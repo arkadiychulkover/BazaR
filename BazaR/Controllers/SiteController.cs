@@ -203,9 +203,6 @@ namespace BazaR.Controllers
             return RedirectToAction(nameof(Wishlist));
         }
 
-        // -------------------------
-        // Checkout / Orders
-        // -------------------------
 
         [HttpGet]
         public IActionResult Checkout()
@@ -232,7 +229,6 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CreateOrder(int id, string address, string paymentMethod, string deliveryMethod)
         {
-            // id = userId (по твоей сигнатуре). Но безопаснее брать из сессии:
             if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Checkout)));
 
             var userId = CurrentUserId!.Value;
@@ -244,7 +240,6 @@ namespace BazaR.Controllers
                 return RedirectToAction(nameof(Cart));
             }
 
-            // Собираем Order. Поля могут отличаться в твоей модели — подстрой при необходимости.
             var order = new Order
             {
                 Status = "Created",
@@ -255,13 +250,11 @@ namespace BazaR.Controllers
                 Items = new List<Item>()
             };
 
-            // Добавляем товары (без qty в модели Items, qty храним в сессии / можно расширить модель)
             foreach (var kv in cart)
             {
                 var item = _itMan.GetById(kv.Key);
                 if (item != null)
                 {
-                    // Если qty нужно в БД — делай OrderItem (many-to-many) и сохраняй kv.Value туда
                     order.Items.Add(item);
                 }
             }
@@ -273,7 +266,6 @@ namespace BazaR.Controllers
                 return RedirectToAction(nameof(Checkout));
             }
 
-            // очищаем корзину
             SaveCart(new Dictionary<int, int>());
             TempData["Ok"] = "Заказ создан!";
             return RedirectToAction(nameof(Orders));
@@ -299,7 +291,6 @@ namespace BazaR.Controllers
             var order = _usMan.GetOrderById(id);
             if (order == null) return NotFound();
 
-            // защита: показываем только владельцу или админу
             if (!IsAdmin && order.UserId != CurrentUserId!.Value) return RedirectToAction(nameof(AccessDenied));
 
             return View(order);
@@ -320,10 +311,6 @@ namespace BazaR.Controllers
             TempData[ok ? "Ok" : "Error"] = ok ? "Заказ отменён." : "Не удалось отменить заказ.";
             return RedirectToAction(nameof(Orders));
         }
-
-        // -------------------------
-        // Profile / Auth
-        // -------------------------
 
         [HttpGet]
         public IActionResult Profile()
@@ -346,7 +333,6 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult OpenLoginModal()
         {
-            // Partial view "LoginModal" (создай в Views/Site/ или Shared)
             return PartialView("LoginModal");
         }
 
@@ -415,7 +401,6 @@ namespace BazaR.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // логиним сразу
             var created = _usMan.GetByEmail(email);
             if (created != null)
                 HttpContext.Session.SetInt32("uid", created.Id);
@@ -436,9 +421,6 @@ namespace BazaR.Controllers
             return View();
         }
 
-        // -------------------------
-        // Item API/Actions (CRUD + helpers)
-        // -------------------------
 
         [HttpGet]
         public List<Item> GetAllItems() => _itMan.GetAll();
@@ -572,9 +554,6 @@ namespace BazaR.Controllers
         }
     }
 
-    // ---------------------------------------
-    // Session JSON helpers (cart / wishlist)
-    // ---------------------------------------
     public static class SessionExtensions
     {
         public static void SetObject<T>(this ISession session, string key, T value)
