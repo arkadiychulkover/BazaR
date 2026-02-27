@@ -29,3 +29,137 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+.search-form {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.search-container {
+    display: flex;
+    width: 600px;
+    max-width: 90%;
+    background: #f1f2f6;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 16px;
+}
+
+    .search-input::placeholder {
+        color: #888;
+    }
+
+.search-button {
+    background: #2ecc71;
+    border: none;
+    padding: 0 25px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+    .search-button:hover {
+        background: #27ae60;
+    }
+.catalog-wrapper {
+    position: relative;
+}
+
+.catalog-button {
+    background: #9acd32;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 120px;
+    text-align: center;
+}
+
+.mega-menu {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    width: 100%;
+    background: #f5f5f5;
+    display: none;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    z-index: 999;
+}
+
+.catalog-wrapper:hover .mega-menu {
+    display: block;
+}
+
+.mega-container {
+    display: flex;
+    max-width: 1400px;
+    margin: auto;
+    padding: 30px;
+}
+
+.mega-left {
+    width: 250px;
+    border-right: 1px solid #ddd;
+}
+
+    .mega-left ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .mega-left li {
+        padding: 8px 12px;
+    }
+
+    .mega-left a {
+        text-decoration: none;
+        color: #333;
+    }
+
+        .mega-left a:hover {
+            color: #6b8e23;
+        }
+
+.mega-right {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    padding-left: 30px;
+}
+
+.mega-column {
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+    .mega-column h4 {
+        margin-bottom: 10px;
+        color: #6b8e23;
+    }
+
+    .mega-column a {
+        text-decoration: none;
+        color: #333;
+        margin-bottom: 6px;
+        font-size: 14px;
+    }
+
+        .mega-column a:hover {
+            color: #6b8e23;
+        }

@@ -1,0 +1,15 @@
+﻿@model string
+
+<form asp-action="Browse" asp-controller="Site" method="get" class="search-form">
+    <div class="search-container">
+        <input type="text"
+               name="query"
+               value="@Model"
+               class="search-input"
+               placeholder="Я шукаю..." />
+
+        <button type="submit" class="search-button">
+            Знайти
+        </button>
+    </div>
+</form>

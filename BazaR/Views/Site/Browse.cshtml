@@ -1,0 +1,59 @@
+﻿<!-- Views/Site/Browse.cshtml -->
+@model List<BazaR.Models.Item>
+
+@{
+    ViewData["Title"] = "Каталог товаров";
+    var categories = ViewBag.Categories as List<BazaR.Models.Category> ?? new List<BazaR.Models.Category>();
+    var selectedCategoryIds = ViewBag.SelectedCategoryIds as List<int> ?? new List<int>();
+    var query = ViewBag.Query as string ?? string.Empty;
+    var page = ViewBag.Page ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var totalItems = ViewBag.TotalItems ?? 0;
+    var user = ViewBag.User as BazaR.Models.User;
+    var cartCount = ViewBag.CartCount ?? 0;
+    var wishlistCount = ViewBag.WishlistCount ?? 0;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            @await Html.PartialAsync("SideBarInSearch", categories)
+            @await Html.PartialAsync("Filters", categories)
+        </div>
+
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Каталог товаров</h2>
+                <span class="text-muted">Найдено: @totalItems товаров</span>
+            </div>
+
+            @await Html.PartialAsync("SortBar", new { CurrentSort = ViewBag.CurrentSort })
+
+            @if (Model.Any())
+            {
+                <div class="row">
+                    @foreach (var item in Model)
+                    {
+                        <div class="col-md-4 mb-4">
+                            @await Html.PartialAsync("Card", item)
+                        </div>
+                    }
+                </div>
+
+                @await Html.PartialAsync("Pagination", new
+                {
+                    Page = page,
+                        TotalPages = totalPages,
+                        Query = query,
+                        CategoryIds = selectedCategoryIds
+                        })
+                }
+            else
+            {
+                <div class="alert alert-info">
+                    Товары не найдены. Попробуйте изменить параметры поиска.
+                </div>
+            }
+        </div>
+    </div>
+</div>

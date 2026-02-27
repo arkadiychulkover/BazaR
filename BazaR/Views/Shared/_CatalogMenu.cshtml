@@ -1,0 +1,41 @@
+﻿@model List<BazaR.Models.Category>
+
+<div class="mega-container">
+
+    <div class="mega-left">
+        <ul>
+            @foreach (var category in Model)
+            {
+                <li>
+                    <a asp-controller="Shop"
+                       asp-action="Browse"
+                       asp-route-categoryIds="@category.Id">
+                        @category.Name
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <div class="mega-right">
+
+        @foreach (var category in Model)
+        {
+            <div class="mega-column">
+                <h4>@category.Name</h4>
+                @foreach (var brand in category.CategoryBrands)
+                {
+                    <a asp-controller="Shop"
+                       asp-action="Browse"
+                       asp-route-categoryIds="@category.Id"
+                       asp-route-brandId="@brand.BrandId">
+                        @brand.Brand.Name
+                    </a>
+                }
+
+            </div>
+        }
+
+    </div>
+
+</div>

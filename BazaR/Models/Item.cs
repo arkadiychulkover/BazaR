@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+﻿using System.Collections.Generic;
 
 namespace BazaR.Models
 {
@@ -17,7 +17,7 @@ namespace BazaR.Models
         public int BrandId { get; set; }
         public Brand Brand { get; set; }
 
-        public List<string>? Colors { get; set; }
+        public List<ItemColor> Colors { get; set; }
 
         public List<Review> Reviews { get; set; } = new();
 
@@ -34,5 +34,9 @@ namespace BazaR.Models
 
         public int UserId { get; set; }
         public User User { get; set; }
+
+        public List<CartItem> CartItems { get; set; } = new();
+        public List<WishlistItem> WishlistItems { get; set; } = new();
+        public List<OrderItem> OrderItems { get; set; } = new();
     }
 }

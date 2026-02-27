@@ -1,0 +1,77 @@
+﻿@model List<BazaR.Models.Item>
+
+@{
+    ViewData["Title"] = "Главная";
+    var user = ViewBag.User as BazaR.Models.User;
+    var categories = ViewBag.Categories as List<BazaR.Models.Category> ?? new List<BazaR.Models.Category>();
+    var featuredItems = ViewBag.FeaturedItems as List<BazaR.Models.Item> ?? new List<BazaR.Models.Item>();
+    var newItems = ViewBag.NewItems as List<BazaR.Models.Item> ?? new List<BazaR.Models.Item>();
+    var popularItems = ViewBag.PopularItems as List<BazaR.Models.Item> ?? new List<BazaR.Models.Item>();
+    var cartCount = ViewBag.CartCount ?? 0;
+    var wishlistCount = ViewBag.WishlistCount ?? 0;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            @await Html.PartialAsync("SideBarOnIndex", categories)
+        </div>
+
+        <div class="col-md-9">
+            <section class="hero-section mb-5">
+                <div class="jumbotron bg-light p-5 rounded">
+                    <h1 class="display-4">Добро пожаловать в BazaR!</h1>
+                    <p class="lead">Лучшие товары по лучшим ценам</p>
+                    <hr class="my-4">
+                    <p>Тысячи товаров от проверенных продавцов</p>
+                    <a class="btn btn-primary btn-lg" href="@Url.Action("Browse", "Site")" role="button">Начать покупки</a>
+                </div>
+            </section>
+
+            @if (featuredItems.Any())
+            {
+                <section class="featured-items mb-5">
+                    <h2 class="mb-4">Рекомендуемые товары</h2>
+                    <div class="row">
+                        @foreach (var item in featuredItems.Take(4))
+                        {
+                            <div class="col-md-3 mb-4">
+                                @await Html.PartialAsync("Card", item)
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+
+            @if (newItems.Any())
+            {
+                <section class="new-items mb-5">
+                    <h2 class="mb-4">Новинки</h2>
+                    <div class="row">
+                        @foreach (var item in newItems.Take(4))
+                        {
+                            <div class="col-md-3 mb-4">
+                                @await Html.PartialAsync("Card", item)
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+
+            @if (popularItems.Any())
+            {
+                <section class="popular-items mb-5">
+                    <h2 class="mb-4">Популярные товары</h2>
+                    <div class="row">
+                        @foreach (var item in popularItems.Take(4))
+                        {
+                            <div class="col-md-3 mb-4">
+                                @await Html.PartialAsync("Card", item)
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+        </div>
+    </div>
+</div>
