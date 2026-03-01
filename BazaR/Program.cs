@@ -28,8 +28,7 @@ builder.Services.AddScoped<IItemRepository, ItemRepository>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+// Configure the HTTP request pipeline.if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();

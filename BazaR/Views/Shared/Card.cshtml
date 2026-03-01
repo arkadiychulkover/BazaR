@@ -1,0 +1,106 @@
+﻿@model BazaR.Models.Item
+
+<div class="item-card h-100">
+    <div class="card h-100">
+        <div class="item-card-img position-relative">
+            <img src="@(Model.Colors?.FirstOrDefault()?.Color ?? "/images/no-image.png")"
+                 class="card-img-top"
+                 alt="@Model.Name"
+                 style="height: 200px; object-fit: cover;">
+
+            @if (ViewBag.User != null)
+            {
+                <button class="wishlist-btn position-absolute top-0 end-0 m-2 btn btn-light rounded-circle p-2"
+                        data-item-id="@Model.Id"
+                        onclick="addToWishlist(this)">
+                    <i class="bi bi-heart @(ViewBag.IsInWishlist == true ? "text-danger" : "")"></i>
+                </button>
+            }
+            else
+            {
+                <button class="wishlist-btn position-absolute top-0 end-0 m-2 btn btn-light rounded-circle p-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#loginModal">
+                    <i class="bi bi-heart"></i>
+                </button>
+            }
+        </div>
+
+        <div class="card-body">
+            <h6 class="card-title item-title text-truncate">
+                @Model.Name
+            </h6>
+
+            @if (!Model.IsAvailable)
+            {
+                <div class="text-danger small mb-1">
+                    <i class="bi bi-exclamation-circle"></i> Нет в наличии
+                </div>
+            }
+
+            <div class="item-price mb-2">
+                <span class="price-current fw-bold fs-5">
+                    @Model.Price.ToString("N0") ₴
+                </span>
+            </div>
+
+            <div class="item-actions mt-2">
+                <a asp-controller="Site"
+                   asp-action="ItemDetails"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-sm btn-outline-primary w-100">
+                    <i class="bi bi-eye"></i> Подробнее
+                </a>
+
+                @if (Model.IsAvailable)
+                {
+                    <button class="btn btn-sm btn-primary w-100 mt-2 add-to-cart"
+                            data-item-id="@Model.Id"
+                            onclick="addToCart(@Model.Id)">
+                        <i class="bi bi-cart-plus"></i> В корзину
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addToCart(itemId) {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        fetch('@Url.Action("AddToCart", "Site")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': token
+            },
+            body: 'itemId=' + itemId + '&quantity=1'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Обновить счетчик корзины
+                const cartLink = document.querySelector('a[href*="Cart"]');
+                if (cartLink) {
+                    let badge = cartLink.querySelector('.badge');
+                    if (data.cartCount > 0) {
+                        if (!badge) {
+                            badge = document.createElement('span');
+                            badge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
+                            cartLink.appendChild(badge);
+                        }
+                        badge.textContent = data.cartCount;
+                    } else if (badge) {
+                        badge.remove();
+                    }
+                }
+
+                showNotification('Товар добавлен в корзину', 'success');
+            } else if (data.requireLogin) {
+                new bootstrap.Modal(document.getElementById('loginModal')).show();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>

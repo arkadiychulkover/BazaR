@@ -163,3 +163,61 @@ body {
         .mega-column a:hover {
             color: #6b8e23;
         }
+.item-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px;
+    transition: 0.2s;
+    height: 100%;
+}
+
+    .item-card:hover {
+        box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
+
+.item-card-img {
+    position: relative;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+    .item-card-img img {
+        max-height: 160px;
+        object-fit: contain;
+    }
+
+.wishlist-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    border: none;
+    background: none;
+    font-size: 20px;
+    color: #888;
+    cursor: pointer;
+}
+
+    .wishlist-btn:hover {
+        color: red;
+    }
+
+.item-title {
+    font-size: 14px;
+    min-height: 40px;
+}
+
+.price-current {
+    color: red;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.sidebar-wrapper {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+    .sidebar-wrapper > * {
+        margin-bottom: 20px;
+    }
