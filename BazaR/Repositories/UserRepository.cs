@@ -31,21 +31,18 @@ namespace BazaR.Repository
         public User UpdateUser(User user)
         {
             var existing = _context.Users
-                .Include(u => u.TovarsOnSell)
-                .Include(u => u.TovarsInKorzina)
-                .Include(u => u.TovarsInWishList)
-                .Include(u => u.TovarsInDelivery)
+                .Include(u => u.CartItems)
+                .Include(u => u.WishlistItems)
                 .Include(u => u.Orders)
                 .Include(u => u.Reviews)
+                .Include(u => u.SellingItems)
                 .FirstOrDefault(u => u.Id == user.Id);
 
             if (existing == null) return null;
 
             existing.Email = user.Email;
-            existing.FirstName = user.FirstName;
-            existing.SecondName = user.SecondName;
-            existing.Password = user.Password;
-            existing.PhoneNumber = user.PhoneNumber;
+            existing.PasswordHash = user.PasswordHash;
+            existing.Name = user.Name;
             existing.IsAdmin = user.IsAdmin;
 
             _context.SaveChanges();
@@ -56,8 +53,15 @@ namespace BazaR.Repository
         {
             try
             {
-                var user = _context.Users.FirstOrDefault(u => u.Id == id);
+                var user = _context.Users
+                    .Include(u => u.CartItems)
+                    .Include(u => u.WishlistItems)
+                    .FirstOrDefault(u => u.Id == id);
+
                 if (user == null) return null;
+
+                _context.CartItems.RemoveRange(user.CartItems);
+                _context.WishlistItems.RemoveRange(user.WishlistItems);
 
                 _context.Users.Remove(user);
                 _context.SaveChanges();
@@ -80,11 +84,22 @@ namespace BazaR.Repository
         {
             return _context.Users
                 .Include(u => u.Orders)
+                    .ThenInclude(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Item)
                 .Include(u => u.Reviews)
-                .Include(u => u.TovarsOnSell)
-                .Include(u => u.TovarsInKorzina)
-                .Include(u => u.TovarsInWishList)
-                .Include(u => u.TovarsInDelivery)
+                .Include(u => u.SellingItems)
+                .Include(u => u.CartItems)
+                    .ThenInclude(ci => ci.Item)
+                    .ThenInclude(i => i.Reviews)
+                .Include(u => u.CartItems)
+                    .ThenInclude(ci => ci.Item)
+                    .ThenInclude(i => i.Colors)
+                .Include(u => u.WishlistItems)
+                    .ThenInclude(wi => wi.Item)
+                    .ThenInclude(i => i.Reviews)
+                .Include(u => u.WishlistItems)
+                    .ThenInclude(wi => wi.Item)
+                    .ThenInclude(i => i.Colors)
                 .FirstOrDefault(u => u.Id == id);
         }
 
@@ -118,171 +133,300 @@ namespace BazaR.Repository
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
             if (user == null) return false;
 
-            user.Password = newPassword;
+            user.PasswordHash = newPassword;
             _context.SaveChanges();
             return true;
         }
 
         public bool AddToCart(int userId, int itemId)
         {
-            var user = _context.Users.Include(u => u.TovarsInKorzina)
-                .FirstOrDefault(u => u.Id == userId);
-            var item = _context.Items.FirstOrDefault(i => i.Id == itemId);
+            try
+            {
+                var user = _context.Users.Include(u => u.CartItems).FirstOrDefault(u => u.Id == userId);
+                var item = _context.Items.FirstOrDefault(i => i.Id == itemId);
 
-            if (user == null || item == null) return false;
+                if (user == null || item == null) return false;
 
-            user.TovarsInKorzina.Add(item);
-            _context.SaveChanges();
-            return true;
+                var existing = user.CartItems.FirstOrDefault(ci => ci.ItemId == itemId);
+                if (existing != null)
+                {
+                    existing.Quantity++;
+                }
+                else
+                {
+                    user.CartItems.Add(new CartItem { UserId = userId, ItemId = itemId, Quantity = 1 });
+                }
+
+                _context.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public bool RemoveFromCart(int userId, int itemId)
         {
-            var user = _context.Users.Include(u => u.TovarsInKorzina)
-                .FirstOrDefault(u => u.Id == userId);
+            try
+            {
+                var user = _context.Users.Include(u => u.CartItems).FirstOrDefault(u => u.Id == userId);
+                if (user == null) return false;
 
-            if (user == null) return false;
+                var cartItem = user.CartItems.FirstOrDefault(ci => ci.ItemId == itemId);
+                if (cartItem == null) return false;
 
-            var item = user.TovarsInKorzina.FirstOrDefault(i => i.Id == itemId);
-            if (item == null) return false;
+                if (cartItem.Quantity > 1)
+                {
+                    cartItem.Quantity--;
+                }
+                else
+                {
+                    user.CartItems.Remove(cartItem);
+                }
 
-            user.TovarsInKorzina.Remove(item);
-            _context.SaveChanges();
-            return true;
+                _context.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public bool ClearCart(int userId)
         {
-            var user = _context.Users.Include(u => u.TovarsInKorzina)
-                .FirstOrDefault(u => u.Id == userId);
+            try
+            {
+                var user = _context.Users.Include(u => u.CartItems).FirstOrDefault(u => u.Id == userId);
+                if (user == null) return false;
 
-            if (user == null) return false;
-
-            user.TovarsInKorzina.Clear();
-            _context.SaveChanges();
-            return true;
+                user.CartItems.Clear();
+                _context.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public IQueryable<Item> GetCartItems(int userId)
         {
-            return _context.Users
-                .Include(u => u.TovarsInKorzina)
-                .Where(u => u.Id == userId)
-                .SelectMany(u => u.TovarsInKorzina);
+            return _context.CartItems
+                .Where(ci => ci.UserId == userId)
+                .Include(ci => ci.Item)             
+                    .ThenInclude(i => i.Reviews)
+                .Include(ci => ci.Item)
+                    .ThenInclude(i => i.Characteristics)
+                .Include(ci => ci.Item)
+                    .ThenInclude(i => i.Colors)
+                .Include(ci => ci.Item)
+                    .ThenInclude(i => i.Uslugi)
+                .Include(ci => ci.Item)
+                    .ThenInclude(i => i.DeliveryVariants)
+                .Select(ci => ci.Item)
+                .AsQueryable();
+        }
+
+        public List<CartItem> GetCartItemsWithQuantity(int userId)
+        {
+            return _context.CartItems
+                .Where(ci => ci.UserId == userId)
+                .Include(ci => ci.Item)
+                    .ThenInclude(i => i.Reviews)
+                .Include(ci => ci.Item)
+                    .ThenInclude(i => i.Colors)
+                .ToList();
         }
 
         public bool AddToWishList(int userId, int itemId)
         {
-            var user = _context.Users.Include(u => u.TovarsInWishList)
-                .FirstOrDefault(u => u.Id == userId);
-            var item = _context.Items.FirstOrDefault(i => i.Id == itemId);
+            try
+            {
+                var user = _context.Users.Include(u => u.WishlistItems).FirstOrDefault(u => u.Id == userId);
+                var item = _context.Items.FirstOrDefault(i => i.Id == itemId);
 
-            if (user == null || item == null) return false;
+                if (user == null || item == null) return false;
 
-            user.TovarsInWishList.Add(item);
-            _context.SaveChanges();
-            return true;
+                var exists = user.WishlistItems.Any(wi => wi.ItemId == itemId);
+                if (!exists)
+                {
+                    user.WishlistItems.Add(new WishlistItem { UserId = userId, ItemId = itemId });
+                    _context.SaveChanges();
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public bool RemoveFromWishList(int userId, int itemId)
         {
-            var user = _context.Users.Include(u => u.TovarsInWishList)
-                .FirstOrDefault(u => u.Id == userId);
+            try
+            {
+                var user = _context.Users.Include(u => u.WishlistItems).FirstOrDefault(u => u.Id == userId);
+                if (user == null) return false;
 
-            if (user == null) return false;
+                var wishItem = user.WishlistItems.FirstOrDefault(wi => wi.ItemId == itemId);
+                if (wishItem == null) return false;
 
-            var item = user.TovarsInWishList.FirstOrDefault(i => i.Id == itemId);
-            if (item == null) return false;
-
-            user.TovarsInWishList.Remove(item);
-            _context.SaveChanges();
-            return true;
+                user.WishlistItems.Remove(wishItem);
+                _context.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public IQueryable<Item> GetWishList(int userId)
         {
-            return _context.Users
-                .Include(u => u.TovarsInWishList)
-                .Where(u => u.Id == userId)
-                .SelectMany(u => u.TovarsInWishList);
+            return _context.WishlistItems
+                .Where(wi => wi.UserId == userId)
+                .Include(wi => wi.Item)
+                    .ThenInclude(i => i.Reviews)
+                .Include(wi => wi.Item)
+                    .ThenInclude(i => i.Characteristics)
+                .Include(wi => wi.Item)
+                    .ThenInclude(i => i.Colors)
+                .Include(wi => wi.Item)
+                    .ThenInclude(i => i.Uslugi)
+                .Include(wi => wi.Item)
+                    .ThenInclude(i => i.DeliveryVariants)
+                .Select(wi => wi.Item);
         }
 
         public bool AddItemToSell(int userId, Item item)
         {
-            var user = _context.Users.Include(u => u.TovarsOnSell)
-                .FirstOrDefault(u => u.Id == userId);
+            try
+            {
+                var user = _context.Users.Include(u => u.SellingItems).FirstOrDefault(u => u.Id == userId);
+                if (user == null) return false;
 
-            if (user == null) return false;
-
-            user.TovarsOnSell.Add(item);
-            _context.Items.Add(item);
-            _context.SaveChanges();
-            return true;
+                item.UserId = userId;
+                user.SellingItems.Add(item);
+                _context.Items.Add(item);
+                _context.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public bool RemoveItemFromSell(int userId, int itemId)
         {
-            var user = _context.Users.Include(u => u.TovarsOnSell)
-                .FirstOrDefault(u => u.Id == userId);
+            try
+            {
+                var user = _context.Users.Include(u => u.SellingItems).FirstOrDefault(u => u.Id == userId);
+                if (user == null) return false;
 
-            if (user == null) return false;
+                var item = user.SellingItems.FirstOrDefault(i => i.Id == itemId);
+                if (item == null) return false;
 
-            var item = user.TovarsOnSell.FirstOrDefault(i => i.Id == itemId);
-            if (item == null) return false;
-
-            user.TovarsOnSell.Remove(item);
-            _context.Items.Remove(item);
-            _context.SaveChanges();
-            return true;
+                user.SellingItems.Remove(item);
+                _context.Items.Remove(item);
+                _context.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public IQueryable<Item> GetUserSellingItems(int userId)
         {
             return _context.Users
-                .Include(u => u.TovarsOnSell)
                 .Where(u => u.Id == userId)
-                .SelectMany(u => u.TovarsOnSell);
+                .SelectMany(u => u.SellingItems)
+                .Include(i => i.Reviews)
+                .Include(i => i.Characteristics)
+                .Include(i => i.Colors)
+                .Include(i => i.Uslugi)
+                .Include(i => i.DeliveryVariants)
+                .AsQueryable();
         }
 
         public bool CreateOrder(int userId, Order order)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-            if (user == null) return false;
+            try
+            {
+                var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+                if (user == null) return false;
 
-            order.UserId = userId;
-            _context.Orders.Add(order);
-            _context.SaveChanges();
-            return true;
+                order.UserId = userId;
+                order.Number = GenerateOrderNumber();
+                order.CreatedAt = DateTime.UtcNow;
+                order.PaymentStatus = "Pending";
+
+                _context.Orders.Add(order);
+                _context.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private string GenerateOrderNumber()
+        {
+            return $"ORD-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
         }
 
         public IQueryable<Order> GetUserOrders(int userId)
         {
-            return _context.Orders.Where(o => o.UserId == userId);
+            return _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Item)
+                    .ThenInclude(i => i.Reviews)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Item)
+                    .ThenInclude(i => i.Colors)
+                .Include(o => o.City);
         }
 
         public Order GetOrderById(int orderId)
         {
             return _context.Orders
-                .Include(o => o.Items)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Item)
+                    .ThenInclude(i => i.Reviews)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Item)
+                    .ThenInclude(i => i.Colors)
+                .Include(o => o.City)
+                .Include(o => o.User)
                 .FirstOrDefault(o => o.Id == orderId);
         }
 
         public bool CancelOrder(int orderId)
         {
-            var order = _context.Orders.FirstOrDefault(o => o.Id == orderId);
-            if (order == null) return false;
+            try
+            {
+                var order = _context.Orders.FirstOrDefault(o => o.Id == orderId);
+                if (order == null) return false;
 
-            order.Status = "Cancelled";
-            _context.SaveChanges();
-            return true;
+                order.Status = "Cancelled";
+                _context.SaveChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public IQueryable<Item> GetItemsInDelivery(int userId)
         {
-            return _context.Users
-                .Include(u => u.TovarsInDelivery)
-                .Where(u => u.Id == userId)
-                .SelectMany(u => u.TovarsInDelivery);
+            return Enumerable.Empty<Item>().AsQueryable();
         }
     }
 }

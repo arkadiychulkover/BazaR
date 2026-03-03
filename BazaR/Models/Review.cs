@@ -1,4 +1,6 @@
-﻿namespace BazaR.Models
+﻿using System;
+
+namespace BazaR.Models
 {
     public class Review
     {
@@ -10,15 +12,10 @@
         public int UserId { get; set; }
         public User User { get; set; }
 
-        public int Likes { get; set; }
-        public int Dislikes { get; set; }
-
         public int Rating { get; set; }
 
         public string Comment { get; set; }
 
-        public DateTime Date { get; set; }
-
-        public bool IsApproved { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -1,0 +1,36 @@
+﻿@model IEnumerable<ItemCardVm>
+
+@{
+    ViewData["Title"] = "Shop - BazaR";
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-section__content">
+        <h1 class="hero-section__title">Welcome to BazaR</h1>
+        <p class="hero-section__subtitle">Discover our premium collection of products</p>
+    </div>
+</section>
+
+<!-- Products Grid -->
+<section class="products-section">
+    <div class="container-fluid">
+        <h2 class="products-section__title">Featured Products</h2>
+        
+        @if (Model.Any())
+        {
+            <div class="products-grid">
+                @foreach (var item in Model)
+                {
+                    @await Html.PartialAsync("~/Views/Shared/_Card.cshtml", item)
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <p>No products available at the moment.</p>
+            </div>
+        }
+    </div>
+</section>

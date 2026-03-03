@@ -17,19 +17,24 @@ namespace BazaR.Interfaces
 
         bool ChangePassword(int userId, string newPassword);
 
+        // Cart operations
         bool AddToCart(int userId, int itemId);
         bool RemoveFromCart(int userId, int itemId);
         bool ClearCart(int userId);
         IQueryable<Item> GetCartItems(int userId);
+        List<CartItem> GetCartItemsWithQuantity(int userId); // Изменено на List<CartItem>
 
+        // Wishlist operations
         bool AddToWishList(int userId, int itemId);
         bool RemoveFromWishList(int userId, int itemId);
         IQueryable<Item> GetWishList(int userId);
 
+        // Selling items operations
         bool AddItemToSell(int userId, Item item);
         bool RemoveItemFromSell(int userId, int itemId);
         IQueryable<Item> GetUserSellingItems(int userId);
 
+        // Order operations
         bool CreateOrder(int userId, Order order);
         IQueryable<Order> GetUserOrders(int userId);
         Order GetOrderById(int orderId);

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// ItemRepository.cs
+using Microsoft.EntityFrameworkCore;
 using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Models;
@@ -21,6 +22,7 @@ public class ItemRepository : IItemRepository
             .Include(i => i.Characteristics)
             .Include(i => i.Uslugi)
             .Include(i => i.DeliveryVariants)
+            .Include(i => i.Colors)
             .ToList();
     }
 
@@ -31,6 +33,7 @@ public class ItemRepository : IItemRepository
             .Include(i => i.Characteristics)
             .Include(i => i.Uslugi)
             .Include(i => i.DeliveryVariants)
+            .Include(i => i.Colors)
             .FirstOrDefault(i => i.Id == id);
     }
 
@@ -42,6 +45,7 @@ public class ItemRepository : IItemRepository
             .Include(i => i.Characteristics)
             .Include(i => i.Uslugi)
             .Include(i => i.DeliveryVariants)
+            .Include(i => i.Colors)
             .ToList();
     }
 
@@ -53,6 +57,7 @@ public class ItemRepository : IItemRepository
             .Include(i => i.Characteristics)
             .Include(i => i.Uslugi)
             .Include(i => i.DeliveryVariants)
+            .Include(i => i.Colors)
             .ToList();
     }
 
@@ -70,6 +75,7 @@ public class ItemRepository : IItemRepository
             .Include(i => i.Characteristics)
             .Include(i => i.Uslugi)
             .Include(i => i.DeliveryVariants)
+            .Include(i => i.Colors)
             .ToList();
     }
 
@@ -93,6 +99,7 @@ public class ItemRepository : IItemRepository
             .Include(i => i.Characteristics)
             .Include(i => i.Uslugi)
             .Include(i => i.DeliveryVariants)
+            .Include(i => i.Colors)
             .ToList();
     }
 

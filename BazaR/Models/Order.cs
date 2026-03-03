@@ -1,10 +1,14 @@
-﻿namespace BazaR.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace BazaR.Models
 {
     public class Order
     {
         public int Id { get; set; }
 
         public string Number { get; set; }
+
         public int UserId { get; set; }
         public User User { get; set; }
 
@@ -24,6 +28,6 @@
 
         public decimal TotalAmount { get; set; }
 
-        public List<Item> Items { get; set; } = new();
+        public List<OrderItem> OrderItems { get; set; } = new();
     }
 }
