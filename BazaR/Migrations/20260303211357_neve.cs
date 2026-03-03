@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace BazaR.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class neve : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +19,8 @@ namespace BazaR.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Logo = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -30,11 +33,20 @@ namespace BazaR.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IconUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ParentCategoryId = table.Column<int>(type: "int", nullable: true),
+                    DisplayOrder = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Categories_Categories_ParentCategoryId",
+                        column: x => x.ParentCategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -69,7 +81,7 @@ namespace BazaR.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsAdmin = table.Column<bool>(type: "bit", nullable: false)
@@ -94,7 +106,7 @@ namespace BazaR.Migrations
                         column: x => x.BrandId,
                         principalTable: "Brands",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_CategoryBrands_Categories_CategoryId",
                         column: x => x.CategoryId,
@@ -134,7 +146,7 @@ namespace BazaR.Migrations
                     Price = table.Column<int>(type: "int", nullable: false),
                     Garantia = table.Column<int>(type: "int", nullable: false),
                     IsAvailable = table.Column<bool>(type: "bit", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Desc = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BrandId = table.Column<int>(type: "int", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
@@ -179,7 +191,7 @@ namespace BazaR.Migrations
                     PaymentStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DeliveryMethod = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Ttn = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -189,7 +201,7 @@ namespace BazaR.Migrations
                         column: x => x.CityId,
                         principalTable: "Cities",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Orders_Users_UserId",
                         column: x => x.UserId,
@@ -222,7 +234,7 @@ namespace BazaR.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -259,7 +271,7 @@ namespace BazaR.Migrations
                     SendingPlace = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DeliveryTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     SendingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     PaymentType = table.Column<int>(type: "int", nullable: false),
                     ItemId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -345,21 +357,21 @@ namespace BazaR.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Uslugas",
+                name: "Uslugi",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     ItemId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Uslugas", x => x.Id);
+                    table.PrimaryKey("PK_Uslugi", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Uslugas_Items_ItemId",
+                        name: "FK_Uslugi_Items_ItemId",
                         column: x => x.ItemId,
                         principalTable: "Items",
                         principalColumn: "Id",
@@ -389,7 +401,7 @@ namespace BazaR.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -401,7 +413,7 @@ namespace BazaR.Migrations
                     OrderId = table.Column<int>(type: "int", nullable: false),
                     ItemId = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
-                    PriceAtMoment = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    PriceAtMoment = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -420,6 +432,219 @@ namespace BazaR.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Brands",
+                columns: new[] { "Id", "Logo", "Name" },
+                values: new object[,]
+                {
+                    { 1, "/images/brands/samsung.png", "Samsung" },
+                    { 2, "/images/brands/apple.png", "Apple" },
+                    { 3, "/images/brands/xiaomi.png", "Xiaomi" },
+                    { 4, "/images/brands/sony.png", "Sony" },
+                    { 5, "/images/brands/lg.png", "LG" },
+                    { 6, "/images/brands/bosch.png", "Bosch" },
+                    { 7, "/images/brands/adidas.png", "Adidas" },
+                    { 8, "/images/brands/nike.png", "Nike" },
+                    { 9, "/images/brands/puma.png", "Puma" },
+                    { 10, "/images/brands/zara.png", "Zara" },
+                    { 11, "/images/brands/hm.png", "H&M" },
+                    { 12, "/images/brands/asus.png", "Asus" },
+                    { 13, "/images/brands/acer.png", "Acer" },
+                    { 14, "/images/brands/hp.png", "HP" },
+                    { 15, "/images/brands/lenovo.png", "Lenovo" },
+                    { 16, "/images/brands/dell.png", "Dell" },
+                    { 17, "/images/brands/canon.png", "Canon" },
+                    { 18, "/images/brands/epson.png", "Epson" },
+                    { 19, "/images/brands/makita.png", "Makita" },
+                    { 20, "/images/brands/dewalt.png", "DeWalt" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "DisplayOrder", "IconUrl", "Name", "ParentCategoryId" },
+                values: new object[,]
+                {
+                    { 1, 1, "bi-laptop", "Ноутбуки", null },
+                    { 2, 2, "bi-phone", "Смартфони, ТВ та електроніка", null },
+                    { 3, 3, "bi-controller", "Товари для геймерів", null },
+                    { 4, 4, "bi-fan", "Побутова техніка", null },
+                    { 5, 5, "bi-house", "Товари для дому", null },
+                    { 6, 6, "bi-tools", "Інструменти та автотовари", null },
+                    { 7, 7, "bi-droplet", "Сантехніка та ремонт", null },
+                    { 8, 8, "bi-flower", "Дача, сад та город", null },
+                    { 9, 9, "bi-bicycle", "Спорт та захоплення", null },
+                    { 10, 10, "bi-tag", "Одяг, взуття та прикраси", null },
+                    { 11, 11, "bi-heart", "Краса і здоров'я", null },
+                    { 12, 12, "bi-emoji-smile", "Дитячі товари", null },
+                    { 13, 13, "bi-bug", "Зоотовари", null },
+                    { 14, 14, "bi-pencil", "Канцтовари та книги", null },
+                    { 15, 15, "bi-cup-straw", "Алкогольні напої та продукти", null },
+                    { 16, 16, "bi-briefcase", "Товари для бізнесу та послуги", null },
+                    { 17, 17, "bi-tree", "Тури та відпочинок", null },
+                    { 18, 18, "bi-percent", "Акції", null },
+                    { 19, 19, "bi-fire", "Тотальний розпродаж", null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Cities",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Київ" },
+                    { 2, "Харків" },
+                    { 3, "Одеса" },
+                    { 4, "Дніпро" },
+                    { 5, "Львів" },
+                    { 6, "Запоріжжя" },
+                    { 7, "Миколаїв" },
+                    { 8, "Вінниця" },
+                    { 9, "Херсон" },
+                    { 10, "Полтава" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "DisplayOrder", "IconUrl", "Name", "ParentCategoryId" },
+                values: new object[,]
+                {
+                    { 101, 1, null, "Asus", 1 },
+                    { 102, 2, null, "Acer", 1 },
+                    { 103, 3, null, "HP", 1 },
+                    { 104, 4, null, "Lenovo", 1 },
+                    { 105, 5, null, "Dell", 1 },
+                    { 106, 6, null, "Apple", 1 },
+                    { 107, 7, null, "Аксесуари для ноутбуків і ПК", 1 },
+                    { 120, 8, null, "Комп'ютери", 1 },
+                    { 130, 9, null, "Комплектуючі", 1 },
+                    { 140, 10, null, "Мережеве обладнання", 1 },
+                    { 150, 11, null, "Серверне обладнання", 1 },
+                    { 160, 12, null, "Оргтехніка", 1 },
+                    { 170, 13, null, "Програмне забезпечення", 1 },
+                    { 201, 1, null, "Смартфони", 2 },
+                    { 202, 2, null, "Телевізори", 2 },
+                    { 203, 3, null, "Планшети", 2 },
+                    { 204, 4, null, "Аудіотехніка", 2 },
+                    { 208, 5, null, "Фотоапарати", 2 },
+                    { 209, 6, null, "Відеокамери", 2 },
+                    { 210, 7, null, "Розумний дім", 2 },
+                    { 211, 8, null, "Аксесуари до телефонів", 2 },
+                    { 301, 1, null, "PlayStation", 3 },
+                    { 302, 2, null, "Xbox", 3 },
+                    { 303, 3, null, "Nintendo", 3 },
+                    { 304, 4, null, "Ігрові консолі та приставки", 3 },
+                    { 305, 5, null, "Джойстики та аксесуари", 3 },
+                    { 306, 6, null, "Ігри", 3 },
+                    { 307, 7, null, "Ігрові поверхні", 3 },
+                    { 308, 8, null, "Ігрові крісла", 3 },
+                    { 309, 9, null, "Ігрові миші", 3 },
+                    { 310, 10, null, "Ігрові клавіатури", 3 },
+                    { 311, 11, null, "Ігрові навушники", 3 },
+                    { 401, 1, null, "Велика побутова техніка", 4 },
+                    { 407, 2, null, "Мала побутова техніка", 4 },
+                    { 414, 3, null, "Кліматична техніка", 4 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "CategoryBrands",
+                columns: new[] { "BrandId", "CategoryId" },
+                values: new object[,]
+                {
+                    { 1, 1 },
+                    { 2, 1 },
+                    { 3, 1 },
+                    { 4, 1 },
+                    { 5, 1 },
+                    { 12, 1 },
+                    { 13, 1 },
+                    { 14, 1 },
+                    { 15, 1 },
+                    { 16, 1 },
+                    { 6, 6 },
+                    { 19, 6 },
+                    { 20, 6 },
+                    { 7, 9 },
+                    { 8, 9 },
+                    { 9, 9 },
+                    { 7, 10 },
+                    { 8, 10 },
+                    { 9, 10 },
+                    { 10, 10 },
+                    { 11, 10 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "DisplayOrder", "IconUrl", "Name", "ParentCategoryId" },
+                values: new object[,]
+                {
+                    { 108, 1, null, "Флеш пам'ять USB", 107 },
+                    { 109, 2, null, "Сумки та рюкзаки для ноутбуків", 107 },
+                    { 110, 3, null, "Підставки та столики для ноутбуків", 107 },
+                    { 111, 4, null, "Веб-камери", 107 },
+                    { 121, 1, null, "Монітори", 120 },
+                    { 122, 2, null, "Миші", 120 },
+                    { 123, 3, null, "Клавіатури", 120 },
+                    { 124, 4, null, "Комплект: клавіатури + миші", 120 },
+                    { 125, 5, null, "Мережеві сховища (NAS)", 120 },
+                    { 131, 1, null, "Відеокарти", 130 },
+                    { 132, 2, null, "Жорсткі диски та дискові масиви", 130 },
+                    { 133, 3, null, "Процесори", 130 },
+                    { 134, 4, null, "SSD", 130 },
+                    { 135, 5, null, "Оперативна пам'ять", 130 },
+                    { 136, 6, null, "Материнські плати", 130 },
+                    { 137, 7, null, "Блоки живлення", 130 },
+                    { 141, 1, null, "Патч-корди", 140 },
+                    { 142, 2, null, "Маршрутизатори", 140 },
+                    { 143, 3, null, "IP-камери", 140 },
+                    { 144, 4, null, "Комутатори", 140 },
+                    { 145, 5, null, "Бездротові точки доступу", 140 },
+                    { 161, 1, null, "БФП/Принтери", 160 },
+                    { 162, 2, null, "Проектори", 160 },
+                    { 163, 3, null, "Витратні матеріали для принтерів", 160 },
+                    { 164, 4, null, "Телефонні апарати", 160 },
+                    { 171, 1, null, "Операційні системи", 170 },
+                    { 172, 2, null, "Офісні програми", 170 },
+                    { 173, 3, null, "Антивірусні програми", 170 },
+                    { 205, 1, null, "Навушники", 204 },
+                    { 206, 2, null, "Колонки", 204 },
+                    { 207, 3, null, "MP3-плеєри", 204 },
+                    { 212, 1, null, "Чохли для телефонів", 211 },
+                    { 213, 2, null, "Захисні скельця", 211 },
+                    { 214, 3, null, "Зарядні пристрої", 211 },
+                    { 215, 4, null, "Power Bank", 211 },
+                    { 402, 1, null, "Холодильники", 401 },
+                    { 403, 2, null, "Пральні машини", 401 },
+                    { 404, 3, null, "Плити та духовки", 401 },
+                    { 405, 4, null, "Мікрохвильові печі", 401 },
+                    { 406, 5, null, "Посудомийні машини", 401 },
+                    { 408, 1, null, "Пилососи", 407 },
+                    { 409, 2, null, "Праски", 407 },
+                    { 410, 3, null, "Блендери, міксери", 407 },
+                    { 411, 4, null, "Кавомашини", 407 },
+                    { 412, 5, null, "Електрочайники", 407 },
+                    { 413, 6, null, "Фени", 407 },
+                    { 415, 1, null, "Кондиціонери", 414 },
+                    { 416, 2, null, "Обігрівачі", 414 },
+                    { 417, 3, null, "Зволожувачі повітря", 414 },
+                    { 418, 4, null, "Вентилятори", 414 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "CategoryBrands",
+                columns: new[] { "BrandId", "CategoryId" },
+                values: new object[,]
+                {
+                    { 1, 201 },
+                    { 2, 201 },
+                    { 3, 201 },
+                    { 4, 201 }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Brands_Name",
+                table: "Brands",
+                column: "Name");
+
             migrationBuilder.CreateIndex(
                 name: "IX_CartItems_ItemId",
                 table: "CartItems",
@@ -429,6 +654,16 @@ namespace BazaR.Migrations
                 name: "IX_CartItems_UserId",
                 table: "CartItems",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Categories_Name",
+                table: "Categories",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Categories_ParentCategoryId",
+                table: "Categories",
+                column: "ParentCategoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CategoryBrands_BrandId",
@@ -471,6 +706,21 @@ namespace BazaR.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Items_IsAvailable",
+                table: "Items",
+                column: "IsAvailable");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Items_Name",
+                table: "Items",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Items_Price",
+                table: "Items",
+                column: "Price");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Items_UserId",
                 table: "Items",
                 column: "UserId");
@@ -506,8 +756,14 @@ namespace BazaR.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Uslugas_ItemId",
-                table: "Uslugas",
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Uslugi_ItemId",
+                table: "Uslugi",
                 column: "ItemId");
 
             migrationBuilder.CreateIndex(
@@ -552,7 +808,7 @@ namespace BazaR.Migrations
                 name: "Reviews");
 
             migrationBuilder.DropTable(
-                name: "Uslugas");
+                name: "Uslugi");
 
             migrationBuilder.DropTable(
                 name: "WishlistItems");

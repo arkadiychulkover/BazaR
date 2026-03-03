@@ -1,15 +1,25 @@
-﻿using BazaR.Models;
+﻿// Interfaces/IItemRepository.cs
+using BazaR.Models;
 
 namespace BazaR.Interfaces;
 
 public interface IItemRepository
 {
+    // Существующие методы...
     List<Item> GetAll();
     Item? GetById(int id);
     List<Item> GetByCategory(int categoryId);
     List<Item> GetByBrand(int brandId);
     List<Item> Search(string query);
     List<Item> Filter(int? categoryId, int? brandId, decimal? minPrice, decimal? maxPrice, bool? isAvailable);
+
+    // Новые методы для категорий
+    List<Category> GetAllCategories();
+    List<Category> GetMainCategories();
+    List<Category> GetSubCategories(int parentCategoryId);
+    Category? GetCategoryById(int id);
+    Category? GetCategoryWithSubCategories(int id);
+    List<Category> GetCategoryPath(int categoryId); // Путь от главной до текущей
 
     bool Create(Item item);
     Item? Update(int id, Item item);

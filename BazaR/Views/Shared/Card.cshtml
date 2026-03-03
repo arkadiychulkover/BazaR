@@ -1,7 +1,7 @@
 ﻿@model BazaR.Models.Item
 
 <div class="item-card h-100">
-    <div class="card h-100">
+    <div class="card h-100 shadow-sm">
         <div class="item-card-img position-relative">
             <img src="@(Model.Colors?.FirstOrDefault()?.Color ?? "/images/no-image.png")"
                  class="card-img-top"
@@ -24,83 +24,112 @@
                     <i class="bi bi-heart"></i>
                 </button>
             }
-        </div>
-
-        <div class="card-body">
-            <h6 class="card-title item-title text-truncate">
-                @Model.Name
-            </h6>
 
             @if (!Model.IsAvailable)
             {
-                <div class="text-danger small mb-1">
-                    <i class="bi bi-exclamation-circle"></i> Нет в наличии
+                <div class="position-absolute top-0 start-0 m-2 badge bg-danger">
+                    Немає в наявності
                 </div>
             }
+        </div>
 
-            <div class="item-price mb-2">
-                <span class="price-current fw-bold fs-5">
-                    @Model.Price.ToString("N0") ₴
-                </span>
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-secondary">@Model.Brand?.Name</span>
+                <small class="text-muted">Код: @Model.Id</small>
             </div>
 
-            <div class="item-actions mt-2">
+            <h6 class="card-title item-title" style="height: 40px; overflow: hidden;">
                 <a asp-controller="Site"
                    asp-action="ItemDetails"
                    asp-route-id="@Model.Id"
-                   class="btn btn-sm btn-outline-primary w-100">
-                    <i class="bi bi-eye"></i> Подробнее
+                   class="text-decoration-none text-dark">
+                    @Model.Name
+                </a>
+            </h6>
+
+            <div class="item-price mb-2">
+                <span class="price-current fw-bold fs-5 text-primary">
+                    @Model.Price.ToString("N0") ₴
+                </span>
+                @if (Model.Garantia > 0)
+                {
+                    <small class="text-muted d-block">Гарантія: @Model.Garantia міс.</small>
+                }
+            </div>
+
+            <div class="item-actions mt-3">
+                <a asp-controller="Site"
+                   asp-action="ItemDetails"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-sm btn-outline-primary w-100 mb-2">
+                    <i class="bi bi-eye"></i> Детальніше
                 </a>
 
                 @if (Model.IsAvailable)
                 {
-                    <button class="btn btn-sm btn-primary w-100 mt-2 add-to-cart"
+                    <button class="btn btn-sm btn-primary w-100 add-to-cart"
                             data-item-id="@Model.Id"
                             onclick="addToCart(@Model.Id)">
-                        <i class="bi bi-cart-plus"></i> В корзину
+                        <i class="bi bi-cart-plus"></i> В кошик
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-sm btn-secondary w-100" disabled>
+                        <i class="bi bi-cart-x"></i> Немає в наявності
                     </button>
                 }
             </div>
         </div>
+
+        @if (Model.Reviews != null && Model.Reviews.Any())
+        {
+            <div class="card-footer bg-transparent">
+                <small class="text-warning">
+                    @for (int i = 0; i < 5; i++)
+                    {
+                        if (i < Math.Round(Model.Reviews.Average(r => r.Rating)))
+                        {
+                            <i class="bi bi-star-fill"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-star"></i>
+                        }
+                    }
+                    <span class="text-muted ms-1">(@Model.Reviews.Count)</span>
+                </small>
+            </div>
+        }
     </div>
 </div>
 
-<script>
-    function addToCart(itemId) {
-        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-
-        fetch('@Url.Action("AddToCart", "Site")', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'RequestVerificationToken': token
-            },
-            body: 'itemId=' + itemId + '&quantity=1'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Обновить счетчик корзины
-                const cartLink = document.querySelector('a[href*="Cart"]');
-                if (cartLink) {
-                    let badge = cartLink.querySelector('.badge');
-                    if (data.cartCount > 0) {
-                        if (!badge) {
-                            badge = document.createElement('span');
-                            badge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
-                            cartLink.appendChild(badge);
-                        }
-                        badge.textContent = data.cartCount;
-                    } else if (badge) {
-                        badge.remove();
-                    }
-                }
-
-                showNotification('Товар добавлен в корзину', 'success');
-            } else if (data.requireLogin) {
-                new bootstrap.Modal(document.getElementById('loginModal')).show();
-            }
-        })
-        .catch(error => console.error('Error:', error));
+<style>
+    .item-card {
+        transition: transform 0.2s, box-shadow 0.2s;
     }
-</script>
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1) !important;
+        }
+
+    .wishlist-btn {
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+        .wishlist-btn:hover {
+            background-color: #dc3545 !important;
+            color: white !important;
+        }
+
+        .wishlist-btn .bi-heart.text-danger {
+            color: #dc3545 !important;
+        }
+</style>

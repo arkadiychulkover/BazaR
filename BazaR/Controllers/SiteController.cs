@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -10,13 +11,15 @@ namespace BazaR.Controllers
     {
         private readonly IUserDb _usMan;
         private readonly IItemRepository _itMan;
+        private readonly AppDbContext _db;
 
         private const int PageSize = 12;
 
-        public SiteController(IUserDb usMan, IItemRepository itMan)
+        public SiteController(IUserDb usMan, IItemRepository itMan, AppDbContext db)
         {
             _usMan = usMan;
             _itMan = itMan;
+            _db = db;
         }
 
         private int? CurrentUserId => HttpContext.Session.GetInt32("uid");
@@ -67,6 +70,10 @@ namespace BazaR.Controllers
                 .Where(i => i.IsAvailable)
                 .Take(24)
                 .ToList();
+            var cat = _db.Categories.ToList();
+            ViewBag.Categories = cat;
+            foreach(var it in cat)
+                Console.WriteLine(it.Name);
 
             return View(items);
         }
@@ -78,13 +85,37 @@ namespace BazaR.Controllers
 
             if (page < 1) page = 1;
 
-            var items = string.IsNullOrWhiteSpace(query)
-                ? _itMan.GetAll()
-                : _itMan.Search(query);
+            // Получаем все категории для сайдбара
+            var allCategories = _itMan.GetMainCategories();
+            ViewBag.AllCategories = allCategories;
 
-            if (categoryIds != null && categoryIds.Count > 0)
-                items = items.Where(i => categoryIds.Contains(i.CategoryId)).ToList();
+            IQueryable<Item> itemsQuery = _db.Items.AsQueryable();
 
+            // Фильтр по поисковому запросу
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                itemsQuery = itemsQuery.Where(i => i.Name.Contains(query) ||
+                                                  (i.Desc != null && i.Desc.Contains(query)));
+            }
+
+            // Фильтр по категориям (включая подкатегории)
+            if (categoryIds != null && categoryIds.Any())
+            {
+                var allCategoryIds = new List<int>();
+                foreach (var catId in categoryIds)
+                {
+                    allCategoryIds.Add(catId);
+                    // Добавляем ID всех подкатегорий
+                    var subCats = GetSubCategoryIds(catId);
+                    allCategoryIds.AddRange(subCats);
+                }
+                allCategoryIds = allCategoryIds.Distinct().ToList();
+                itemsQuery = itemsQuery.Where(i => allCategoryIds.Contains(i.CategoryId));
+            }
+
+            var items = itemsQuery.ToList();
+
+            // Сортировка
             items = sort switch
             {
                 "price_asc" => items.OrderBy(i => i.Price).ToList(),
@@ -103,6 +134,19 @@ namespace BazaR.Controllers
                 .Take(PageSize)
                 .ToList();
 
+            // Если выбрана конкретная категория, получаем информацию о ней
+            if (categoryIds != null && categoryIds.Count == 1)
+            {
+                var currentCategory = _itMan.GetCategoryById(categoryIds[0]);
+                ViewBag.CurrentCategory = currentCategory;
+
+                // Получаем путь к категории (хлебные крошки)
+                ViewBag.CategoryPath = _itMan.GetCategoryPath(categoryIds[0]);
+
+                // Получаем подкатегории для фильтра
+                ViewBag.SubCategories = _itMan.GetSubCategories(categoryIds[0]);
+            }
+
             ViewBag.Query = query ?? "";
             ViewBag.CategoryIds = categoryIds ?? new List<int>();
             ViewBag.Page = page;
@@ -112,6 +156,19 @@ namespace BazaR.Controllers
             ViewBag.CurrentSort = sort;
 
             return View(paged);
+        }
+
+        // Вспомогательный метод для получения всех ID подкатегорий
+        private List<int> GetSubCategoryIds(int categoryId)
+        {
+            var ids = new List<int>();
+            var subCats = _itMan.GetSubCategories(categoryId);
+            foreach (var subCat in subCats)
+            {
+                ids.Add(subCat.Id);
+                ids.AddRange(GetSubCategoryIds(subCat.Id));
+            }
+            return ids;
         }
 
         [HttpGet]
@@ -741,6 +798,19 @@ namespace BazaR.Controllers
             TempData[ok ? "Ok" : "Error"] = ok ? "Вариант доставки удалён." : "Не удалось удалить доставку.";
             return RedirectToAction(nameof(Index));
         }
+
+        public IActionResult AddCategoriesTest() 
+        {
+            _db.Categories.AddRange(new List<Category>
+            {
+                new Category { Name = "Телефоны", IconUrl = "/images/cat_phone.png" },
+                new Category { Name = "Ноутбуки", IconUrl = "/images/cat_laptop.png" },
+                new Category { Name = "Планшеты", IconUrl = "/images/cat_tablet.png" },
+                new Category { Name = "Аксессуары", IconUrl = "/images/cat_accessory.png" },
+            });
+            _db.SaveChanges();
+            return Content("OK");
+        }
     }
 
     public static class SessionExtensions
@@ -757,5 +827,7 @@ namespace BazaR.Controllers
             if (string.IsNullOrWhiteSpace(json)) return default;
             return JsonSerializer.Deserialize<T>(json);
         }
+
+        
     }
 }

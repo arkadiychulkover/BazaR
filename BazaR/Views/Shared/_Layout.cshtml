@@ -1,236 +1,177 @@
-﻿<!DOCTYPE html>
-<html lang="ru">
+﻿@{
+    var title = ViewData["Title"] ?? "BazaR";
+}
+
+<!DOCTYPE html>
+<html lang="uk">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - BazaR</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@title - BazaR</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Site CSS -->
+    <link href="~/css/site.css" rel="stylesheet" />
+
     <style>
-        /* Дополнительные стили для корзины и избранного */
-        .badge-count {
-            position: absolute;
-            top: 0;
-            right: -8px;
-            font-size: 0.6rem;
-            padding: 0.25rem 0.4rem;
+        body {
+            background-color: #f5f5f5;
         }
 
-        .nav-link {
-            position: relative;
-        }
-
-        .wishlist-btn.active {
-            color: red;
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 22px;
         }
 
         .sale-banner {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 320px;
+            background: linear-gradient(135deg, #ff4d4d, #cc0000);
             color: white;
-            border-radius: 10px;
-            min-height: 200px;
-            padding: 2rem;
+            border-radius: 12px;
         }
+
+        footer {
+            background: #212529;
+            color: #ccc;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+
+            footer a {
+                color: #ccc;
+                text-decoration: none;
+            }
+
+                footer a:hover {
+                    color: white;
+                }
     </style>
 </head>
 <body>
+
+    <!-- HEADER -->
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-            <div class="container">
-                <a class="navbar-brand fw-bold" href="@Url.Action("Index", "Site")">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+            <div class="container-fluid">
+
+                <a class="navbar-brand" asp-controller="Site" asp-action="Index">
                     <i class="bi bi-shop"></i> BazaR
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="navbarMain">
-                    <div class="d-flex flex-grow-1 me-3">
-                        <a href="@Url.Action("Browse", "Site")" class="btn btn-light me-2">
-                            <i class="bi bi-grid"></i> Категории
-                        </a>
-                        <div class="flex-grow-1">
-                            @await Html.PartialAsync("_SearchBar", (string?)ViewBag.Query ?? "")
-                        </div>
-                    </div>
+                <div class="collapse navbar-collapse" id="mainNavbar">
 
-                    <!-- Правая часть навигации -->
-                    <ul class="navbar-nav">
+                    <!-- Search -->
+                    <form class="d-flex mx-auto w-50" asp-controller="Site" asp-action="Browse" method="get">
+                        <input class="form-control me-2" type="search" name="search" placeholder="Пошук товарів..." />
+                        <button class="btn btn-outline-light" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+
+                    <!-- Right menu -->
+                    <ul class="navbar-nav ms-auto">
+
                         <li class="nav-item">
-                            <a class="nav-link position-relative" href="@Url.Action("Wishlist", "Site")">
-                                <i class="bi bi-heart"></i> Избранное
-                                @if (ViewBag.WishlistCount > 0)
-                                {
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        @ViewBag.WishlistCount
-                                    </span>
-                                }
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" href="@Url.Action("Cart", "Site")">
-                                <i class="bi bi-cart"></i> Корзина
-                                @if (ViewBag.CartCount > 0)
-                                {
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        @ViewBag.CartCount
-                                    </span>
-                                }
+                            <a class="nav-link" asp-controller="Site" asp-action="Browse">
+                                <i class="bi bi-grid"></i> Каталог
                             </a>
                         </li>
 
-                        @if (ViewBag.User != null)
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-person-circle"></i> @ViewBag.User.Name
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="@Url.Action("Profile", "Site")">Профиль</a></li>
-                                    <li><a class="dropdown-item" href="@Url.Action("Orders", "Site")">Мои заказы</a></li>
-                                    @if (ViewBag.User.IsAdmin)
-                                    {
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="#">Админ панель</a></li>
-                                    }
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form asp-action="Logout" asp-controller="Site" method="post" class="d-inline">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="dropdown-item">Выйти</button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
-                                    <i class="bi bi-box-arrow-in-right"></i> Вход
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">
-                                    <i class="bi bi-person-plus"></i> Регистрация
-                                </a>
-                            </li>
-                        }
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Cart" asp-action="Index">
+                                <i class="bi bi-cart"></i> Кошик
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Wishlist" asp-action="Index">
+                                <i class="bi bi-heart"></i> Обране
+                            </a>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="bi bi-person"></i> Профіль
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="User" asp-action="Profile">
+                                        Мій профіль
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="User" asp-action="Orders">
+                                        Замовлення
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" asp-controller="User" asp-action="Logout">
+                                        Вийти
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
                     </ul>
+
                 </div>
             </div>
         </nav>
     </header>
 
-    <!-- Модальные окна для входа и регистрации -->
-    <div class="modal fade" id="loginModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                @await Html.PartialAsync("LoginModal")
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="registerModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                @await Html.PartialAsync("RegisterModal")
-            </div>
-        </div>
-    </div>
-
-    <!-- Скрытое поле для anti-forgery token (для AJAX запросов) -->
-    @Html.AntiForgeryToken()
-
-    <main class="container">
-        @if (TempData["Ok"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                @TempData["Ok"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                @TempData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-
+    <!-- BODY -->
+    <main role="main" class="pb-3">
         @RenderBody()
     </main>
 
-    <footer class="border-top footer text-muted mt-5">
-        <div class="container text-center py-3">
-            &copy; 2024 - BazaR - Лучший магазин для покупок
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="row">
+
+                <div class="col-md-4">
+                    <h5>BazaR</h5>
+                    <p>Інтернет-магазин електроніки, техніки та аксесуарів.</p>
+                </div>
+
+                <div class="col-md-4">
+                    <h6>Інформація</h6>
+                    <ul class="list-unstyled">
+                        <li><a asp-controller="Site" asp-action="About">Про нас</a></li>
+                        <li><a asp-controller="Site" asp-action="Delivery">Доставка</a></li>
+                        <li><a asp-controller="Site" asp-action="Contacts">Контакти</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-4">
+                    <h6>Контакти</h6>
+                    <p>Email: support@bazar.ua</p>
+                    <p>Тел: +380 00 000 00 00</p>
+                </div>
+
+            </div>
+
+            <hr class="mt-4" />
+
+            <div class="text-center">
+                &copy; @DateTime.Now.Year - BazaR. Всі права захищені.
+            </div>
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        // Глобальная функция для добавления в избранное
-        function addToWishlist(button) {
-            const itemId = button.getAttribute('data-item-id');
-            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+    <!-- Bootstrap JS -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-            fetch('@Url.Action("AddToWishlist", "Site")', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': token
-                },
-                body: 'id=' + itemId
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Обновить счетчик в избранном
-                    const wishlistLink = document.querySelector('a[href*="Wishlist"]');
-                    if (wishlistLink) {
-                        let badge = wishlistLink.querySelector('.badge');
-                        if (data.wishlistCount > 0) {
-                            if (!badge) {
-                                badge = document.createElement('span');
-                                badge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
-                                wishlistLink.appendChild(badge);
-                            }
-                            badge.textContent = data.wishlistCount;
-                        } else if (badge) {
-                            badge.remove();
-                        }
-                    }
+    <!-- Render page scripts -->
+    @RenderSection("Scripts", required: false)
 
-                    // Визуально отметить кнопку
-                    button.classList.add('active');
-
-                    // Показать уведомление
-                    showNotification('Товар добавлен в избранное', 'success');
-                } else if (data.requireLogin) {
-                    // Показать модальное окно входа
-                    new bootstrap.Modal(document.getElementById('loginModal')).show();
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Функция для показа уведомлений
-        function showNotification(message, type) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
-            alertDiv.style.zIndex = '9999';
-            alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.body.appendChild(alertDiv);
-            setTimeout(() => alertDiv.remove(), 3000);
-        }
-    </script>
-    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,41 +1,241 @@
 ﻿@model List<BazaR.Models.Category>
 
-<div class="mega-container">
+@{
+    var mainCategories = Model?.Where(c => c.ParentCategoryId == null).OrderBy(c => c.DisplayOrder).ToList() ?? new List<BazaR.Models.Category>();
+}
 
+<div class="mega-container">
     <div class="mega-left">
-        <ul>
-            @foreach (var category in Model)
+        <ul class="main-categories">
+            @foreach (var category in mainCategories)
             {
-                <li>
-                    <a asp-controller="Shop"
+                <li class="main-category-item">
+                    <a asp-controller="Site"
                        asp-action="Browse"
-                       asp-route-categoryIds="@category.Id">
+                       asp-route-categoryIds="@category.Id"
+                       class="category-link">
+                        @if (!string.IsNullOrEmpty(category.IconUrl))
+                        {
+                            <i class="bi @category.IconUrl me-2"></i>
+                        }
                         @category.Name
                     </a>
+
+                    @{
+                        var subCategories = Model?.Where(c => c.ParentCategoryId == category.Id).OrderBy(c => c.DisplayOrder).ToList();
+                    }
+
+                    @if (subCategories != null && subCategories.Any())
+                    {
+                        <div class="mega-submenu">
+                            <div class="mega-submenu-content">
+                                @foreach (var subCategory in subCategories)
+                                {
+                                    <div class="mega-column">
+                                        <h4>
+                                            <a asp-controller="Site"
+                                               asp-action="Browse"
+                                               asp-route-categoryIds="@subCategory.Id">
+                                                @subCategory.Name
+                                            </a>
+                                        </h4>
+
+                                        @{
+                                            var subSubCategories = Model?.Where(c => c.ParentCategoryId == subCategory.Id).OrderBy(c => c.DisplayOrder).ToList();
+                                        }
+
+                                        @if (subSubCategories != null && subSubCategories.Any())
+                                        {
+                                            <ul class="subcategory-list">
+                                                @foreach (var subSubCategory in subSubCategories)
+                                                {
+                                                    <li>
+                                                        <a asp-controller="Site"
+                                                           asp-action="Browse"
+                                                           asp-route-categoryIds="@subSubCategory.Id">
+                                                            @subSubCategory.Name
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+
+                                        @if (subCategory.CategoryBrands != null && subCategory.CategoryBrands.Any())
+                                        {
+                                            <div class="brands-in-category mt-2">
+                                                <strong>Популярні бренди:</strong>
+                                                <div class="brand-tags">
+                                                    @foreach (var categoryBrand in subCategory.CategoryBrands.Take(5))
+                                                    {
+                                                        <a asp-controller="Site"
+                                                           asp-action="Browse"
+                                                           asp-route-categoryIds="@subCategory.Id"
+                                                           asp-route-brandId="@categoryBrand.BrandId"
+                                                           class="brand-tag">
+                                                            @categoryBrand.Brand?.Name
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
                 </li>
             }
         </ul>
     </div>
+</div>
 
-    <div class="mega-right">
+<style>
+    .mega-container {
+        position: relative;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
 
-        @foreach (var category in Model)
-        {
-            <div class="mega-column">
-                <h4>@category.Name</h4>
-                @foreach (var brand in category.CategoryBrands)
-                {
-                    <a asp-controller="Shop"
-                       asp-action="Browse"
-                       asp-route-categoryIds="@category.Id"
-                       asp-route-brandId="@brand.BrandId">
-                        @brand.Brand.Name
-                    </a>
-                }
+    .mega-left {
+        width: 100%;
+    }
 
-            </div>
+    .main-categories {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .main-category-item {
+        position: relative;
+    }
+
+    .category-link {
+        display: block;
+        padding: 12px 20px;
+        color: #333;
+        text-decoration: none;
+        border-bottom: 1px solid #f0f0f0;
+        transition: all 0.3s;
+        font-weight: 500;
+    }
+
+    .category-link:hover {
+        background: #f8f9fa;
+        color: #0d6efd;
+        padding-left: 25px;
+    }
+
+    .mega-submenu {
+        position: absolute;
+        left: 100%;
+        top: 0;
+        width: 800px;
+        background: #fff;
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+        border-radius: 0 8px 8px 0;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+        z-index: 1000;
+        min-height: 100%;
+    }
+
+    .main-category-item:hover .mega-submenu {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .mega-submenu-content {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        padding: 20px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .mega-column {
+        min-width: 200px;
+    }
+
+    .mega-column h4 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        font-weight: 600;
+        border-bottom: 2px solid #0d6efd;
+        padding-bottom: 5px;
+    }
+
+    .mega-column h4 a {
+        color: #333;
+        text-decoration: none;
+    }
+
+    .mega-column h4 a:hover {
+        color: #0d6efd;
+    }
+
+    .subcategory-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 15px 0;
+    }
+
+    .subcategory-list li {
+        margin-bottom: 5px;
+    }
+
+    .subcategory-list li a {
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s;
+        display: inline-block;
+    }
+
+    .subcategory-list li a:hover {
+        color: #0d6efd;
+        transform: translateX(3px);
+    }
+
+    .brand-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 5px;
+    }
+
+    .brand-tag {
+        display: inline-block;
+        padding: 2px 8px;
+        background: #f0f0f0;
+        border-radius: 12px;
+        color: #666;
+        text-decoration: none;
+        font-size: 12px;
+        transition: all 0.3s;
+    }
+
+    .brand-tag:hover {
+        background: #0d6efd;
+        color: #fff;
+    }
+
+    @@media (max-width: 768px) {
+        .mega-submenu {
+            position: static;
+            width: 100%;
+            opacity: 1;
+            visibility: visible;
+            box-shadow: none;
+            border-radius: 0;
         }
 
-    </div>
-
-</div>
+        .mega-submenu-content {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

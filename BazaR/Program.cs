@@ -24,6 +24,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Регистрация репозиториев
 builder.Services.AddScoped<IUserDb, UserRepository>();
+builder.Services.AddTransient<ILogger, Logger<ItemRepository>>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 
 var app = builder.Build();

@@ -1,33 +1,172 @@
-﻿<!-- Views/Site/Browse.cshtml -->
-@model List<BazaR.Models.Item>
+﻿@model List<BazaR.Models.Item>
 
 @{
-    ViewData["Title"] = "Каталог товаров";
-    var categories = ViewBag.Categories as List<BazaR.Models.Category> ?? new List<BazaR.Models.Category>();
-    var selectedCategoryIds = ViewBag.SelectedCategoryIds as List<int> ?? new List<int>();
+    ViewData["Title"] = "Каталог товарів";
+    var categories = ViewBag.AllCategories as List<BazaR.Models.Category> ?? new List<BazaR.Models.Category>();
+    var mainCategories = categories.Where(c => c.ParentCategoryId == null).OrderBy(c => c.DisplayOrder).ToList();
+    var selectedCategoryIds = ViewBag.CategoryIds as List<int> ?? new List<int>();
+    var currentCategory = ViewBag.CurrentCategory as BazaR.Models.Category;
+    var categoryPath = ViewBag.CategoryPath as List<BazaR.Models.Category> ?? new List<BazaR.Models.Category>();
+    var subCategories = ViewBag.SubCategories as List<BazaR.Models.Category> ?? new List<BazaR.Models.Category>();
     var query = ViewBag.Query as string ?? string.Empty;
     var page = ViewBag.Page ?? 1;
     var totalPages = ViewBag.TotalPages ?? 1;
     var totalItems = ViewBag.TotalItems ?? 0;
-    var user = ViewBag.User as BazaR.Models.User;
-    var cartCount = ViewBag.CartCount ?? 0;
-    var wishlistCount = ViewBag.WishlistCount ?? 0;
 }
 
 <div class="container mt-4">
-    <div class="row">
-        <div class="col-md-3">
-            @await Html.PartialAsync("_SideBarInSearch", categories)
-            @await Html.PartialAsync("_Filters", categories)
-        </div>
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Site")">Головна</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Browse", "Site")">Каталог</a></li>
+            @foreach (var cat in categoryPath)
+            {
+                if (cat == categoryPath.Last())
+                {
+                    <li class="breadcrumb-item active" aria-current="page">@cat.Name</li>
+                }
+                else
+                {
+                    <li class="breadcrumb-item"><a href="@Url.Action("Browse", "Site", new { categoryIds = new List<int> { cat.Id } })">@cat.Name</a></li>
+                }
+            }
+        </ol>
+    </nav>
 
-        <div class="col-md-9">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Каталог товаров</h2>
-                <span class="text-muted">Найдено: @totalItems товаров</span>
+    <div class="row">
+        <!-- Левая колонка с фильтрами -->
+        <div class="col-md-3">
+            <!-- Категории -->
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Категорії</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        @foreach (var category in mainCategories)
+                        {
+                            var isSelected = selectedCategoryIds.Contains(category.Id);
+                            <li class="list-group-item @(isSelected ? "active" : "")">
+                                <a href="@Url.Action("Browse", "Site", new { 
+                                    categoryIds = isSelected ? null : new List<int> { category.Id },
+                                    query = query 
+                                })" class="text-decoration-none @(isSelected ? "text-white" : "text-dark") d-block">
+                                    @if (!string.IsNullOrEmpty(category.IconUrl))
+                                    {
+                                        <i class="bi @category.IconUrl me-2"></i>
+                                    }
+                                    @category.Name
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
             </div>
 
-            @await Html.PartialAsync("SortBar", new { CurrentSort = ViewBag.CurrentSort })
+            <!-- Подкатегории (если выбрана основная категория) -->
+            @if (subCategories.Any())
+            {
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Підкатегорії</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            @foreach (var subCat in subCategories)
+                            {
+                                var isSelected = selectedCategoryIds.Contains(subCat.Id);
+                                <li class="list-group-item @(isSelected ? "active" : "")">
+                                    <a href="@Url.Action("Browse", "Site", new { 
+                                        categoryIds = new List<int> { subCat.Id },
+                                        query = query 
+                                    })" class="text-decoration-none @(isSelected ? "text-white" : "text-dark") d-block">
+                                        @subCat.Name
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+            <!-- Фильтр по цене -->
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Ціна</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Від</label>
+                            <input type="number" class="form-control" id="minPrice" placeholder="0">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">До</label>
+                            <input type="number" class="form-control" id="maxPrice" placeholder="100000">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary w-100 mt-3" onclick="applyPriceFilter()">
+                        Застосувати
+                    </button>
+                </div>
+            </div>
+
+            <!-- Фильтр по брендам -->
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Бренди</h5>
+                </div>
+                <div class="card-body">
+                    <div class="brand-filter-list" style="max-height: 200px; overflow-y: auto;">
+                        @if (currentCategory?.CategoryBrands != null)
+                        {
+                            foreach (var cb in currentCategory.CategoryBrands)
+                            {
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input brand-checkbox" 
+                                           type="checkbox" 
+                                           value="@cb.BrandId" 
+                                           id="brand_@cb.BrandId">
+                                    <label class="form-check-label" for="brand_@cb.BrandId">
+                                        @cb.Brand?.Name
+                                    </label>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted">Виберіть категорію для фільтрації за брендами</p>
+                        }
+                    </div>
+                    @if (currentCategory?.CategoryBrands != null && currentCategory.CategoryBrands.Any())
+                    {
+                        <button class="btn btn-primary w-100 mt-3" onclick="applyBrandFilter()">
+                            Застосувати
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка с товарами -->
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    @if (currentCategory != null)
+                    {
+                        @currentCategory.Name
+                    }
+                    else
+                    {
+                        @ViewData["Title"]
+                    }
+                </h2>
+                <span class="text-muted">Знайдено: @totalItems товарів</span>
+            </div>
+
+            <!-- Сортировка -->
+            @await Html.PartialAsync("SortBar")
 
             @if (Model.Any())
             {
@@ -40,20 +179,62 @@
                     }
                 </div>
 
+                <!-- Пагинация -->
                 @await Html.PartialAsync("Pagination", new
                 {
                     Page = page,
-                        TotalPages = totalPages,
-                        Query = query,
-                        CategoryIds = selectedCategoryIds
-                        })
-                }
+                    TotalPages = totalPages,
+                    Query = query,
+                    CategoryIds = selectedCategoryIds
+                })
+            }
             else
             {
-                <div class="alert alert-info">
-                    Товары не найдены. Попробуйте изменить параметры поиска.
+                <div class="alert alert-info text-center py-5">
+                    <i class="bi bi-info-circle-fill display-4"></i>
+                    <h3 class="mt-3">Товари не знайдено</h3>
+                    <p>Спробуйте змінити параметри пошуку або вибрати іншу категорію</p>
+                    <a href="@Url.Action("Browse", "Site")" class="btn btn-primary mt-3">
+                        <i class="bi bi-arrow-repeat"></i> Скинути фільтри
+                    </a>
                 </div>
             }
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function applyPriceFilter() {
+            var minPrice = document.getElementById('minPrice').value;
+            var maxPrice = document.getElementById('maxPrice').value;
+            var url = new URL(window.location.href);
+            
+            if (minPrice) url.searchParams.set('minPrice', minPrice);
+            else url.searchParams.delete('minPrice');
+            
+            if (maxPrice) url.searchParams.set('maxPrice', maxPrice);
+            else url.searchParams.delete('maxPrice');
+            
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        function applyBrandFilter() {
+            var selectedBrands = [];
+            document.querySelectorAll('.brand-checkbox:checked').forEach(cb => {
+                selectedBrands.push(cb.value);
+            });
+            
+            var url = new URL(window.location.href);
+            url.searchParams.delete('brandIds');
+            
+            selectedBrands.forEach(brandId => {
+                url.searchParams.append('brandIds', brandId);
+            });
+            
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+    </script>
+}
