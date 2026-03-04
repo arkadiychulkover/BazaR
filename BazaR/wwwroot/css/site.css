@@ -692,6 +692,7 @@ html {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     height: 100%;
+    padding-inline: 20px;
 }
 
 .product-card:hover {
@@ -705,7 +706,8 @@ html {
     width: 100%;
     aspect-ratio: 4 / 3;
     overflow: hidden;
-    background: #FAFAFA;
+    padding: 60px;
+    background: #FFFFFF;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -725,36 +727,58 @@ html {
     position: absolute;
     top: clamp(8px, 1.5vw, 16px);
     right: clamp(8px, 1.5vw, 16px);
-    width: clamp(28px, 6vw, 40px);
-    height: clamp(28px, 6vw, 40px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    background: #FFFFFF;
-    cursor: pointer;
+    width: clamp(30px, 6vw, 42px);
+    height: clamp(30px, 6vw, 42px);
     display: grid;
     place-items: center;
-    border-radius: clamp(6px, 1.5vw, 10px);
-    transition: all 0.2s ease;
+    border: none;
+    border-radius: clamp(8px, 1.5vw, 12px);
+    background: rgba(250,250,250,.95);
+    cursor: pointer;
     z-index: 10;
+    transition: background .2s ease, border-color .2s ease, transform .12s ease, box-shadow .2s ease;
+    -webkit-tap-highlight-color: transparent;
 }
+
     .product-card__wish:hover {
-        background: #A7ABCC;
+        background: #F5F6FF;
+        border-color: none;
+        box-shadow: 0 8px 18px rgba(0,0,0,.08);
     }
 
-.product-card__wish:hover {
-    background: #F5F5F5;
-    border-color: rgba(0, 0, 0, 0.2);
-}
+    .product-card__wish:active {
+        transform: scale(.96);
+        box-shadow: 0 4px 10px rgba(0,0,0,.08);
+    }
 
-.product-card__wish svg {
-    width: clamp(18px, 4vw, 28px);
-    height: clamp(18px, 4vw, 28px);
-    fill: transparent;
-    stroke-width: 1.8;
-    transition: all 0.2s ease;
-}
+    .product-card__wish:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(116,120,159,.28), 0 8px 18px rgba(0,0,0,.08);
+    }
+    .product-card__wish svg path {
+        fill: transparent;
+        stroke: #74789F;
+        stroke-width: 1.8;
+        transition: fill .25s ease;
+    }
 
-    .product-card__wish.is-active svg {
+    .product-card__wish.is-active svg path {
         fill: #74789F;
+    }
+
+/* активное состояние */
+.product-card__wish.is-active {
+    border-color: none;
+}
+
+    .product-card__wish.is-active .product-card__wish-icon path {
+        fill: #74789F;
+        stroke: #74789F;
+    }
+
+    /* если хочешь подсветку и в hover при активном */
+    .product-card__wish.is-active:hover {
+        background: #E3E6FF;
     }
 
 /* Content Section - Flexible footer area */

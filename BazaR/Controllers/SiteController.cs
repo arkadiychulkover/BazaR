@@ -66,6 +66,15 @@ namespace BazaR.Controllers
 
             var items = _itMan.GetAll();
 
+            HashSet<int> wishlistIds = new();
+            if (IsAuthenticated)
+            {
+                var userId = CurrentUserId!.Value;
+                wishlistIds = _usMan.GetWishList(userId)
+                                    .Select(i => i.Id)
+                                    .ToHashSet();
+            }
+
             var model = items.Select(x => new ItemCardVm
             {
                 Id = x.Id,
@@ -73,17 +82,17 @@ namespace BazaR.Controllers
                 Price = x.Price,
                 OldPrice = null,
                 ImageUrl = x.ImageUrl,
-                InWishlist = false
+                InWishlist = wishlistIds.Contains(x.Id)
             }).ToList();
 
             return View(model);
         }
 
+
         [HttpGet]
         public IActionResult Browse(string? query, List<int>? categoryIds, int page = 1, string sort = "default")
         {
             SetLayoutData();
-
             if (page < 1) page = 1;
 
             var items = string.IsNullOrWhiteSpace(query)
@@ -106,10 +115,30 @@ namespace BazaR.Controllers
 
             var total = items.Count;
             var totalPages = (int)Math.Ceiling(total / (double)PageSize);
+
             var paged = items
                 .Skip((page - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();
+
+            HashSet<int> wishlistIds = new();
+            if (IsAuthenticated)
+            {
+                var userId = CurrentUserId!.Value;
+                wishlistIds = _usMan.GetWishList(userId)
+                                    .Select(i => i.Id)
+                                    .ToHashSet();
+            }
+
+            var model = paged.Select(x => new ItemCardVm
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Price = x.Price,
+                OldPrice = null,
+                ImageUrl = x.ImageUrl,
+                InWishlist = wishlistIds.Contains(x.Id)
+            }).ToList();
 
             ViewBag.Query = query ?? "";
             ViewBag.CategoryIds = categoryIds ?? new List<int>();
@@ -119,7 +148,7 @@ namespace BazaR.Controllers
             ViewBag.TotalPages = totalPages;
             ViewBag.CurrentSort = sort;
 
-            return View(paged);
+            return View(model);
         }
 
         [HttpGet]
@@ -810,6 +839,31 @@ namespace BazaR.Controllers
             var ok = _itMan.RemoveDeliveryVariant(deliveryId);
             TempData[ok ? "Ok" : "Error"] = ok ? "Вариант доставки удалён." : "Не удалось удалить доставку.";
             return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ToggleWishlist(int id)
+        {
+            if (!IsAuthenticated)
+                return Json(new { success = false, requireLogin = true });
+
+            var userId = CurrentUserId!.Value;
+
+            bool isInWishlist = _usMan.GetWishList(userId).Any(i => i.Id == id);
+
+            if (isInWishlist)
+                _usMan.RemoveFromWishList(userId, id);
+            else
+                _usMan.AddToWishList(userId, id);
+
+            var wishlistCount = _usMan.GetWishList(userId).Count();
+
+            return Json(new
+            {
+                success = true,
+                inWishlist = !isInWishlist,
+                wishlistCount
+            });
         }
     }
 

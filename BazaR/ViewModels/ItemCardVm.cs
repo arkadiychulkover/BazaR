@@ -1,4 +1,4 @@
-﻿namespace BazaR.ViewModels
+namespace BazaR.ViewModels
 {
     public class ItemCardVm
     {
