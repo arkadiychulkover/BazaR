@@ -924,3 +924,115 @@ html {
         display: none;
     }
 }
+
+.download-app {
+    width: 325px;
+    min-height: 112px;
+    background: #fff;
+    border: 0.5px solid #DADADA;
+    border-radius: 12px;
+    padding: 16px 14px;
+    display: grid;
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+.download-app__title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 16px;
+    margin-left: 15px;
+    color: #898888;
+}
+
+.download-app__actions {
+    display: flex;
+    justify-content: center;
+    gap: 23px;
+}
+
+.download-app__btn {
+    width: 120px;
+    height: 36px;
+    border-radius: 22px;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background: #221F1F;
+    text-decoration: none;
+    transition: transform .12s ease, box-shadow .2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+    .download-app__btn:hover {
+        box-shadow: 0 8px 18px rgba(0,0,0,.10);
+    }
+
+    .download-app__btn:active {
+        transform: scale(.98);
+    }
+
+    .download-app__btn img {
+        width: 120px;
+        height: 36px;
+        display: block;
+        object-fit: cover;
+    }
+.social-card {
+    width: 325px;
+    min-height: 92px;
+    background: #FFFFFF;
+    border: 0.5px solid #DADADA;
+    border-radius: 12px;
+    padding: 14px 14px 12px;
+    box-sizing: border-box;
+    display: grid;
+    gap: 12px;
+}
+
+.social-card__title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 16px;
+    margin-left: 15px;
+    color: #898888;
+}
+
+/* ряд иконок */
+.social-card__icons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 21px; /* под твои координаты из макета */
+}
+
+/* кликабельная иконка */
+.social-card__icon {
+    width: 28px; /* в макете самая большая 28x28 (twitter) */
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: transform .12s ease, box-shadow .2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+    .social-card__icon:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(0,0,0,.10);
+    }
+
+    .social-card__icon:active {
+        transform: translateY(0) scale(.98);
+    }
+
+    /* img внутри */
+    .social-card__icon img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+    }
