@@ -438,6 +438,48 @@ namespace BazaR.Data
                 new CategoryBrand { CategoryId = 6, BrandId = 20 },
                 new CategoryBrand { CategoryId = 6, BrandId = 6 }
             );
+
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = 1,
+                    Email = "test@example.com",
+                    PasswordHash = "123456", // В реальном проекте нужно хэшировать
+                    Name = "Test User",
+                    IsAdmin = false
+                }
+            );
+
+            // Очищаем предыдущие seed данные для Item (если они были)
+            modelBuilder.Entity<Item>().HasData(new List<Item>());
+
+            // Добавляем с отрицательными ID
+            var items = new List<Item>();
+            int itemId = -1000;
+
+            var categoryIds = new[] { 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 121, 122, 123, 201, 202, 203, 204, 205 };
+
+            foreach (var categoryId in categoryIds)
+            {
+                for (int i = 1; i <= 3; i++)
+                {
+                    items.Add(new Item
+                    {
+                        Id = itemId--,
+                        Name = $"Товар {i} категорії {categoryId}",
+                        Desc = $"Опис товару {i}",
+                        Price = 1000 + (i * 500),
+                        Garantia = 12,
+                        IsAvailable = true,
+                        CategoryId = categoryId,
+                        BrandId = 1,
+                        UserId = 1,
+                        ImageUrl = "/images/items/default.jpg"
+                    });
+                }
+            }
+
+            modelBuilder.Entity<Item>().HasData(items);
         }
     }
 }

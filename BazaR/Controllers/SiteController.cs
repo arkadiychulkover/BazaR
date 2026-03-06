@@ -66,16 +66,32 @@ namespace BazaR.Controllers
         {
             SetLayoutData();
 
-            var items = _itMan.GetAll()
-                .Where(i => i.IsAvailable)
-                .Take(24)
-                .ToList();
-            var cat = _db.Categories.ToList();
-            ViewBag.Categories = cat;
-            foreach(var it in cat)
-                Console.WriteLine(it.Name);
+            var categories = _db.Categories.ToList();
 
-            return View(items);
+            var featuredItems = _db.Items
+                .Where(i => i.IsAvailable)
+                .OrderByDescending(i => i.Price)
+                .Take(3)
+                .ToList();
+
+            var newItems = _db.Items
+                .Where(i => i.IsAvailable)
+                .OrderByDescending(i => i.Id)
+                .Take(3)
+                .ToList();
+
+            var popularItems = _db.Items
+                .Where(i => i.IsAvailable)
+                .OrderByDescending(i => i.Reviews.Average(r => r.Rating))
+                .Take(3)
+                .ToList();
+
+            ViewBag.Categories = categories;
+            ViewBag.FeaturedItems = featuredItems;
+            ViewBag.NewItems = newItems;
+            ViewBag.PopularItems = popularItems;
+
+            return View();
         }
 
         [HttpGet]
@@ -158,7 +174,6 @@ namespace BazaR.Controllers
             return View(paged);
         }
 
-        // Вспомогательный метод для получения всех ID подкатегорий
         private List<int> GetSubCategoryIds(int categoryId)
         {
             var ids = new List<int>();

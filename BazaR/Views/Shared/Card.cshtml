@@ -3,7 +3,8 @@
 <div class="item-card h-100">
     <div class="card h-100 shadow-sm">
         <div class="item-card-img position-relative">
-            <img src="@(Model.Colors?.FirstOrDefault()?.Color ?? "/images/no-image.png")"
+
+            <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/no-image.png" : Model.ImageUrl)"
                  class="card-img-top"
                  alt="@Model.Name"
                  style="height: 200px; object-fit: cover;">
@@ -31,6 +32,7 @@
                     Немає в наявності
                 </div>
             }
+
         </div>
 
         <div class="card-body">

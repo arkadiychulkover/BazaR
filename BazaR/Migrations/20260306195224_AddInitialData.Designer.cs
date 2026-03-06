@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BazaR.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260303211357_neve")]
-    partial class neve
+    [Migration("20260306195224_AddInitialData")]
+    partial class AddInitialData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1290,6 +1290,9 @@ namespace BazaR.Migrations
                     b.Property<int>("Garantia")
                         .HasColumnType("int");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
 
@@ -1323,6 +1326,710 @@ namespace BazaR.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Items");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = -1000,
+                            BrandId = 1,
+                            CategoryId = 101,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 101",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1001,
+                            BrandId = 1,
+                            CategoryId = 101,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 101",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1002,
+                            BrandId = 1,
+                            CategoryId = 101,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 101",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1003,
+                            BrandId = 1,
+                            CategoryId = 102,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 102",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1004,
+                            BrandId = 1,
+                            CategoryId = 102,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 102",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1005,
+                            BrandId = 1,
+                            CategoryId = 102,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 102",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1006,
+                            BrandId = 1,
+                            CategoryId = 103,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 103",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1007,
+                            BrandId = 1,
+                            CategoryId = 103,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 103",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1008,
+                            BrandId = 1,
+                            CategoryId = 103,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 103",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1009,
+                            BrandId = 1,
+                            CategoryId = 104,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 104",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1010,
+                            BrandId = 1,
+                            CategoryId = 104,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 104",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1011,
+                            BrandId = 1,
+                            CategoryId = 104,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 104",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1012,
+                            BrandId = 1,
+                            CategoryId = 105,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 105",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1013,
+                            BrandId = 1,
+                            CategoryId = 105,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 105",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1014,
+                            BrandId = 1,
+                            CategoryId = 105,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 105",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1015,
+                            BrandId = 1,
+                            CategoryId = 106,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 106",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1016,
+                            BrandId = 1,
+                            CategoryId = 106,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 106",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1017,
+                            BrandId = 1,
+                            CategoryId = 106,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 106",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1018,
+                            BrandId = 1,
+                            CategoryId = 107,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 107",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1019,
+                            BrandId = 1,
+                            CategoryId = 107,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 107",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1020,
+                            BrandId = 1,
+                            CategoryId = 107,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 107",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1021,
+                            BrandId = 1,
+                            CategoryId = 108,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 108",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1022,
+                            BrandId = 1,
+                            CategoryId = 108,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 108",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1023,
+                            BrandId = 1,
+                            CategoryId = 108,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 108",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1024,
+                            BrandId = 1,
+                            CategoryId = 109,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 109",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1025,
+                            BrandId = 1,
+                            CategoryId = 109,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 109",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1026,
+                            BrandId = 1,
+                            CategoryId = 109,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 109",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1027,
+                            BrandId = 1,
+                            CategoryId = 110,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 110",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1028,
+                            BrandId = 1,
+                            CategoryId = 110,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 110",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1029,
+                            BrandId = 1,
+                            CategoryId = 110,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 110",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1030,
+                            BrandId = 1,
+                            CategoryId = 121,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 121",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1031,
+                            BrandId = 1,
+                            CategoryId = 121,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 121",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1032,
+                            BrandId = 1,
+                            CategoryId = 121,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 121",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1033,
+                            BrandId = 1,
+                            CategoryId = 122,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 122",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1034,
+                            BrandId = 1,
+                            CategoryId = 122,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 122",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1035,
+                            BrandId = 1,
+                            CategoryId = 122,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 122",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1036,
+                            BrandId = 1,
+                            CategoryId = 123,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 123",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1037,
+                            BrandId = 1,
+                            CategoryId = 123,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 123",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1038,
+                            BrandId = 1,
+                            CategoryId = 123,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 123",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1039,
+                            BrandId = 1,
+                            CategoryId = 201,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 201",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1040,
+                            BrandId = 1,
+                            CategoryId = 201,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 201",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1041,
+                            BrandId = 1,
+                            CategoryId = 201,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 201",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1042,
+                            BrandId = 1,
+                            CategoryId = 202,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 202",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1043,
+                            BrandId = 1,
+                            CategoryId = 202,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 202",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1044,
+                            BrandId = 1,
+                            CategoryId = 202,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 202",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1045,
+                            BrandId = 1,
+                            CategoryId = 203,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 203",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1046,
+                            BrandId = 1,
+                            CategoryId = 203,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 203",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1047,
+                            BrandId = 1,
+                            CategoryId = 203,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 203",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1048,
+                            BrandId = 1,
+                            CategoryId = 204,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 204",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1049,
+                            BrandId = 1,
+                            CategoryId = 204,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 204",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1050,
+                            BrandId = 1,
+                            CategoryId = 204,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 204",
+                            Price = 2500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1051,
+                            BrandId = 1,
+                            CategoryId = 205,
+                            Desc = "Опис товару 1",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 1 категорії 205",
+                            Price = 1500,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1052,
+                            BrandId = 1,
+                            CategoryId = 205,
+                            Desc = "Опис товару 2",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 2 категорії 205",
+                            Price = 2000,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = -1053,
+                            BrandId = 1,
+                            CategoryId = 205,
+                            Desc = "Опис товару 3",
+                            Garantia = 12,
+                            ImageUrl = "/images/items/default.jpg",
+                            IsAvailable = true,
+                            Name = "Товар 3 категорії 205",
+                            Price = 2500,
+                            UserId = 1
+                        });
                 });
 
             modelBuilder.Entity("BazaR.Models.ItemCharacteristic", b =>
@@ -1524,6 +2231,16 @@ namespace BazaR.Migrations
                         .HasDatabaseName("IX_Users_Email");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "test@example.com",
+                            IsAdmin = false,
+                            Name = "Test User",
+                            PasswordHash = "123456"
+                        });
                 });
 
             modelBuilder.Entity("BazaR.Models.Usluga", b =>

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BazaR.Migrations
 {
     /// <inheritdoc />
-    public partial class neve : Migration
+    public partial class AddInitialData : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -148,6 +148,7 @@ namespace BazaR.Migrations
                     IsAvailable = table.Column<bool>(type: "bit", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Desc = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BrandId = table.Column<int>(type: "int", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false)
@@ -503,6 +504,11 @@ namespace BazaR.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "Email", "IsAdmin", "Name", "PasswordHash" },
+                values: new object[] { 1, "test@example.com", false, "Test User", "123456" });
+
+            migrationBuilder.InsertData(
                 table: "Categories",
                 columns: new[] { "Id", "DisplayOrder", "IconUrl", "Name", "ParentCategoryId" },
                 values: new object[,]
@@ -638,6 +644,67 @@ namespace BazaR.Migrations
                     { 2, 201 },
                     { 3, 201 },
                     { 4, 201 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Items",
+                columns: new[] { "Id", "BrandId", "CategoryId", "Desc", "Garantia", "ImageUrl", "IsAvailable", "Name", "Price", "UserId" },
+                values: new object[,]
+                {
+                    { -1050, 1, 204, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 204", 2500, 1 },
+                    { -1049, 1, 204, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 204", 2000, 1 },
+                    { -1048, 1, 204, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 204", 1500, 1 },
+                    { -1047, 1, 203, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 203", 2500, 1 },
+                    { -1046, 1, 203, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 203", 2000, 1 },
+                    { -1045, 1, 203, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 203", 1500, 1 },
+                    { -1044, 1, 202, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 202", 2500, 1 },
+                    { -1043, 1, 202, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 202", 2000, 1 },
+                    { -1042, 1, 202, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 202", 1500, 1 },
+                    { -1041, 1, 201, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 201", 2500, 1 },
+                    { -1040, 1, 201, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 201", 2000, 1 },
+                    { -1039, 1, 201, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 201", 1500, 1 },
+                    { -1020, 1, 107, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 107", 2500, 1 },
+                    { -1019, 1, 107, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 107", 2000, 1 },
+                    { -1018, 1, 107, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 107", 1500, 1 },
+                    { -1017, 1, 106, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 106", 2500, 1 },
+                    { -1016, 1, 106, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 106", 2000, 1 },
+                    { -1015, 1, 106, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 106", 1500, 1 },
+                    { -1014, 1, 105, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 105", 2500, 1 },
+                    { -1013, 1, 105, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 105", 2000, 1 },
+                    { -1012, 1, 105, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 105", 1500, 1 },
+                    { -1011, 1, 104, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 104", 2500, 1 },
+                    { -1010, 1, 104, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 104", 2000, 1 },
+                    { -1009, 1, 104, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 104", 1500, 1 },
+                    { -1008, 1, 103, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 103", 2500, 1 },
+                    { -1007, 1, 103, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 103", 2000, 1 },
+                    { -1006, 1, 103, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 103", 1500, 1 },
+                    { -1005, 1, 102, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 102", 2500, 1 },
+                    { -1004, 1, 102, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 102", 2000, 1 },
+                    { -1003, 1, 102, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 102", 1500, 1 },
+                    { -1002, 1, 101, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 101", 2500, 1 },
+                    { -1001, 1, 101, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 101", 2000, 1 },
+                    { -1000, 1, 101, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 101", 1500, 1 },
+                    { -1053, 1, 205, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 205", 2500, 1 },
+                    { -1052, 1, 205, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 205", 2000, 1 },
+                    { -1051, 1, 205, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 205", 1500, 1 },
+                    { -1038, 1, 123, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 123", 2500, 1 },
+                    { -1037, 1, 123, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 123", 2000, 1 },
+                    { -1036, 1, 123, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 123", 1500, 1 },
+                    { -1035, 1, 122, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 122", 2500, 1 },
+                    { -1034, 1, 122, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 122", 2000, 1 },
+                    { -1033, 1, 122, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 122", 1500, 1 },
+                    { -1032, 1, 121, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 121", 2500, 1 },
+                    { -1031, 1, 121, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 121", 2000, 1 },
+                    { -1030, 1, 121, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 121", 1500, 1 },
+                    { -1029, 1, 110, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 110", 2500, 1 },
+                    { -1028, 1, 110, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 110", 2000, 1 },
+                    { -1027, 1, 110, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 110", 1500, 1 },
+                    { -1026, 1, 109, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 109", 2500, 1 },
+                    { -1025, 1, 109, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 109", 2000, 1 },
+                    { -1024, 1, 109, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 109", 1500, 1 },
+                    { -1023, 1, 108, "Опис товару 3", 12, "/images/items/default.jpg", true, "Товар 3 категорії 108", 2500, 1 },
+                    { -1022, 1, 108, "Опис товару 2", 12, "/images/items/default.jpg", true, "Товар 2 категорії 108", 2000, 1 },
+                    { -1021, 1, 108, "Опис товару 1", 12, "/images/items/default.jpg", true, "Товар 1 категорії 108", 1500, 1 }
                 });
 
             migrationBuilder.CreateIndex(

@@ -13,6 +13,7 @@ namespace BazaR.Models
 
         public string Name { get; set; }
         public string Desc { get; set; }
+        public string? ImageUrl { get; set; }
 
         public int BrandId { get; set; }
         public Brand Brand { get; set; }
