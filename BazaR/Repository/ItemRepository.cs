@@ -121,14 +121,13 @@ namespace BazaR.Repositories
                 .ToList();
         }
 
-        public List<Category> GetSubCategories(int parentCategoryId)
-        {
-            return _context.Categories
-                .Where(c => c.ParentCategoryId == parentCategoryId)
-                .Include(c => c.SubCategories)
-                .OrderBy(c => c.DisplayOrder)
-                .ToList();
-        }
+        public List<Category> GetSubCategories(int parentCategoryId) => _context.Categories
+            .Where(c => c.ParentCategoryId == parentCategoryId)
+            .Include(c => c.SubCategories)
+            .OrderBy(c => c.DisplayOrder)
+            .ToList();
+
+
 
         public Category? GetCategoryById(int id)
         {
@@ -154,15 +153,11 @@ namespace BazaR.Repositories
         {
             var path = new List<Category>();
             var category = GetCategoryById(categoryId);
-
             while (category != null)
             {
                 path.Insert(0, category);
-                category = category.ParentCategory != null
-                    ? GetCategoryById(category.ParentCategory.Id)
-                    : null;
+                category = category.ParentCategory != null ? GetCategoryById(category.ParentCategory.Id) : null;
             }
-
             return path;
         }
 

@@ -95,43 +95,48 @@ namespace BazaR.Controllers
         }
 
         [HttpGet]
-        public IActionResult Browse(string? query, List<int>? categoryIds, int page = 1, string sort = "default")
+        public IActionResult Browse(string? query, List<int>? categoryIds, int page = 1,
+    string sort = "default", decimal? minPrice = null, decimal? maxPrice = null,
+    List<int>? brandIds = null)
         {
             SetLayoutData();
-
             if (page < 1) page = 1;
 
-            // Получаем все категории для сайдбара
             var allCategories = _itMan.GetMainCategories();
             ViewBag.AllCategories = allCategories;
 
-            IQueryable<Item> itemsQuery = _db.Items.AsQueryable();
+            IQueryable<Item> itemsQuery = _db.Items.AsQueryable().AsNoTracking();
 
-            // Фильтр по поисковому запросу
             if (!string.IsNullOrWhiteSpace(query))
-            {
                 itemsQuery = itemsQuery.Where(i => i.Name.Contains(query) ||
                                                   (i.Desc != null && i.Desc.Contains(query)));
-            }
 
-            // Фильтр по категориям (включая подкатегории)
             if (categoryIds != null && categoryIds.Any())
             {
                 var allCategoryIds = new List<int>();
                 foreach (var catId in categoryIds)
                 {
                     allCategoryIds.Add(catId);
-                    // Добавляем ID всех подкатегорий
-                    var subCats = GetSubCategoryIds(catId);
-                    allCategoryIds.AddRange(subCats);
+                    allCategoryIds.AddRange(GetSubCategoryIds(catId));
                 }
                 allCategoryIds = allCategoryIds.Distinct().ToList();
                 itemsQuery = itemsQuery.Where(i => allCategoryIds.Contains(i.CategoryId));
             }
 
+            // Фильтр по цене
+            if (minPrice.HasValue)
+                itemsQuery = itemsQuery.Where(i => i.Price >= minPrice.Value);
+
+            if (maxPrice.HasValue)
+                itemsQuery = itemsQuery.Where(i => i.Price <= maxPrice.Value);
+
+            // Фильтр по брендам
+            if (brandIds != null && brandIds.Any())
+                itemsQuery = itemsQuery.Where(i => brandIds.Contains(i.BrandId));
+
             var items = itemsQuery.ToList();
 
-            // Сортировка
+            // Применяем сортировку
             items = sort switch
             {
                 "price_asc" => items.OrderBy(i => i.Price).ToList(),
@@ -145,30 +150,25 @@ namespace BazaR.Controllers
 
             var total = items.Count;
             var totalPages = (int)Math.Ceiling(total / (double)PageSize);
-            var paged = items
-                .Skip((page - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
+            var paged = items.Skip((page - 1) * PageSize).Take(PageSize).ToList();
 
-            // Если выбрана конкретная категория, получаем информацию о ней
             if (categoryIds != null && categoryIds.Count == 1)
             {
                 var currentCategory = _itMan.GetCategoryById(categoryIds[0]);
                 ViewBag.CurrentCategory = currentCategory;
-
-                // Получаем путь к категории (хлебные крошки)
                 ViewBag.CategoryPath = _itMan.GetCategoryPath(categoryIds[0]);
-
-                // Получаем подкатегории для фильтра
                 ViewBag.SubCategories = _itMan.GetSubCategories(categoryIds[0]);
             }
 
             ViewBag.Query = query ?? "";
             ViewBag.CategoryIds = categoryIds ?? new List<int>();
+            ViewBag.BrandIds = brandIds ?? new List<int>();
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
             ViewBag.Page = page;
             ViewBag.PageSize = PageSize;
-            ViewBag.Total = total;
             ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = total;
             ViewBag.CurrentSort = sort;
 
             return View(paged);
