@@ -11,8 +11,8 @@
             {
                 <li class="main-category-item">
                     <a asp-controller="Site"
-                       asp-action="Browse"
-                       asp-route-categoryIds="@category.Id"
+                       asp-action="CategoryPage"
+                       asp-route-category="@category.Id"
                        class="category-link">
                         @if (!string.IsNullOrEmpty(category.IconUrl))
                         {

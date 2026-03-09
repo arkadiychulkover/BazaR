@@ -21,7 +21,7 @@
                 @foreach (var category in mainCategories.Take(10))
                 {
                     <li class="list-group-item">
-                        <a href="@Url.Action("Browse", "Site", new { categoryIds = new List<int> { category.Id } })"
+                        <a href="@Url.Action("CategoryPage", "Site", new { category = category.Id })"
                            class="text-decoration-none text-dark d-flex align-items-center">
                             @if (!string.IsNullOrEmpty(category.IconUrl))
                             {

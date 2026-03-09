@@ -96,9 +96,8 @@ namespace BazaR.Controllers
 
         [HttpGet]
         public IActionResult Browse(string? query, List<int>? categoryIds, int page = 1,
-    string sort = "default", decimal? minPrice = null, decimal? maxPrice = null,
-    List<int>? brandIds = null)
-        {
+            string sort = "default", decimal? minPrice = null, decimal? maxPrice = null,
+            List<int>? brandIds = null){
             SetLayoutData();
             if (page < 1) page = 1;
 
@@ -172,6 +171,20 @@ namespace BazaR.Controllers
             ViewBag.CurrentSort = sort;
 
             return View(paged);
+        }
+
+        [HttpGet]
+        public IActionResult CategoryPage(int category)
+        {
+            List<int> categorysId = GetSubCategoryIds(category);
+            List<Category> categories = new();
+            ViewBag.CategotyName = _itMan.GetCategoryById(category).Name;
+
+            foreach (int cat in categorysId) 
+            {
+                categories.Add(_itMan.GetCategoryById(cat));
+            }
+            return View(categories.Take(12).ToList());
         }
 
         private List<int> GetSubCategoryIds(int categoryId)
