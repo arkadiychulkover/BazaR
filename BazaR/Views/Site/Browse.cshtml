@@ -1,40 +1,49 @@
-﻿@using BazaR.Interfaces
+﻿@using BazaR.Models
 @model List<BazaR.Models.Item>
-@inject IItemRepository it
 
 @{
     ViewData["Title"] = "Каталог товарів";
-    var categories = ViewBag.AllCategories as List<BazaR.Models.Category> ?? new List<BazaR.Models.Category>();
-    var mainCategories = categories.Where(c => c.ParentCategoryId == null).OrderBy(c => c.DisplayOrder).ToList();
-    var selectedCategoryIds = ViewBag.CategoryIds as List<int> ?? new List<int>();
-    var currentCategory = ViewBag.CurrentCategory as BazaR.Models.Category;
-    var categoryPath = ViewBag.CategoryPath as List<BazaR.Models.Category> ?? new List<BazaR.Models.Category>();
-    var subCategories = ViewBag.SubCategories as List<BazaR.Models.Category> ?? new List<BazaR.Models.Category>();
+    
     var query = ViewBag.Query as string ?? string.Empty;
     var page = ViewBag.Page ?? 1;
     var totalPages = ViewBag.TotalPages ?? 1;
     var totalItems = ViewBag.TotalItems ?? 0;
     var currentSort = ViewBag.CurrentSort as string ?? "default";
+    var selectedCategoryIds = ViewBag.CategoryIds as List<int> ?? new List<int>();
+    var selectedBrandIds = ViewBag.BrandIds as List<int> ?? new List<int>();
     var minPrice = ViewBag.MinPrice as decimal?;
     var maxPrice = ViewBag.MaxPrice as decimal?;
-    var selectedBrandIds = ViewBag.BrandIds as List<int> ?? new List<int>();
+    var currentCategory = ViewBag.CurrentCategory as Category;
+    var categoryPath = ViewBag.CategoryPath as List<Category> ?? new List<Category>();
 }
 
 <div class="container mt-4">
     <!-- Хлебные крошки -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Site")">Головна</a></li>
-            <li class="breadcrumb-item"><a href="@Url.Action("Browse", "Site")">Каталог</a></li>
+            <li class="breadcrumb-item">
+                <a asp-controller="Site" asp-action="Index">
+                    <i class="bi bi-house"></i> Головна
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a asp-controller="Site" asp-action="Browse">Каталог</a>
+            </li>
             @foreach (var cat in categoryPath)
             {
-                if (cat == categoryPath.Last())
+                if (cat == categoryPath.LastOrDefault())
                 {
                     <li class="breadcrumb-item active" aria-current="page">@cat.Name</li>
                 }
                 else
                 {
-                    <li class="breadcrumb-item"><a href="@Url.Action("Browse", "Site", new { categoryIds = new List<int> { cat.Id } })">@cat.Name</a></li>
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Site" 
+                           asp-action="Browse" 
+                           asp-route-categoryIds="@cat.Id">
+                            @cat.Name
+                        </a>
+                    </li>
                 }
             }
         </ol>
@@ -42,204 +51,73 @@
 
     <div class="row">
         <!-- Левая колонка с фильтрами -->
-        <div class="col-md-3">
-            <!-- Категории -->
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Категорії</h5>
-                </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        @foreach (var category in mainCategories)
-                        {
-                            var isSelected = selectedCategoryIds.Contains(category.Id);
-                            <li class="list-group-item @(isSelected ? "active" : "")">
-                                <a href="@Url.Action("Browse", "Site", new { 
-                                    categoryIds = isSelected ? null : new List<int> { category.Id },
-                                    query = query,
-                                    sort = currentSort,
-                                    minPrice = minPrice,
-                                    maxPrice = maxPrice,
-                                    brandIds = selectedBrandIds
-                                })" class="text-decoration-none @(isSelected ? "text-white" : "text-dark") d-block">
-                                    @if (!string.IsNullOrEmpty(category.IconUrl))
-                                    {
-                                        <i class="bi @category.IconUrl me-2"></i>
-                                    }
-                                    @category.Name
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Подкатегории (если выбрана основная категория) -->
-            @if (subCategories.Any())
-            {
-                <div class="card mb-3">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Підкатегорії</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <ul class="list-group list-group-flush">
-                            @foreach (var subCat in subCategories)
-                            {
-                                var isSelected = selectedCategoryIds.Contains(subCat.Id);
-                                <li class="list-group-item @(isSelected ? "active" : "")">
-                                    <a href="@Url.Action("Browse", "Site", new { 
-                                        categoryIds = new List<int> { subCat.Id },
-                                        query = query,
-                                        sort = currentSort,
-                                        minPrice = minPrice,
-                                        maxPrice = maxPrice,
-                                        brandIds = selectedBrandIds
-                                    })" class="text-decoration-none @(isSelected ? "text-white" : "text-dark") d-block">
-                                        @subCat.Name
-                                    </a>
-                                </li>
-                            }
-                        </ul>
-                    </div>
-                </div>
-            }
-
-            <!-- Фильтр по цене (форма без JS) -->
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Ціна</h5>
-                </div>
-                <div class="card-body">
-                    <form method="get" action="@Url.Action("Browse", "Site")">
-                        <!-- Сохраняем существующие параметры -->
-                        <input type="hidden" name="query" value="@query" />
-                        <input type="hidden" name="sort" value="@currentSort" />
-                        <input type="hidden" name="page" value="1" />
-                        
-                        @foreach (var catId in selectedCategoryIds)
-                        {
-                            <input type="hidden" name="categoryIds" value="@catId" />
-                        }
-                        
-                        @foreach (var brandId in selectedBrandIds)
-                        {
-                            <input type="hidden" name="brandIds" value="@brandId" />
-                        }
-                        
-                        <div class="row">
-                            <div class="col-6">
-                                <label class="form-label">Від</label>
-                                <input type="number" class="form-control" name="minPrice" value="@minPrice" placeholder="0">
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">До</label>
-                                <input type="number" class="form-control" name="maxPrice" value="@maxPrice" placeholder="100000">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 mt-3">
-                            Застосувати
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Фильтр по брендам (форма без JS) -->
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Бренди</h5>
-                </div>
-                <div class="card-body">
-                    <form method="get" action="@Url.Action("Browse", "Site")">
-                        <!-- Сохраняем существующие параметры -->
-                        <input type="hidden" name="query" value="@query" />
-                        <input type="hidden" name="sort" value="@currentSort" />
-                        <input type="hidden" name="page" value="1" />
-                        <input type="hidden" name="minPrice" value="@minPrice" />
-                        <input type="hidden" name="maxPrice" value="@maxPrice" />
-                        
-                        @foreach (var catId in selectedCategoryIds)
-                        {
-                            <input type="hidden" name="categoryIds" value="@catId" />
-                        }
-                        
-                        <div class="brand-filter-list" style="max-height: 200px; overflow-y: auto;">
-                            @if (currentCategory?.CategoryBrands != null && currentCategory.CategoryBrands.Any())
-                            {
-                                foreach (var cb in currentCategory.CategoryBrands)
-                                {
-                                    var isChecked = selectedBrandIds.Contains(cb.BrandId);
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" 
-                                               type="checkbox" 
-                                               name="brandIds" 
-                                               value="@cb.BrandId" 
-                                               id="brand_@cb.BrandId"
-                                               @(isChecked ? "checked" : "")>
-                                        <label class="form-check-label" for="brand_@cb.BrandId">
-                                            @cb.Brand?.Name
-                                        </label>
-                                    </div>
-                                }
-                                <button type="submit" class="btn btn-primary w-100 mt-3">
-                                    Застосувати
-                                </button>
-                            }
-                            else
-                            {
-                                <p class="text-muted">Виберіть категорію для фільтрації за брендами</p>
-                            }
-                        </div>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- Кнопка сброса всех фильтров -->
-            @if (!string.IsNullOrEmpty(query) || selectedCategoryIds.Any() || selectedBrandIds.Any() || minPrice.HasValue || maxPrice.HasValue)
-            {
-                <div class="text-center mt-2">
-                    <a href="@Url.Action("Browse", "Site")" class="btn btn-outline-secondary w-100">
-                        <i class="bi bi-x-circle"></i> Скинути всі фільтри
-                    </a>
-                </div>
-            }
+        <div class="col-lg-3 col-md-4 mb-4">
+            @await Html.PartialAsync("_FilterSidebar")
         </div>
 
         <!-- Правая колонка с товарами -->
-        <div class="col-md-9">
+        <div class="col-lg-9 col-md-8">
+            <!-- Заголовок и количество -->
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>
+                <h1 class="h3 mb-0">
                     @if (currentCategory != null)
                     {
                         @currentCategory.Name
+                        if (!string.IsNullOrEmpty(query))
+                        {
+                            <small class="text-muted fs-6">(пошук: "@query")</small>
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(query))
+                    {
+                        <span>Результати пошуку: "@query"</span>
                     }
                     else
                     {
                         @ViewData["Title"]
                     }
-                </h2>
-                <span class="text-muted">Знайдено: @totalItems товарів</span>
+                </h1>
+                <div class="text-muted">
+                    <i class="bi bi-box"></i> Знайдено: <strong>@totalItems</strong> товарів
+                </div>
             </div>
 
-            <!-- Сортировка (формы без JS) -->
+            <!-- Сортировка -->
             <div class="card mb-4">
-                <div class="card-body py-2">
-                    <form method="get" action="@Url.Action("Browse", "Site")" class="row align-items-center">
+                <div class="card-body py-3">
+                    <form method="get" action="@Url.Action("Browse", "Site")" class="row align-items-center g-3">
                         <div class="col-auto">
-                            <label class="col-form-label">Сортувати:</label>
+                            <label class="col-form-label">
+                                <i class="bi bi-arrow-up-short"></i> Сортувати:
+                            </label>
                         </div>
                         <div class="col-auto">
-                            <select name="sort" class="form-select" onchange="this.form.submit()">
-                            <option value="default" selected="@(currentSort == "default")">За замовчуванням</option>
-                            <option value="price_asc" selected="@(currentSort == "price_asc")">Ціна (від дешевих)</option>
-                            <option valuev="price_desc" selected="@(currentSort == "price_desc")">Ціна (від дорогих)</option>
-                            <option value="name_asc" selected="@(currentSort == "name_asc")">Назва (А-Я)</option>
-                            <option value="name_desc" selected="@(currentSort == "name_desc")">Назва (Я-А)</option>
-                            <option value="rating_desc" selected="@(currentSort == "rating_desc")">За рейтингом</option>
-                            <option value="newest" selected="@(currentSort == "newest")">Спочатку нові</option>
-                        </select>
+                            <select name="sort" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="default" selected="@(currentSort == "default")">
+                                    За замовчуванням
+                                </option>
+                                <option value="price_asc" selected="@(currentSort == "price_asc")">
+                                    Ціна (від дешевих)
+                                </option>
+                                <option value="price_desc" selected="@(currentSort == "price_desc")">
+                                    Ціна (від дорогих)
+                                </option>
+                                <option value="name_asc" selected="@(currentSort == "name_asc")">
+                                    Назва (А-Я)
+                                </option>
+                                <option value="name_desc" selected="@(currentSort == "name_desc")">
+                                    Назва (Я-А)
+                                </option>
+                                <option value="rating_desc" selected="@(currentSort == "rating_desc")">
+                                    За рейтингом
+                                </option>
+                                <option value="newest" selected="@(currentSort == "newest")">
+                                    Спочатку нові
+                                </option>
+                            </select>
                         </div>
                         
-                        <!-- Сохраняем все текущие параметры фильтрации -->
+                        <!-- Сохраняем все текущие параметры -->
                         <input type="hidden" name="query" value="@query" />
                         <input type="hidden" name="page" value="1" />
                         <input type="hidden" name="minPrice" value="@minPrice" />
@@ -258,12 +136,13 @@
                 </div>
             </div>
 
+            <!-- Товары -->
             @if (Model.Any())
             {
-                <div class="row">
+                <div class="row g-4">
                     @foreach (var item in Model)
                     {
-                        <div class="col-md-4 mb-4">
+                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                             @await Html.PartialAsync("Card", item)
                         </div>
                     }
@@ -272,33 +151,81 @@
                 <!-- Пагинация -->
                 @if (totalPages > 1)
                 {
-                    <nav aria-label="Page navigation">
+                    <nav aria-label="Page navigation" class="mt-5">
                         <ul class="pagination justify-content-center">
+                            <li class="page-item @(page == 1 ? "disabled" : "")">
+                                <a class="page-link" 
+                                   href="@Url.Action("Browse", "Site", new { 
+                                       page = page - 1,
+                                       query = query,
+                                       categoryIds = selectedCategoryIds,
+                                       brandIds = selectedBrandIds,
+                                       sort = currentSort,
+                                       minPrice = minPrice,
+                                       maxPrice = maxPrice
+                                   })">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+
                             @for (int i = 1; i <= totalPages; i++)
                             {
-                                <li class="page-item @(i == page ? "active" : "")">
-                                    <a class="page-link" href="@Url.Action("Browse", "Site", new { 
-                                        page = i, 
-                                        query = query, 
-                                        categoryIds = selectedCategoryIds,
-                                        sort = currentSort,
-                                        minPrice = minPrice,
-                                        maxPrice = maxPrice,
-                                        brandIds = selectedBrandIds
-                                    })">@i</a>
-                                </li>
+                                if (i == 1 || i == totalPages || (i >= page - 2 && i <= page + 2))
+                                {
+                                    <li class="page-item @(i == page ? "active" : "")">
+                                        <a class="page-link" 
+                                           href="@Url.Action("Browse", "Site", new { 
+                                               page = i,
+                                               query = query,
+                                               categoryIds = selectedCategoryIds,
+                                               brandIds = selectedBrandIds,
+                                               sort = currentSort,
+                                               minPrice = minPrice,
+                                               maxPrice = maxPrice
+                                           })">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+                                else if (i == page - 3 || i == page + 3)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
                             }
+
+                            <li class="page-item @(page == totalPages ? "disabled" : "")">
+                                <a class="page-link" 
+                                   href="@Url.Action("Browse", "Site", new { 
+                                       page = page + 1,
+                                       query = query,
+                                       categoryIds = selectedCategoryIds,
+                                       brandIds = selectedBrandIds,
+                                       sort = currentSort,
+                                       minPrice = minPrice,
+                                       maxPrice = maxPrice
+                                   })">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
                         </ul>
                     </nav>
                 }
+
+                <!-- Информация о пагинации -->
+                <div class="text-center text-muted mt-3 small">
+                    Показано @(((page - 1) * ViewBag.PageSize + 1)) - 
+                    @(Math.Min(page * ViewBag.PageSize, totalItems)) з @totalItems товарів
+                </div>
             }
             else
             {
                 <div class="alert alert-info text-center py-5">
-                    <i class="bi bi-info-circle-fill display-4"></i>
+                    <i class="bi bi-emoji-frown display-1"></i>
                     <h3 class="mt-3">Товари не знайдено</h3>
-                    <p>Спробуйте змінити параметри пошуку або вибрати іншу категорію</p>
-                    <a href="@Url.Action("Browse", "Site")" class="btn btn-primary mt-3">
+                    <p class="mb-4">Спробуйте змінити параметри пошуку або вибрати іншу категорію</p>
+                    <a asp-controller="Site" asp-action="Browse" class="btn btn-primary">
                         <i class="bi bi-arrow-repeat"></i> Скинути фільтри
                     </a>
                 </div>
@@ -307,4 +234,89 @@
     </div>
 </div>
 
-<!-- Удаляем секцию Scripts полностью -->
+<!-- Недавно просмотренные товары (если есть) -->
+@if (Model.Any())
+{
+    <div class="container mt-5">
+        <hr />
+        <h4 class="mb-4">Ви нещодавно переглядали</h4>
+        <div class="row g-4">
+            @foreach (var item in Model.Take(4))
+            {
+                <div class="col-md-3 col-6">
+                    @await Html.PartialAsync("Card", item)
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Анимация появления карточек
+            $('.item-card').each(function(index) {
+                $(this).css({
+                    'animation': `fadeInUp 0.5s ease forwards ${index * 0.1}s`,
+                    'opacity': 0
+                });
+            });
+
+            // Сохраняем последний просмотренный товар
+            $('.item-card .card-title a').click(function() {
+                var itemId = $(this).attr('href').split('/').pop();
+                var viewedItems = JSON.parse(localStorage.getItem('viewedItems') || '[]');
+                
+                if (!viewedItems.includes(itemId)) {
+                    viewedItems.unshift(itemId);
+                    if (viewedItems.length > 10) viewedItems.pop();
+                    localStorage.setItem('viewedItems', JSON.stringify(viewedItems));
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .item-card {
+            animation-fill-mode: forwards;
+        }
+        
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pagination .page-link {
+            color: #0d6efd;
+            border-radius: 8px;
+            margin: 0 3px;
+        }
+
+        .pagination .active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .breadcrumb {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .breadcrumb a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #0d6efd;
+        }
+    </style>
+}

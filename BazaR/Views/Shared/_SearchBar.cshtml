@@ -1,15 +1,320 @@
-﻿@model string
+﻿@model List<BazaR.Models.Category>
+
+@{
+    var mainCategories = Model?.Where(c => c.ParentCategoryId == null)
+        .OrderBy(c => c.DisplayOrder)
+        .ToList() ?? new List<BazaR.Models.Category>();
+}
 
 <form asp-action="Browse" asp-controller="Site" method="get" class="search-form">
+
     <div class="search-container">
+
         <input type="text"
                name="query"
-               value="@Model"
+               value="@ViewBag.Query"
                class="search-input"
-               placeholder="" />
+               placeholder="Я шукаю..."
+               id="searchInput"
+               autocomplete="off" />
 
         <button type="submit" class="search-button">
             Знайти
         </button>
+
     </div>
+
+
+    <div class="mega-overlay" id="megaOverlay">
+
+        <div class="mega">
+
+            <div class="mega-left">
+
+                @foreach (var category in mainCategories.Take(20))
+                {
+                    <a href="@Url.Action("CategoryPage", "Site", new { category = category.Id })"
+                       class="mega-category @(category == mainCategories.FirstOrDefault() ? "active" : "")"
+                       data-id="@category.Id">
+
+                        @if (!string.IsNullOrEmpty(category.IconUrl))
+                        {
+                            <i class="bi @category.IconUrl"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-grid"></i>
+                        }
+
+                        <span>@category.Name</span>
+
+                    </a>
+                }
+
+            </div>
+
+
+            <div class="mega-right">
+
+                @foreach (var mainCategory in mainCategories)
+                {
+
+                    var subCategories = Model?
+                    .Where(x => x.ParentCategoryId == mainCategory.Id)
+                    .OrderBy(x => x.DisplayOrder)
+                    .ToList();
+
+                    <div class="mega-block"
+                         data-id="@mainCategory.Id"
+                         style="display:@(mainCategory == mainCategories.FirstOrDefault() ? "grid" : "none")">
+
+                        @foreach (var sub in subCategories ?? new List<BazaR.Models.Category>())
+                        {
+
+                            var subSub = Model?
+                            .Where(x => x.ParentCategoryId == sub.Id)
+                            .OrderBy(x => x.DisplayOrder)
+                            .ToList();
+
+                            <div class="mega-col">
+
+                                <h3>
+                                    <a href="@Url.Action("Browse", "Site", new { categoryIds = new List<int> { sub.Id } })">
+                                        @sub.Name
+                                    </a>
+                                </h3>
+
+                                @if (subSub != null)
+                                {
+                                    foreach (var s in subSub)
+                                    {
+                                        <a class="mega-link"
+                                           href="@Url.Action("Browse", "Site", new { categoryIds = new List<int> { s.Id } })">
+                                            @s.Name
+                                        </a>
+                                    }
+                                }
+
+                            </div>
+
+                        }
+
+                    </div>
+
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
 </form>
+
+
+
+<style>
+
+    .search-form {
+        position: relative;
+        width: 100%;
+    }
+
+    .search-container {
+        display: flex;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 12px 15px;
+        border-radius: 30px 0 0 30px;
+        border: none;
+        background: #f2f2f2;
+        font-size: 15px;
+    }
+
+        .search-input:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 2px #66bb6a;
+        }
+
+    .search-button {
+        background: #7bd500;
+        border: none;
+        padding: 0 25px;
+        color: #111;
+        font-weight: 600;
+        border-radius: 0 30px 30px 0;
+        cursor: pointer;
+    }
+
+        .search-button:hover {
+            background: #6ac000;
+        }
+
+
+
+    .mega-overlay {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 55px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        opacity: 0;
+        visibility: hidden;
+        transition: 0.25s;
+        z-index: 999;
+    }
+
+    .search-form.active .mega-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+
+
+
+    .mega {
+        display: flex;
+        min-height: 420px;
+    }
+
+
+
+    .mega-left {
+        width: 260px;
+        background: #f5f5f5;
+        border-right: 1px solid #e5e5e5;
+        padding: 10px 0;
+        overflow-y: auto;
+    }
+
+
+
+    .mega-category {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px;
+        color: #333;
+        text-decoration: none;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+
+        .mega-category i {
+            font-size: 18px;
+            color: #888;
+        }
+
+        .mega-category:hover {
+            background: white;
+            color: #7bd500;
+        }
+
+        .mega-category.active {
+            background: white;
+            font-weight: 600;
+            color: #7bd500;
+        }
+
+
+
+    .mega-right {
+        flex: 1;
+        padding: 30px;
+        display: flex;
+        align-items: flex-start;
+    }
+
+
+
+    .mega-block {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 30px;
+        width: 100%;
+    }
+
+
+
+    .mega-col h3 {
+        font-size: 15px;
+        margin-bottom: 10px;
+    }
+
+        .mega-col h3 a {
+            color: #222;
+            text-decoration: none;
+        }
+
+            .mega-col h3 a:hover {
+                color: #7bd500;
+            }
+
+
+
+    .mega-link {
+        display: block;
+        font-size: 13px;
+        color: #666;
+        text-decoration: none;
+        padding: 3px 0;
+        transition: 0.15s;
+    }
+
+        .mega-link:hover {
+            color: #7bd500;
+            padding-left: 6px;
+        }
+
+</style>
+
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded",function(){
+
+    const form=document.querySelector(".search-form")
+    const input=document.getElementById("searchInput")
+
+    const cats=document.querySelectorAll(".mega-category")
+    const blocks=document.querySelectorAll(".mega-block")
+
+    input.addEventListener("focus",()=>{
+    form.classList.add("active")
+    })
+
+    document.addEventListener("click",(e)=>{
+    if(!form.contains(e.target)){
+    form.classList.remove("active")
+    }
+    })
+
+    function openCat(id){
+
+    cats.forEach(c=>{
+    c.classList.remove("active")
+    if(c.dataset.id==id) c.classList.add("active")
+    })
+
+    blocks.forEach(b=>{
+    b.style.display = b.dataset.id==id ? "grid":"none"
+    })
+
+    }
+
+    cats.forEach(c=>{
+
+    c.addEventListener("mouseenter",()=>{
+    openCat(c.dataset.id)
+    })
+
+    })
+
+    })
+
+</script>

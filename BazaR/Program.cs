@@ -1,7 +1,6 @@
 using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Repositories;
-using BazaR.Repository;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,12 +23,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Регистрация репозиториев
 builder.Services.AddScoped<IUserDb, UserRepository>();
-builder.Services.AddTransient<ILogger, Logger<ItemRepository>>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.if (!app.Environment.IsDevelopment())
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();

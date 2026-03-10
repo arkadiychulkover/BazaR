@@ -3,7 +3,7 @@ using BazaR.Interfaces;
 using BazaR.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BazaR.Repository
+namespace BazaR.Repositories
 {
     public class UserRepository : IUserDb
     {
@@ -14,13 +14,14 @@ namespace BazaR.Repository
             _context = context;
         }
 
+        // ========== Управление пользователями ==========
+
         public bool AddUser(User user)
         {
             try
             {
                 _context.Users.Add(user);
-                _context.SaveChanges();
-                return true;
+                return _context.SaveChanges() > 0;
             }
             catch
             {
@@ -30,38 +31,31 @@ namespace BazaR.Repository
 
         public User UpdateUser(User user)
         {
-            var existing = _context.Users
-                .Include(u => u.CartItems)
-                .Include(u => u.WishlistItems)
-                .Include(u => u.Orders)
-                .Include(u => u.Reviews)
-                .Include(u => u.SellingItems)
-                .FirstOrDefault(u => u.Id == user.Id);
+            try
+            {
+                var existing = _context.Users.Find(user.Id);
+                if (existing == null) return null;
 
-            if (existing == null) return null;
+                existing.Name = user.Name;
+                existing.Email = user.Email;
+                existing.PasswordHash = user.PasswordHash;
 
-            existing.Email = user.Email;
-            existing.PasswordHash = user.PasswordHash;
-            existing.Name = user.Name;
-            existing.IsAdmin = user.IsAdmin;
-
-            _context.SaveChanges();
-            return existing;
+                _context.Users.Update(existing);
+                _context.SaveChanges();
+                return existing;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public User Delete(int id)
         {
             try
             {
-                var user = _context.Users
-                    .Include(u => u.CartItems)
-                    .Include(u => u.WishlistItems)
-                    .FirstOrDefault(u => u.Id == id);
-
+                var user = _context.Users.Find(id);
                 if (user == null) return null;
-
-                _context.CartItems.RemoveRange(user.CartItems);
-                _context.WishlistItems.RemoveRange(user.WishlistItems);
 
                 _context.Users.Remove(user);
                 _context.SaveChanges();
@@ -77,7 +71,9 @@ namespace BazaR.Repository
         {
             return _context.Users
                 .Include(u => u.Orders)
-                .Include(u => u.Reviews);
+                .Include(u => u.Reviews)
+                .Include(u => u.SellingItems)
+                .AsQueryable();
         }
 
         public User GetUser(int id)
@@ -85,80 +81,98 @@ namespace BazaR.Repository
             return _context.Users
                 .Include(u => u.Orders)
                     .ThenInclude(o => o.OrderItems)
-                    .ThenInclude(oi => oi.Item)
+                        .ThenInclude(oi => oi.Item)
                 .Include(u => u.Reviews)
                 .Include(u => u.SellingItems)
                 .Include(u => u.CartItems)
                     .ThenInclude(ci => ci.Item)
-                    .ThenInclude(i => i.Reviews)
-                .Include(u => u.CartItems)
-                    .ThenInclude(ci => ci.Item)
-                    .ThenInclude(i => i.Colors)
                 .Include(u => u.WishlistItems)
                     .ThenInclude(wi => wi.Item)
-                    .ThenInclude(i => i.Reviews)
-                .Include(u => u.WishlistItems)
-                    .ThenInclude(wi => wi.Item)
-                    .ThenInclude(i => i.Colors)
                 .FirstOrDefault(u => u.Id == id);
         }
 
         public User GetByEmail(string email)
         {
-            return _context.Users.FirstOrDefault(u => u.Email == email);
+            return _context.Users
+                .FirstOrDefault(u => u.Email == email);
         }
+
+        // ========== Права администратора ==========
 
         public bool AddAdminRights(int id)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == id);
-            if (user == null) return false;
+            try
+            {
+                var user = _context.Users.Find(id);
+                if (user == null) return false;
 
-            user.IsAdmin = true;
-            _context.SaveChanges();
-            return true;
+                user.IsAdmin = true;
+                return _context.SaveChanges() > 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public bool RemoveAdminRights(int id)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == id);
-            if (user == null) return false;
+            try
+            {
+                var user = _context.Users.Find(id);
+                if (user == null) return false;
 
-            user.IsAdmin = false;
-            _context.SaveChanges();
-            return true;
+                user.IsAdmin = false;
+                return _context.SaveChanges() > 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
+
+        // ========== Пароль ==========
 
         public bool ChangePassword(int userId, string newPassword)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-            if (user == null) return false;
+            try
+            {
+                var user = _context.Users.Find(userId);
+                if (user == null) return false;
 
-            user.PasswordHash = newPassword;
-            _context.SaveChanges();
-            return true;
+                user.PasswordHash = newPassword;
+                return _context.SaveChanges() > 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
+
+        // ========== Корзина ==========
 
         public bool AddToCart(int userId, int itemId)
         {
             try
             {
-                var user = _context.Users.Include(u => u.CartItems).FirstOrDefault(u => u.Id == userId);
-                var item = _context.Items.FirstOrDefault(i => i.Id == itemId);
+                var existing = _context.CartItems
+                    .FirstOrDefault(ci => ci.UserId == userId && ci.ItemId == itemId);
 
-                if (user == null || item == null) return false;
-
-                var existing = user.CartItems.FirstOrDefault(ci => ci.ItemId == itemId);
                 if (existing != null)
                 {
                     existing.Quantity++;
                 }
                 else
                 {
-                    user.CartItems.Add(new CartItem { UserId = userId, ItemId = itemId, Quantity = 1 });
+                    _context.CartItems.Add(new CartItem
+                    {
+                        UserId = userId,
+                        ItemId = itemId,
+                        Quantity = 1
+                    });
                 }
 
-                _context.SaveChanges();
-                return true;
+                return _context.SaveChanges() > 0;
             }
             catch
             {
@@ -170,10 +184,9 @@ namespace BazaR.Repository
         {
             try
             {
-                var user = _context.Users.Include(u => u.CartItems).FirstOrDefault(u => u.Id == userId);
-                if (user == null) return false;
+                var cartItem = _context.CartItems
+                    .FirstOrDefault(ci => ci.UserId == userId && ci.ItemId == itemId);
 
-                var cartItem = user.CartItems.FirstOrDefault(ci => ci.ItemId == itemId);
                 if (cartItem == null) return false;
 
                 if (cartItem.Quantity > 1)
@@ -182,11 +195,10 @@ namespace BazaR.Repository
                 }
                 else
                 {
-                    user.CartItems.Remove(cartItem);
+                    _context.CartItems.Remove(cartItem);
                 }
 
-                _context.SaveChanges();
-                return true;
+                return _context.SaveChanges() > 0;
             }
             catch
             {
@@ -198,12 +210,12 @@ namespace BazaR.Repository
         {
             try
             {
-                var user = _context.Users.Include(u => u.CartItems).FirstOrDefault(u => u.Id == userId);
-                if (user == null) return false;
+                var cartItems = _context.CartItems
+                    .Where(ci => ci.UserId == userId)
+                    .ToList();
 
-                user.CartItems.Clear();
-                _context.SaveChanges();
-                return true;
+                _context.CartItems.RemoveRange(cartItems);
+                return _context.SaveChanges() > 0;
             }
             catch
             {
@@ -215,12 +227,12 @@ namespace BazaR.Repository
         {
             return _context.CartItems
                 .Where(ci => ci.UserId == userId)
+                .Include(ci => ci.Item)
+                    .ThenInclude(i => i.Brand)
+                .Include(ci => ci.Item)
+                    .ThenInclude(i => i.Category)
                 .Select(ci => ci.Item)
-                .Include(i => i.Reviews)
-                .Include(i => i.Characteristics)
-                .Include(i => i.Colors)
-                .Include(i => i.Uslugi)
-                .Include(i => i.DeliveryVariants);
+                .AsQueryable();
         }
 
         public List<CartItem> GetCartItemsWithQuantity(int userId)
@@ -228,28 +240,31 @@ namespace BazaR.Repository
             return _context.CartItems
                 .Where(ci => ci.UserId == userId)
                 .Include(ci => ci.Item)
-                    .ThenInclude(i => i.Reviews)
+                    .ThenInclude(i => i.Brand)
                 .Include(ci => ci.Item)
-                    .ThenInclude(i => i.Colors)
+                    .ThenInclude(i => i.Category)
                 .ToList();
         }
+
+        // ========== Избранное ==========
 
         public bool AddToWishList(int userId, int itemId)
         {
             try
             {
-                var user = _context.Users.Include(u => u.WishlistItems).FirstOrDefault(u => u.Id == userId);
-                var item = _context.Items.FirstOrDefault(i => i.Id == itemId);
+                var existing = _context.WishlistItems
+                    .FirstOrDefault(wi => wi.UserId == userId && wi.ItemId == itemId);
 
-                if (user == null || item == null) return false;
-
-                var exists = user.WishlistItems.Any(wi => wi.ItemId == itemId);
-                if (!exists)
+                if (existing == null)
                 {
-                    user.WishlistItems.Add(new WishlistItem { UserId = userId, ItemId = itemId });
-                    _context.SaveChanges();
+                    _context.WishlistItems.Add(new WishlistItem
+                    {
+                        UserId = userId,
+                        ItemId = itemId
+                    });
                 }
-                return true;
+
+                return _context.SaveChanges() > 0;
             }
             catch
             {
@@ -261,15 +276,13 @@ namespace BazaR.Repository
         {
             try
             {
-                var user = _context.Users.Include(u => u.WishlistItems).FirstOrDefault(u => u.Id == userId);
-                if (user == null) return false;
+                var wishlistItem = _context.WishlistItems
+                    .FirstOrDefault(wi => wi.UserId == userId && wi.ItemId == itemId);
 
-                var wishItem = user.WishlistItems.FirstOrDefault(wi => wi.ItemId == itemId);
-                if (wishItem == null) return false;
+                if (wishlistItem == null) return false;
 
-                user.WishlistItems.Remove(wishItem);
-                _context.SaveChanges();
-                return true;
+                _context.WishlistItems.Remove(wishlistItem);
+                return _context.SaveChanges() > 0;
             }
             catch
             {
@@ -281,26 +294,23 @@ namespace BazaR.Repository
         {
             return _context.WishlistItems
                 .Where(wi => wi.UserId == userId)
+                .Include(wi => wi.Item)
+                    .ThenInclude(i => i.Brand)
+                .Include(wi => wi.Item)
+                    .ThenInclude(i => i.Category)
                 .Select(wi => wi.Item)
-                .Include(i => i.Reviews)
-                .Include(i => i.Characteristics)
-                .Include(i => i.Colors)
-                .Include(i => i.Uslugi)
-                .Include(i => i.DeliveryVariants);
+                .AsQueryable();
         }
+
+        // ========== Товары на продажу ==========
 
         public bool AddItemToSell(int userId, Item item)
         {
             try
             {
-                var user = _context.Users.Include(u => u.SellingItems).FirstOrDefault(u => u.Id == userId);
-                if (user == null) return false;
-
                 item.UserId = userId;
-                user.SellingItems.Add(item);
                 _context.Items.Add(item);
-                _context.SaveChanges();
-                return true;
+                return _context.SaveChanges() > 0;
             }
             catch
             {
@@ -312,16 +322,13 @@ namespace BazaR.Repository
         {
             try
             {
-                var user = _context.Users.Include(u => u.SellingItems).FirstOrDefault(u => u.Id == userId);
-                if (user == null) return false;
+                var item = _context.Items
+                    .FirstOrDefault(i => i.Id == itemId && i.UserId == userId);
 
-                var item = user.SellingItems.FirstOrDefault(i => i.Id == itemId);
                 if (item == null) return false;
 
-                user.SellingItems.Remove(item);
                 _context.Items.Remove(item);
-                _context.SaveChanges();
-                return true;
+                return _context.SaveChanges() > 0;
             }
             catch
             {
@@ -331,31 +338,28 @@ namespace BazaR.Repository
 
         public IQueryable<Item> GetUserSellingItems(int userId)
         {
-            return _context.Users
-                .Where(u => u.Id == userId)
-                .SelectMany(u => u.SellingItems)
+            return _context.Items
+                .Where(i => i.UserId == userId)
+                .Include(i => i.Brand)
+                .Include(i => i.Category)
                 .Include(i => i.Reviews)
-                .Include(i => i.Characteristics)
-                .Include(i => i.Colors)
-                .Include(i => i.Uslugi)
-                .Include(i => i.DeliveryVariants);
+                .AsQueryable();
         }
+
+        // ========== Заказы ==========
 
         public bool CreateOrder(int userId, Order order)
         {
             try
             {
-                var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-                if (user == null) return false;
-
                 order.UserId = userId;
                 order.Number = GenerateOrderNumber();
                 order.CreatedAt = DateTime.UtcNow;
-                order.PaymentStatus = "Pending";
+                order.Status = "Новий";
+                order.PaymentStatus = "Очікує оплати";
 
                 _context.Orders.Add(order);
-                _context.SaveChanges();
-                return true;
+                return _context.SaveChanges() > 0;
             }
             catch
             {
@@ -365,7 +369,7 @@ namespace BazaR.Repository
 
         private string GenerateOrderNumber()
         {
-            return $"ORD-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+            return $"ORDER-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
         }
 
         public IQueryable<Order> GetUserOrders(int userId)
@@ -374,11 +378,9 @@ namespace BazaR.Repository
                 .Where(o => o.UserId == userId)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Item)
-                    .ThenInclude(i => i.Reviews)
-                .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.Item)
-                    .ThenInclude(i => i.Colors)
-                .Include(o => o.City);
+                .Include(o => o.City)
+                .OrderByDescending(o => o.CreatedAt)
+                .AsQueryable();
         }
 
         public Order GetOrderById(int orderId)
@@ -386,12 +388,12 @@ namespace BazaR.Repository
             return _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Item)
-                    .ThenInclude(i => i.Reviews)
+                        .ThenInclude(i => i.Brand)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Item)
-                    .ThenInclude(i => i.Colors)
-                .Include(o => o.City)
+                        .ThenInclude(i => i.Category)
                 .Include(o => o.User)
+                .Include(o => o.City)
                 .FirstOrDefault(o => o.Id == orderId);
         }
 
@@ -399,12 +401,11 @@ namespace BazaR.Repository
         {
             try
             {
-                var order = _context.Orders.FirstOrDefault(o => o.Id == orderId);
+                var order = _context.Orders.Find(orderId);
                 if (order == null) return false;
 
-                order.Status = "Cancelled";
-                _context.SaveChanges();
-                return true;
+                order.Status = "Скасовано";
+                return _context.SaveChanges() > 0;
             }
             catch
             {
@@ -412,9 +413,17 @@ namespace BazaR.Repository
             }
         }
 
+        // ========== Доставка ==========
+
         public IQueryable<Item> GetItemsInDelivery(int userId)
         {
-            return Enumerable.Empty<Item>().AsQueryable();
+            return _context.Orders
+                .Where(o => o.UserId == userId && o.Status == "Відправлено")
+                .SelectMany(o => o.OrderItems)
+                .Select(oi => oi.Item)
+                .Include(i => i.Brand)
+                .Include(i => i.Category)
+                .AsQueryable();
         }
     }
 }

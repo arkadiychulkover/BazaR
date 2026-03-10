@@ -96,20 +96,37 @@ namespace BazaR.Controllers
 
         [HttpGet]
         public IActionResult Browse(string? query, List<int>? categoryIds, int page = 1,
-            string sort = "default", decimal? minPrice = null, decimal? maxPrice = null,
-            List<int>? brandIds = null){
+    string sort = "default", decimal? minPrice = null, decimal? maxPrice = null,
+    List<int>? brandIds = null)
+        {
             SetLayoutData();
             if (page < 1) page = 1;
 
-            var allCategories = _itMan.GetMainCategories();
+            // Получаем все категории с их фильтрами и брендами
+            var allCategories = _db.Categories
+                .Include(c => c.CategoryBrands)
+                    .ThenInclude(cb => cb.Brand)
+                .Include(c => c.Filters)
+                .ToList();
+
             ViewBag.AllCategories = allCategories;
+            ViewBag.MainCategories = allCategories.Where(c => c.ParentCategoryId == null)
+                .OrderBy(c => c.DisplayOrder)
+                .ToList();
 
-            IQueryable<Item> itemsQuery = _db.Items.AsQueryable().AsNoTracking();
+            IQueryable<Item> itemsQuery = _db.Items
+                .Include(i => i.Brand)
+                .Include(i => i.Category)
+                .Include(i => i.Reviews)
+                .AsQueryable()
+                .AsNoTracking();
 
+            // Фильтр по поисковому запросу
             if (!string.IsNullOrWhiteSpace(query))
                 itemsQuery = itemsQuery.Where(i => i.Name.Contains(query) ||
                                                   (i.Desc != null && i.Desc.Contains(query)));
 
+            // Фильтр по категориям (включая подкатегории)
             if (categoryIds != null && categoryIds.Any())
             {
                 var allCategoryIds = new List<int>();
@@ -120,6 +137,24 @@ namespace BazaR.Controllers
                 }
                 allCategoryIds = allCategoryIds.Distinct().ToList();
                 itemsQuery = itemsQuery.Where(i => allCategoryIds.Contains(i.CategoryId));
+
+                // Для фильтра брендов в выбранной категории
+                var currentCategory = allCategories.FirstOrDefault(c => c.Id == categoryIds[0]);
+                if (currentCategory != null)
+                {
+                    ViewBag.CurrentCategory = currentCategory;
+                    ViewBag.CategoryPath = GetCategoryPath(categoryIds[0], allCategories);
+                    ViewBag.SubCategories = allCategories
+                        .Where(c => c.ParentCategoryId == categoryIds[0])
+                        .OrderBy(c => c.DisplayOrder)
+                        .ToList();
+
+                    // Бренды для текущей категории
+                    ViewBag.CategoryBrands = currentCategory.CategoryBrands?
+                        .Select(cb => cb.Brand)
+                        .OrderBy(b => b.Name)
+                        .ToList() ?? new List<Brand>();
+                }
             }
 
             // Фильтр по цене
@@ -151,14 +186,7 @@ namespace BazaR.Controllers
             var totalPages = (int)Math.Ceiling(total / (double)PageSize);
             var paged = items.Skip((page - 1) * PageSize).Take(PageSize).ToList();
 
-            if (categoryIds != null && categoryIds.Count == 1)
-            {
-                var currentCategory = _itMan.GetCategoryById(categoryIds[0]);
-                ViewBag.CurrentCategory = currentCategory;
-                ViewBag.CategoryPath = _itMan.GetCategoryPath(categoryIds[0]);
-                ViewBag.SubCategories = _itMan.GetSubCategories(categoryIds[0]);
-            }
-
+            // Сохраняем параметры для фильтров
             ViewBag.Query = query ?? "";
             ViewBag.CategoryIds = categoryIds ?? new List<int>();
             ViewBag.BrandIds = brandIds ?? new List<int>();
@@ -171,6 +199,34 @@ namespace BazaR.Controllers
             ViewBag.CurrentSort = sort;
 
             return View(paged);
+        }
+
+        private List<int> GetSubCategoryIds(int categoryId)
+        {
+            var ids = new List<int>();
+            var subCats = _db.Categories.Where(c => c.ParentCategoryId == categoryId).ToList();
+            foreach (var subCat in subCats)
+            {
+                ids.Add(subCat.Id);
+                ids.AddRange(GetSubCategoryIds(subCat.Id));
+            }
+            return ids;
+        }
+
+        private List<Category> GetCategoryPath(int categoryId, List<Category> allCategories)
+        {
+            var path = new List<Category>();
+            var current = allCategories.FirstOrDefault(c => c.Id == categoryId);
+
+            while (current != null)
+            {
+                path.Insert(0, current);
+                current = current.ParentCategoryId.HasValue
+                    ? allCategories.FirstOrDefault(c => c.Id == current.ParentCategoryId.Value)
+                    : null;
+            }
+
+            return path;
         }
 
         [HttpGet]
@@ -186,19 +242,6 @@ namespace BazaR.Controllers
             }
             return View(categories.Take(12).ToList());
         }
-
-        private List<int> GetSubCategoryIds(int categoryId)
-        {
-            var ids = new List<int>();
-            var subCats = _itMan.GetSubCategories(categoryId);
-            foreach (var subCat in subCats)
-            {
-                ids.Add(subCat.Id);
-                ids.AddRange(GetSubCategoryIds(subCat.Id));
-            }
-            return ids;
-        }
-
         [HttpGet]
         public IActionResult ItemDetails(int id)
         {
