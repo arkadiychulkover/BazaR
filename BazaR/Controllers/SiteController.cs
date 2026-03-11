@@ -865,6 +865,11 @@ namespace BazaR.Controllers
                 wishlistCount
             });
         }
+        public IActionResult Reviews()
+        {
+            ViewBag.ActiveMenu = "Reviews";
+            return View("_ProfileSidebar");
+        }
     }
 
     public static class SessionExtensions

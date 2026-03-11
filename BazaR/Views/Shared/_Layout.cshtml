@@ -32,23 +32,16 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Profile" asp-action="Index">
-                                    @User.Identity.Name
-                                </a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <button class="nav-link text-dark" data-open-login="true">
-                                    Увійти
-                                </button>
-                            </li>
-                        }
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Profile" asp-action="Index">
+                                @User.Identity.Name
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link text-dark" data-open-login="true">
+                                Увійти
+                            </button>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -65,6 +58,15 @@
     @await Html.PartialAsync("_LoadOurApp")
     @await Html.PartialAsync("_SocialMedia")
     @await Html.PartialAsync("_Register")
+    @await Html.PartialAsync("Profile", new AccountProfileViewModel())
+    @await Html.PartialAsync("Error404")
+    @await Html.PartialAsync("LoockedCards")
+    @await Html.PartialAsync("Mailings")
+    @await Html.PartialAsync("Messages")
+    @await Html.PartialAsync("Premium")
+    @await Html.PartialAsync("Reviews")
+    @await Html.PartialAsync("Sales")
+    @await Html.PartialAsync("Wallet")
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

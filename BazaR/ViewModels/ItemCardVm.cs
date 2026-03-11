@@ -8,5 +8,6 @@ namespace BazaR.ViewModels
         public int? OldPrice { get; set; }
         public string ImageUrl { get; set; }
         public bool InWishlist { get; set; }
+        public bool IsLooked { get; set; }
     }
 }
