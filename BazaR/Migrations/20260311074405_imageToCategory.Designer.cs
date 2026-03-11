@@ -4,6 +4,7 @@ using BazaR.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BazaR.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260311074405_imageToCategory")]
+    partial class imageToCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,18 +34,16 @@ namespace BazaR.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Logo")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
-                        .IsUnique();
+                        .HasDatabaseName("IX_Brands_Name");
 
                     b.ToTable("Brands");
 
@@ -50,14 +51,14 @@ namespace BazaR.Migrations
                         new
                         {
                             Id = 1,
-                            Logo = "/images/brands/apple.png",
-                            Name = "Apple"
+                            Logo = "/images/brands/samsung.png",
+                            Name = "Samsung"
                         },
                         new
                         {
                             Id = 2,
-                            Logo = "/images/brands/samsung.png",
-                            Name = "Samsung"
+                            Logo = "/images/brands/apple.png",
+                            Name = "Apple"
                         },
                         new
                         {
@@ -86,14 +87,14 @@ namespace BazaR.Migrations
                         new
                         {
                             Id = 7,
-                            Logo = "/images/brands/nike.png",
-                            Name = "Nike"
+                            Logo = "/images/brands/adidas.png",
+                            Name = "Adidas"
                         },
                         new
                         {
                             Id = 8,
-                            Logo = "/images/brands/adidas.png",
-                            Name = "Adidas"
+                            Logo = "/images/brands/nike.png",
+                            Name = "Nike"
                         },
                         new
                         {
@@ -116,56 +117,56 @@ namespace BazaR.Migrations
                         new
                         {
                             Id = 12,
-                            Logo = "/images/brands/dell.png",
-                            Name = "Dell"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            Logo = "/images/brands/hp.png",
-                            Name = "HP"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            Logo = "/images/brands/lenovo.png",
-                            Name = "Lenovo"
-                        },
-                        new
-                        {
-                            Id = 15,
                             Logo = "/images/brands/asus.png",
                             Name = "Asus"
                         },
                         new
                         {
-                            Id = 16,
+                            Id = 13,
                             Logo = "/images/brands/acer.png",
                             Name = "Acer"
                         },
                         new
                         {
-                            Id = 17,
-                            Logo = "/images/brands/microsoft.png",
-                            Name = "Microsoft"
+                            Id = 14,
+                            Logo = "/images/brands/hp.png",
+                            Name = "HP"
                         },
                         new
                         {
-                            Id = 18,
+                            Id = 15,
+                            Logo = "/images/brands/lenovo.png",
+                            Name = "Lenovo"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Logo = "/images/brands/dell.png",
+                            Name = "Dell"
+                        },
+                        new
+                        {
+                            Id = 17,
                             Logo = "/images/brands/canon.png",
                             Name = "Canon"
                         },
                         new
                         {
+                            Id = 18,
+                            Logo = "/images/brands/epson.png",
+                            Name = "Epson"
+                        },
+                        new
+                        {
                             Id = 19,
-                            Logo = "/images/brands/nikon.png",
-                            Name = "Nikon"
+                            Logo = "/images/brands/makita.png",
+                            Name = "Makita"
                         },
                         new
                         {
                             Id = 20,
-                            Logo = "/images/brands/panasonic.png",
-                            Name = "Panasonic"
+                            Logo = "/images/brands/dewalt.png",
+                            Name = "DeWalt"
                         });
                 });
 
@@ -190,8 +191,7 @@ namespace BazaR.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.HasIndex("UserId", "ItemId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("CartItems");
                 });
@@ -208,24 +208,25 @@ namespace BazaR.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("IconUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImgUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int?>("ParentCategoryId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ParentCategoryId");
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_Categories_Name");
+
+                    b.HasIndex("ParentCategoryId")
+                        .HasDatabaseName("IX_Categories_ParentCategoryId");
 
                     b.ToTable("Categories");
 
@@ -234,356 +235,421 @@ namespace BazaR.Migrations
                         {
                             Id = 1,
                             DisplayOrder = 1,
-                            IconUrl = "icon-laptops-and-computers.svg",
-                            ImgUrl = "categoryImg-laptops-and-computers.svg",
-                            Name = "Ноутбуки та комп'ютери"
+                            IconUrl = "bi-laptop",
+                            Name = "Ноутбуки"
                         },
                         new
                         {
                             Id = 2,
                             DisplayOrder = 2,
-                            IconUrl = "icon-smartphones-tv-electronics.svg",
-                            ImgUrl = "categoryImg-smartphones-tv-electronics.svg",
+                            IconUrl = "bi-phone",
                             Name = "Смартфони, ТВ та електроніка"
                         },
                         new
                         {
                             Id = 3,
                             DisplayOrder = 3,
-                            IconUrl = "icon-gaming.svg",
-                            ImgUrl = "categoryImg-gaming.svg",
+                            IconUrl = "bi-controller",
                             Name = "Товари для геймерів"
                         },
                         new
                         {
                             Id = 4,
                             DisplayOrder = 4,
-                            IconUrl = "icon-home-appliances.svg",
-                            ImgUrl = "categoryImg-home-appliances.svg",
+                            IconUrl = "bi-fan",
                             Name = "Побутова техніка"
                         },
                         new
                         {
                             Id = 5,
                             DisplayOrder = 5,
-                            IconUrl = "icon-home-goods.svg",
-                            ImgUrl = "categoryImg-home-goods.svg",
+                            IconUrl = "bi-house",
                             Name = "Товари для дому"
                         },
                         new
                         {
                             Id = 6,
                             DisplayOrder = 6,
-                            IconUrl = "icon-tools-auto.svg",
-                            ImgUrl = "categoryImg-tools-auto.svg",
+                            IconUrl = "bi-tools",
                             Name = "Інструменти та автотовари"
                         },
                         new
                         {
                             Id = 7,
                             DisplayOrder = 7,
-                            IconUrl = "icon-plumbing-renovation.svg",
-                            ImgUrl = "categoryImg-plumbing-renovation.svg",
+                            IconUrl = "bi-droplet",
                             Name = "Сантехніка та ремонт"
                         },
                         new
                         {
                             Id = 8,
                             DisplayOrder = 8,
-                            IconUrl = "icon-garden.svg",
-                            ImgUrl = "categoryImg-garden.svg",
+                            IconUrl = "bi-flower",
                             Name = "Дача, сад та город"
                         },
                         new
                         {
                             Id = 9,
                             DisplayOrder = 9,
-                            IconUrl = "icon-sports-hobbies.svg",
-                            ImgUrl = "categoryImg-sports-hobbies.svg",
+                            IconUrl = "bi-bicycle",
                             Name = "Спорт та захоплення"
                         },
                         new
                         {
                             Id = 10,
                             DisplayOrder = 10,
-                            IconUrl = "icon-clothing-footwear-jewelry.svg",
-                            ImgUrl = "categoryImg-clothing-footwear-jewelry.svg",
+                            IconUrl = "bi-tag",
                             Name = "Одяг, взуття та прикраси"
                         },
                         new
                         {
                             Id = 11,
                             DisplayOrder = 11,
-                            IconUrl = "icon-beauty-health.svg",
-                            ImgUrl = "categoryImg-beauty-health.svg",
+                            IconUrl = "bi-heart",
                             Name = "Краса і здоров'я"
                         },
                         new
                         {
                             Id = 12,
                             DisplayOrder = 12,
-                            IconUrl = "icon-baby-products.svg",
-                            ImgUrl = "categoryImg-baby-products.svg",
+                            IconUrl = "bi-emoji-smile",
                             Name = "Дитячі товари"
                         },
                         new
                         {
                             Id = 13,
                             DisplayOrder = 13,
-                            IconUrl = "icon-pet-supplies.svg",
-                            ImgUrl = "categoryImg-pet-supplies.svg",
+                            IconUrl = "bi-bug",
                             Name = "Зоотовари"
                         },
                         new
                         {
                             Id = 14,
                             DisplayOrder = 14,
-                            IconUrl = "icon-stationery-books.svg",
-                            ImgUrl = "categoryImg-stationery-books.svg",
+                            IconUrl = "bi-pencil",
                             Name = "Канцтовари та книги"
                         },
                         new
                         {
                             Id = 15,
                             DisplayOrder = 15,
-                            IconUrl = "icon-alcohol-food.svg",
-                            ImgUrl = "categoryImg-alcohol-food.svg",
+                            IconUrl = "bi-cup-straw",
                             Name = "Алкогольні напої та продукти"
                         },
                         new
                         {
                             Id = 16,
                             DisplayOrder = 16,
-                            IconUrl = "icon-business-services.svg",
-                            ImgUrl = "categoryImg-business-services.svg",
+                            IconUrl = "bi-briefcase",
                             Name = "Товари для бізнесу та послуги"
                         },
                         new
                         {
                             Id = 17,
                             DisplayOrder = 17,
-                            IconUrl = "icon-tourism-outdoor.svg",
-                            ImgUrl = "categoryImg-tourism-outdoor.svg",
-                            Name = "Туризм та відпочинок"
+                            IconUrl = "bi-tree",
+                            Name = "Тури та відпочинок"
                         },
                         new
                         {
                             Id = 18,
                             DisplayOrder = 18,
-                            IconUrl = "icon-promotions.svg",
-                            ImgUrl = "categoryImg-promotions.svg",
+                            IconUrl = "bi-percent",
                             Name = "Акції"
                         },
                         new
                         {
                             Id = 19,
                             DisplayOrder = 19,
-                            IconUrl = "icon-total-sale.svg",
-                            ImgUrl = "categoryImg-total-sale.svg",
+                            IconUrl = "bi-fire",
                             Name = "Тотальний розпродаж"
                         },
                         new
                         {
                             Id = 101,
                             DisplayOrder = 1,
-                            Name = "Ноутбуки",
+                            Name = "Asus",
                             ParentCategoryId = 1
                         },
                         new
                         {
                             Id = 102,
                             DisplayOrder = 2,
-                            Name = "Ігрові ноутбуки",
+                            Name = "Acer",
                             ParentCategoryId = 1
                         },
                         new
                         {
                             Id = 103,
                             DisplayOrder = 3,
-                            Name = "Ультрабуки",
+                            Name = "HP",
                             ParentCategoryId = 1
                         },
                         new
                         {
                             Id = 104,
                             DisplayOrder = 4,
-                            Name = "Для навчання",
+                            Name = "Lenovo",
                             ParentCategoryId = 1
                         },
                         new
                         {
                             Id = 105,
                             DisplayOrder = 5,
-                            Name = "Для роботи",
+                            Name = "Dell",
                             ParentCategoryId = 1
                         },
                         new
                         {
                             Id = 106,
                             DisplayOrder = 6,
-                            Name = "Chromebook",
+                            Name = "Apple",
                             ParentCategoryId = 1
                         },
                         new
                         {
                             Id = 107,
                             DisplayOrder = 7,
-                            Name = "Комп'ютери",
+                            Name = "Аксесуари для ноутбуків і ПК",
                             ParentCategoryId = 1
                         },
                         new
                         {
                             Id = 108,
-                            DisplayOrder = 8,
-                            Name = "Настільні ПК",
-                            ParentCategoryId = 1
+                            DisplayOrder = 1,
+                            Name = "Флеш пам'ять USB",
+                            ParentCategoryId = 107
                         },
                         new
                         {
                             Id = 109,
-                            DisplayOrder = 9,
-                            Name = "Ігрові ПК",
-                            ParentCategoryId = 1
+                            DisplayOrder = 2,
+                            Name = "Сумки та рюкзаки для ноутбуків",
+                            ParentCategoryId = 107
                         },
                         new
                         {
                             Id = 110,
-                            DisplayOrder = 10,
-                            Name = "Міні-ПК",
-                            ParentCategoryId = 1
+                            DisplayOrder = 3,
+                            Name = "Підставки та столики для ноутбуків",
+                            ParentCategoryId = 107
                         },
                         new
                         {
                             Id = 111,
-                            DisplayOrder = 11,
-                            Name = "Моноблоки",
-                            ParentCategoryId = 1
-                        },
-                        new
-                        {
-                            Id = 112,
-                            DisplayOrder = 12,
-                            Name = "Робочі станції",
-                            ParentCategoryId = 1
-                        },
-                        new
-                        {
-                            Id = 113,
-                            DisplayOrder = 13,
-                            Name = "Комплектуючі",
-                            ParentCategoryId = 1
-                        },
-                        new
-                        {
-                            Id = 114,
-                            DisplayOrder = 14,
-                            Name = "Процесори",
-                            ParentCategoryId = 1
-                        },
-                        new
-                        {
-                            Id = 115,
-                            DisplayOrder = 15,
-                            Name = "Відеокарти",
-                            ParentCategoryId = 1
-                        },
-                        new
-                        {
-                            Id = 116,
-                            DisplayOrder = 16,
-                            Name = "Материнські плати",
-                            ParentCategoryId = 1
-                        },
-                        new
-                        {
-                            Id = 117,
-                            DisplayOrder = 17,
-                            Name = "Оперативна пам'ять",
-                            ParentCategoryId = 1
-                        },
-                        new
-                        {
-                            Id = 118,
-                            DisplayOrder = 18,
-                            Name = "Блоки живлення",
-                            ParentCategoryId = 1
-                        },
-                        new
-                        {
-                            Id = 119,
-                            DisplayOrder = 19,
-                            Name = "Корпуси",
-                            ParentCategoryId = 1
+                            DisplayOrder = 4,
+                            Name = "Веб-камери",
+                            ParentCategoryId = 107
                         },
                         new
                         {
                             Id = 120,
-                            DisplayOrder = 20,
-                            Name = "Накопичувачі",
+                            DisplayOrder = 8,
+                            Name = "Комп'ютери",
                             ParentCategoryId = 1
                         },
                         new
                         {
                             Id = 121,
-                            DisplayOrder = 21,
-                            Name = "SSD",
-                            ParentCategoryId = 1
+                            DisplayOrder = 1,
+                            Name = "Монітори",
+                            ParentCategoryId = 120
                         },
                         new
                         {
                             Id = 122,
-                            DisplayOrder = 22,
-                            Name = "HDD",
-                            ParentCategoryId = 1
+                            DisplayOrder = 2,
+                            Name = "Миші",
+                            ParentCategoryId = 120
                         },
                         new
                         {
                             Id = 123,
-                            DisplayOrder = 23,
-                            Name = "Зовнішні диски",
-                            ParentCategoryId = 1
+                            DisplayOrder = 3,
+                            Name = "Клавіатури",
+                            ParentCategoryId = 120
                         },
                         new
                         {
                             Id = 124,
-                            DisplayOrder = 24,
-                            Name = "NAS",
-                            ParentCategoryId = 1
+                            DisplayOrder = 4,
+                            Name = "Комплект: клавіатури + миші",
+                            ParentCategoryId = 120
                         },
                         new
                         {
                             Id = 125,
-                            DisplayOrder = 25,
-                            Name = "Периферія",
+                            DisplayOrder = 5,
+                            Name = "Мережеві сховища (NAS)",
+                            ParentCategoryId = 120
+                        },
+                        new
+                        {
+                            Id = 130,
+                            DisplayOrder = 9,
+                            Name = "Комплектуючі",
                             ParentCategoryId = 1
                         },
                         new
                         {
-                            Id = 126,
-                            DisplayOrder = 26,
-                            Name = "Клавіатури",
+                            Id = 131,
+                            DisplayOrder = 1,
+                            Name = "Відеокарти",
+                            ParentCategoryId = 130
+                        },
+                        new
+                        {
+                            Id = 132,
+                            DisplayOrder = 2,
+                            Name = "Жорсткі диски та дискові масиви",
+                            ParentCategoryId = 130
+                        },
+                        new
+                        {
+                            Id = 133,
+                            DisplayOrder = 3,
+                            Name = "Процесори",
+                            ParentCategoryId = 130
+                        },
+                        new
+                        {
+                            Id = 134,
+                            DisplayOrder = 4,
+                            Name = "SSD",
+                            ParentCategoryId = 130
+                        },
+                        new
+                        {
+                            Id = 135,
+                            DisplayOrder = 5,
+                            Name = "Оперативна пам'ять",
+                            ParentCategoryId = 130
+                        },
+                        new
+                        {
+                            Id = 136,
+                            DisplayOrder = 6,
+                            Name = "Материнські плати",
+                            ParentCategoryId = 130
+                        },
+                        new
+                        {
+                            Id = 137,
+                            DisplayOrder = 7,
+                            Name = "Блоки живлення",
+                            ParentCategoryId = 130
+                        },
+                        new
+                        {
+                            Id = 140,
+                            DisplayOrder = 10,
+                            Name = "Мережеве обладнання",
                             ParentCategoryId = 1
                         },
                         new
                         {
-                            Id = 127,
-                            DisplayOrder = 27,
-                            Name = "Миші",
+                            Id = 141,
+                            DisplayOrder = 1,
+                            Name = "Патч-корди",
+                            ParentCategoryId = 140
+                        },
+                        new
+                        {
+                            Id = 142,
+                            DisplayOrder = 2,
+                            Name = "Маршрутизатори",
+                            ParentCategoryId = 140
+                        },
+                        new
+                        {
+                            Id = 143,
+                            DisplayOrder = 3,
+                            Name = "IP-камери",
+                            ParentCategoryId = 140
+                        },
+                        new
+                        {
+                            Id = 144,
+                            DisplayOrder = 4,
+                            Name = "Комутатори",
+                            ParentCategoryId = 140
+                        },
+                        new
+                        {
+                            Id = 145,
+                            DisplayOrder = 5,
+                            Name = "Бездротові точки доступу",
+                            ParentCategoryId = 140
+                        },
+                        new
+                        {
+                            Id = 150,
+                            DisplayOrder = 11,
+                            Name = "Серверне обладнання",
                             ParentCategoryId = 1
                         },
                         new
                         {
-                            Id = 128,
-                            DisplayOrder = 28,
-                            Name = "Килимки",
+                            Id = 160,
+                            DisplayOrder = 12,
+                            Name = "Оргтехніка",
                             ParentCategoryId = 1
                         },
                         new
                         {
-                            Id = 129,
-                            DisplayOrder = 29,
-                            Name = "Вебкамери",
+                            Id = 161,
+                            DisplayOrder = 1,
+                            Name = "БФП/Принтери",
+                            ParentCategoryId = 160
+                        },
+                        new
+                        {
+                            Id = 162,
+                            DisplayOrder = 2,
+                            Name = "Проектори",
+                            ParentCategoryId = 160
+                        },
+                        new
+                        {
+                            Id = 163,
+                            DisplayOrder = 3,
+                            Name = "Витратні матеріали для принтерів",
+                            ParentCategoryId = 160
+                        },
+                        new
+                        {
+                            Id = 164,
+                            DisplayOrder = 4,
+                            Name = "Телефонні апарати",
+                            ParentCategoryId = 160
+                        },
+                        new
+                        {
+                            Id = 170,
+                            DisplayOrder = 13,
+                            Name = "Програмне забезпечення",
                             ParentCategoryId = 1
+                        },
+                        new
+                        {
+                            Id = 171,
+                            DisplayOrder = 1,
+                            Name = "Операційні системи",
+                            ParentCategoryId = 170
+                        },
+                        new
+                        {
+                            Id = 172,
+                            DisplayOrder = 2,
+                            Name = "Офісні програми",
+                            ParentCategoryId = 170
+                        },
+                        new
+                        {
+                            Id = 173,
+                            DisplayOrder = 3,
+                            Name = "Антивірусні програми",
+                            ParentCategoryId = 170
                         },
                         new
                         {
@@ -596,1219 +662,302 @@ namespace BazaR.Migrations
                         {
                             Id = 202,
                             DisplayOrder = 2,
-                            Name = "Android",
+                            Name = "Телевізори",
                             ParentCategoryId = 2
                         },
                         new
                         {
                             Id = 203,
                             DisplayOrder = 3,
-                            Name = "iPhone",
+                            Name = "Планшети",
                             ParentCategoryId = 2
                         },
                         new
                         {
                             Id = 204,
                             DisplayOrder = 4,
-                            Name = "Бюджетні",
+                            Name = "Аудіотехніка",
                             ParentCategoryId = 2
                         },
                         new
                         {
                             Id = 205,
-                            DisplayOrder = 5,
-                            Name = "Флагмани",
-                            ParentCategoryId = 2
+                            DisplayOrder = 1,
+                            Name = "Навушники",
+                            ParentCategoryId = 204
                         },
                         new
                         {
                             Id = 206,
-                            DisplayOrder = 6,
-                            Name = "Телевізори",
-                            ParentCategoryId = 2
+                            DisplayOrder = 2,
+                            Name = "Колонки",
+                            ParentCategoryId = 204
                         },
                         new
                         {
                             Id = 207,
-                            DisplayOrder = 7,
-                            Name = "Smart TV",
-                            ParentCategoryId = 2
+                            DisplayOrder = 3,
+                            Name = "MP3-плеєри",
+                            ParentCategoryId = 204
                         },
                         new
                         {
                             Id = 208,
-                            DisplayOrder = 8,
-                            Name = "LED",
+                            DisplayOrder = 5,
+                            Name = "Фотоапарати",
                             ParentCategoryId = 2
                         },
                         new
                         {
                             Id = 209,
-                            DisplayOrder = 9,
-                            Name = "OLED",
+                            DisplayOrder = 6,
+                            Name = "Відеокамери",
                             ParentCategoryId = 2
                         },
                         new
                         {
                             Id = 210,
-                            DisplayOrder = 10,
-                            Name = "QLED",
+                            DisplayOrder = 7,
+                            Name = "Розумний дім",
                             ParentCategoryId = 2
                         },
                         new
                         {
                             Id = 211,
-                            DisplayOrder = 11,
-                            Name = "Аудіо",
+                            DisplayOrder = 8,
+                            Name = "Аксесуари до телефонів",
                             ParentCategoryId = 2
                         },
                         new
                         {
                             Id = 212,
-                            DisplayOrder = 12,
-                            Name = "Навушники",
-                            ParentCategoryId = 2
+                            DisplayOrder = 1,
+                            Name = "Чохли для телефонів",
+                            ParentCategoryId = 211
                         },
                         new
                         {
                             Id = 213,
-                            DisplayOrder = 13,
-                            Name = "Саундбари",
-                            ParentCategoryId = 2
+                            DisplayOrder = 2,
+                            Name = "Захисні скельця",
+                            ParentCategoryId = 211
                         },
                         new
                         {
                             Id = 214,
-                            DisplayOrder = 14,
-                            Name = "Колонки",
-                            ParentCategoryId = 2
+                            DisplayOrder = 3,
+                            Name = "Зарядні пристрої",
+                            ParentCategoryId = 211
                         },
                         new
                         {
                             Id = 215,
-                            DisplayOrder = 15,
-                            Name = "Домашні кінотеатри",
-                            ParentCategoryId = 2
-                        },
-                        new
-                        {
-                            Id = 216,
-                            DisplayOrder = 16,
-                            Name = "Планшети",
-                            ParentCategoryId = 2
-                        },
-                        new
-                        {
-                            Id = 217,
-                            DisplayOrder = 17,
-                            Name = "iPad",
-                            ParentCategoryId = 2
-                        },
-                        new
-                        {
-                            Id = 218,
-                            DisplayOrder = 18,
-                            Name = "Android планшети",
-                            ParentCategoryId = 2
-                        },
-                        new
-                        {
-                            Id = 219,
-                            DisplayOrder = 19,
-                            Name = "Гаджети",
-                            ParentCategoryId = 2
-                        },
-                        new
-                        {
-                            Id = 220,
-                            DisplayOrder = 20,
-                            Name = "Смарт-годинники",
-                            ParentCategoryId = 2
-                        },
-                        new
-                        {
-                            Id = 221,
-                            DisplayOrder = 21,
-                            Name = "Фітнес-браслети",
-                            ParentCategoryId = 2
+                            DisplayOrder = 4,
+                            Name = "Power Bank",
+                            ParentCategoryId = 211
                         },
                         new
                         {
                             Id = 301,
                             DisplayOrder = 1,
-                            Name = "Консолі",
+                            Name = "PlayStation",
                             ParentCategoryId = 3
                         },
                         new
                         {
                             Id = 302,
                             DisplayOrder = 2,
-                            Name = "PlayStation",
+                            Name = "Xbox",
                             ParentCategoryId = 3
                         },
                         new
                         {
                             Id = 303,
                             DisplayOrder = 3,
-                            Name = "Xbox",
+                            Name = "Nintendo",
                             ParentCategoryId = 3
                         },
                         new
                         {
                             Id = 304,
                             DisplayOrder = 4,
-                            Name = "Nintendo",
+                            Name = "Ігрові консолі та приставки",
                             ParentCategoryId = 3
                         },
                         new
                         {
                             Id = 305,
                             DisplayOrder = 5,
-                            Name = "Ігри",
+                            Name = "Джойстики та аксесуари",
                             ParentCategoryId = 3
                         },
                         new
                         {
                             Id = 306,
                             DisplayOrder = 6,
-                            Name = "PlayStation ігри",
+                            Name = "Ігри",
                             ParentCategoryId = 3
                         },
                         new
                         {
                             Id = 307,
                             DisplayOrder = 7,
-                            Name = "Xbox ігри",
+                            Name = "Ігрові поверхні",
                             ParentCategoryId = 3
                         },
                         new
                         {
                             Id = 308,
                             DisplayOrder = 8,
-                            Name = "PC ігри",
+                            Name = "Ігрові крісла",
                             ParentCategoryId = 3
                         },
                         new
                         {
                             Id = 309,
                             DisplayOrder = 9,
-                            Name = "Геймерська периферія",
+                            Name = "Ігрові миші",
                             ParentCategoryId = 3
                         },
                         new
                         {
                             Id = 310,
                             DisplayOrder = 10,
-                            Name = "Ігрові миші",
+                            Name = "Ігрові клавіатури",
                             ParentCategoryId = 3
                         },
                         new
                         {
                             Id = 311,
                             DisplayOrder = 11,
-                            Name = "Ігрові клавіатури",
-                            ParentCategoryId = 3
-                        },
-                        new
-                        {
-                            Id = 312,
-                            DisplayOrder = 12,
-                            Name = "Геймерські навушники",
-                            ParentCategoryId = 3
-                        },
-                        new
-                        {
-                            Id = 313,
-                            DisplayOrder = 13,
-                            Name = "VR",
-                            ParentCategoryId = 3
-                        },
-                        new
-                        {
-                            Id = 314,
-                            DisplayOrder = 14,
-                            Name = "VR шоломи",
-                            ParentCategoryId = 3
-                        },
-                        new
-                        {
-                            Id = 315,
-                            DisplayOrder = 15,
-                            Name = "VR аксесуари",
+                            Name = "Ігрові навушники",
                             ParentCategoryId = 3
                         },
                         new
                         {
                             Id = 401,
                             DisplayOrder = 1,
-                            Name = "Велика техніка",
+                            Name = "Велика побутова техніка",
                             ParentCategoryId = 4
                         },
                         new
                         {
                             Id = 402,
-                            DisplayOrder = 2,
+                            DisplayOrder = 1,
                             Name = "Холодильники",
-                            ParentCategoryId = 4
+                            ParentCategoryId = 401
                         },
                         new
                         {
                             Id = 403,
-                            DisplayOrder = 3,
+                            DisplayOrder = 2,
                             Name = "Пральні машини",
-                            ParentCategoryId = 4
+                            ParentCategoryId = 401
                         },
                         new
                         {
                             Id = 404,
-                            DisplayOrder = 4,
-                            Name = "Посудомийні машини",
-                            ParentCategoryId = 4
+                            DisplayOrder = 3,
+                            Name = "Плити та духовки",
+                            ParentCategoryId = 401
                         },
                         new
                         {
                             Id = 405,
-                            DisplayOrder = 5,
-                            Name = "Кухонна техніка",
-                            ParentCategoryId = 4
+                            DisplayOrder = 4,
+                            Name = "Мікрохвильові печі",
+                            ParentCategoryId = 401
                         },
                         new
                         {
                             Id = 406,
-                            DisplayOrder = 6,
-                            Name = "Мікрохвильові печі",
-                            ParentCategoryId = 4
+                            DisplayOrder = 5,
+                            Name = "Посудомийні машини",
+                            ParentCategoryId = 401
                         },
                         new
                         {
                             Id = 407,
-                            DisplayOrder = 7,
-                            Name = "Блендери",
+                            DisplayOrder = 2,
+                            Name = "Мала побутова техніка",
                             ParentCategoryId = 4
                         },
                         new
                         {
                             Id = 408,
-                            DisplayOrder = 8,
-                            Name = "Міксери",
-                            ParentCategoryId = 4
+                            DisplayOrder = 1,
+                            Name = "Пилососи",
+                            ParentCategoryId = 407
                         },
                         new
                         {
                             Id = 409,
-                            DisplayOrder = 9,
-                            Name = "Мультиварки",
-                            ParentCategoryId = 4
+                            DisplayOrder = 2,
+                            Name = "Праски",
+                            ParentCategoryId = 407
                         },
                         new
                         {
                             Id = 410,
-                            DisplayOrder = 10,
+                            DisplayOrder = 3,
+                            Name = "Блендери, міксери",
+                            ParentCategoryId = 407
+                        },
+                        new
+                        {
+                            Id = 411,
+                            DisplayOrder = 4,
+                            Name = "Кавомашини",
+                            ParentCategoryId = 407
+                        },
+                        new
+                        {
+                            Id = 412,
+                            DisplayOrder = 5,
+                            Name = "Електрочайники",
+                            ParentCategoryId = 407
+                        },
+                        new
+                        {
+                            Id = 413,
+                            DisplayOrder = 6,
+                            Name = "Фени",
+                            ParentCategoryId = 407
+                        },
+                        new
+                        {
+                            Id = 414,
+                            DisplayOrder = 3,
                             Name = "Кліматична техніка",
                             ParentCategoryId = 4
                         },
                         new
                         {
-                            Id = 411,
-                            DisplayOrder = 11,
-                            Name = "Кондиціонери",
-                            ParentCategoryId = 4
-                        },
-                        new
-                        {
-                            Id = 412,
-                            DisplayOrder = 12,
-                            Name = "Обігрівачі",
-                            ParentCategoryId = 4
-                        },
-                        new
-                        {
-                            Id = 413,
-                            DisplayOrder = 13,
-                            Name = "Вентилятори",
-                            ParentCategoryId = 4
-                        },
-                        new
-                        {
-                            Id = 414,
-                            DisplayOrder = 14,
-                            Name = "Прибирання",
-                            ParentCategoryId = 4
-                        },
-                        new
-                        {
                             Id = 415,
-                            DisplayOrder = 15,
-                            Name = "Пилососи",
-                            ParentCategoryId = 4
+                            DisplayOrder = 1,
+                            Name = "Кондиціонери",
+                            ParentCategoryId = 414
                         },
                         new
                         {
                             Id = 416,
-                            DisplayOrder = 16,
-                            Name = "Роботи-пилососи",
-                            ParentCategoryId = 4
-                        },
-                        new
-                        {
-                            Id = 501,
-                            DisplayOrder = 1,
-                            Name = "Меблі",
-                            ParentCategoryId = 5
-                        },
-                        new
-                        {
-                            Id = 502,
                             DisplayOrder = 2,
-                            Name = "Дивани",
-                            ParentCategoryId = 5
+                            Name = "Обігрівачі",
+                            ParentCategoryId = 414
                         },
                         new
                         {
-                            Id = 503,
+                            Id = 417,
                             DisplayOrder = 3,
-                            Name = "Ліжка",
-                            ParentCategoryId = 5
+                            Name = "Зволожувачі повітря",
+                            ParentCategoryId = 414
                         },
                         new
                         {
-                            Id = 504,
+                            Id = 418,
                             DisplayOrder = 4,
-                            Name = "Шафи",
-                            ParentCategoryId = 5
-                        },
-                        new
-                        {
-                            Id = 505,
-                            DisplayOrder = 5,
-                            Name = "Освітлення",
-                            ParentCategoryId = 5
-                        },
-                        new
-                        {
-                            Id = 506,
-                            DisplayOrder = 6,
-                            Name = "Лампи",
-                            ParentCategoryId = 5
-                        },
-                        new
-                        {
-                            Id = 507,
-                            DisplayOrder = 7,
-                            Name = "Люстри",
-                            ParentCategoryId = 5
-                        },
-                        new
-                        {
-                            Id = 508,
-                            DisplayOrder = 8,
-                            Name = "LED освітлення",
-                            ParentCategoryId = 5
-                        },
-                        new
-                        {
-                            Id = 509,
-                            DisplayOrder = 9,
-                            Name = "Декор",
-                            ParentCategoryId = 5
-                        },
-                        new
-                        {
-                            Id = 510,
-                            DisplayOrder = 10,
-                            Name = "Картини",
-                            ParentCategoryId = 5
-                        },
-                        new
-                        {
-                            Id = 511,
-                            DisplayOrder = 11,
-                            Name = "Дзеркала",
-                            ParentCategoryId = 5
-                        },
-                        new
-                        {
-                            Id = 512,
-                            DisplayOrder = 12,
-                            Name = "Годинники",
-                            ParentCategoryId = 5
-                        },
-                        new
-                        {
-                            Id = 601,
-                            DisplayOrder = 1,
-                            Name = "Електроінструменти",
-                            ParentCategoryId = 6
-                        },
-                        new
-                        {
-                            Id = 602,
-                            DisplayOrder = 2,
-                            Name = "Дрилі",
-                            ParentCategoryId = 6
-                        },
-                        new
-                        {
-                            Id = 603,
-                            DisplayOrder = 3,
-                            Name = "Шуруповерти",
-                            ParentCategoryId = 6
-                        },
-                        new
-                        {
-                            Id = 604,
-                            DisplayOrder = 4,
-                            Name = "Болгарки",
-                            ParentCategoryId = 6
-                        },
-                        new
-                        {
-                            Id = 605,
-                            DisplayOrder = 5,
-                            Name = "Автоелектроніка",
-                            ParentCategoryId = 6
-                        },
-                        new
-                        {
-                            Id = 606,
-                            DisplayOrder = 6,
-                            Name = "Відеореєстратори",
-                            ParentCategoryId = 6
-                        },
-                        new
-                        {
-                            Id = 607,
-                            DisplayOrder = 7,
-                            Name = "GPS навігатори",
-                            ParentCategoryId = 6
-                        },
-                        new
-                        {
-                            Id = 608,
-                            DisplayOrder = 8,
-                            Name = "Автоаксесуари",
-                            ParentCategoryId = 6
-                        },
-                        new
-                        {
-                            Id = 609,
-                            DisplayOrder = 9,
-                            Name = "Тримачі телефону",
-                            ParentCategoryId = 6
-                        },
-                        new
-                        {
-                            Id = 610,
-                            DisplayOrder = 10,
-                            Name = "Зарядні пристрої",
-                            ParentCategoryId = 6
-                        },
-                        new
-                        {
-                            Id = 701,
-                            DisplayOrder = 1,
-                            Name = "Ванна кімната",
-                            ParentCategoryId = 7
-                        },
-                        new
-                        {
-                            Id = 702,
-                            DisplayOrder = 2,
-                            Name = "Душові кабіни",
-                            ParentCategoryId = 7
-                        },
-                        new
-                        {
-                            Id = 703,
-                            DisplayOrder = 3,
-                            Name = "Унітази",
-                            ParentCategoryId = 7
-                        },
-                        new
-                        {
-                            Id = 704,
-                            DisplayOrder = 4,
-                            Name = "Раковини",
-                            ParentCategoryId = 7
-                        },
-                        new
-                        {
-                            Id = 705,
-                            DisplayOrder = 5,
-                            Name = "Інструменти",
-                            ParentCategoryId = 7
-                        },
-                        new
-                        {
-                            Id = 706,
-                            DisplayOrder = 6,
-                            Name = "Ручний інструмент",
-                            ParentCategoryId = 7
-                        },
-                        new
-                        {
-                            Id = 707,
-                            DisplayOrder = 7,
-                            Name = "Вимірювальні прилади",
-                            ParentCategoryId = 7
-                        },
-                        new
-                        {
-                            Id = 708,
-                            DisplayOrder = 8,
-                            Name = "Матеріали",
-                            ParentCategoryId = 7
-                        },
-                        new
-                        {
-                            Id = 709,
-                            DisplayOrder = 9,
-                            Name = "Фарба",
-                            ParentCategoryId = 7
-                        },
-                        new
-                        {
-                            Id = 710,
-                            DisplayOrder = 10,
-                            Name = "Плитка",
-                            ParentCategoryId = 7
-                        },
-                        new
-                        {
-                            Id = 711,
-                            DisplayOrder = 11,
-                            Name = "Ламінат",
-                            ParentCategoryId = 7
-                        },
-                        new
-                        {
-                            Id = 801,
-                            DisplayOrder = 1,
-                            Name = "Садова техніка",
-                            ParentCategoryId = 8
-                        },
-                        new
-                        {
-                            Id = 802,
-                            DisplayOrder = 2,
-                            Name = "Газонокосарки",
-                            ParentCategoryId = 8
-                        },
-                        new
-                        {
-                            Id = 803,
-                            DisplayOrder = 3,
-                            Name = "Тримери",
-                            ParentCategoryId = 8
-                        },
-                        new
-                        {
-                            Id = 804,
-                            DisplayOrder = 4,
-                            Name = "Садові інструменти",
-                            ParentCategoryId = 8
-                        },
-                        new
-                        {
-                            Id = 805,
-                            DisplayOrder = 5,
-                            Name = "Лопати",
-                            ParentCategoryId = 8
-                        },
-                        new
-                        {
-                            Id = 806,
-                            DisplayOrder = 6,
-                            Name = "Секатори",
-                            ParentCategoryId = 8
-                        },
-                        new
-                        {
-                            Id = 807,
-                            DisplayOrder = 7,
-                            Name = "Меблі для саду",
-                            ParentCategoryId = 8
-                        },
-                        new
-                        {
-                            Id = 808,
-                            DisplayOrder = 8,
-                            Name = "Садові столи",
-                            ParentCategoryId = 8
-                        },
-                        new
-                        {
-                            Id = 809,
-                            DisplayOrder = 9,
-                            Name = "Крісла",
-                            ParentCategoryId = 8
-                        },
-                        new
-                        {
-                            Id = 901,
-                            DisplayOrder = 1,
-                            Name = "Фітнес",
-                            ParentCategoryId = 9
-                        },
-                        new
-                        {
-                            Id = 902,
-                            DisplayOrder = 2,
-                            Name = "Гантелі",
-                            ParentCategoryId = 9
-                        },
-                        new
-                        {
-                            Id = 903,
-                            DisplayOrder = 3,
-                            Name = "Бігові доріжки",
-                            ParentCategoryId = 9
-                        },
-                        new
-                        {
-                            Id = 904,
-                            DisplayOrder = 4,
-                            Name = "Велоспорт",
-                            ParentCategoryId = 9
-                        },
-                        new
-                        {
-                            Id = 905,
-                            DisplayOrder = 5,
-                            Name = "Велосипеди",
-                            ParentCategoryId = 9
-                        },
-                        new
-                        {
-                            Id = 906,
-                            DisplayOrder = 6,
-                            Name = "Аксесуари",
-                            ParentCategoryId = 9
-                        },
-                        new
-                        {
-                            Id = 907,
-                            DisplayOrder = 7,
-                            Name = "Активний відпочинок",
-                            ParentCategoryId = 9
-                        },
-                        new
-                        {
-                            Id = 908,
-                            DisplayOrder = 8,
-                            Name = "Самокати",
-                            ParentCategoryId = 9
-                        },
-                        new
-                        {
-                            Id = 909,
-                            DisplayOrder = 9,
-                            Name = "Електросамокати",
-                            ParentCategoryId = 9
-                        },
-                        new
-                        {
-                            Id = 1001,
-                            DisplayOrder = 1,
-                            Name = "Чоловічий одяг",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1002,
-                            DisplayOrder = 2,
-                            Name = "Футболки",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1003,
-                            DisplayOrder = 3,
-                            Name = "Джинси",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1004,
-                            DisplayOrder = 4,
-                            Name = "Куртки",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1005,
-                            DisplayOrder = 5,
-                            Name = "Жіночий одяг",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1006,
-                            DisplayOrder = 6,
-                            Name = "Сукні",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1007,
-                            DisplayOrder = 7,
-                            Name = "Спідниці",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1008,
-                            DisplayOrder = 8,
-                            Name = "Взуття",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1009,
-                            DisplayOrder = 9,
-                            Name = "Кросівки",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1010,
-                            DisplayOrder = 10,
-                            Name = "Черевики",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1011,
-                            DisplayOrder = 11,
-                            Name = "Аксесуари",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1012,
-                            DisplayOrder = 12,
-                            Name = "Сумки",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1013,
-                            DisplayOrder = 13,
-                            Name = "Ремені",
-                            ParentCategoryId = 10
-                        },
-                        new
-                        {
-                            Id = 1101,
-                            DisplayOrder = 1,
-                            Name = "Догляд за обличчям",
-                            ParentCategoryId = 11
-                        },
-                        new
-                        {
-                            Id = 1102,
-                            DisplayOrder = 2,
-                            Name = "Креми",
-                            ParentCategoryId = 11
-                        },
-                        new
-                        {
-                            Id = 1103,
-                            DisplayOrder = 3,
-                            Name = "Сироватки",
-                            ParentCategoryId = 11
-                        },
-                        new
-                        {
-                            Id = 1104,
-                            DisplayOrder = 4,
-                            Name = "Догляд за волоссям",
-                            ParentCategoryId = 11
-                        },
-                        new
-                        {
-                            Id = 1105,
-                            DisplayOrder = 5,
-                            Name = "Шампуні",
-                            ParentCategoryId = 11
-                        },
-                        new
-                        {
-                            Id = 1106,
-                            DisplayOrder = 6,
-                            Name = "Маски",
-                            ParentCategoryId = 11
-                        },
-                        new
-                        {
-                            Id = 1107,
-                            DisplayOrder = 7,
-                            Name = "Техніка",
-                            ParentCategoryId = 11
-                        },
-                        new
-                        {
-                            Id = 1108,
-                            DisplayOrder = 8,
-                            Name = "Фени",
-                            ParentCategoryId = 11
-                        },
-                        new
-                        {
-                            Id = 1109,
-                            DisplayOrder = 9,
-                            Name = "Бритви",
-                            ParentCategoryId = 11
-                        },
-                        new
-                        {
-                            Id = 1201,
-                            DisplayOrder = 1,
-                            Name = "Іграшки",
-                            ParentCategoryId = 12
-                        },
-                        new
-                        {
-                            Id = 1202,
-                            DisplayOrder = 2,
-                            Name = "Конструктори",
-                            ParentCategoryId = 12
-                        },
-                        new
-                        {
-                            Id = 1203,
-                            DisplayOrder = 3,
-                            Name = "Ляльки",
-                            ParentCategoryId = 12
-                        },
-                        new
-                        {
-                            Id = 1204,
-                            DisplayOrder = 4,
-                            Name = "Машинки",
-                            ParentCategoryId = 12
-                        },
-                        new
-                        {
-                            Id = 1205,
-                            DisplayOrder = 5,
-                            Name = "Для немовлят",
-                            ParentCategoryId = 12
-                        },
-                        new
-                        {
-                            Id = 1206,
-                            DisplayOrder = 6,
-                            Name = "Підгузки",
-                            ParentCategoryId = 12
-                        },
-                        new
-                        {
-                            Id = 1207,
-                            DisplayOrder = 7,
-                            Name = "Пляшечки",
-                            ParentCategoryId = 12
-                        },
-                        new
-                        {
-                            Id = 1208,
-                            DisplayOrder = 8,
-                            Name = "Дитячий транспорт",
-                            ParentCategoryId = 12
-                        },
-                        new
-                        {
-                            Id = 1209,
-                            DisplayOrder = 9,
-                            Name = "Коляски",
-                            ParentCategoryId = 12
-                        },
-                        new
-                        {
-                            Id = 1210,
-                            DisplayOrder = 10,
-                            Name = "Самокати",
-                            ParentCategoryId = 12
-                        },
-                        new
-                        {
-                            Id = 1301,
-                            DisplayOrder = 1,
-                            Name = "Для собак",
-                            ParentCategoryId = 13
-                        },
-                        new
-                        {
-                            Id = 1302,
-                            DisplayOrder = 2,
-                            Name = "Корм",
-                            ParentCategoryId = 13
-                        },
-                        new
-                        {
-                            Id = 1303,
-                            DisplayOrder = 3,
-                            Name = "Іграшки",
-                            ParentCategoryId = 13
-                        },
-                        new
-                        {
-                            Id = 1304,
-                            DisplayOrder = 4,
-                            Name = "Для котів",
-                            ParentCategoryId = 13
-                        },
-                        new
-                        {
-                            Id = 1305,
-                            DisplayOrder = 5,
-                            Name = "Корм",
-                            ParentCategoryId = 13
-                        },
-                        new
-                        {
-                            Id = 1306,
-                            DisplayOrder = 6,
-                            Name = "Наповнювачі",
-                            ParentCategoryId = 13
-                        },
-                        new
-                        {
-                            Id = 1307,
-                            DisplayOrder = 7,
-                            Name = "Для гризунів",
-                            ParentCategoryId = 13
-                        },
-                        new
-                        {
-                            Id = 1308,
-                            DisplayOrder = 8,
-                            Name = "Клітки",
-                            ParentCategoryId = 13
-                        },
-                        new
-                        {
-                            Id = 1309,
-                            DisplayOrder = 9,
-                            Name = "Корм",
-                            ParentCategoryId = 13
-                        },
-                        new
-                        {
-                            Id = 1401,
-                            DisplayOrder = 1,
-                            Name = "Канцтовари",
-                            ParentCategoryId = 14
-                        },
-                        new
-                        {
-                            Id = 1402,
-                            DisplayOrder = 2,
-                            Name = "Ручки",
-                            ParentCategoryId = 14
-                        },
-                        new
-                        {
-                            Id = 1403,
-                            DisplayOrder = 3,
-                            Name = "Зошити",
-                            ParentCategoryId = 14
-                        },
-                        new
-                        {
-                            Id = 1404,
-                            DisplayOrder = 4,
-                            Name = "Папір",
-                            ParentCategoryId = 14
-                        },
-                        new
-                        {
-                            Id = 1405,
-                            DisplayOrder = 5,
-                            Name = "Книги",
-                            ParentCategoryId = 14
-                        },
-                        new
-                        {
-                            Id = 1406,
-                            DisplayOrder = 6,
-                            Name = "Художні",
-                            ParentCategoryId = 14
-                        },
-                        new
-                        {
-                            Id = 1407,
-                            DisplayOrder = 7,
-                            Name = "Навчальні",
-                            ParentCategoryId = 14
-                        },
-                        new
-                        {
-                            Id = 1501,
-                            DisplayOrder = 1,
-                            Name = "Алкоголь",
-                            ParentCategoryId = 15
-                        },
-                        new
-                        {
-                            Id = 1502,
-                            DisplayOrder = 2,
-                            Name = "Вино",
-                            ParentCategoryId = 15
-                        },
-                        new
-                        {
-                            Id = 1503,
-                            DisplayOrder = 3,
-                            Name = "Пиво",
-                            ParentCategoryId = 15
-                        },
-                        new
-                        {
-                            Id = 1504,
-                            DisplayOrder = 4,
-                            Name = "Віскі",
-                            ParentCategoryId = 15
-                        },
-                        new
-                        {
-                            Id = 1505,
-                            DisplayOrder = 5,
-                            Name = "Продукти",
-                            ParentCategoryId = 15
-                        },
-                        new
-                        {
-                            Id = 1506,
-                            DisplayOrder = 6,
-                            Name = "Солодощі",
-                            ParentCategoryId = 15
-                        },
-                        new
-                        {
-                            Id = 1507,
-                            DisplayOrder = 7,
-                            Name = "Снеки",
-                            ParentCategoryId = 15
-                        },
-                        new
-                        {
-                            Id = 1601,
-                            DisplayOrder = 1,
-                            Name = "Офіс",
-                            ParentCategoryId = 16
-                        },
-                        new
-                        {
-                            Id = 1602,
-                            DisplayOrder = 2,
-                            Name = "Офісна техніка",
-                            ParentCategoryId = 16
-                        },
-                        new
-                        {
-                            Id = 1603,
-                            DisplayOrder = 3,
-                            Name = "Меблі",
-                            ParentCategoryId = 16
-                        },
-                        new
-                        {
-                            Id = 1604,
-                            DisplayOrder = 4,
-                            Name = "Бізнес обладнання",
-                            ParentCategoryId = 16
-                        },
-                        new
-                        {
-                            Id = 1605,
-                            DisplayOrder = 5,
-                            Name = "POS системи",
-                            ParentCategoryId = 16
-                        },
-                        new
-                        {
-                            Id = 1606,
-                            DisplayOrder = 6,
-                            Name = "Касові апарати",
-                            ParentCategoryId = 16
-                        },
-                        new
-                        {
-                            Id = 1701,
-                            DisplayOrder = 1,
-                            Name = "Туристичне спорядження",
-                            ParentCategoryId = 17
-                        },
-                        new
-                        {
-                            Id = 1702,
-                            DisplayOrder = 2,
-                            Name = "Намет",
-                            ParentCategoryId = 17
-                        },
-                        new
-                        {
-                            Id = 1703,
-                            DisplayOrder = 3,
-                            Name = "Спальні мішки",
-                            ParentCategoryId = 17
-                        },
-                        new
-                        {
-                            Id = 1704,
-                            DisplayOrder = 4,
-                            Name = "Подорожі",
-                            ParentCategoryId = 17
-                        },
-                        new
-                        {
-                            Id = 1705,
-                            DisplayOrder = 5,
-                            Name = "Валізи",
-                            ParentCategoryId = 17
-                        },
-                        new
-                        {
-                            Id = 1706,
-                            DisplayOrder = 6,
-                            Name = "Рюкзаки",
-                            ParentCategoryId = 17
-                        },
-                        new
-                        {
-                            Id = 1801,
-                            DisplayOrder = 1,
-                            Name = "Товари зі знижками",
-                            ParentCategoryId = 18
-                        },
-                        new
-                        {
-                            Id = 1802,
-                            DisplayOrder = 2,
-                            Name = "Сезонні розпродажі",
-                            ParentCategoryId = 18
-                        },
-                        new
-                        {
-                            Id = 1901,
-                            DisplayOrder = 1,
-                            Name = "До −50%",
-                            ParentCategoryId = 19
-                        },
-                        new
-                        {
-                            Id = 1902,
-                            DisplayOrder = 2,
-                            Name = "До −70%",
-                            ParentCategoryId = 19
-                        },
-                        new
-                        {
-                            Id = 1903,
-                            DisplayOrder = 3,
-                            Name = "Останні екземпляри",
-                            ParentCategoryId = 19
+                            Name = "Вентилятори",
+                            ParentCategoryId = 414
                         });
                 });
 
@@ -1840,6 +989,21 @@ namespace BazaR.Migrations
                         new
                         {
                             CategoryId = 1,
+                            BrandId = 3
+                        },
+                        new
+                        {
+                            CategoryId = 1,
+                            BrandId = 4
+                        },
+                        new
+                        {
+                            CategoryId = 1,
+                            BrandId = 5
+                        },
+                        new
+                        {
+                            CategoryId = 1,
                             BrandId = 12
                         },
                         new
@@ -1864,63 +1028,23 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            CategoryId = 2,
+                            CategoryId = 201,
                             BrandId = 1
                         },
                         new
                         {
-                            CategoryId = 2,
+                            CategoryId = 201,
                             BrandId = 2
                         },
                         new
                         {
-                            CategoryId = 2,
+                            CategoryId = 201,
                             BrandId = 3
                         },
                         new
                         {
-                            CategoryId = 3,
+                            CategoryId = 201,
                             BrandId = 4
-                        },
-                        new
-                        {
-                            CategoryId = 3,
-                            BrandId = 15
-                        },
-                        new
-                        {
-                            CategoryId = 4,
-                            BrandId = 2
-                        },
-                        new
-                        {
-                            CategoryId = 4,
-                            BrandId = 4
-                        },
-                        new
-                        {
-                            CategoryId = 4,
-                            BrandId = 5
-                        },
-                        new
-                        {
-                            CategoryId = 4,
-                            BrandId = 6
-                        },
-                        new
-                        {
-                            CategoryId = 9,
-                            BrandId = 7
-                        },
-                        new
-                        {
-                            CategoryId = 9,
-                            BrandId = 8
-                        },
-                        new
-                        {
-                            CategoryId = 9,
-                            BrandId = 9
                         },
                         new
                         {
@@ -1946,6 +1070,36 @@ namespace BazaR.Migrations
                         {
                             CategoryId = 10,
                             BrandId = 11
+                        },
+                        new
+                        {
+                            CategoryId = 9,
+                            BrandId = 7
+                        },
+                        new
+                        {
+                            CategoryId = 9,
+                            BrandId = 8
+                        },
+                        new
+                        {
+                            CategoryId = 9,
+                            BrandId = 9
+                        },
+                        new
+                        {
+                            CategoryId = 6,
+                            BrandId = 19
+                        },
+                        new
+                        {
+                            CategoryId = 6,
+                            BrandId = 20
+                        },
+                        new
+                        {
+                            CategoryId = 6,
+                            BrandId = 6
                         });
                 });
 
@@ -1962,13 +1116,11 @@ namespace BazaR.Migrations
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ValueType")
                         .HasColumnType("int");
@@ -1990,13 +1142,9 @@ namespace BazaR.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("Cities");
 
@@ -2004,112 +1152,52 @@ namespace BazaR.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Kyiv"
+                            Name = "Київ"
                         },
                         new
                         {
                             Id = 2,
-                            Name = "Kharkiv"
+                            Name = "Харків"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "Odesa"
+                            Name = "Одеса"
                         },
                         new
                         {
                             Id = 4,
-                            Name = "Dnipro"
+                            Name = "Дніпро"
                         },
                         new
                         {
                             Id = 5,
-                            Name = "Lviv"
+                            Name = "Львів"
                         },
                         new
                         {
                             Id = 6,
-                            Name = "Zaporizhzhia"
+                            Name = "Запоріжжя"
                         },
                         new
                         {
                             Id = 7,
-                            Name = "Mykolaiv"
+                            Name = "Миколаїв"
                         },
                         new
                         {
                             Id = 8,
-                            Name = "Vinnytsia"
+                            Name = "Вінниця"
                         },
                         new
                         {
                             Id = 9,
-                            Name = "Kherson"
+                            Name = "Херсон"
                         },
                         new
                         {
                             Id = 10,
-                            Name = "Poltava"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Name = "Chernihiv"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Name = "Cherkasy"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            Name = "Zhytomyr"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            Name = "Sumy"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            Name = "Rivne"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            Name = "Ternopil"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            Name = "Lutsk"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            Name = "Uzhhorod"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            Name = "Chernivtsi"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            Name = "IvanoFrankivsk"
-                        },
-                        new
-                        {
-                            Id = 21,
-                            Name = "Kropyvnytskyi"
-                        },
-                        new
-                        {
-                            Id = 22,
-                            Name = "Khmelnytskyi"
+                            Name = "Полтава"
                         });
                 });
 
@@ -2123,8 +1211,7 @@ namespace BazaR.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -2156,8 +1243,7 @@ namespace BazaR.Migrations
 
                     b.Property<string>("DeliveryPlace")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<TimeSpan>("DeliveryTime")
                         .HasColumnType("time");
@@ -2177,8 +1263,7 @@ namespace BazaR.Migrations
 
                     b.Property<string>("SendingPlace")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -2203,23 +1288,20 @@ namespace BazaR.Migrations
 
                     b.Property<string>("Desc")
                         .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Garantia")
                         .HasColumnType("int");
 
                     b.Property<string>("ImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Price")
                         .HasColumnType("int");
@@ -2229,9 +1311,20 @@ namespace BazaR.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BrandId");
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("IX_Items_BrandId");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("IX_Items_CategoryId");
+
+                    b.HasIndex("IsAvailable")
+                        .HasDatabaseName("IX_Items_IsAvailable");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_Items_Name");
+
+                    b.HasIndex("Price")
+                        .HasDatabaseName("IX_Items_Price");
 
                     b.HasIndex("UserId");
 
@@ -2240,10 +1333,10 @@ namespace BazaR.Migrations
                     b.HasData(
                         new
                         {
-                            Id = -1053,
+                            Id = -1000,
                             BrandId = 1,
                             CategoryId = 101,
-                            Desc = "Опис товару 1 для категорії 101. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2253,10 +1346,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1054,
+                            Id = -1001,
                             BrandId = 1,
                             CategoryId = 101,
-                            Desc = "Опис товару 2 для категорії 101. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2266,10 +1359,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1055,
+                            Id = -1002,
                             BrandId = 1,
                             CategoryId = 101,
-                            Desc = "Опис товару 3 для категорії 101. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2279,10 +1372,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1056,
+                            Id = -1003,
                             BrandId = 1,
                             CategoryId = 102,
-                            Desc = "Опис товару 1 для категорії 102. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2292,10 +1385,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1057,
+                            Id = -1004,
                             BrandId = 1,
                             CategoryId = 102,
-                            Desc = "Опис товару 2 для категорії 102. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2305,10 +1398,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1058,
+                            Id = -1005,
                             BrandId = 1,
                             CategoryId = 102,
-                            Desc = "Опис товару 3 для категорії 102. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2318,10 +1411,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1059,
+                            Id = -1006,
                             BrandId = 1,
                             CategoryId = 103,
-                            Desc = "Опис товару 1 для категорії 103. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2331,10 +1424,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1060,
+                            Id = -1007,
                             BrandId = 1,
                             CategoryId = 103,
-                            Desc = "Опис товару 2 для категорії 103. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2344,10 +1437,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1061,
+                            Id = -1008,
                             BrandId = 1,
                             CategoryId = 103,
-                            Desc = "Опис товару 3 для категорії 103. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2357,10 +1450,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1062,
+                            Id = -1009,
                             BrandId = 1,
                             CategoryId = 104,
-                            Desc = "Опис товару 1 для категорії 104. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2370,10 +1463,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1063,
+                            Id = -1010,
                             BrandId = 1,
                             CategoryId = 104,
-                            Desc = "Опис товару 2 для категорії 104. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2383,10 +1476,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1064,
+                            Id = -1011,
                             BrandId = 1,
                             CategoryId = 104,
-                            Desc = "Опис товару 3 для категорії 104. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2396,10 +1489,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1065,
+                            Id = -1012,
                             BrandId = 1,
                             CategoryId = 105,
-                            Desc = "Опис товару 1 для категорії 105. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2409,10 +1502,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1066,
+                            Id = -1013,
                             BrandId = 1,
                             CategoryId = 105,
-                            Desc = "Опис товару 2 для категорії 105. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2422,10 +1515,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1067,
+                            Id = -1014,
                             BrandId = 1,
                             CategoryId = 105,
-                            Desc = "Опис товару 3 для категорії 105. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2435,10 +1528,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1068,
+                            Id = -1015,
                             BrandId = 1,
                             CategoryId = 106,
-                            Desc = "Опис товару 1 для категорії 106. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2448,10 +1541,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1069,
+                            Id = -1016,
                             BrandId = 1,
                             CategoryId = 106,
-                            Desc = "Опис товару 2 для категорії 106. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2461,10 +1554,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1070,
+                            Id = -1017,
                             BrandId = 1,
                             CategoryId = 106,
-                            Desc = "Опис товару 3 для категорії 106. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2474,10 +1567,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1071,
+                            Id = -1018,
                             BrandId = 1,
                             CategoryId = 107,
-                            Desc = "Опис товару 1 для категорії 107. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2487,10 +1580,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1072,
+                            Id = -1019,
                             BrandId = 1,
                             CategoryId = 107,
-                            Desc = "Опис товару 2 для категорії 107. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2500,10 +1593,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1073,
+                            Id = -1020,
                             BrandId = 1,
                             CategoryId = 107,
-                            Desc = "Опис товару 3 для категорії 107. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2513,10 +1606,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1074,
+                            Id = -1021,
                             BrandId = 1,
                             CategoryId = 108,
-                            Desc = "Опис товару 1 для категорії 108. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2526,10 +1619,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1075,
+                            Id = -1022,
                             BrandId = 1,
                             CategoryId = 108,
-                            Desc = "Опис товару 2 для категорії 108. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2539,10 +1632,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1076,
+                            Id = -1023,
                             BrandId = 1,
                             CategoryId = 108,
-                            Desc = "Опис товару 3 для категорії 108. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2552,10 +1645,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1077,
+                            Id = -1024,
                             BrandId = 1,
                             CategoryId = 109,
-                            Desc = "Опис товару 1 для категорії 109. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2565,10 +1658,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1078,
+                            Id = -1025,
                             BrandId = 1,
                             CategoryId = 109,
-                            Desc = "Опис товару 2 для категорії 109. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2578,10 +1671,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1079,
+                            Id = -1026,
                             BrandId = 1,
                             CategoryId = 109,
-                            Desc = "Опис товару 3 для категорії 109. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2591,10 +1684,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1080,
+                            Id = -1027,
                             BrandId = 1,
                             CategoryId = 110,
-                            Desc = "Опис товару 1 для категорії 110. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2604,10 +1697,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1081,
+                            Id = -1028,
                             BrandId = 1,
                             CategoryId = 110,
-                            Desc = "Опис товару 2 для категорії 110. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2617,10 +1710,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1082,
+                            Id = -1029,
                             BrandId = 1,
                             CategoryId = 110,
-                            Desc = "Опис товару 3 для категорії 110. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2630,10 +1723,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1083,
+                            Id = -1030,
                             BrandId = 1,
                             CategoryId = 121,
-                            Desc = "Опис товару 1 для категорії 121. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2643,10 +1736,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1084,
+                            Id = -1031,
                             BrandId = 1,
                             CategoryId = 121,
-                            Desc = "Опис товару 2 для категорії 121. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2656,10 +1749,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1085,
+                            Id = -1032,
                             BrandId = 1,
                             CategoryId = 121,
-                            Desc = "Опис товару 3 для категорії 121. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2669,10 +1762,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1086,
+                            Id = -1033,
                             BrandId = 1,
                             CategoryId = 122,
-                            Desc = "Опис товару 1 для категорії 122. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2682,10 +1775,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1087,
+                            Id = -1034,
                             BrandId = 1,
                             CategoryId = 122,
-                            Desc = "Опис товару 2 для категорії 122. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2695,10 +1788,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1088,
+                            Id = -1035,
                             BrandId = 1,
                             CategoryId = 122,
-                            Desc = "Опис товару 3 для категорії 122. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2708,10 +1801,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1089,
+                            Id = -1036,
                             BrandId = 1,
                             CategoryId = 123,
-                            Desc = "Опис товару 1 для категорії 123. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2721,10 +1814,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1090,
+                            Id = -1037,
                             BrandId = 1,
                             CategoryId = 123,
-                            Desc = "Опис товару 2 для категорії 123. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2734,10 +1827,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1091,
+                            Id = -1038,
                             BrandId = 1,
                             CategoryId = 123,
-                            Desc = "Опис товару 3 для категорії 123. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2747,10 +1840,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1092,
+                            Id = -1039,
                             BrandId = 1,
                             CategoryId = 201,
-                            Desc = "Опис товару 1 для категорії 201. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2760,10 +1853,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1093,
+                            Id = -1040,
                             BrandId = 1,
                             CategoryId = 201,
-                            Desc = "Опис товару 2 для категорії 201. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2773,10 +1866,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1094,
+                            Id = -1041,
                             BrandId = 1,
                             CategoryId = 201,
-                            Desc = "Опис товару 3 для категорії 201. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2786,10 +1879,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1095,
+                            Id = -1042,
                             BrandId = 1,
                             CategoryId = 202,
-                            Desc = "Опис товару 1 для категорії 202. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2799,10 +1892,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1096,
+                            Id = -1043,
                             BrandId = 1,
                             CategoryId = 202,
-                            Desc = "Опис товару 2 для категорії 202. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2812,10 +1905,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1097,
+                            Id = -1044,
                             BrandId = 1,
                             CategoryId = 202,
-                            Desc = "Опис товару 3 для категорії 202. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2825,10 +1918,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1098,
+                            Id = -1045,
                             BrandId = 1,
                             CategoryId = 203,
-                            Desc = "Опис товару 1 для категорії 203. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2838,10 +1931,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1099,
+                            Id = -1046,
                             BrandId = 1,
                             CategoryId = 203,
-                            Desc = "Опис товару 2 для категорії 203. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2851,10 +1944,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1100,
+                            Id = -1047,
                             BrandId = 1,
                             CategoryId = 203,
-                            Desc = "Опис товару 3 для категорії 203. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2864,10 +1957,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1101,
+                            Id = -1048,
                             BrandId = 1,
                             CategoryId = 204,
-                            Desc = "Опис товару 1 для категорії 204. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2877,10 +1970,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1102,
+                            Id = -1049,
                             BrandId = 1,
                             CategoryId = 204,
-                            Desc = "Опис товару 2 для категорії 204. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2890,10 +1983,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1103,
+                            Id = -1050,
                             BrandId = 1,
                             CategoryId = 204,
-                            Desc = "Опис товару 3 для категорії 204. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2903,10 +1996,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1104,
+                            Id = -1051,
                             BrandId = 1,
                             CategoryId = 205,
-                            Desc = "Опис товару 1 для категорії 205. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 1",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2916,10 +2009,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1105,
+                            Id = -1052,
                             BrandId = 1,
                             CategoryId = 205,
-                            Desc = "Опис товару 2 для категорії 205. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 2",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2929,10 +2022,10 @@ namespace BazaR.Migrations
                         },
                         new
                         {
-                            Id = -1106,
+                            Id = -1053,
                             BrandId = 1,
                             CategoryId = 205,
-                            Desc = "Опис товару 3 для категорії 205. Це якісний товар від відомого бренду.",
+                            Desc = "Опис товару 3",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
@@ -2955,13 +2048,11 @@ namespace BazaR.Migrations
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -2980,8 +2071,7 @@ namespace BazaR.Migrations
 
                     b.Property<string>("Color")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
@@ -3003,8 +2093,7 @@ namespace BazaR.Migrations
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CityId")
                         .HasColumnType("int");
@@ -3014,28 +2103,23 @@ namespace BazaR.Migrations
 
                     b.Property<string>("DeliveryMethod")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Number")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalAmount")
                         .HasPrecision(18, 2)
@@ -3043,8 +2127,7 @@ namespace BazaR.Migrations
 
                     b.Property<string>("Ttn")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -3052,9 +2135,6 @@ namespace BazaR.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CityId");
-
-                    b.HasIndex("Number")
-                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -3101,8 +2181,7 @@ namespace BazaR.Migrations
 
                     b.Property<string>("Comment")
                         .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -3135,16 +2214,14 @@ namespace BazaR.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -3153,7 +2230,8 @@ namespace BazaR.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_Users_Email");
 
                     b.ToTable("Users");
 
@@ -3161,18 +2239,10 @@ namespace BazaR.Migrations
                         new
                         {
                             Id = 1,
-                            Email = "admin@example.com",
-                            IsAdmin = true,
-                            Name = "Admin User",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
-                        },
-                        new
-                        {
-                            Id = 2,
                             Email = "test@example.com",
                             IsAdmin = false,
                             Name = "Test User",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+                            PasswordHash = "123456"
                         });
                 });
 
@@ -3186,16 +2256,14 @@ namespace BazaR.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
@@ -3226,8 +2294,7 @@ namespace BazaR.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.HasIndex("UserId", "ItemId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("WishlistItems");
                 });
@@ -3243,7 +2310,7 @@ namespace BazaR.Migrations
                     b.HasOne("BazaR.Models.User", "User")
                         .WithMany("CartItems")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Item");
@@ -3449,7 +2516,7 @@ namespace BazaR.Migrations
                     b.HasOne("BazaR.Models.User", "User")
                         .WithMany("WishlistItems")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Item");

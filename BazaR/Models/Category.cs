@@ -8,6 +8,7 @@ namespace BazaR.Models
         public string Name { get; set; }
 
         public string? IconUrl { get; set; } // Иконка категории (Bootstrap Icons class)
+        public string? ImgUrl { get; set; } // Иконка категории (Bootstrap Icons class)
 
         public int? ParentCategoryId { get; set; } // Для поддержки подкатегорий
         public Category? ParentCategory { get; set; }

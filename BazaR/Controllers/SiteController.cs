@@ -91,6 +91,8 @@ namespace BazaR.Controllers
             ViewBag.NewItems = newItems;
             ViewBag.PopularItems = popularItems;
 
+            Console.WriteLine(_db.Items.Count());
+
             return View();
         }
 

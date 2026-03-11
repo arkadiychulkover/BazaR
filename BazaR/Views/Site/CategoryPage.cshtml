@@ -43,16 +43,16 @@
                            style="text-decoration:none;color:inherit;">
 
                             <div style="
-                                    border:1px solid #e5e5e5;
-                                    border-radius:10px;
-                                    padding:10px;
-                                    height:85px;
-                                    display:flex;
-                                    flex-direction:column;
-                                    align-items:center;
-                                    justify-content:center;
-                                    background:white;
-                                ">
+                                        border:1px solid #e5e5e5;
+                                        border-radius:10px;
+                                        padding:10px;
+                                        height:85px;
+                                        display:flex;
+                                        flex-direction:column;
+                                        align-items:center;
+                                        justify-content:center;
+                                        background:white;
+                                    ">
 
                                 @if (!string.IsNullOrEmpty(cat.IconUrl))
                                 {
@@ -103,41 +103,7 @@
         {
             <div class="col-lg-3 col-md-4 col-sm-6">
 
-                <a asp-controller="Site"
-                   asp-action="Browse"
-                   asp-route-categoryIds="@category.Id"
-                   style="text-decoration:none;color:inherit;">
-
-                    <div style="
-                            background:white;
-                            border-radius:14px;
-                            border:1px solid #e5e5e5;
-                            height:150px;
-                            padding:20px;
-                            display:flex;
-                            flex-direction:column;
-                            justify-content:space-between;
-                            transition:0.2s;
-                        "
-                         onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.1)'"
-                         onmouseout="this.style.boxShadow='none'">
-
-                        <div style="display:flex;justify-content:flex-end;">
-
-                            @if (!string.IsNullOrEmpty(category.IconUrl))
-                            {
-                                <img src="@category.IconUrl" style="height:55px;" />
-                            }
-
-                        </div>
-
-                        <div style="font-size:14px;font-weight:500;">
-                            @category.Name
-                        </div>
-
-                    </div>
-
-                </a>
+                <partial name="_CategoryCard" model="category" />
 
             </div>
         }

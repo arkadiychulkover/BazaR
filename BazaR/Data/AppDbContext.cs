@@ -1,6 +1,5 @@
-﻿// Data/AppDbContext.cs
+﻿using Microsoft.EntityFrameworkCore;
 using BazaR.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace BazaR.Data
 {
@@ -11,453 +10,749 @@ namespace BazaR.Data
         {
         }
 
-        public DbSet<User> Users { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<Brand> Brands { get; set; }
+        public DbSet<CategoryFilter> CategoryFilters { get; set; }
         public DbSet<CategoryBrand> CategoryBrands { get; set; }
+        public DbSet<Brand> Brands { get; set; }
         public DbSet<Item> Items { get; set; }
+        public DbSet<ItemCharacteristic> ItemCharacteristics { get; set; }
         public DbSet<ItemColor> ItemColors { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Complect> Complects { get; set; }
+        public DbSet<ComplectItem> ComplectItems { get; set; }
+        public DbSet<Usluga> Uslugi { get; set; }
+        public DbSet<Delivery> Deliveries { get; set; }
+        public DbSet<User> Users { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<WishlistItem> WishlistItems { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<City> Cities { get; set; }
-        public DbSet<Delivery> Deliveries { get; set; }
-        public DbSet<Usluga> Uslugi { get; set; }
-        public DbSet<ItemCharacteristic> ItemCharacteristics { get; set; }
-        public DbSet<Complect> Complects { get; set; }
-        public DbSet<ComplectItem> ComplectItems { get; set; }
-        public DbSet<CategoryFilter> CategoryFilters { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            // Настройка Category
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.HasKey(e => e.Id);
 
-            // Настройка десятичных полей
-            modelBuilder.Entity<Delivery>()
-                .Property(d => d.Price)
-                .HasPrecision(18, 2);
+                entity.HasIndex(e => e.ParentCategoryId);
 
-            modelBuilder.Entity<Order>()
-                .Property(o => o.TotalAmount)
-                .HasPrecision(18, 2);
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(200);
 
-            modelBuilder.Entity<OrderItem>()
-                .Property(oi => oi.PriceAtMoment)
-                .HasPrecision(18, 2);
+                entity.Property(e => e.IconUrl)
+                    .HasMaxLength(500);
 
-            modelBuilder.Entity<Usluga>()
-                .Property(u => u.Price)
-                .HasPrecision(18, 2);
+                entity.Property(e => e.ImgUrl)
+                    .HasMaxLength(500);
 
-            // Связь Category (самоссылка для подкатегорий)
-            modelBuilder.Entity<Category>()
-                .HasOne(c => c.ParentCategory)
-                .WithMany(c => c.SubCategories)
-                .HasForeignKey(c => c.ParentCategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
+                // Связь для подкатегорий (самоссылающаяся)
+                entity.HasOne(c => c.ParentCategory)
+                    .WithMany(c => c.SubCategories)
+                    .HasForeignKey(c => c.ParentCategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            // Составные ключи
-            modelBuilder.Entity<CategoryBrand>()
-                .HasKey(cb => new { cb.CategoryId, cb.BrandId });
+            // Настройка CategoryFilter
+            modelBuilder.Entity<CategoryFilter>(entity =>
+            {
+                entity.HasKey(e => e.Id);
 
-            modelBuilder.Entity<ComplectItem>()
-                .HasKey(ci => new { ci.ComplectId, ci.ItemId });
+                entity.HasIndex(e => e.CategoryId);
 
-            // CategoryBrand связи
-            modelBuilder.Entity<CategoryBrand>()
-                .HasOne(cb => cb.Category)
-                .WithMany(c => c.CategoryBrands)
-                .HasForeignKey(cb => cb.CategoryId)
-                .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(e => e.Key)
+                    .IsRequired()
+                    .HasMaxLength(100);
 
-            modelBuilder.Entity<CategoryBrand>()
-                .HasOne(cb => cb.Brand)
-                .WithMany(b => b.CategoryBrands)
-                .HasForeignKey(cb => cb.BrandId)
-                .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(e => e.DisplayName)
+                    .IsRequired()
+                    .HasMaxLength(200);
 
-            // Item связи
-            modelBuilder.Entity<Item>()
-                .HasOne(i => i.Category)
-                .WithMany()
-                .HasForeignKey(i => i.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(e => e.ValueType)
+                    .HasConversion<int>();
 
-            modelBuilder.Entity<Item>()
-                .HasOne(i => i.Brand)
-                .WithMany(b => b.Items) // Требует наличия свойства Items в Brand
-                .HasForeignKey(i => i.BrandId)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(cf => cf.Category)
+                    .WithMany(c => c.Filters)
+                    .HasForeignKey(cf => cf.CategoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
-            modelBuilder.Entity<Item>()
-                .HasOne(i => i.User)
-                .WithMany(u => u.SellingItems)
-                .HasForeignKey(i => i.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Настройка CategoryBrand (составной ключ)
+            modelBuilder.Entity<CategoryBrand>(entity =>
+            {
+                entity.HasKey(cb => new { cb.CategoryId, cb.BrandId });
 
-            // CartItem (без множественных каскадов)
-            modelBuilder.Entity<CartItem>()
-                .HasOne(ci => ci.User)
-                .WithMany(u => u.CartItems)
-                .HasForeignKey(ci => ci.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(cb => cb.Category)
+                    .WithMany(c => c.CategoryBrands)
+                    .HasForeignKey(cb => cb.CategoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<CartItem>()
-                .HasOne(ci => ci.Item)
-                .WithMany(i => i.CartItems)
-                .HasForeignKey(ci => ci.ItemId)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(cb => cb.Brand)
+                    .WithMany(b => b.CategoryBrands)
+                    .HasForeignKey(cb => cb.BrandId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
-            // WishlistItem
-            modelBuilder.Entity<WishlistItem>()
-                .HasOne(wi => wi.User)
-                .WithMany(u => u.WishlistItems)
-                .HasForeignKey(wi => wi.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Настройка Brand
+            modelBuilder.Entity<Brand>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Name).IsUnique();
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Logo).HasMaxLength(500);
+            });
 
-            modelBuilder.Entity<WishlistItem>()
-                .HasOne(wi => wi.Item)
-                .WithMany(i => i.WishlistItems)
-                .HasForeignKey(wi => wi.ItemId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Настройка Item
+            modelBuilder.Entity<Item>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(300);
+                entity.Property(e => e.Desc).HasMaxLength(4000);
+                entity.Property(e => e.ImageUrl).HasMaxLength(500);
+                entity.Property(e => e.Price).IsRequired();
+                entity.Property(e => e.Garantia).IsRequired();
 
-            // Order
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.User)
-                .WithMany(u => u.Orders)
-                .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(i => i.Brand)
+                    .WithMany(b => b.Items)
+                    .HasForeignKey(i => i.BrandId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.City)
-                .WithMany()
-                .HasForeignKey(o => o.CityId)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(i => i.Category)
+                    .WithMany()
+                    .HasForeignKey(i => i.CategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-            // OrderItem
-            modelBuilder.Entity<OrderItem>()
-                .HasOne(oi => oi.Order)
-                .WithMany(o => o.OrderItems)
-                .HasForeignKey(oi => oi.OrderId)
-                .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(i => i.User)
+                    .WithMany(u => u.SellingItems)
+                    .HasForeignKey(i => i.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            modelBuilder.Entity<OrderItem>()
-                .HasOne(oi => oi.Item)
-                .WithMany(i => i.OrderItems)
-                .HasForeignKey(oi => oi.ItemId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Настройка ItemCharacteristic
+            modelBuilder.Entity<ItemCharacteristic>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Key).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Value).IsRequired().HasMaxLength(500);
 
-            // Review
-            modelBuilder.Entity<Review>()
-                .HasOne(r => r.User)
-                .WithMany(u => u.Reviews)
-                .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(ic => ic.Item)
+                    .WithMany(i => i.Characteristics)
+                    .HasForeignKey(ic => ic.ItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
-            modelBuilder.Entity<Review>()
-                .HasOne(r => r.Item)
-                .WithMany(i => i.Reviews)
-                .HasForeignKey(r => r.ItemId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // Настройка ItemColor
+            modelBuilder.Entity<ItemColor>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Color).IsRequired().HasMaxLength(100);
 
-            // ItemColor
-            modelBuilder.Entity<ItemColor>()
-                .HasOne(ic => ic.Item)
-                .WithMany(i => i.Colors)
-                .HasForeignKey(ic => ic.ItemId)
-                .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(ic => ic.Item)
+                    .WithMany(i => i.Colors)
+                    .HasForeignKey(ic => ic.ItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
-            // ItemCharacteristic
-            modelBuilder.Entity<ItemCharacteristic>()
-                .HasOne(ic => ic.Item)
-                .WithMany(i => i.Characteristics)
-                .HasForeignKey(ic => ic.ItemId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // Настройка Review
+            modelBuilder.Entity<Review>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Comment).HasMaxLength(2000);
+                entity.Property(e => e.Rating).IsRequired();
+                entity.Property(e => e.CreatedAt).IsRequired();
 
-            // Usluga
-            modelBuilder.Entity<Usluga>()
-                .HasOne(u => u.Item)
-                .WithMany(i => i.Uslugi)
-                .HasForeignKey(u => u.ItemId)
-                .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(r => r.Item)
+                    .WithMany(i => i.Reviews)
+                    .HasForeignKey(r => r.ItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            // Delivery
-            modelBuilder.Entity<Delivery>()
-                .HasOne(d => d.Item)
-                .WithMany(i => i.DeliveryVariants)
-                .HasForeignKey(d => d.ItemId)
-                .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(r => r.User)
+                    .WithMany(u => u.Reviews)
+                    .HasForeignKey(r => r.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            // ComplectItem
-            modelBuilder.Entity<ComplectItem>()
-                .HasOne(ci => ci.Complect)
-                .WithMany(c => c.Items)
-                .HasForeignKey(ci => ci.ComplectId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // Настройка Complect
+            modelBuilder.Entity<Complect>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            });
 
-            modelBuilder.Entity<ComplectItem>()
-                .HasOne(ci => ci.Item)
-                .WithMany(i => i.ComplectItems)
-                .HasForeignKey(ci => ci.ItemId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Настройка ComplectItem (составной ключ)
+            modelBuilder.Entity<ComplectItem>(entity =>
+            {
+                entity.HasKey(ci => new { ci.ComplectId, ci.ItemId });
 
-            // CategoryFilter
-            modelBuilder.Entity<CategoryFilter>()
-                .HasOne(cf => cf.Category)
-                .WithMany(c => c.Filters)
-                .HasForeignKey(cf => cf.CategoryId)
-                .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(ci => ci.Complect)
+                    .WithMany(c => c.Items)
+                    .HasForeignKey(ci => ci.ComplectId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            // Индексы
-            modelBuilder.Entity<Item>()
-                .HasIndex(i => i.Name)
-                .HasDatabaseName("IX_Items_Name");
+                entity.HasOne(ci => ci.Item)
+                    .WithMany(i => i.ComplectItems)
+                    .HasForeignKey(ci => ci.ItemId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            modelBuilder.Entity<Item>()
-                .HasIndex(i => i.CategoryId)
-                .HasDatabaseName("IX_Items_CategoryId");
+            // Настройка Usluga
+            modelBuilder.Entity<Usluga>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Description).HasMaxLength(1000);
+                entity.Property(e => e.Price).HasPrecision(18, 2); // Добавлено для decimal
 
-            modelBuilder.Entity<Item>()
-                .HasIndex(i => i.BrandId)
-                .HasDatabaseName("IX_Items_BrandId");
+                entity.HasOne(u => u.Item)
+                    .WithMany(i => i.Uslugi)
+                    .HasForeignKey(u => u.ItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
-            modelBuilder.Entity<Item>()
-                .HasIndex(i => i.Price)
-                .HasDatabaseName("IX_Items_Price");
+            // Настройка Delivery
+            modelBuilder.Entity<Delivery>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.DeliveryPlace).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.SendingPlace).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Price).HasPrecision(18, 2); // Добавлено для decimal
+                entity.Property(e => e.PaymentType).HasConversion<int>();
 
-            modelBuilder.Entity<Item>()
-                .HasIndex(i => i.IsAvailable)
-                .HasDatabaseName("IX_Items_IsAvailable");
+                entity.HasOne(d => d.Item)
+                    .WithMany(i => i.DeliveryVariants)
+                    .HasForeignKey(d => d.ItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
-            modelBuilder.Entity<Category>()
-                .HasIndex(c => c.ParentCategoryId)
-                .HasDatabaseName("IX_Categories_ParentCategoryId");
+            // Настройка User
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Email).IsUnique();
+                entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.PasswordHash).IsRequired();
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            });
 
-            modelBuilder.Entity<Category>()
-                .HasIndex(c => c.Name)
-                .HasDatabaseName("IX_Categories_Name");
+            // Настройка CartItem
+            modelBuilder.Entity<CartItem>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Quantity).IsRequired();
 
-            modelBuilder.Entity<Brand>()
-                .HasIndex(b => b.Name)
-                .HasDatabaseName("IX_Brands_Name");
+                entity.HasOne(ci => ci.User)
+                    .WithMany(u => u.CartItems)
+                    .HasForeignKey(ci => ci.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique()
-                .HasDatabaseName("IX_Users_Email");
+                entity.HasOne(ci => ci.Item)
+                    .WithMany(i => i.CartItems)
+                    .HasForeignKey(ci => ci.ItemId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-            // Seed города
+                // Уникальность: один пользователь может добавить конкретный товар только один раз
+                entity.HasIndex(ci => new { ci.UserId, ci.ItemId }).IsUnique();
+            });
+
+            // Настройка WishlistItem
+            modelBuilder.Entity<WishlistItem>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(wi => wi.User)
+                    .WithMany(u => u.WishlistItems)
+                    .HasForeignKey(wi => wi.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(wi => wi.Item)
+                    .WithMany(i => i.WishlistItems)
+                    .HasForeignKey(wi => wi.ItemId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Уникальность: один пользователь может добавить конкретный товар в избранное только один раз
+                entity.HasIndex(wi => new { wi.UserId, wi.ItemId }).IsUnique();
+            });
+
+            // Настройка Order
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Number).IsRequired().HasMaxLength(50);
+                entity.HasIndex(e => e.Number).IsUnique();
+                entity.Property(e => e.Address).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.PaymentMethod).HasMaxLength(50);
+                entity.Property(e => e.PaymentStatus).HasMaxLength(50);
+                entity.Property(e => e.DeliveryMethod).HasMaxLength(100);
+                entity.Property(e => e.Ttn).HasMaxLength(100);
+                entity.Property(e => e.TotalAmount).HasPrecision(18, 2); // Добавлено для decimal
+
+                entity.HasOne(o => o.User)
+                    .WithMany(u => u.Orders)
+                    .HasForeignKey(o => o.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(o => o.City)
+                    .WithMany()
+                    .HasForeignKey(o => o.CityId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Настройка OrderItem
+            modelBuilder.Entity<OrderItem>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Quantity).IsRequired();
+                entity.Property(e => e.PriceAtMoment).HasPrecision(18, 2); // Добавлено для decimal
+
+                entity.HasOne(oi => oi.Order)
+                    .WithMany(o => o.OrderItems)
+                    .HasForeignKey(oi => oi.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(oi => oi.Item)
+                    .WithMany(i => i.OrderItems)
+                    .HasForeignKey(oi => oi.ItemId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Настройка City
+            modelBuilder.Entity<City>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Name).IsUnique();
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            });
+
+            // Заполнение начальными данными
+            SeedData(modelBuilder);
+        }
+
+        private void SeedData(ModelBuilder modelBuilder)
+        {
+            // 1. Сначала города
             modelBuilder.Entity<City>().HasData(
-                new City { Id = 1, Name = "Київ" },
-                new City { Id = 2, Name = "Харків" },
-                new City { Id = 3, Name = "Одеса" },
-                new City { Id = 4, Name = "Дніпро" },
-                new City { Id = 5, Name = "Львів" },
-                new City { Id = 6, Name = "Запоріжжя" },
-                new City { Id = 7, Name = "Миколаїв" },
-                new City { Id = 8, Name = "Вінниця" },
-                new City { Id = 9, Name = "Херсон" },
-                new City { Id = 10, Name = "Полтава" }
+                new City { Id = 1, Name = "Kyiv" },
+                new City { Id = 2, Name = "Kharkiv" },
+                new City { Id = 3, Name = "Odesa" },
+                new City { Id = 4, Name = "Dnipro" },
+                new City { Id = 5, Name = "Lviv" },
+                new City { Id = 6, Name = "Zaporizhzhia" },
+                new City { Id = 7, Name = "Mykolaiv" },
+                new City { Id = 8, Name = "Vinnytsia" },
+                new City { Id = 9, Name = "Kherson" },
+                new City { Id = 10, Name = "Poltava" },
+                new City { Id = 11, Name = "Chernihiv" },
+                new City { Id = 12, Name = "Cherkasy" },
+                new City { Id = 13, Name = "Zhytomyr" },
+                new City { Id = 14, Name = "Sumy" },
+                new City { Id = 15, Name = "Rivne" },
+                new City { Id = 16, Name = "Ternopil" },
+                new City { Id = 17, Name = "Lutsk" },
+                new City { Id = 18, Name = "Uzhhorod" },
+                new City { Id = 19, Name = "Chernivtsi" },
+                new City { Id = 20, Name = "IvanoFrankivsk" },
+                new City { Id = 21, Name = "Kropyvnytskyi" },
+                new City { Id = 22, Name = "Khmelnytskyi" }
             );
 
-            // Обновление/добавление категорий (используем проверку в миграции, но здесь оставляем для целостности)
-            modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1, Name = "Ноутбуки", IconUrl = "bi-laptop", DisplayOrder = 1 },
-                new Category { Id = 2, Name = "Смартфони, ТВ та електроніка", IconUrl = "bi-phone", DisplayOrder = 2 },
-                new Category { Id = 3, Name = "Товари для геймерів", IconUrl = "bi-controller", DisplayOrder = 3 },
-                new Category { Id = 4, Name = "Побутова техніка", IconUrl = "bi-fan", DisplayOrder = 4 },
-                new Category { Id = 5, Name = "Товари для дому", IconUrl = "bi-house", DisplayOrder = 5 },
-                new Category { Id = 6, Name = "Інструменти та автотовари", IconUrl = "bi-tools", DisplayOrder = 6 },
-                new Category { Id = 7, Name = "Сантехніка та ремонт", IconUrl = "bi-droplet", DisplayOrder = 7 },
-                new Category { Id = 8, Name = "Дача, сад та город", IconUrl = "bi-flower", DisplayOrder = 8 },
-                new Category { Id = 9, Name = "Спорт та захоплення", IconUrl = "bi-bicycle", DisplayOrder = 9 },
-                new Category { Id = 10, Name = "Одяг, взуття та прикраси", IconUrl = "bi-tag", DisplayOrder = 10 },
-                new Category { Id = 11, Name = "Краса і здоров'я", IconUrl = "bi-heart", DisplayOrder = 11 },
-                new Category { Id = 12, Name = "Дитячі товари", IconUrl = "bi-emoji-smile", DisplayOrder = 12 },
-                new Category { Id = 13, Name = "Зоотовари", IconUrl = "bi-bug", DisplayOrder = 13 },
-                new Category { Id = 14, Name = "Канцтовари та книги", IconUrl = "bi-pencil", DisplayOrder = 14 },
-                new Category { Id = 15, Name = "Алкогольні напої та продукти", IconUrl = "bi-cup-straw", DisplayOrder = 15 },
-                new Category { Id = 16, Name = "Товари для бізнесу та послуги", IconUrl = "bi-briefcase", DisplayOrder = 16 },
-                new Category { Id = 17, Name = "Тури та відпочинок", IconUrl = "bi-tree", DisplayOrder = 17 },
-                new Category { Id = 18, Name = "Акції", IconUrl = "bi-percent", DisplayOrder = 18 },
-                new Category { Id = 19, Name = "Тотальний розпродаж", IconUrl = "bi-fire", DisplayOrder = 19 }
-            );
-
-            // Подкатегории для Ноутбуков
-            modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 101, Name = "Asus", ParentCategoryId = 1, DisplayOrder = 1 },
-                new Category { Id = 102, Name = "Acer", ParentCategoryId = 1, DisplayOrder = 2 },
-                new Category { Id = 103, Name = "HP", ParentCategoryId = 1, DisplayOrder = 3 },
-                new Category { Id = 104, Name = "Lenovo", ParentCategoryId = 1, DisplayOrder = 4 },
-                new Category { Id = 105, Name = "Dell", ParentCategoryId = 1, DisplayOrder = 5 },
-                new Category { Id = 106, Name = "Apple", ParentCategoryId = 1, DisplayOrder = 6 },
-                new Category { Id = 107, Name = "Аксесуари для ноутбуків і ПК", ParentCategoryId = 1, DisplayOrder = 7 },
-                new Category { Id = 108, Name = "Флеш пам'ять USB", ParentCategoryId = 107, DisplayOrder = 1 },
-                new Category { Id = 109, Name = "Сумки та рюкзаки для ноутбуків", ParentCategoryId = 107, DisplayOrder = 2 },
-                new Category { Id = 110, Name = "Підставки та столики для ноутбуків", ParentCategoryId = 107, DisplayOrder = 3 },
-                new Category { Id = 111, Name = "Веб-камери", ParentCategoryId = 107, DisplayOrder = 4 },
-                new Category { Id = 120, Name = "Комп'ютери", ParentCategoryId = 1, DisplayOrder = 8 },
-                new Category { Id = 121, Name = "Монітори", ParentCategoryId = 120, DisplayOrder = 1 },
-                new Category { Id = 122, Name = "Миші", ParentCategoryId = 120, DisplayOrder = 2 },
-                new Category { Id = 123, Name = "Клавіатури", ParentCategoryId = 120, DisplayOrder = 3 },
-                new Category { Id = 124, Name = "Комплект: клавіатури + миші", ParentCategoryId = 120, DisplayOrder = 4 },
-                new Category { Id = 125, Name = "Мережеві сховища (NAS)", ParentCategoryId = 120, DisplayOrder = 5 },
-                new Category { Id = 130, Name = "Комплектуючі", ParentCategoryId = 1, DisplayOrder = 9 },
-                new Category { Id = 131, Name = "Відеокарти", ParentCategoryId = 130, DisplayOrder = 1 },
-                new Category { Id = 132, Name = "Жорсткі диски та дискові масиви", ParentCategoryId = 130, DisplayOrder = 2 },
-                new Category { Id = 133, Name = "Процесори", ParentCategoryId = 130, DisplayOrder = 3 },
-                new Category { Id = 134, Name = "SSD", ParentCategoryId = 130, DisplayOrder = 4 },
-                new Category { Id = 135, Name = "Оперативна пам'ять", ParentCategoryId = 130, DisplayOrder = 5 },
-                new Category { Id = 136, Name = "Материнські плати", ParentCategoryId = 130, DisplayOrder = 6 },
-                new Category { Id = 137, Name = "Блоки живлення", ParentCategoryId = 130, DisplayOrder = 7 },
-                new Category { Id = 140, Name = "Мережеве обладнання", ParentCategoryId = 1, DisplayOrder = 10 },
-                new Category { Id = 141, Name = "Патч-корди", ParentCategoryId = 140, DisplayOrder = 1 },
-                new Category { Id = 142, Name = "Маршрутизатори", ParentCategoryId = 140, DisplayOrder = 2 },
-                new Category { Id = 143, Name = "IP-камери", ParentCategoryId = 140, DisplayOrder = 3 },
-                new Category { Id = 144, Name = "Комутатори", ParentCategoryId = 140, DisplayOrder = 4 },
-                new Category { Id = 145, Name = "Бездротові точки доступу", ParentCategoryId = 140, DisplayOrder = 5 },
-                new Category { Id = 150, Name = "Серверне обладнання", ParentCategoryId = 1, DisplayOrder = 11 },
-                new Category { Id = 160, Name = "Оргтехніка", ParentCategoryId = 1, DisplayOrder = 12 },
-                new Category { Id = 161, Name = "БФП/Принтери", ParentCategoryId = 160, DisplayOrder = 1 },
-                new Category { Id = 162, Name = "Проектори", ParentCategoryId = 160, DisplayOrder = 2 },
-                new Category { Id = 163, Name = "Витратні матеріали для принтерів", ParentCategoryId = 160, DisplayOrder = 3 },
-                new Category { Id = 164, Name = "Телефонні апарати", ParentCategoryId = 160, DisplayOrder = 4 },
-                new Category { Id = 170, Name = "Програмне забезпечення", ParentCategoryId = 1, DisplayOrder = 13 },
-                new Category { Id = 171, Name = "Операційні системи", ParentCategoryId = 170, DisplayOrder = 1 },
-                new Category { Id = 172, Name = "Офісні програми", ParentCategoryId = 170, DisplayOrder = 2 },
-                new Category { Id = 173, Name = "Антивірусні програми", ParentCategoryId = 170, DisplayOrder = 3 }
-            );
-
-            // Подкатегории для Смартфонов
-            modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 201, Name = "Смартфони", ParentCategoryId = 2, DisplayOrder = 1 },
-                new Category { Id = 202, Name = "Телевізори", ParentCategoryId = 2, DisplayOrder = 2 },
-                new Category { Id = 203, Name = "Планшети", ParentCategoryId = 2, DisplayOrder = 3 },
-                new Category { Id = 204, Name = "Аудіотехніка", ParentCategoryId = 2, DisplayOrder = 4 },
-                new Category { Id = 205, Name = "Навушники", ParentCategoryId = 204, DisplayOrder = 1 },
-                new Category { Id = 206, Name = "Колонки", ParentCategoryId = 204, DisplayOrder = 2 },
-                new Category { Id = 207, Name = "MP3-плеєри", ParentCategoryId = 204, DisplayOrder = 3 },
-                new Category { Id = 208, Name = "Фотоапарати", ParentCategoryId = 2, DisplayOrder = 5 },
-                new Category { Id = 209, Name = "Відеокамери", ParentCategoryId = 2, DisplayOrder = 6 },
-                new Category { Id = 210, Name = "Розумний дім", ParentCategoryId = 2, DisplayOrder = 7 },
-                new Category { Id = 211, Name = "Аксесуари до телефонів", ParentCategoryId = 2, DisplayOrder = 8 },
-                new Category { Id = 212, Name = "Чохли для телефонів", ParentCategoryId = 211, DisplayOrder = 1 },
-                new Category { Id = 213, Name = "Захисні скельця", ParentCategoryId = 211, DisplayOrder = 2 },
-                new Category { Id = 214, Name = "Зарядні пристрої", ParentCategoryId = 211, DisplayOrder = 3 },
-                new Category { Id = 215, Name = "Power Bank", ParentCategoryId = 211, DisplayOrder = 4 }
-            );
-
-            // Подкатегории для Товаров для геймеров
-            modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 301, Name = "PlayStation", ParentCategoryId = 3, DisplayOrder = 1 },
-                new Category { Id = 302, Name = "Xbox", ParentCategoryId = 3, DisplayOrder = 2 },
-                new Category { Id = 303, Name = "Nintendo", ParentCategoryId = 3, DisplayOrder = 3 },
-                new Category { Id = 304, Name = "Ігрові консолі та приставки", ParentCategoryId = 3, DisplayOrder = 4 },
-                new Category { Id = 305, Name = "Джойстики та аксесуари", ParentCategoryId = 3, DisplayOrder = 5 },
-                new Category { Id = 306, Name = "Ігри", ParentCategoryId = 3, DisplayOrder = 6 },
-                new Category { Id = 307, Name = "Ігрові поверхні", ParentCategoryId = 3, DisplayOrder = 7 },
-                new Category { Id = 308, Name = "Ігрові крісла", ParentCategoryId = 3, DisplayOrder = 8 },
-                new Category { Id = 309, Name = "Ігрові миші", ParentCategoryId = 3, DisplayOrder = 9 },
-                new Category { Id = 310, Name = "Ігрові клавіатури", ParentCategoryId = 3, DisplayOrder = 10 },
-                new Category { Id = 311, Name = "Ігрові навушники", ParentCategoryId = 3, DisplayOrder = 11 }
-            );
-
-            // Подкатегории для Побутовой техники
-            modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 401, Name = "Велика побутова техніка", ParentCategoryId = 4, DisplayOrder = 1 },
-                new Category { Id = 402, Name = "Холодильники", ParentCategoryId = 401, DisplayOrder = 1 },
-                new Category { Id = 403, Name = "Пральні машини", ParentCategoryId = 401, DisplayOrder = 2 },
-                new Category { Id = 404, Name = "Плити та духовки", ParentCategoryId = 401, DisplayOrder = 3 },
-                new Category { Id = 405, Name = "Мікрохвильові печі", ParentCategoryId = 401, DisplayOrder = 4 },
-                new Category { Id = 406, Name = "Посудомийні машини", ParentCategoryId = 401, DisplayOrder = 5 },
-                new Category { Id = 407, Name = "Мала побутова техніка", ParentCategoryId = 4, DisplayOrder = 2 },
-                new Category { Id = 408, Name = "Пилососи", ParentCategoryId = 407, DisplayOrder = 1 },
-                new Category { Id = 409, Name = "Праски", ParentCategoryId = 407, DisplayOrder = 2 },
-                new Category { Id = 410, Name = "Блендери, міксери", ParentCategoryId = 407, DisplayOrder = 3 },
-                new Category { Id = 411, Name = "Кавомашини", ParentCategoryId = 407, DisplayOrder = 4 },
-                new Category { Id = 412, Name = "Електрочайники", ParentCategoryId = 407, DisplayOrder = 5 },
-                new Category { Id = 413, Name = "Фени", ParentCategoryId = 407, DisplayOrder = 6 },
-                new Category { Id = 414, Name = "Кліматична техніка", ParentCategoryId = 4, DisplayOrder = 3 },
-                new Category { Id = 415, Name = "Кондиціонери", ParentCategoryId = 414, DisplayOrder = 1 },
-                new Category { Id = 416, Name = "Обігрівачі", ParentCategoryId = 414, DisplayOrder = 2 },
-                new Category { Id = 417, Name = "Зволожувачі повітря", ParentCategoryId = 414, DisplayOrder = 3 },
-                new Category { Id = 418, Name = "Вентилятори", ParentCategoryId = 414, DisplayOrder = 4 }
-            );
-
-            // Seed брендов с логотипами
-            modelBuilder.Entity<Brand>().HasData(
-                new Brand { Id = 1, Name = "Samsung", Logo = "/images/brands/samsung.png" },
-                new Brand { Id = 2, Name = "Apple", Logo = "/images/brands/apple.png" },
-                new Brand { Id = 3, Name = "Xiaomi", Logo = "/images/brands/xiaomi.png" },
-                new Brand { Id = 4, Name = "Sony", Logo = "/images/brands/sony.png" },
-                new Brand { Id = 5, Name = "LG", Logo = "/images/brands/lg.png" },
-                new Brand { Id = 6, Name = "Bosch", Logo = "/images/brands/bosch.png" },
-                new Brand { Id = 7, Name = "Adidas", Logo = "/images/brands/adidas.png" },
-                new Brand { Id = 8, Name = "Nike", Logo = "/images/brands/nike.png" },
-                new Brand { Id = 9, Name = "Puma", Logo = "/images/brands/puma.png" },
-                new Brand { Id = 10, Name = "Zara", Logo = "/images/brands/zara.png" },
-                new Brand { Id = 11, Name = "H&M", Logo = "/images/brands/hm.png" },
-                new Brand { Id = 12, Name = "Asus", Logo = "/images/brands/asus.png" },
-                new Brand { Id = 13, Name = "Acer", Logo = "/images/brands/acer.png" },
-                new Brand { Id = 14, Name = "HP", Logo = "/images/brands/hp.png" },
-                new Brand { Id = 15, Name = "Lenovo", Logo = "/images/brands/lenovo.png" },
-                new Brand { Id = 16, Name = "Dell", Logo = "/images/brands/dell.png" },
-                new Brand { Id = 17, Name = "Canon", Logo = "/images/brands/canon.png" },
-                new Brand { Id = 18, Name = "Epson", Logo = "/images/brands/epson.png" },
-                new Brand { Id = 19, Name = "Makita", Logo = "/images/brands/makita.png" },
-                new Brand { Id = 20, Name = "DeWalt", Logo = "/images/brands/dewalt.png" }
-            );
-
-            // Связи категория-бренд
-            modelBuilder.Entity<CategoryBrand>().HasData(
-                new CategoryBrand { CategoryId = 1, BrandId = 1 },
-                new CategoryBrand { CategoryId = 1, BrandId = 2 },
-                new CategoryBrand { CategoryId = 1, BrandId = 3 },
-                new CategoryBrand { CategoryId = 1, BrandId = 4 },
-                new CategoryBrand { CategoryId = 1, BrandId = 5 },
-                new CategoryBrand { CategoryId = 1, BrandId = 12 },
-                new CategoryBrand { CategoryId = 1, BrandId = 13 },
-                new CategoryBrand { CategoryId = 1, BrandId = 14 },
-                new CategoryBrand { CategoryId = 1, BrandId = 15 },
-                new CategoryBrand { CategoryId = 1, BrandId = 16 },
-                new CategoryBrand { CategoryId = 201, BrandId = 1 },
-                new CategoryBrand { CategoryId = 201, BrandId = 2 },
-                new CategoryBrand { CategoryId = 201, BrandId = 3 },
-                new CategoryBrand { CategoryId = 201, BrandId = 4 },
-                new CategoryBrand { CategoryId = 10, BrandId = 7 },
-                new CategoryBrand { CategoryId = 10, BrandId = 8 },
-                new CategoryBrand { CategoryId = 10, BrandId = 9 },
-                new CategoryBrand { CategoryId = 10, BrandId = 10 },
-                new CategoryBrand { CategoryId = 10, BrandId = 11 },
-                new CategoryBrand { CategoryId = 9, BrandId = 7 },
-                new CategoryBrand { CategoryId = 9, BrandId = 8 },
-                new CategoryBrand { CategoryId = 9, BrandId = 9 },
-                new CategoryBrand { CategoryId = 6, BrandId = 19 },
-                new CategoryBrand { CategoryId = 6, BrandId = 20 },
-                new CategoryBrand { CategoryId = 6, BrandId = 6 }
-            );
-
+            // 2. Затем пользователь (админ)
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
                     Id = 1,
+                    Email = "admin@example.com",
+                    PasswordHash = "AQAAAAIAAYagAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==", // "admin123"
+                    Name = "Admin User",
+                    IsAdmin = true
+                },
+                new User
+                {
+                    Id = 2,
                     Email = "test@example.com",
-                    PasswordHash = "123456", // В реальном проекте нужно хэшировать
+                    PasswordHash = "AQAAAAIAAYagAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==", // "test123"
                     Name = "Test User",
                     IsAdmin = false
                 }
             );
 
-            // Очищаем предыдущие seed данные для Item (если они были)
-            modelBuilder.Entity<Item>().HasData(new List<Item>());
+            // 3. Бренды (добавляем перед Items)
+            modelBuilder.Entity<Brand>().HasData(
+                new Brand { Id = 1, Name = "Apple", Logo = "/images/brands/apple.png" },
+                new Brand { Id = 2, Name = "Samsung", Logo = "/images/brands/samsung.png" },
+                new Brand { Id = 3, Name = "Xiaomi", Logo = "/images/brands/xiaomi.png" },
+                new Brand { Id = 4, Name = "Sony", Logo = "/images/brands/sony.png" },
+                new Brand { Id = 5, Name = "LG", Logo = "/images/brands/lg.png" },
+                new Brand { Id = 6, Name = "Bosch", Logo = "/images/brands/bosch.png" },
+                new Brand { Id = 7, Name = "Nike", Logo = "/images/brands/nike.png" },
+                new Brand { Id = 8, Name = "Adidas", Logo = "/images/brands/adidas.png" },
+                new Brand { Id = 9, Name = "Puma", Logo = "/images/brands/puma.png" },
+                new Brand { Id = 10, Name = "Zara", Logo = "/images/brands/zara.png" },
+                new Brand { Id = 11, Name = "H&M", Logo = "/images/brands/hm.png" },
+                new Brand { Id = 12, Name = "Dell", Logo = "/images/brands/dell.png" },
+                new Brand { Id = 13, Name = "HP", Logo = "/images/brands/hp.png" },
+                new Brand { Id = 14, Name = "Lenovo", Logo = "/images/brands/lenovo.png" },
+                new Brand { Id = 15, Name = "Asus", Logo = "/images/brands/asus.png" },
+                new Brand { Id = 16, Name = "Acer", Logo = "/images/brands/acer.png" },
+                new Brand { Id = 17, Name = "Microsoft", Logo = "/images/brands/microsoft.png" },
+                new Brand { Id = 18, Name = "Canon", Logo = "/images/brands/canon.png" },
+                new Brand { Id = 19, Name = "Nikon", Logo = "/images/brands/nikon.png" },
+                new Brand { Id = 20, Name = "Panasonic", Logo = "/images/brands/panasonic.png" }
+            );
 
-            // Добавляем с отрицательными ID
+            // 4. Категории верхнего уровня
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1, Name = "Ноутбуки та комп'ютери", IconUrl = "icon-laptops-and-computers.svg", ImgUrl = "categoryImg-laptops-and-computers.svg", ParentCategoryId = null, DisplayOrder = 1 },
+                new Category { Id = 2, Name = "Смартфони, ТВ та електроніка", IconUrl = "icon-smartphones-tv-electronics.svg", ImgUrl = "categoryImg-smartphones-tv-electronics.svg", ParentCategoryId = null, DisplayOrder = 2 },
+                new Category { Id = 3, Name = "Товари для геймерів", IconUrl = "icon-gaming.svg", ImgUrl = "categoryImg-gaming.svg", ParentCategoryId = null, DisplayOrder = 3 },
+                new Category { Id = 4, Name = "Побутова техніка", IconUrl = "icon-home-appliances.svg", ImgUrl = "categoryImg-home-appliances.svg", ParentCategoryId = null, DisplayOrder = 4 },
+                new Category { Id = 5, Name = "Товари для дому", IconUrl = "icon-home-goods.svg", ImgUrl = "categoryImg-home-goods.svg", ParentCategoryId = null, DisplayOrder = 5 },
+                new Category { Id = 6, Name = "Інструменти та автотовари", IconUrl = "icon-tools-auto.svg", ImgUrl = "categoryImg-tools-auto.svg", ParentCategoryId = null, DisplayOrder = 6 },
+                new Category { Id = 7, Name = "Сантехніка та ремонт", IconUrl = "icon-plumbing-renovation.svg", ImgUrl = "categoryImg-plumbing-renovation.svg", ParentCategoryId = null, DisplayOrder = 7 },
+                new Category { Id = 8, Name = "Дача, сад та город", IconUrl = "icon-garden.svg", ImgUrl = "categoryImg-garden.svg", ParentCategoryId = null, DisplayOrder = 8 },
+                new Category { Id = 9, Name = "Спорт та захоплення", IconUrl = "icon-sports-hobbies.svg", ImgUrl = "categoryImg-sports-hobbies.svg", ParentCategoryId = null, DisplayOrder = 9 },
+                new Category { Id = 10, Name = "Одяг, взуття та прикраси", IconUrl = "icon-clothing-footwear-jewelry.svg", ImgUrl = "categoryImg-clothing-footwear-jewelry.svg", ParentCategoryId = null, DisplayOrder = 10 },
+                new Category { Id = 11, Name = "Краса і здоров'я", IconUrl = "icon-beauty-health.svg", ImgUrl = "categoryImg-beauty-health.svg", ParentCategoryId = null, DisplayOrder = 11 },
+                new Category { Id = 12, Name = "Дитячі товари", IconUrl = "icon-baby-products.svg", ImgUrl = "categoryImg-baby-products.svg", ParentCategoryId = null, DisplayOrder = 12 },
+                new Category { Id = 13, Name = "Зоотовари", IconUrl = "icon-pet-supplies.svg", ImgUrl = "categoryImg-pet-supplies.svg", ParentCategoryId = null, DisplayOrder = 13 },
+                new Category { Id = 14, Name = "Канцтовари та книги", IconUrl = "icon-stationery-books.svg", ImgUrl = "categoryImg-stationery-books.svg", ParentCategoryId = null, DisplayOrder = 14 },
+                new Category { Id = 15, Name = "Алкогольні напої та продукти", IconUrl = "icon-alcohol-food.svg", ImgUrl = "categoryImg-alcohol-food.svg", ParentCategoryId = null, DisplayOrder = 15 },
+                new Category { Id = 16, Name = "Товари для бізнесу та послуги", IconUrl = "icon-business-services.svg", ImgUrl = "categoryImg-business-services.svg", ParentCategoryId = null, DisplayOrder = 16 },
+                new Category { Id = 17, Name = "Туризм та відпочинок", IconUrl = "icon-tourism-outdoor.svg", ImgUrl = "categoryImg-tourism-outdoor.svg", ParentCategoryId = null, DisplayOrder = 17 },
+                new Category { Id = 18, Name = "Акції", IconUrl = "icon-promotions.svg", ImgUrl = "categoryImg-promotions.svg", ParentCategoryId = null, DisplayOrder = 18 },
+                new Category { Id = 19, Name = "Тотальний розпродаж", IconUrl = "icon-total-sale.svg", ImgUrl = "categoryImg-total-sale.svg", ParentCategoryId = null, DisplayOrder = 19 }
+            );
+
+            // 5. Подкатегории
+            // Категория 1 - Ноутбуки та комп'ютери
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 101, Name = "Ноутбуки", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 1 },
+                new Category { Id = 102, Name = "Ігрові ноутбуки", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 2 },
+                new Category { Id = 103, Name = "Ультрабуки", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 3 },
+                new Category { Id = 104, Name = "Для навчання", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 4 },
+                new Category { Id = 105, Name = "Для роботи", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 5 },
+                new Category { Id = 106, Name = "Chromebook", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 6 },
+                new Category { Id = 107, Name = "Комп'ютери", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 7 },
+                new Category { Id = 108, Name = "Настільні ПК", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 8 },
+                new Category { Id = 109, Name = "Ігрові ПК", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 9 },
+                new Category { Id = 110, Name = "Міні-ПК", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 10 },
+                new Category { Id = 111, Name = "Моноблоки", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 11 },
+                new Category { Id = 112, Name = "Робочі станції", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 12 },
+                new Category { Id = 113, Name = "Комплектуючі", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 13 },
+                new Category { Id = 114, Name = "Процесори", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 14 },
+                new Category { Id = 115, Name = "Відеокарти", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 15 },
+                new Category { Id = 116, Name = "Материнські плати", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 16 },
+                new Category { Id = 117, Name = "Оперативна пам'ять", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 17 },
+                new Category { Id = 118, Name = "Блоки живлення", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 18 },
+                new Category { Id = 119, Name = "Корпуси", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 19 },
+                new Category { Id = 120, Name = "Накопичувачі", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 20 },
+                new Category { Id = 121, Name = "SSD", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 21 },
+                new Category { Id = 122, Name = "HDD", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 22 },
+                new Category { Id = 123, Name = "Зовнішні диски", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 23 },
+                new Category { Id = 124, Name = "NAS", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 24 },
+                new Category { Id = 125, Name = "Периферія", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 25 },
+                new Category { Id = 126, Name = "Клавіатури", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 26 },
+                new Category { Id = 127, Name = "Миші", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 27 },
+                new Category { Id = 128, Name = "Килимки", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 28 },
+                new Category { Id = 129, Name = "Вебкамери", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 29 }
+            );
+
+            // Категория 2 - Смартфони, ТВ та електроніка
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 201, Name = "Смартфони", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 1 },
+                new Category { Id = 202, Name = "Android", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 2 },
+                new Category { Id = 203, Name = "iPhone", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 3 },
+                new Category { Id = 204, Name = "Бюджетні", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 4 },
+                new Category { Id = 205, Name = "Флагмани", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 5 },
+                new Category { Id = 206, Name = "Телевізори", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 6 },
+                new Category { Id = 207, Name = "Smart TV", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 7 },
+                new Category { Id = 208, Name = "LED", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 8 },
+                new Category { Id = 209, Name = "OLED", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 9 },
+                new Category { Id = 210, Name = "QLED", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 10 },
+                new Category { Id = 211, Name = "Аудіо", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 11 },
+                new Category { Id = 212, Name = "Навушники", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 12 },
+                new Category { Id = 213, Name = "Саундбари", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 13 },
+                new Category { Id = 214, Name = "Колонки", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 14 },
+                new Category { Id = 215, Name = "Домашні кінотеатри", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 15 },
+                new Category { Id = 216, Name = "Планшети", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 16 },
+                new Category { Id = 217, Name = "iPad", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 17 },
+                new Category { Id = 218, Name = "Android планшети", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 18 },
+                new Category { Id = 219, Name = "Гаджети", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 19 },
+                new Category { Id = 220, Name = "Смарт-годинники", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 20 },
+                new Category { Id = 221, Name = "Фітнес-браслети", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 21 }
+            );
+
+            // Категория 3 - Товари для геймерів
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 301, Name = "Консолі", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 1 },
+                new Category { Id = 302, Name = "PlayStation", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 2 },
+                new Category { Id = 303, Name = "Xbox", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 3 },
+                new Category { Id = 304, Name = "Nintendo", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 4 },
+                new Category { Id = 305, Name = "Ігри", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 5 },
+                new Category { Id = 306, Name = "PlayStation ігри", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 6 },
+                new Category { Id = 307, Name = "Xbox ігри", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 7 },
+                new Category { Id = 308, Name = "PC ігри", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 8 },
+                new Category { Id = 309, Name = "Геймерська периферія", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 9 },
+                new Category { Id = 310, Name = "Ігрові миші", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 10 },
+                new Category { Id = 311, Name = "Ігрові клавіатури", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 11 },
+                new Category { Id = 312, Name = "Геймерські навушники", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 12 },
+                new Category { Id = 313, Name = "VR", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 13 },
+                new Category { Id = 314, Name = "VR шоломи", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 14 },
+                new Category { Id = 315, Name = "VR аксесуари", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 15 }
+            );
+
+            // Категория 4 - Побутова техніка
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 401, Name = "Велика техніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 1 },
+                new Category { Id = 402, Name = "Холодильники", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 2 },
+                new Category { Id = 403, Name = "Пральні машини", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 3 },
+                new Category { Id = 404, Name = "Посудомийні машини", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 4 },
+                new Category { Id = 405, Name = "Кухонна техніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 5 },
+                new Category { Id = 406, Name = "Мікрохвильові печі", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 6 },
+                new Category { Id = 407, Name = "Блендери", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 7 },
+                new Category { Id = 408, Name = "Міксери", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 8 },
+                new Category { Id = 409, Name = "Мультиварки", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 9 },
+                new Category { Id = 410, Name = "Кліматична техніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 10 },
+                new Category { Id = 411, Name = "Кондиціонери", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 11 },
+                new Category { Id = 412, Name = "Обігрівачі", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 12 },
+                new Category { Id = 413, Name = "Вентилятори", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 13 },
+                new Category { Id = 414, Name = "Прибирання", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 14 },
+                new Category { Id = 415, Name = "Пилососи", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 15 },
+                new Category { Id = 416, Name = "Роботи-пилососи", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 16 }
+            );
+
+            // Категория 5 - Товари для дому
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 501, Name = "Меблі", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 1 },
+                new Category { Id = 502, Name = "Дивани", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 2 },
+                new Category { Id = 503, Name = "Ліжка", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 3 },
+                new Category { Id = 504, Name = "Шафи", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 4 },
+                new Category { Id = 505, Name = "Освітлення", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 5 },
+                new Category { Id = 506, Name = "Лампи", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 6 },
+                new Category { Id = 507, Name = "Люстри", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 7 },
+                new Category { Id = 508, Name = "LED освітлення", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 8 },
+                new Category { Id = 509, Name = "Декор", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 9 },
+                new Category { Id = 510, Name = "Картини", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 10 },
+                new Category { Id = 511, Name = "Дзеркала", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 11 },
+                new Category { Id = 512, Name = "Годинники", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 12 }
+            );
+
+            // Категория 6 - Інструменти та автотовари
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 601, Name = "Електроінструменти", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 1 },
+                new Category { Id = 602, Name = "Дрилі", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 2 },
+                new Category { Id = 603, Name = "Шуруповерти", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 3 },
+                new Category { Id = 604, Name = "Болгарки", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 4 },
+                new Category { Id = 605, Name = "Автоелектроніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 5 },
+                new Category { Id = 606, Name = "Відеореєстратори", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 6 },
+                new Category { Id = 607, Name = "GPS навігатори", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 7 },
+                new Category { Id = 608, Name = "Автоаксесуари", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 8 },
+                new Category { Id = 609, Name = "Тримачі телефону", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 9 },
+                new Category { Id = 610, Name = "Зарядні пристрої", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 10 }
+            );
+
+            // Категория 7 - Сантехніка та ремонт
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 701, Name = "Ванна кімната", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 1 },
+                new Category { Id = 702, Name = "Душові кабіни", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 2 },
+                new Category { Id = 703, Name = "Унітази", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 3 },
+                new Category { Id = 704, Name = "Раковини", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 4 },
+                new Category { Id = 705, Name = "Інструменти", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 5 },
+                new Category { Id = 706, Name = "Ручний інструмент", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 6 },
+                new Category { Id = 707, Name = "Вимірювальні прилади", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 7 },
+                new Category { Id = 708, Name = "Матеріали", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 8 },
+                new Category { Id = 709, Name = "Фарба", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 9 },
+                new Category { Id = 710, Name = "Плитка", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 10 },
+                new Category { Id = 711, Name = "Ламінат", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 11 }
+            );
+
+            // Категория 8 - Дача, сад та город
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 801, Name = "Садова техніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 1 },
+                new Category { Id = 802, Name = "Газонокосарки", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 2 },
+                new Category { Id = 803, Name = "Тримери", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 3 },
+                new Category { Id = 804, Name = "Садові інструменти", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 4 },
+                new Category { Id = 805, Name = "Лопати", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 5 },
+                new Category { Id = 806, Name = "Секатори", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 6 },
+                new Category { Id = 807, Name = "Меблі для саду", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 7 },
+                new Category { Id = 808, Name = "Садові столи", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 8 },
+                new Category { Id = 809, Name = "Крісла", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 9 }
+            );
+
+            // Категория 9 - Спорт та захоплення
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 901, Name = "Фітнес", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 1 },
+                new Category { Id = 902, Name = "Гантелі", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 2 },
+                new Category { Id = 903, Name = "Бігові доріжки", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 3 },
+                new Category { Id = 904, Name = "Велоспорт", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 4 },
+                new Category { Id = 905, Name = "Велосипеди", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 5 },
+                new Category { Id = 906, Name = "Аксесуари", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 6 },
+                new Category { Id = 907, Name = "Активний відпочинок", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 7 },
+                new Category { Id = 908, Name = "Самокати", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 8 },
+                new Category { Id = 909, Name = "Електросамокати", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 9 }
+            );
+
+            // Категория 10 - Одяг, взуття та прикраси
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1001, Name = "Чоловічий одяг", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 1 },
+                new Category { Id = 1002, Name = "Футболки", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 2 },
+                new Category { Id = 1003, Name = "Джинси", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 3 },
+                new Category { Id = 1004, Name = "Куртки", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 4 },
+                new Category { Id = 1005, Name = "Жіночий одяг", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 5 },
+                new Category { Id = 1006, Name = "Сукні", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 6 },
+                new Category { Id = 1007, Name = "Спідниці", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 7 },
+                new Category { Id = 1008, Name = "Взуття", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 8 },
+                new Category { Id = 1009, Name = "Кросівки", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 9 },
+                new Category { Id = 1010, Name = "Черевики", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 10 },
+                new Category { Id = 1011, Name = "Аксесуари", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 11 },
+                new Category { Id = 1012, Name = "Сумки", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 12 },
+                new Category { Id = 1013, Name = "Ремені", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 13 }
+            );
+
+            // Категория 11 - Краса і здоров'я
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1101, Name = "Догляд за обличчям", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 1 },
+                new Category { Id = 1102, Name = "Креми", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 2 },
+                new Category { Id = 1103, Name = "Сироватки", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 3 },
+                new Category { Id = 1104, Name = "Догляд за волоссям", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 4 },
+                new Category { Id = 1105, Name = "Шампуні", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 5 },
+                new Category { Id = 1106, Name = "Маски", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 6 },
+                new Category { Id = 1107, Name = "Техніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 7 },
+                new Category { Id = 1108, Name = "Фени", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 8 },
+                new Category { Id = 1109, Name = "Бритви", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 9 }
+            );
+
+            // Категория 12 - Дитячі товари
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1201, Name = "Іграшки", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 1 },
+                new Category { Id = 1202, Name = "Конструктори", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 2 },
+                new Category { Id = 1203, Name = "Ляльки", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 3 },
+                new Category { Id = 1204, Name = "Машинки", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 4 },
+                new Category { Id = 1205, Name = "Для немовлят", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 5 },
+                new Category { Id = 1206, Name = "Підгузки", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 6 },
+                new Category { Id = 1207, Name = "Пляшечки", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 7 },
+                new Category { Id = 1208, Name = "Дитячий транспорт", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 8 },
+                new Category { Id = 1209, Name = "Коляски", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 9 },
+                new Category { Id = 1210, Name = "Самокати", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 10 }
+            );
+
+            // Категория 13 - Зоотовари
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1301, Name = "Для собак", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 1 },
+                new Category { Id = 1302, Name = "Корм", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 2 },
+                new Category { Id = 1303, Name = "Іграшки", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 3 },
+                new Category { Id = 1304, Name = "Для котів", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 4 },
+                new Category { Id = 1305, Name = "Корм", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 5 },
+                new Category { Id = 1306, Name = "Наповнювачі", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 6 },
+                new Category { Id = 1307, Name = "Для гризунів", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 7 },
+                new Category { Id = 1308, Name = "Клітки", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 8 },
+                new Category { Id = 1309, Name = "Корм", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 9 }
+            );
+
+            // Категория 14 - Канцтовари та книги
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1401, Name = "Канцтовари", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 1 },
+                new Category { Id = 1402, Name = "Ручки", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 2 },
+                new Category { Id = 1403, Name = "Зошити", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 3 },
+                new Category { Id = 1404, Name = "Папір", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 4 },
+                new Category { Id = 1405, Name = "Книги", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 5 },
+                new Category { Id = 1406, Name = "Художні", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 6 },
+                new Category { Id = 1407, Name = "Навчальні", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 7 }
+            );
+
+            // Категория 15 - Алкогольні напої та продукти
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1501, Name = "Алкоголь", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 1 },
+                new Category { Id = 1502, Name = "Вино", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 2 },
+                new Category { Id = 1503, Name = "Пиво", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 3 },
+                new Category { Id = 1504, Name = "Віскі", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 4 },
+                new Category { Id = 1505, Name = "Продукти", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 5 },
+                new Category { Id = 1506, Name = "Солодощі", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 6 },
+                new Category { Id = 1507, Name = "Снеки", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 7 }
+            );
+
+            // Категория 16 - Товари для бізнесу та послуги
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1601, Name = "Офіс", IconUrl = null, ImgUrl = null, ParentCategoryId = 16, DisplayOrder = 1 },
+                new Category { Id = 1602, Name = "Офісна техніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 16, DisplayOrder = 2 },
+                new Category { Id = 1603, Name = "Меблі", IconUrl = null, ImgUrl = null, ParentCategoryId = 16, DisplayOrder = 3 },
+                new Category { Id = 1604, Name = "Бізнес обладнання", IconUrl = null, ImgUrl = null, ParentCategoryId = 16, DisplayOrder = 4 },
+                new Category { Id = 1605, Name = "POS системи", IconUrl = null, ImgUrl = null, ParentCategoryId = 16, DisplayOrder = 5 },
+                new Category { Id = 1606, Name = "Касові апарати", IconUrl = null, ImgUrl = null, ParentCategoryId = 16, DisplayOrder = 6 }
+            );
+
+            // Категория 17 - Туризм та відпочинок
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1701, Name = "Туристичне спорядження", IconUrl = null, ImgUrl = null, ParentCategoryId = 17, DisplayOrder = 1 },
+                new Category { Id = 1702, Name = "Намет", IconUrl = null, ImgUrl = null, ParentCategoryId = 17, DisplayOrder = 2 },
+                new Category { Id = 1703, Name = "Спальні мішки", IconUrl = null, ImgUrl = null, ParentCategoryId = 17, DisplayOrder = 3 },
+                new Category { Id = 1704, Name = "Подорожі", IconUrl = null, ImgUrl = null, ParentCategoryId = 17, DisplayOrder = 4 },
+                new Category { Id = 1705, Name = "Валізи", IconUrl = null, ImgUrl = null, ParentCategoryId = 17, DisplayOrder = 5 },
+                new Category { Id = 1706, Name = "Рюкзаки", IconUrl = null, ImgUrl = null, ParentCategoryId = 17, DisplayOrder = 6 }
+            );
+
+            // Категория 18 - Акції
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1801, Name = "Товари зі знижками", IconUrl = null, ImgUrl = null, ParentCategoryId = 18, DisplayOrder = 1 },
+                new Category { Id = 1802, Name = "Сезонні розпродажі", IconUrl = null, ImgUrl = null, ParentCategoryId = 18, DisplayOrder = 2 }
+            );
+
+            // Категория 19 - Тотальний розпродаж
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1901, Name = "До −50%", IconUrl = null, ImgUrl = null, ParentCategoryId = 19, DisplayOrder = 1 },
+                new Category { Id = 1902, Name = "До −70%", IconUrl = null, ImgUrl = null, ParentCategoryId = 19, DisplayOrder = 2 },
+                new Category { Id = 1903, Name = "Останні екземпляри", IconUrl = null, ImgUrl = null, ParentCategoryId = 19, DisplayOrder = 3 }
+            );
+
+            // 6. Связи категорий с брендами
+            modelBuilder.Entity<CategoryBrand>().HasData(
+                // Категория 1 (Ноутбуки) с брендами
+                new CategoryBrand { CategoryId = 1, BrandId = 1 },
+                new CategoryBrand { CategoryId = 1, BrandId = 2 },
+                new CategoryBrand { CategoryId = 1, BrandId = 12 },
+                new CategoryBrand { CategoryId = 1, BrandId = 13 },
+                new CategoryBrand { CategoryId = 1, BrandId = 14 },
+                new CategoryBrand { CategoryId = 1, BrandId = 15 },
+                new CategoryBrand { CategoryId = 1, BrandId = 16 },
+
+                // Категория 2 (Смартфоны) с брендами
+                new CategoryBrand { CategoryId = 2, BrandId = 1 },
+                new CategoryBrand { CategoryId = 2, BrandId = 2 },
+                new CategoryBrand { CategoryId = 2, BrandId = 3 },
+
+                // Категория 3 (Гейминг) с брендами
+                new CategoryBrand { CategoryId = 3, BrandId = 4 },
+                new CategoryBrand { CategoryId = 3, BrandId = 15 },
+
+                // Категория 4 (Побутова техніка) с брендами
+                new CategoryBrand { CategoryId = 4, BrandId = 2 },
+                new CategoryBrand { CategoryId = 4, BrandId = 4 },
+                new CategoryBrand { CategoryId = 4, BrandId = 5 },
+                new CategoryBrand { CategoryId = 4, BrandId = 6 },
+
+                // Категория 9 (Спорт) с брендами
+                new CategoryBrand { CategoryId = 9, BrandId = 7 },
+                new CategoryBrand { CategoryId = 9, BrandId = 8 },
+                new CategoryBrand { CategoryId = 9, BrandId = 9 },
+
+                // Категория 10 (Одяг) с брендами
+                new CategoryBrand { CategoryId = 10, BrandId = 7 },
+                new CategoryBrand { CategoryId = 10, BrandId = 8 },
+                new CategoryBrand { CategoryId = 10, BrandId = 9 },
+                new CategoryBrand { CategoryId = 10, BrandId = 10 },
+                new CategoryBrand { CategoryId = 10, BrandId = 11 }
+            );
+
+            // 7. Товары (теперь BrandId=1 существует)
             var items = new List<Item>();
-            int itemId = -1000;
+            int itemId = -1053;
 
-            var categoryIds = new[] { 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 121, 122, 123, 201, 202, 203, 204, 205 };
+            var categoryIds = new[] {
+                101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
+                121, 122, 123, 201, 202, 203, 204, 205
+            };
 
             foreach (var categoryId in categoryIds)
             {
@@ -467,13 +762,13 @@ namespace BazaR.Data
                     {
                         Id = itemId--,
                         Name = $"Товар {i} категорії {categoryId}",
-                        Desc = $"Опис товару {i}",
+                        Desc = $"Опис товару {i} для категорії {categoryId}. Це якісний товар від відомого бренду.",
                         Price = 1000 + (i * 500),
                         Garantia = 12,
                         IsAvailable = true,
                         CategoryId = categoryId,
-                        BrandId = 1,
-                        UserId = 1,
+                        BrandId = 1, // Apple
+                        UserId = 1, // Admin
                         ImageUrl = "/images/items/default.jpg"
                     });
                 }
