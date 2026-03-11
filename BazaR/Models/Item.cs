@@ -10,13 +10,20 @@ namespace BazaR.Models
         public int Garantia { get; set; }
 
         public bool IsAvailable { get; set; }
+        public bool IsReadyToSend { get; set; }
+        public bool IsNoPercentCredit { get; set; }
 
         public string Name { get; set; }
         public string Desc { get; set; }
         public string? ImageUrl { get; set; }
 
+        public SellerType SellerType { get; set; }
+        public ProductionCountry Country { get; set; }
+
         public int BrandId { get; set; }
         public Brand Brand { get; set; }
+
+        public List<CategoryFilter> filters { get; set; }
 
         public List<ItemColor> Colors { get; set; }
 

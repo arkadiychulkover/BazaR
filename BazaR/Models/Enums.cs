@@ -25,6 +25,27 @@
         Kropyvnytskyi,
         Khmelnytskyi
     }
+    public enum SellerType
+    {
+        bazar = 1,
+        otherSeller = 2,
+        otherSellerOnSklad = 3
+    }
+
+    public enum ProductionCountry
+    {
+        Ukraine = 1,
+        USA = 2,
+        Germany = 3,
+        France = 4,
+        Poland = 5,
+        Italy = 6,
+        Spain = 7,
+        Canada = 8,
+        Japan = 9,
+        China = 10
+    }
+
     public enum PaymentType
     {
         Cash,

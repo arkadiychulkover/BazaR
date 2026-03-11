@@ -4,6 +4,7 @@ using BazaR.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BazaR.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260311141314_imagesToCategories")]
+    partial class imagesToCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2373,9 +2376,6 @@ namespace BazaR.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int?>("ItemId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -2387,8 +2387,6 @@ namespace BazaR.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
-
-                    b.HasIndex("ItemId");
 
                     b.ToTable("CategoryFilters");
                 });
@@ -2614,9 +2612,6 @@ namespace BazaR.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Country")
-                        .HasColumnType("int");
-
                     b.Property<string>("Desc")
                         .IsRequired()
                         .HasMaxLength(4000)
@@ -2632,21 +2627,12 @@ namespace BazaR.Migrations
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsNoPercentCredit")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsReadyToSend")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
                     b.Property<int>("Price")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SellerType")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
@@ -2668,16 +2654,12 @@ namespace BazaR.Migrations
                             Id = -1053,
                             BrandId = 1,
                             CategoryId = 101,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 101. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 101",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2685,16 +2667,12 @@ namespace BazaR.Migrations
                             Id = -1054,
                             BrandId = 1,
                             CategoryId = 101,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 101. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 101",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2702,16 +2680,12 @@ namespace BazaR.Migrations
                             Id = -1055,
                             BrandId = 1,
                             CategoryId = 101,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 101. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 101",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2719,16 +2693,12 @@ namespace BazaR.Migrations
                             Id = -1056,
                             BrandId = 1,
                             CategoryId = 102,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 102. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 102",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2736,16 +2706,12 @@ namespace BazaR.Migrations
                             Id = -1057,
                             BrandId = 1,
                             CategoryId = 102,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 102. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 102",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2753,16 +2719,12 @@ namespace BazaR.Migrations
                             Id = -1058,
                             BrandId = 1,
                             CategoryId = 102,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 102. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 102",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2770,16 +2732,12 @@ namespace BazaR.Migrations
                             Id = -1059,
                             BrandId = 1,
                             CategoryId = 103,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 103. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 103",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2787,16 +2745,12 @@ namespace BazaR.Migrations
                             Id = -1060,
                             BrandId = 1,
                             CategoryId = 103,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 103. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 103",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2804,16 +2758,12 @@ namespace BazaR.Migrations
                             Id = -1061,
                             BrandId = 1,
                             CategoryId = 103,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 103. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 103",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2821,16 +2771,12 @@ namespace BazaR.Migrations
                             Id = -1062,
                             BrandId = 1,
                             CategoryId = 104,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 104. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 104",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2838,16 +2784,12 @@ namespace BazaR.Migrations
                             Id = -1063,
                             BrandId = 1,
                             CategoryId = 104,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 104. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 104",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2855,16 +2797,12 @@ namespace BazaR.Migrations
                             Id = -1064,
                             BrandId = 1,
                             CategoryId = 104,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 104. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 104",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2872,16 +2810,12 @@ namespace BazaR.Migrations
                             Id = -1065,
                             BrandId = 1,
                             CategoryId = 105,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 105. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 105",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2889,16 +2823,12 @@ namespace BazaR.Migrations
                             Id = -1066,
                             BrandId = 1,
                             CategoryId = 105,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 105. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 105",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2906,16 +2836,12 @@ namespace BazaR.Migrations
                             Id = -1067,
                             BrandId = 1,
                             CategoryId = 105,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 105. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 105",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2923,16 +2849,12 @@ namespace BazaR.Migrations
                             Id = -1068,
                             BrandId = 1,
                             CategoryId = 106,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 106. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 106",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2940,16 +2862,12 @@ namespace BazaR.Migrations
                             Id = -1069,
                             BrandId = 1,
                             CategoryId = 106,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 106. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 106",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2957,16 +2875,12 @@ namespace BazaR.Migrations
                             Id = -1070,
                             BrandId = 1,
                             CategoryId = 106,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 106. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 106",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2974,16 +2888,12 @@ namespace BazaR.Migrations
                             Id = -1071,
                             BrandId = 1,
                             CategoryId = 107,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 107. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 107",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -2991,16 +2901,12 @@ namespace BazaR.Migrations
                             Id = -1072,
                             BrandId = 1,
                             CategoryId = 107,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 107. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 107",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3008,16 +2914,12 @@ namespace BazaR.Migrations
                             Id = -1073,
                             BrandId = 1,
                             CategoryId = 107,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 107. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 107",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3025,16 +2927,12 @@ namespace BazaR.Migrations
                             Id = -1074,
                             BrandId = 1,
                             CategoryId = 108,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 108. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 108",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3042,16 +2940,12 @@ namespace BazaR.Migrations
                             Id = -1075,
                             BrandId = 1,
                             CategoryId = 108,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 108. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 108",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3059,16 +2953,12 @@ namespace BazaR.Migrations
                             Id = -1076,
                             BrandId = 1,
                             CategoryId = 108,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 108. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 108",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3076,16 +2966,12 @@ namespace BazaR.Migrations
                             Id = -1077,
                             BrandId = 1,
                             CategoryId = 109,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 109. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 109",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3093,16 +2979,12 @@ namespace BazaR.Migrations
                             Id = -1078,
                             BrandId = 1,
                             CategoryId = 109,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 109. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 109",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3110,16 +2992,12 @@ namespace BazaR.Migrations
                             Id = -1079,
                             BrandId = 1,
                             CategoryId = 109,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 109. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 109",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3127,16 +3005,12 @@ namespace BazaR.Migrations
                             Id = -1080,
                             BrandId = 1,
                             CategoryId = 110,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 110. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 110",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3144,16 +3018,12 @@ namespace BazaR.Migrations
                             Id = -1081,
                             BrandId = 1,
                             CategoryId = 110,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 110. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 110",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3161,16 +3031,12 @@ namespace BazaR.Migrations
                             Id = -1082,
                             BrandId = 1,
                             CategoryId = 110,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 110. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 110",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3178,16 +3044,12 @@ namespace BazaR.Migrations
                             Id = -1083,
                             BrandId = 1,
                             CategoryId = 121,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 121. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 121",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3195,16 +3057,12 @@ namespace BazaR.Migrations
                             Id = -1084,
                             BrandId = 1,
                             CategoryId = 121,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 121. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 121",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3212,16 +3070,12 @@ namespace BazaR.Migrations
                             Id = -1085,
                             BrandId = 1,
                             CategoryId = 121,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 121. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 121",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3229,16 +3083,12 @@ namespace BazaR.Migrations
                             Id = -1086,
                             BrandId = 1,
                             CategoryId = 122,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 122. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 122",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3246,16 +3096,12 @@ namespace BazaR.Migrations
                             Id = -1087,
                             BrandId = 1,
                             CategoryId = 122,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 122. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 122",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3263,16 +3109,12 @@ namespace BazaR.Migrations
                             Id = -1088,
                             BrandId = 1,
                             CategoryId = 122,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 122. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 122",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3280,16 +3122,12 @@ namespace BazaR.Migrations
                             Id = -1089,
                             BrandId = 1,
                             CategoryId = 123,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 123. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 123",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3297,16 +3135,12 @@ namespace BazaR.Migrations
                             Id = -1090,
                             BrandId = 1,
                             CategoryId = 123,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 123. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 123",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3314,16 +3148,12 @@ namespace BazaR.Migrations
                             Id = -1091,
                             BrandId = 1,
                             CategoryId = 123,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 123. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 123",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3331,16 +3161,12 @@ namespace BazaR.Migrations
                             Id = -1092,
                             BrandId = 1,
                             CategoryId = 201,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 201. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 201",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3348,16 +3174,12 @@ namespace BazaR.Migrations
                             Id = -1093,
                             BrandId = 1,
                             CategoryId = 201,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 201. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 201",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3365,16 +3187,12 @@ namespace BazaR.Migrations
                             Id = -1094,
                             BrandId = 1,
                             CategoryId = 201,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 201. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 201",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3382,16 +3200,12 @@ namespace BazaR.Migrations
                             Id = -1095,
                             BrandId = 1,
                             CategoryId = 202,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 202. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 202",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3399,16 +3213,12 @@ namespace BazaR.Migrations
                             Id = -1096,
                             BrandId = 1,
                             CategoryId = 202,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 202. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 202",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3416,16 +3226,12 @@ namespace BazaR.Migrations
                             Id = -1097,
                             BrandId = 1,
                             CategoryId = 202,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 202. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 202",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3433,16 +3239,12 @@ namespace BazaR.Migrations
                             Id = -1098,
                             BrandId = 1,
                             CategoryId = 203,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 203. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 203",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3450,16 +3252,12 @@ namespace BazaR.Migrations
                             Id = -1099,
                             BrandId = 1,
                             CategoryId = 203,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 203. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 203",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3467,16 +3265,12 @@ namespace BazaR.Migrations
                             Id = -1100,
                             BrandId = 1,
                             CategoryId = 203,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 203. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 203",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3484,16 +3278,12 @@ namespace BazaR.Migrations
                             Id = -1101,
                             BrandId = 1,
                             CategoryId = 204,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 204. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 204",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3501,16 +3291,12 @@ namespace BazaR.Migrations
                             Id = -1102,
                             BrandId = 1,
                             CategoryId = 204,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 204. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 204",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3518,16 +3304,12 @@ namespace BazaR.Migrations
                             Id = -1103,
                             BrandId = 1,
                             CategoryId = 204,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 204. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 204",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3535,16 +3317,12 @@ namespace BazaR.Migrations
                             Id = -1104,
                             BrandId = 1,
                             CategoryId = 205,
-                            Country = 0,
                             Desc = "Опис товару 1 для категорії 205. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 1 категорії 205",
                             Price = 1500,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3552,16 +3330,12 @@ namespace BazaR.Migrations
                             Id = -1105,
                             BrandId = 1,
                             CategoryId = 205,
-                            Country = 0,
                             Desc = "Опис товару 2 для категорії 205. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 2 категорії 205",
                             Price = 2000,
-                            SellerType = 0,
                             UserId = 1
                         },
                         new
@@ -3569,16 +3343,12 @@ namespace BazaR.Migrations
                             Id = -1106,
                             BrandId = 1,
                             CategoryId = 205,
-                            Country = 0,
                             Desc = "Опис товару 3 для категорії 205. Це якісний товар від відомого бренду.",
                             Garantia = 12,
                             ImageUrl = "/images/items/default.jpg",
                             IsAvailable = true,
-                            IsNoPercentCredit = false,
-                            IsReadyToSend = false,
                             Name = "Товар 3 категорії 205",
                             Price = 2500,
-                            SellerType = 0,
                             UserId = 1
                         });
                 });
@@ -3929,10 +3699,6 @@ namespace BazaR.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BazaR.Models.Item", null)
-                        .WithMany("filters")
-                        .HasForeignKey("ItemId");
-
                     b.Navigation("Category");
                 });
 
@@ -4142,8 +3908,6 @@ namespace BazaR.Migrations
                     b.Navigation("Uslugi");
 
                     b.Navigation("WishlistItems");
-
-                    b.Navigation("filters");
                 });
 
             modelBuilder.Entity("BazaR.Models.Order", b =>

@@ -425,285 +425,285 @@ namespace BazaR.Data
                 new Category { Id = 19, Name = "Тотальний розпродаж", IconUrl = "icon-total-sale.svg", ImgUrl = "categoryImg-total-sale.svg", ParentCategoryId = null, DisplayOrder = 19 }
             );
 
-            // 5. Подкатегории
+            // 5. Подкатегории с заполненными IconUrl и ImgUrl
             // Категория 1 - Ноутбуки та комп'ютери
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 101, Name = "Ноутбуки", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 1 },
-                new Category { Id = 102, Name = "Ігрові ноутбуки", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 2 },
-                new Category { Id = 103, Name = "Ультрабуки", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 3 },
-                new Category { Id = 104, Name = "Для навчання", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 4 },
-                new Category { Id = 105, Name = "Для роботи", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 5 },
-                new Category { Id = 106, Name = "Chromebook", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 6 },
-                new Category { Id = 107, Name = "Комп'ютери", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 7 },
-                new Category { Id = 108, Name = "Настільні ПК", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 8 },
-                new Category { Id = 109, Name = "Ігрові ПК", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 9 },
-                new Category { Id = 110, Name = "Міні-ПК", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 10 },
-                new Category { Id = 111, Name = "Моноблоки", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 11 },
-                new Category { Id = 112, Name = "Робочі станції", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 12 },
-                new Category { Id = 113, Name = "Комплектуючі", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 13 },
-                new Category { Id = 114, Name = "Процесори", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 14 },
-                new Category { Id = 115, Name = "Відеокарти", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 15 },
-                new Category { Id = 116, Name = "Материнські плати", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 16 },
-                new Category { Id = 117, Name = "Оперативна пам'ять", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 17 },
-                new Category { Id = 118, Name = "Блоки живлення", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 18 },
-                new Category { Id = 119, Name = "Корпуси", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 19 },
-                new Category { Id = 120, Name = "Накопичувачі", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 20 },
-                new Category { Id = 121, Name = "SSD", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 21 },
-                new Category { Id = 122, Name = "HDD", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 22 },
-                new Category { Id = 123, Name = "Зовнішні диски", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 23 },
-                new Category { Id = 124, Name = "NAS", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 24 },
-                new Category { Id = 125, Name = "Периферія", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 25 },
-                new Category { Id = 126, Name = "Клавіатури", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 26 },
-                new Category { Id = 127, Name = "Миші", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 27 },
-                new Category { Id = 128, Name = "Килимки", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 28 },
-                new Category { Id = 129, Name = "Вебкамери", IconUrl = null, ImgUrl = null, ParentCategoryId = 1, DisplayOrder = 29 }
+                new Category { Id = 101, Name = "Ноутбуки", IconUrl = "categoryIcon-Notebooks.svg", ImgUrl = "categoryImg-Notebooks.svg", ParentCategoryId = 1, DisplayOrder = 1 },
+                new Category { Id = 102, Name = "Ігрові ноутбуки", IconUrl = "categoryIcon-GamingNotebooks.svg", ImgUrl = "categoryImg-GamingNotebooks.svg", ParentCategoryId = 1, DisplayOrder = 2 },
+                new Category { Id = 103, Name = "Ультрабуки", IconUrl = "categoryIcon-Ultrabooks.svg", ImgUrl = "categoryImg-Ultrabooks.svg", ParentCategoryId = 1, DisplayOrder = 3 },
+                new Category { Id = 104, Name = "Для навчання", IconUrl = "categoryIcon-ForStudy.svg", ImgUrl = "categoryImg-ForStudy.svg", ParentCategoryId = 1, DisplayOrder = 4 },
+                new Category { Id = 105, Name = "Для роботи", IconUrl = "categoryIcon-ForWork.svg", ImgUrl = "categoryImg-ForWork.svg", ParentCategoryId = 1, DisplayOrder = 5 },
+                new Category { Id = 106, Name = "Chromebook", IconUrl = "categoryIcon-Chromebook.svg", ImgUrl = "categoryImg-Chromebook.svg", ParentCategoryId = 1, DisplayOrder = 6 },
+                new Category { Id = 107, Name = "Комп'ютери", IconUrl = "categoryIcon-Computers.svg", ImgUrl = "categoryImg-Computers.svg", ParentCategoryId = 1, DisplayOrder = 7 },
+                new Category { Id = 108, Name = "Настільні ПК", IconUrl = "categoryIcon-DesktopPC.svg", ImgUrl = "categoryImg-DesktopPC.svg", ParentCategoryId = 1, DisplayOrder = 8 },
+                new Category { Id = 109, Name = "Ігрові ПК", IconUrl = "categoryIcon-GamingPC.svg", ImgUrl = "categoryImg-GamingPC.svg", ParentCategoryId = 1, DisplayOrder = 9 },
+                new Category { Id = 110, Name = "Міні-ПК", IconUrl = "categoryIcon-MiniPC.svg", ImgUrl = "categoryImg-MiniPC.svg", ParentCategoryId = 1, DisplayOrder = 10 },
+                new Category { Id = 111, Name = "Моноблоки", IconUrl = "categoryIcon-Monoblocks.svg", ImgUrl = "categoryImg-Monoblocks.svg", ParentCategoryId = 1, DisplayOrder = 11 },
+                new Category { Id = 112, Name = "Робочі станції", IconUrl = "categoryIcon-Workstations.svg", ImgUrl = "categoryImg-Workstations.svg", ParentCategoryId = 1, DisplayOrder = 12 },
+                new Category { Id = 113, Name = "Комплектуючі", IconUrl = "categoryIcon-Components.svg", ImgUrl = "categoryImg-Components.svg", ParentCategoryId = 1, DisplayOrder = 13 },
+                new Category { Id = 114, Name = "Процесори", IconUrl = "categoryIcon-Processors.svg", ImgUrl = "categoryImg-Processors.svg", ParentCategoryId = 1, DisplayOrder = 14 },
+                new Category { Id = 115, Name = "Відеокарти", IconUrl = "categoryIcon-VideoCards.svg", ImgUrl = "categoryImg-VideoCards.svg", ParentCategoryId = 1, DisplayOrder = 15 },
+                new Category { Id = 116, Name = "Материнські плати", IconUrl = "categoryIcon-Motherboards.svg", ImgUrl = "categoryImg-Motherboards.svg", ParentCategoryId = 1, DisplayOrder = 16 },
+                new Category { Id = 117, Name = "Оперативна пам'ять", IconUrl = "categoryIcon-RAM.svg", ImgUrl = "categoryImg-RAM.svg", ParentCategoryId = 1, DisplayOrder = 17 },
+                new Category { Id = 118, Name = "Блоки живлення", IconUrl = "categoryIcon-PowerSupplies.svg", ImgUrl = "categoryImg-PowerSupplies.svg", ParentCategoryId = 1, DisplayOrder = 18 },
+                new Category { Id = 119, Name = "Корпуси", IconUrl = "categoryIcon-Cases.svg", ImgUrl = "categoryImg-Cases.svg", ParentCategoryId = 1, DisplayOrder = 19 },
+                new Category { Id = 120, Name = "Накопичувачі", IconUrl = "categoryIcon-Storage.svg", ImgUrl = "categoryImg-Storage.svg", ParentCategoryId = 1, DisplayOrder = 20 },
+                new Category { Id = 121, Name = "SSD", IconUrl = "categoryIcon-SSD.svg", ImgUrl = "categoryImg-SSD.svg", ParentCategoryId = 1, DisplayOrder = 21 },
+                new Category { Id = 122, Name = "HDD", IconUrl = "categoryIcon-HDD.svg", ImgUrl = "categoryImg-HDD.svg", ParentCategoryId = 1, DisplayOrder = 22 },
+                new Category { Id = 123, Name = "Зовнішні диски", IconUrl = "categoryIcon-ExternalDrives.svg", ImgUrl = "categoryImg-ExternalDrives.svg", ParentCategoryId = 1, DisplayOrder = 23 },
+                new Category { Id = 124, Name = "NAS", IconUrl = "categoryIcon-NAS.svg", ImgUrl = "categoryImg-NAS.svg", ParentCategoryId = 1, DisplayOrder = 24 },
+                new Category { Id = 125, Name = "Периферія", IconUrl = "categoryIcon-Peripherals.svg", ImgUrl = "categoryImg-Peripherals.svg", ParentCategoryId = 1, DisplayOrder = 25 },
+                new Category { Id = 126, Name = "Клавіатури", IconUrl = "categoryIcon-Keyboards.svg", ImgUrl = "categoryImg-Keyboards.svg", ParentCategoryId = 1, DisplayOrder = 26 },
+                new Category { Id = 127, Name = "Миші", IconUrl = "categoryIcon-Mice.svg", ImgUrl = "categoryImg-Mice.svg", ParentCategoryId = 1, DisplayOrder = 27 },
+                new Category { Id = 128, Name = "Килимки", IconUrl = "categoryIcon-MousePads.svg", ImgUrl = "categoryImg-MousePads.svg", ParentCategoryId = 1, DisplayOrder = 28 },
+                new Category { Id = 129, Name = "Вебкамери", IconUrl = "categoryIcon-Webcams.svg", ImgUrl = "categoryImg-Webcams.svg", ParentCategoryId = 1, DisplayOrder = 29 }
             );
 
             // Категория 2 - Смартфони, ТВ та електроніка
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 201, Name = "Смартфони", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 1 },
-                new Category { Id = 202, Name = "Android", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 2 },
-                new Category { Id = 203, Name = "iPhone", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 3 },
-                new Category { Id = 204, Name = "Бюджетні", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 4 },
-                new Category { Id = 205, Name = "Флагмани", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 5 },
-                new Category { Id = 206, Name = "Телевізори", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 6 },
-                new Category { Id = 207, Name = "Smart TV", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 7 },
-                new Category { Id = 208, Name = "LED", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 8 },
-                new Category { Id = 209, Name = "OLED", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 9 },
-                new Category { Id = 210, Name = "QLED", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 10 },
-                new Category { Id = 211, Name = "Аудіо", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 11 },
-                new Category { Id = 212, Name = "Навушники", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 12 },
-                new Category { Id = 213, Name = "Саундбари", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 13 },
-                new Category { Id = 214, Name = "Колонки", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 14 },
-                new Category { Id = 215, Name = "Домашні кінотеатри", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 15 },
-                new Category { Id = 216, Name = "Планшети", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 16 },
-                new Category { Id = 217, Name = "iPad", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 17 },
-                new Category { Id = 218, Name = "Android планшети", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 18 },
-                new Category { Id = 219, Name = "Гаджети", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 19 },
-                new Category { Id = 220, Name = "Смарт-годинники", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 20 },
-                new Category { Id = 221, Name = "Фітнес-браслети", IconUrl = null, ImgUrl = null, ParentCategoryId = 2, DisplayOrder = 21 }
+                new Category { Id = 201, Name = "Смартфони", IconUrl = "categoryIcon-Smartphones.svg", ImgUrl = "categoryImg-Smartphones.svg", ParentCategoryId = 2, DisplayOrder = 1 },
+                new Category { Id = 202, Name = "Android", IconUrl = "categoryIcon-Android.svg", ImgUrl = "categoryImg-Android.svg", ParentCategoryId = 2, DisplayOrder = 2 },
+                new Category { Id = 203, Name = "iPhone", IconUrl = "categoryIcon-iPhone.svg", ImgUrl = "categoryImg-iPhone.svg", ParentCategoryId = 2, DisplayOrder = 3 },
+                new Category { Id = 204, Name = "Бюджетні", IconUrl = "categoryIcon-Budget.svg", ImgUrl = "categoryImg-Budget.svg", ParentCategoryId = 2, DisplayOrder = 4 },
+                new Category { Id = 205, Name = "Флагмани", IconUrl = "categoryIcon-Flagship.svg", ImgUrl = "categoryImg-Flagship.svg", ParentCategoryId = 2, DisplayOrder = 5 },
+                new Category { Id = 206, Name = "Телевізори", IconUrl = "categoryIcon-TVs.svg", ImgUrl = "categoryImg-TVs.svg", ParentCategoryId = 2, DisplayOrder = 6 },
+                new Category { Id = 207, Name = "Smart TV", IconUrl = "categoryIcon-SmartTV.svg", ImgUrl = "categoryImg-SmartTV.svg", ParentCategoryId = 2, DisplayOrder = 7 },
+                new Category { Id = 208, Name = "LED", IconUrl = "categoryIcon-LED.svg", ImgUrl = "categoryImg-LED.svg", ParentCategoryId = 2, DisplayOrder = 8 },
+                new Category { Id = 209, Name = "OLED", IconUrl = "categoryIcon-OLED.svg", ImgUrl = "categoryImg-OLED.svg", ParentCategoryId = 2, DisplayOrder = 9 },
+                new Category { Id = 210, Name = "QLED", IconUrl = "categoryIcon-QLED.svg", ImgUrl = "categoryImg-QLED.svg", ParentCategoryId = 2, DisplayOrder = 10 },
+                new Category { Id = 211, Name = "Аудіо", IconUrl = "categoryIcon-Audio.svg", ImgUrl = "categoryImg-Audio.svg", ParentCategoryId = 2, DisplayOrder = 11 },
+                new Category { Id = 212, Name = "Навушники", IconUrl = "categoryIcon-Headphones.svg", ImgUrl = "categoryImg-Headphones.svg", ParentCategoryId = 2, DisplayOrder = 12 },
+                new Category { Id = 213, Name = "Саундбари", IconUrl = "categoryIcon-Soundbars.svg", ImgUrl = "categoryImg-Soundbars.svg", ParentCategoryId = 2, DisplayOrder = 13 },
+                new Category { Id = 214, Name = "Колонки", IconUrl = "categoryIcon-Speakers.svg", ImgUrl = "categoryImg-Speakers.svg", ParentCategoryId = 2, DisplayOrder = 14 },
+                new Category { Id = 215, Name = "Домашні кінотеатри", IconUrl = "categoryIcon-HomeTheaters.svg", ImgUrl = "categoryImg-HomeTheaters.svg", ParentCategoryId = 2, DisplayOrder = 15 },
+                new Category { Id = 216, Name = "Планшети", IconUrl = "categoryIcon-Tablets.svg", ImgUrl = "categoryImg-Tablets.svg", ParentCategoryId = 2, DisplayOrder = 16 },
+                new Category { Id = 217, Name = "iPad", IconUrl = "categoryIcon-iPad.svg", ImgUrl = "categoryImg-iPad.svg", ParentCategoryId = 2, DisplayOrder = 17 },
+                new Category { Id = 218, Name = "Android планшети", IconUrl = "categoryIcon-AndroidTablets.svg", ImgUrl = "categoryImg-AndroidTablets.svg", ParentCategoryId = 2, DisplayOrder = 18 },
+                new Category { Id = 219, Name = "Гаджети", IconUrl = "categoryIcon-Gadgets.svg", ImgUrl = "categoryImg-Gadgets.svg", ParentCategoryId = 2, DisplayOrder = 19 },
+                new Category { Id = 220, Name = "Смарт-годинники", IconUrl = "categoryIcon-SmartWatches.svg", ImgUrl = "categoryImg-SmartWatches.svg", ParentCategoryId = 2, DisplayOrder = 20 },
+                new Category { Id = 221, Name = "Фітнес-браслети", IconUrl = "categoryIcon-FitnessBands.svg", ImgUrl = "categoryImg-FitnessBands.svg", ParentCategoryId = 2, DisplayOrder = 21 }
             );
 
             // Категория 3 - Товари для геймерів
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 301, Name = "Консолі", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 1 },
-                new Category { Id = 302, Name = "PlayStation", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 2 },
-                new Category { Id = 303, Name = "Xbox", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 3 },
-                new Category { Id = 304, Name = "Nintendo", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 4 },
-                new Category { Id = 305, Name = "Ігри", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 5 },
-                new Category { Id = 306, Name = "PlayStation ігри", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 6 },
-                new Category { Id = 307, Name = "Xbox ігри", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 7 },
-                new Category { Id = 308, Name = "PC ігри", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 8 },
-                new Category { Id = 309, Name = "Геймерська периферія", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 9 },
-                new Category { Id = 310, Name = "Ігрові миші", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 10 },
-                new Category { Id = 311, Name = "Ігрові клавіатури", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 11 },
-                new Category { Id = 312, Name = "Геймерські навушники", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 12 },
-                new Category { Id = 313, Name = "VR", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 13 },
-                new Category { Id = 314, Name = "VR шоломи", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 14 },
-                new Category { Id = 315, Name = "VR аксесуари", IconUrl = null, ImgUrl = null, ParentCategoryId = 3, DisplayOrder = 15 }
+                new Category { Id = 301, Name = "Консолі", IconUrl = "categoryIcon-Consoles.svg", ImgUrl = "categoryImg-Consoles.svg", ParentCategoryId = 3, DisplayOrder = 1 },
+                new Category { Id = 302, Name = "PlayStation", IconUrl = "categoryIcon-PlayStation.svg", ImgUrl = "categoryImg-PlayStation.svg", ParentCategoryId = 3, DisplayOrder = 2 },
+                new Category { Id = 303, Name = "Xbox", IconUrl = "categoryIcon-Xbox.svg", ImgUrl = "categoryImg-Xbox.svg", ParentCategoryId = 3, DisplayOrder = 3 },
+                new Category { Id = 304, Name = "Nintendo", IconUrl = "categoryIcon-Nintendo.svg", ImgUrl = "categoryImg-Nintendo.svg", ParentCategoryId = 3, DisplayOrder = 4 },
+                new Category { Id = 305, Name = "Ігри", IconUrl = "categoryIcon-Games.svg", ImgUrl = "categoryImg-Games.svg", ParentCategoryId = 3, DisplayOrder = 5 },
+                new Category { Id = 306, Name = "PlayStation ігри", IconUrl = "categoryIcon-PlayStationGames.svg", ImgUrl = "categoryImg-PlayStationGames.svg", ParentCategoryId = 3, DisplayOrder = 6 },
+                new Category { Id = 307, Name = "Xbox ігри", IconUrl = "categoryIcon-XboxGames.svg", ImgUrl = "categoryImg-XboxGames.svg", ParentCategoryId = 3, DisplayOrder = 7 },
+                new Category { Id = 308, Name = "PC ігри", IconUrl = "categoryIcon-PCGames.svg", ImgUrl = "categoryImg-PCGames.svg", ParentCategoryId = 3, DisplayOrder = 8 },
+                new Category { Id = 309, Name = "Геймерська периферія", IconUrl = "categoryIcon-GamingPeripherals.svg", ImgUrl = "categoryImg-GamingPeripherals.svg", ParentCategoryId = 3, DisplayOrder = 9 },
+                new Category { Id = 310, Name = "Ігрові миші", IconUrl = "categoryIcon-GamingMice.svg", ImgUrl = "categoryImg-GamingMice.svg", ParentCategoryId = 3, DisplayOrder = 10 },
+                new Category { Id = 311, Name = "Ігрові клавіатури", IconUrl = "categoryIcon-GamingKeyboards.svg", ImgUrl = "categoryImg-GamingKeyboards.svg", ParentCategoryId = 3, DisplayOrder = 11 },
+                new Category { Id = 312, Name = "Геймерські навушники", IconUrl = "categoryIcon-GamingHeadphones.svg", ImgUrl = "categoryImg-GamingHeadphones.svg", ParentCategoryId = 3, DisplayOrder = 12 },
+                new Category { Id = 313, Name = "VR", IconUrl = "categoryIcon-VR.svg", ImgUrl = "categoryImg-VR.svg", ParentCategoryId = 3, DisplayOrder = 13 },
+                new Category { Id = 314, Name = "VR шоломи", IconUrl = "categoryIcon-VRHeadsets.svg", ImgUrl = "categoryImg-VRHeadsets.svg", ParentCategoryId = 3, DisplayOrder = 14 },
+                new Category { Id = 315, Name = "VR аксесуари", IconUrl = "categoryIcon-VRAccessories.svg", ImgUrl = "categoryImg-VRAccessories.svg", ParentCategoryId = 3, DisplayOrder = 15 }
             );
 
             // Категория 4 - Побутова техніка
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 401, Name = "Велика техніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 1 },
-                new Category { Id = 402, Name = "Холодильники", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 2 },
-                new Category { Id = 403, Name = "Пральні машини", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 3 },
-                new Category { Id = 404, Name = "Посудомийні машини", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 4 },
-                new Category { Id = 405, Name = "Кухонна техніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 5 },
-                new Category { Id = 406, Name = "Мікрохвильові печі", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 6 },
-                new Category { Id = 407, Name = "Блендери", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 7 },
-                new Category { Id = 408, Name = "Міксери", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 8 },
-                new Category { Id = 409, Name = "Мультиварки", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 9 },
-                new Category { Id = 410, Name = "Кліматична техніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 10 },
-                new Category { Id = 411, Name = "Кондиціонери", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 11 },
-                new Category { Id = 412, Name = "Обігрівачі", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 12 },
-                new Category { Id = 413, Name = "Вентилятори", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 13 },
-                new Category { Id = 414, Name = "Прибирання", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 14 },
-                new Category { Id = 415, Name = "Пилососи", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 15 },
-                new Category { Id = 416, Name = "Роботи-пилососи", IconUrl = null, ImgUrl = null, ParentCategoryId = 4, DisplayOrder = 16 }
+                new Category { Id = 401, Name = "Велика техніка", IconUrl = "categoryIcon-LargeAppliances.svg", ImgUrl = "categoryImg-LargeAppliances.svg", ParentCategoryId = 4, DisplayOrder = 1 },
+                new Category { Id = 402, Name = "Холодильники", IconUrl = "categoryIcon-Refrigerators.svg", ImgUrl = "categoryImg-Refrigerators.svg", ParentCategoryId = 4, DisplayOrder = 2 },
+                new Category { Id = 403, Name = "Пральні машини", IconUrl = "categoryIcon-WashingMachines.svg", ImgUrl = "categoryImg-WashingMachines.svg", ParentCategoryId = 4, DisplayOrder = 3 },
+                new Category { Id = 404, Name = "Посудомийні машини", IconUrl = "categoryIcon-Dishwashers.svg", ImgUrl = "categoryImg-Dishwashers.svg", ParentCategoryId = 4, DisplayOrder = 4 },
+                new Category { Id = 405, Name = "Кухонна техніка", IconUrl = "categoryIcon-KitchenAppliances.svg", ImgUrl = "categoryImg-KitchenAppliances.svg", ParentCategoryId = 4, DisplayOrder = 5 },
+                new Category { Id = 406, Name = "Мікрохвильові печі", IconUrl = "categoryIcon-Microwaves.svg", ImgUrl = "categoryImg-Microwaves.svg", ParentCategoryId = 4, DisplayOrder = 6 },
+                new Category { Id = 407, Name = "Блендери", IconUrl = "categoryIcon-Blenders.svg", ImgUrl = "categoryImg-Blenders.svg", ParentCategoryId = 4, DisplayOrder = 7 },
+                new Category { Id = 408, Name = "Міксери", IconUrl = "categoryIcon-Mixers.svg", ImgUrl = "categoryImg-Mixers.svg", ParentCategoryId = 4, DisplayOrder = 8 },
+                new Category { Id = 409, Name = "Мультиварки", IconUrl = "categoryIcon-Multicookers.svg", ImgUrl = "categoryImg-Multicookers.svg", ParentCategoryId = 4, DisplayOrder = 9 },
+                new Category { Id = 410, Name = "Кліматична техніка", IconUrl = "categoryIcon-ClimateControl.svg", ImgUrl = "categoryImg-ClimateControl.svg", ParentCategoryId = 4, DisplayOrder = 10 },
+                new Category { Id = 411, Name = "Кондиціонери", IconUrl = "categoryIcon-AirConditioners.svg", ImgUrl = "categoryImg-AirConditioners.svg", ParentCategoryId = 4, DisplayOrder = 11 },
+                new Category { Id = 412, Name = "Обігрівачі", IconUrl = "categoryIcon-Heaters.svg", ImgUrl = "categoryImg-Heaters.svg", ParentCategoryId = 4, DisplayOrder = 12 },
+                new Category { Id = 413, Name = "Вентилятори", IconUrl = "categoryIcon-Fans.svg", ImgUrl = "categoryImg-Fans.svg", ParentCategoryId = 4, DisplayOrder = 13 },
+                new Category { Id = 414, Name = "Прибирання", IconUrl = "categoryIcon-Cleaning.svg", ImgUrl = "categoryImg-Cleaning.svg", ParentCategoryId = 4, DisplayOrder = 14 },
+                new Category { Id = 415, Name = "Пилососи", IconUrl = "categoryIcon-VacuumCleaners.svg", ImgUrl = "categoryImg-VacuumCleaners.svg", ParentCategoryId = 4, DisplayOrder = 15 },
+                new Category { Id = 416, Name = "Роботи-пилососи", IconUrl = "categoryIcon-RobotVacuums.svg", ImgUrl = "categoryImg-RobotVacuums.svg", ParentCategoryId = 4, DisplayOrder = 16 }
             );
 
             // Категория 5 - Товари для дому
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 501, Name = "Меблі", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 1 },
-                new Category { Id = 502, Name = "Дивани", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 2 },
-                new Category { Id = 503, Name = "Ліжка", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 3 },
-                new Category { Id = 504, Name = "Шафи", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 4 },
-                new Category { Id = 505, Name = "Освітлення", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 5 },
-                new Category { Id = 506, Name = "Лампи", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 6 },
-                new Category { Id = 507, Name = "Люстри", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 7 },
-                new Category { Id = 508, Name = "LED освітлення", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 8 },
-                new Category { Id = 509, Name = "Декор", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 9 },
-                new Category { Id = 510, Name = "Картини", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 10 },
-                new Category { Id = 511, Name = "Дзеркала", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 11 },
-                new Category { Id = 512, Name = "Годинники", IconUrl = null, ImgUrl = null, ParentCategoryId = 5, DisplayOrder = 12 }
+                new Category { Id = 501, Name = "Меблі", IconUrl = "categoryIcon-Furniture.svg", ImgUrl = "categoryImg-Furniture.svg", ParentCategoryId = 5, DisplayOrder = 1 },
+                new Category { Id = 502, Name = "Дивани", IconUrl = "categoryIcon-Sofas.svg", ImgUrl = "categoryImg-Sofas.svg", ParentCategoryId = 5, DisplayOrder = 2 },
+                new Category { Id = 503, Name = "Ліжка", IconUrl = "categoryIcon-Beds.svg", ImgUrl = "categoryImg-Beds.svg", ParentCategoryId = 5, DisplayOrder = 3 },
+                new Category { Id = 504, Name = "Шафи", IconUrl = "categoryIcon-Wardrobes.svg", ImgUrl = "categoryImg-Wardrobes.svg", ParentCategoryId = 5, DisplayOrder = 4 },
+                new Category { Id = 505, Name = "Освітлення", IconUrl = "categoryIcon-Lighting.svg", ImgUrl = "categoryImg-Lighting.svg", ParentCategoryId = 5, DisplayOrder = 5 },
+                new Category { Id = 506, Name = "Лампи", IconUrl = "categoryIcon-Lamps.svg", ImgUrl = "categoryImg-Lamps.svg", ParentCategoryId = 5, DisplayOrder = 6 },
+                new Category { Id = 507, Name = "Люстри", IconUrl = "categoryIcon-Chandeliers.svg", ImgUrl = "categoryImg-Chandeliers.svg", ParentCategoryId = 5, DisplayOrder = 7 },
+                new Category { Id = 508, Name = "LED освітлення", IconUrl = "categoryIcon-LEDLighting.svg", ImgUrl = "categoryImg-LEDLighting.svg", ParentCategoryId = 5, DisplayOrder = 8 },
+                new Category { Id = 509, Name = "Декор", IconUrl = "categoryIcon-Decor.svg", ImgUrl = "categoryImg-Decor.svg", ParentCategoryId = 5, DisplayOrder = 9 },
+                new Category { Id = 510, Name = "Картини", IconUrl = "categoryIcon-Paintings.svg", ImgUrl = "categoryImg-Paintings.svg", ParentCategoryId = 5, DisplayOrder = 10 },
+                new Category { Id = 511, Name = "Дзеркала", IconUrl = "categoryIcon-Mirrors.svg", ImgUrl = "categoryImg-Mirrors.svg", ParentCategoryId = 5, DisplayOrder = 11 },
+                new Category { Id = 512, Name = "Годинники", IconUrl = "categoryIcon-Clocks.svg", ImgUrl = "categoryImg-Clocks.svg", ParentCategoryId = 5, DisplayOrder = 12 }
             );
 
             // Категория 6 - Інструменти та автотовари
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 601, Name = "Електроінструменти", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 1 },
-                new Category { Id = 602, Name = "Дрилі", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 2 },
-                new Category { Id = 603, Name = "Шуруповерти", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 3 },
-                new Category { Id = 604, Name = "Болгарки", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 4 },
-                new Category { Id = 605, Name = "Автоелектроніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 5 },
-                new Category { Id = 606, Name = "Відеореєстратори", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 6 },
-                new Category { Id = 607, Name = "GPS навігатори", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 7 },
-                new Category { Id = 608, Name = "Автоаксесуари", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 8 },
-                new Category { Id = 609, Name = "Тримачі телефону", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 9 },
-                new Category { Id = 610, Name = "Зарядні пристрої", IconUrl = null, ImgUrl = null, ParentCategoryId = 6, DisplayOrder = 10 }
+                new Category { Id = 601, Name = "Електроінструменти", IconUrl = "categoryIcon-PowerTools.svg", ImgUrl = "categoryImg-PowerTools.svg", ParentCategoryId = 6, DisplayOrder = 1 },
+                new Category { Id = 602, Name = "Дрилі", IconUrl = "categoryIcon-Drills.svg", ImgUrl = "categoryImg-Drills.svg", ParentCategoryId = 6, DisplayOrder = 2 },
+                new Category { Id = 603, Name = "Шуруповерти", IconUrl = "categoryIcon-Screwdrivers.svg", ImgUrl = "categoryImg-Screwdrivers.svg", ParentCategoryId = 6, DisplayOrder = 3 },
+                new Category { Id = 604, Name = "Болгарки", IconUrl = "categoryIcon-AngleGrinders.svg", ImgUrl = "categoryImg-AngleGrinders.svg", ParentCategoryId = 6, DisplayOrder = 4 },
+                new Category { Id = 605, Name = "Автоелектроніка", IconUrl = "categoryIcon-CarElectronics.svg", ImgUrl = "categoryImg-CarElectronics.svg", ParentCategoryId = 6, DisplayOrder = 5 },
+                new Category { Id = 606, Name = "Відеореєстратори", IconUrl = "categoryIcon-DashCams.svg", ImgUrl = "categoryImg-DashCams.svg", ParentCategoryId = 6, DisplayOrder = 6 },
+                new Category { Id = 607, Name = "GPS навігатори", IconUrl = "categoryIcon-GPS.svg", ImgUrl = "categoryImg-GPS.svg", ParentCategoryId = 6, DisplayOrder = 7 },
+                new Category { Id = 608, Name = "Автоаксесуари", IconUrl = "categoryIcon-CarAccessories.svg", ImgUrl = "categoryImg-CarAccessories.svg", ParentCategoryId = 6, DisplayOrder = 8 },
+                new Category { Id = 609, Name = "Тримачі телефону", IconUrl = "categoryIcon-PhoneHolders.svg", ImgUrl = "categoryImg-PhoneHolders.svg", ParentCategoryId = 6, DisplayOrder = 9 },
+                new Category { Id = 610, Name = "Зарядні пристрої", IconUrl = "categoryIcon-CarChargers.svg", ImgUrl = "categoryImg-CarChargers.svg", ParentCategoryId = 6, DisplayOrder = 10 }
             );
 
             // Категория 7 - Сантехніка та ремонт
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 701, Name = "Ванна кімната", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 1 },
-                new Category { Id = 702, Name = "Душові кабіни", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 2 },
-                new Category { Id = 703, Name = "Унітази", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 3 },
-                new Category { Id = 704, Name = "Раковини", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 4 },
-                new Category { Id = 705, Name = "Інструменти", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 5 },
-                new Category { Id = 706, Name = "Ручний інструмент", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 6 },
-                new Category { Id = 707, Name = "Вимірювальні прилади", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 7 },
-                new Category { Id = 708, Name = "Матеріали", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 8 },
-                new Category { Id = 709, Name = "Фарба", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 9 },
-                new Category { Id = 710, Name = "Плитка", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 10 },
-                new Category { Id = 711, Name = "Ламінат", IconUrl = null, ImgUrl = null, ParentCategoryId = 7, DisplayOrder = 11 }
+                new Category { Id = 701, Name = "Ванна кімната", IconUrl = "categoryIcon-Bathroom.svg", ImgUrl = "categoryImg-Bathroom.svg", ParentCategoryId = 7, DisplayOrder = 1 },
+                new Category { Id = 702, Name = "Душові кабіни", IconUrl = "categoryIcon-ShowerCubicles.svg", ImgUrl = "categoryImg-ShowerCubicles.svg", ParentCategoryId = 7, DisplayOrder = 2 },
+                new Category { Id = 703, Name = "Унітази", IconUrl = "categoryIcon-Toilets.svg", ImgUrl = "categoryImg-Toilets.svg", ParentCategoryId = 7, DisplayOrder = 3 },
+                new Category { Id = 704, Name = "Раковини", IconUrl = "categoryIcon-Sinks.svg", ImgUrl = "categoryImg-Sinks.svg", ParentCategoryId = 7, DisplayOrder = 4 },
+                new Category { Id = 705, Name = "Інструменти", IconUrl = "categoryIcon-Tools.svg", ImgUrl = "categoryImg-Tools.svg", ParentCategoryId = 7, DisplayOrder = 5 },
+                new Category { Id = 706, Name = "Ручний інструмент", IconUrl = "categoryIcon-HandTools.svg", ImgUrl = "categoryImg-HandTools.svg", ParentCategoryId = 7, DisplayOrder = 6 },
+                new Category { Id = 707, Name = "Вимірювальні прилади", IconUrl = "categoryIcon-MeasuringTools.svg", ImgUrl = "categoryImg-MeasuringTools.svg", ParentCategoryId = 7, DisplayOrder = 7 },
+                new Category { Id = 708, Name = "Матеріали", IconUrl = "categoryIcon-Materials.svg", ImgUrl = "categoryImg-Materials.svg", ParentCategoryId = 7, DisplayOrder = 8 },
+                new Category { Id = 709, Name = "Фарба", IconUrl = "categoryIcon-Paint.svg", ImgUrl = "categoryImg-Paint.svg", ParentCategoryId = 7, DisplayOrder = 9 },
+                new Category { Id = 710, Name = "Плитка", IconUrl = "categoryIcon-Tiles.svg", ImgUrl = "categoryImg-Tiles.svg", ParentCategoryId = 7, DisplayOrder = 10 },
+                new Category { Id = 711, Name = "Ламінат", IconUrl = "categoryIcon-Laminate.svg", ImgUrl = "categoryImg-Laminate.svg", ParentCategoryId = 7, DisplayOrder = 11 }
             );
 
             // Категория 8 - Дача, сад та город
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 801, Name = "Садова техніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 1 },
-                new Category { Id = 802, Name = "Газонокосарки", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 2 },
-                new Category { Id = 803, Name = "Тримери", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 3 },
-                new Category { Id = 804, Name = "Садові інструменти", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 4 },
-                new Category { Id = 805, Name = "Лопати", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 5 },
-                new Category { Id = 806, Name = "Секатори", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 6 },
-                new Category { Id = 807, Name = "Меблі для саду", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 7 },
-                new Category { Id = 808, Name = "Садові столи", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 8 },
-                new Category { Id = 809, Name = "Крісла", IconUrl = null, ImgUrl = null, ParentCategoryId = 8, DisplayOrder = 9 }
+                new Category { Id = 801, Name = "Садова техніка", IconUrl = "categoryIcon-GardenTools.svg", ImgUrl = "categoryImg-GardenTools.svg", ParentCategoryId = 8, DisplayOrder = 1 },
+                new Category { Id = 802, Name = "Газонокосарки", IconUrl = "categoryIcon-LawnMowers.svg", ImgUrl = "categoryImg-LawnMowers.svg", ParentCategoryId = 8, DisplayOrder = 2 },
+                new Category { Id = 803, Name = "Тримери", IconUrl = "categoryIcon-Trimmers.svg", ImgUrl = "categoryImg-Trimmers.svg", ParentCategoryId = 8, DisplayOrder = 3 },
+                new Category { Id = 804, Name = "Садові інструменти", IconUrl = "categoryIcon-GardenImplements.svg", ImgUrl = "categoryImg-GardenImplements.svg", ParentCategoryId = 8, DisplayOrder = 4 },
+                new Category { Id = 805, Name = "Лопати", IconUrl = "categoryIcon-Shovels.svg", ImgUrl = "categoryImg-Shovels.svg", ParentCategoryId = 8, DisplayOrder = 5 },
+                new Category { Id = 806, Name = "Секатори", IconUrl = "categoryIcon-Pruners.svg", ImgUrl = "categoryImg-Pruners.svg", ParentCategoryId = 8, DisplayOrder = 6 },
+                new Category { Id = 807, Name = "Меблі для саду", IconUrl = "categoryIcon-GardenFurniture.svg", ImgUrl = "categoryImg-GardenFurniture.svg", ParentCategoryId = 8, DisplayOrder = 7 },
+                new Category { Id = 808, Name = "Садові столи", IconUrl = "categoryIcon-GardenTables.svg", ImgUrl = "categoryImg-GardenTables.svg", ParentCategoryId = 8, DisplayOrder = 8 },
+                new Category { Id = 809, Name = "Крісла", IconUrl = "categoryIcon-GardenChairs.svg", ImgUrl = "categoryImg-GardenChairs.svg", ParentCategoryId = 8, DisplayOrder = 9 }
             );
 
             // Категория 9 - Спорт та захоплення
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 901, Name = "Фітнес", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 1 },
-                new Category { Id = 902, Name = "Гантелі", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 2 },
-                new Category { Id = 903, Name = "Бігові доріжки", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 3 },
-                new Category { Id = 904, Name = "Велоспорт", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 4 },
-                new Category { Id = 905, Name = "Велосипеди", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 5 },
-                new Category { Id = 906, Name = "Аксесуари", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 6 },
-                new Category { Id = 907, Name = "Активний відпочинок", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 7 },
-                new Category { Id = 908, Name = "Самокати", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 8 },
-                new Category { Id = 909, Name = "Електросамокати", IconUrl = null, ImgUrl = null, ParentCategoryId = 9, DisplayOrder = 9 }
+                new Category { Id = 901, Name = "Фітнес", IconUrl = "categoryIcon-Fitness.svg", ImgUrl = "categoryImg-Fitness.svg", ParentCategoryId = 9, DisplayOrder = 1 },
+                new Category { Id = 902, Name = "Гантелі", IconUrl = "categoryIcon-Dumbbells.svg", ImgUrl = "categoryImg-Dumbbells.svg", ParentCategoryId = 9, DisplayOrder = 2 },
+                new Category { Id = 903, Name = "Бігові доріжки", IconUrl = "categoryIcon-Treadmills.svg", ImgUrl = "categoryImg-Treadmills.svg", ParentCategoryId = 9, DisplayOrder = 3 },
+                new Category { Id = 904, Name = "Велоспорт", IconUrl = "categoryIcon-Cycling.svg", ImgUrl = "categoryImg-Cycling.svg", ParentCategoryId = 9, DisplayOrder = 4 },
+                new Category { Id = 905, Name = "Велосипеди", IconUrl = "categoryIcon-Bicycles.svg", ImgUrl = "categoryImg-Bicycles.svg", ParentCategoryId = 9, DisplayOrder = 5 },
+                new Category { Id = 906, Name = "Аксесуари", IconUrl = "categoryIcon-CyclingAccessories.svg", ImgUrl = "categoryImg-CyclingAccessories.svg", ParentCategoryId = 9, DisplayOrder = 6 },
+                new Category { Id = 907, Name = "Активний відпочинок", IconUrl = "categoryIcon-OutdoorRecreation.svg", ImgUrl = "categoryImg-OutdoorRecreation.svg", ParentCategoryId = 9, DisplayOrder = 7 },
+                new Category { Id = 908, Name = "Самокати", IconUrl = "categoryIcon-KickScooters.svg", ImgUrl = "categoryImg-KickScooters.svg", ParentCategoryId = 9, DisplayOrder = 8 },
+                new Category { Id = 909, Name = "Електросамокати", IconUrl = "categoryIcon-ElectricScooters.svg", ImgUrl = "categoryImg-ElectricScooters.svg", ParentCategoryId = 9, DisplayOrder = 9 }
             );
 
             // Категория 10 - Одяг, взуття та прикраси
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1001, Name = "Чоловічий одяг", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 1 },
-                new Category { Id = 1002, Name = "Футболки", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 2 },
-                new Category { Id = 1003, Name = "Джинси", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 3 },
-                new Category { Id = 1004, Name = "Куртки", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 4 },
-                new Category { Id = 1005, Name = "Жіночий одяг", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 5 },
-                new Category { Id = 1006, Name = "Сукні", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 6 },
-                new Category { Id = 1007, Name = "Спідниці", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 7 },
-                new Category { Id = 1008, Name = "Взуття", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 8 },
-                new Category { Id = 1009, Name = "Кросівки", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 9 },
-                new Category { Id = 1010, Name = "Черевики", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 10 },
-                new Category { Id = 1011, Name = "Аксесуари", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 11 },
-                new Category { Id = 1012, Name = "Сумки", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 12 },
-                new Category { Id = 1013, Name = "Ремені", IconUrl = null, ImgUrl = null, ParentCategoryId = 10, DisplayOrder = 13 }
+                new Category { Id = 1001, Name = "Чоловічий одяг", IconUrl = "categoryIcon-MensClothing.svg", ImgUrl = "categoryImg-MensClothing.svg", ParentCategoryId = 10, DisplayOrder = 1 },
+                new Category { Id = 1002, Name = "Футболки", IconUrl = "categoryIcon-TShirts.svg", ImgUrl = "categoryImg-TShirts.svg", ParentCategoryId = 10, DisplayOrder = 2 },
+                new Category { Id = 1003, Name = "Джинси", IconUrl = "categoryIcon-Jeans.svg", ImgUrl = "categoryImg-Jeans.svg", ParentCategoryId = 10, DisplayOrder = 3 },
+                new Category { Id = 1004, Name = "Куртки", IconUrl = "categoryIcon-Jackets.svg", ImgUrl = "categoryImg-Jackets.svg", ParentCategoryId = 10, DisplayOrder = 4 },
+                new Category { Id = 1005, Name = "Жіночий одяг", IconUrl = "categoryIcon-WomensClothing.svg", ImgUrl = "categoryImg-WomensClothing.svg", ParentCategoryId = 10, DisplayOrder = 5 },
+                new Category { Id = 1006, Name = "Сукні", IconUrl = "categoryIcon-Dresses.svg", ImgUrl = "categoryImg-Dresses.svg", ParentCategoryId = 10, DisplayOrder = 6 },
+                new Category { Id = 1007, Name = "Спідниці", IconUrl = "categoryIcon-Skirts.svg", ImgUrl = "categoryImg-Skirts.svg", ParentCategoryId = 10, DisplayOrder = 7 },
+                new Category { Id = 1008, Name = "Взуття", IconUrl = "categoryIcon-Footwear.svg", ImgUrl = "categoryImg-Footwear.svg", ParentCategoryId = 10, DisplayOrder = 8 },
+                new Category { Id = 1009, Name = "Кросівки", IconUrl = "categoryIcon-Sneakers.svg", ImgUrl = "categoryImg-Sneakers.svg", ParentCategoryId = 10, DisplayOrder = 9 },
+                new Category { Id = 1010, Name = "Черевики", IconUrl = "categoryIcon-Boots.svg", ImgUrl = "categoryImg-Boots.svg", ParentCategoryId = 10, DisplayOrder = 10 },
+                new Category { Id = 1011, Name = "Аксесуари", IconUrl = "categoryIcon-Accessories.svg", ImgUrl = "categoryImg-Accessories.svg", ParentCategoryId = 10, DisplayOrder = 11 },
+                new Category { Id = 1012, Name = "Сумки", IconUrl = "categoryIcon-Bags.svg", ImgUrl = "categoryImg-Bags.svg", ParentCategoryId = 10, DisplayOrder = 12 },
+                new Category { Id = 1013, Name = "Ремені", IconUrl = "categoryIcon-Belts.svg", ImgUrl = "categoryImg-Belts.svg", ParentCategoryId = 10, DisplayOrder = 13 }
             );
 
             // Категория 11 - Краса і здоров'я
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1101, Name = "Догляд за обличчям", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 1 },
-                new Category { Id = 1102, Name = "Креми", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 2 },
-                new Category { Id = 1103, Name = "Сироватки", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 3 },
-                new Category { Id = 1104, Name = "Догляд за волоссям", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 4 },
-                new Category { Id = 1105, Name = "Шампуні", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 5 },
-                new Category { Id = 1106, Name = "Маски", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 6 },
-                new Category { Id = 1107, Name = "Техніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 7 },
-                new Category { Id = 1108, Name = "Фени", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 8 },
-                new Category { Id = 1109, Name = "Бритви", IconUrl = null, ImgUrl = null, ParentCategoryId = 11, DisplayOrder = 9 }
+                new Category { Id = 1101, Name = "Догляд за обличчям", IconUrl = "categoryIcon-FaceCare.svg", ImgUrl = "categoryImg-FaceCare.svg", ParentCategoryId = 11, DisplayOrder = 1 },
+                new Category { Id = 1102, Name = "Креми", IconUrl = "categoryIcon-Creams.svg", ImgUrl = "categoryImg-Creams.svg", ParentCategoryId = 11, DisplayOrder = 2 },
+                new Category { Id = 1103, Name = "Сироватки", IconUrl = "categoryIcon-Serums.svg", ImgUrl = "categoryImg-Serums.svg", ParentCategoryId = 11, DisplayOrder = 3 },
+                new Category { Id = 1104, Name = "Догляд за волоссям", IconUrl = "categoryIcon-HairCare.svg", ImgUrl = "categoryImg-HairCare.svg", ParentCategoryId = 11, DisplayOrder = 4 },
+                new Category { Id = 1105, Name = "Шампуні", IconUrl = "categoryIcon-Shampoos.svg", ImgUrl = "categoryImg-Shampoos.svg", ParentCategoryId = 11, DisplayOrder = 5 },
+                new Category { Id = 1106, Name = "Маски", IconUrl = "categoryIcon-HairMasks.svg", ImgUrl = "categoryImg-HairMasks.svg", ParentCategoryId = 11, DisplayOrder = 6 },
+                new Category { Id = 1107, Name = "Техніка", IconUrl = "categoryIcon-BeautyTech.svg", ImgUrl = "categoryImg-BeautyTech.svg", ParentCategoryId = 11, DisplayOrder = 7 },
+                new Category { Id = 1108, Name = "Фени", IconUrl = "categoryIcon-HairDryers.svg", ImgUrl = "categoryImg-HairDryers.svg", ParentCategoryId = 11, DisplayOrder = 8 },
+                new Category { Id = 1109, Name = "Бритви", IconUrl = "categoryIcon-Razors.svg", ImgUrl = "categoryImg-Razors.svg", ParentCategoryId = 11, DisplayOrder = 9 }
             );
 
             // Категория 12 - Дитячі товари
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1201, Name = "Іграшки", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 1 },
-                new Category { Id = 1202, Name = "Конструктори", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 2 },
-                new Category { Id = 1203, Name = "Ляльки", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 3 },
-                new Category { Id = 1204, Name = "Машинки", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 4 },
-                new Category { Id = 1205, Name = "Для немовлят", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 5 },
-                new Category { Id = 1206, Name = "Підгузки", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 6 },
-                new Category { Id = 1207, Name = "Пляшечки", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 7 },
-                new Category { Id = 1208, Name = "Дитячий транспорт", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 8 },
-                new Category { Id = 1209, Name = "Коляски", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 9 },
-                new Category { Id = 1210, Name = "Самокати", IconUrl = null, ImgUrl = null, ParentCategoryId = 12, DisplayOrder = 10 }
+                new Category { Id = 1201, Name = "Іграшки", IconUrl = "categoryIcon-Toys.svg", ImgUrl = "categoryImg-Toys.svg", ParentCategoryId = 12, DisplayOrder = 1 },
+                new Category { Id = 1202, Name = "Конструктори", IconUrl = "categoryIcon-ConstructionToys.svg", ImgUrl = "categoryImg-ConstructionToys.svg", ParentCategoryId = 12, DisplayOrder = 2 },
+                new Category { Id = 1203, Name = "Ляльки", IconUrl = "categoryIcon-Dolls.svg", ImgUrl = "categoryImg-Dolls.svg", ParentCategoryId = 12, DisplayOrder = 3 },
+                new Category { Id = 1204, Name = "Машинки", IconUrl = "categoryIcon-Cars.svg", ImgUrl = "categoryImg-Cars.svg", ParentCategoryId = 12, DisplayOrder = 4 },
+                new Category { Id = 1205, Name = "Для немовлят", IconUrl = "categoryIcon-Baby.svg", ImgUrl = "categoryImg-Baby.svg", ParentCategoryId = 12, DisplayOrder = 5 },
+                new Category { Id = 1206, Name = "Підгузки", IconUrl = "categoryIcon-Diapers.svg", ImgUrl = "categoryImg-Diapers.svg", ParentCategoryId = 12, DisplayOrder = 6 },
+                new Category { Id = 1207, Name = "Пляшечки", IconUrl = "categoryIcon-BabyBottles.svg", ImgUrl = "categoryImg-BabyBottles.svg", ParentCategoryId = 12, DisplayOrder = 7 },
+                new Category { Id = 1208, Name = "Дитячий транспорт", IconUrl = "categoryIcon-KidsVehicles.svg", ImgUrl = "categoryImg-KidsVehicles.svg", ParentCategoryId = 12, DisplayOrder = 8 },
+                new Category { Id = 1209, Name = "Коляски", IconUrl = "categoryIcon-Strollers.svg", ImgUrl = "categoryImg-Strollers.svg", ParentCategoryId = 12, DisplayOrder = 9 },
+                new Category { Id = 1210, Name = "Самокати", IconUrl = "categoryIcon-KidsScooters.svg", ImgUrl = "categoryImg-KidsScooters.svg", ParentCategoryId = 12, DisplayOrder = 10 }
             );
 
             // Категория 13 - Зоотовари
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1301, Name = "Для собак", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 1 },
-                new Category { Id = 1302, Name = "Корм", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 2 },
-                new Category { Id = 1303, Name = "Іграшки", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 3 },
-                new Category { Id = 1304, Name = "Для котів", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 4 },
-                new Category { Id = 1305, Name = "Корм", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 5 },
-                new Category { Id = 1306, Name = "Наповнювачі", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 6 },
-                new Category { Id = 1307, Name = "Для гризунів", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 7 },
-                new Category { Id = 1308, Name = "Клітки", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 8 },
-                new Category { Id = 1309, Name = "Корм", IconUrl = null, ImgUrl = null, ParentCategoryId = 13, DisplayOrder = 9 }
+                new Category { Id = 1301, Name = "Для собак", IconUrl = "categoryIcon-Dogs.svg", ImgUrl = "categoryImg-Dogs.svg", ParentCategoryId = 13, DisplayOrder = 1 },
+                new Category { Id = 1302, Name = "Корм", IconUrl = "categoryIcon-DogFood.svg", ImgUrl = "categoryImg-DogFood.svg", ParentCategoryId = 13, DisplayOrder = 2 },
+                new Category { Id = 1303, Name = "Іграшки", IconUrl = "categoryIcon-DogToys.svg", ImgUrl = "categoryImg-DogToys.svg", ParentCategoryId = 13, DisplayOrder = 3 },
+                new Category { Id = 1304, Name = "Для котів", IconUrl = "categoryIcon-Cats.svg", ImgUrl = "categoryImg-Cats.svg", ParentCategoryId = 13, DisplayOrder = 4 },
+                new Category { Id = 1305, Name = "Корм", IconUrl = "categoryIcon-CatFood.svg", ImgUrl = "categoryImg-CatFood.svg", ParentCategoryId = 13, DisplayOrder = 5 },
+                new Category { Id = 1306, Name = "Наповнювачі", IconUrl = "categoryIcon-CatLitter.svg", ImgUrl = "categoryImg-CatLitter.svg", ParentCategoryId = 13, DisplayOrder = 6 },
+                new Category { Id = 1307, Name = "Для гризунів", IconUrl = "categoryIcon-Rodents.svg", ImgUrl = "categoryImg-Rodents.svg", ParentCategoryId = 13, DisplayOrder = 7 },
+                new Category { Id = 1308, Name = "Клітки", IconUrl = "categoryIcon-Cages.svg", ImgUrl = "categoryImg-Cages.svg", ParentCategoryId = 13, DisplayOrder = 8 },
+                new Category { Id = 1309, Name = "Корм", IconUrl = "categoryIcon-RodentFood.svg", ImgUrl = "categoryImg-RodentFood.svg", ParentCategoryId = 13, DisplayOrder = 9 }
             );
 
             // Категория 14 - Канцтовари та книги
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1401, Name = "Канцтовари", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 1 },
-                new Category { Id = 1402, Name = "Ручки", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 2 },
-                new Category { Id = 1403, Name = "Зошити", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 3 },
-                new Category { Id = 1404, Name = "Папір", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 4 },
-                new Category { Id = 1405, Name = "Книги", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 5 },
-                new Category { Id = 1406, Name = "Художні", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 6 },
-                new Category { Id = 1407, Name = "Навчальні", IconUrl = null, ImgUrl = null, ParentCategoryId = 14, DisplayOrder = 7 }
+                new Category { Id = 1401, Name = "Канцтовари", IconUrl = "categoryIcon-Stationery.svg", ImgUrl = "categoryImg-Stationery.svg", ParentCategoryId = 14, DisplayOrder = 1 },
+                new Category { Id = 1402, Name = "Ручки", IconUrl = "categoryIcon-Pens.svg", ImgUrl = "categoryImg-Pens.svg", ParentCategoryId = 14, DisplayOrder = 2 },
+                new Category { Id = 1403, Name = "Зошити", IconUrl = "categoryIcon-Notebooks.svg", ImgUrl = "categoryImg-Notebooks.svg", ParentCategoryId = 14, DisplayOrder = 3 },
+                new Category { Id = 1404, Name = "Папір", IconUrl = "categoryIcon-Paper.svg", ImgUrl = "categoryImg-Paper.svg", ParentCategoryId = 14, DisplayOrder = 4 },
+                new Category { Id = 1405, Name = "Книги", IconUrl = "categoryIcon-Books.svg", ImgUrl = "categoryImg-Books.svg", ParentCategoryId = 14, DisplayOrder = 5 },
+                new Category { Id = 1406, Name = "Художні", IconUrl = "categoryIcon-Fiction.svg", ImgUrl = "categoryImg-Fiction.svg", ParentCategoryId = 14, DisplayOrder = 6 },
+                new Category { Id = 1407, Name = "Навчальні", IconUrl = "categoryIcon-Educational.svg", ImgUrl = "categoryImg-Educational.svg", ParentCategoryId = 14, DisplayOrder = 7 }
             );
 
             // Категория 15 - Алкогольні напої та продукти
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1501, Name = "Алкоголь", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 1 },
-                new Category { Id = 1502, Name = "Вино", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 2 },
-                new Category { Id = 1503, Name = "Пиво", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 3 },
-                new Category { Id = 1504, Name = "Віскі", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 4 },
-                new Category { Id = 1505, Name = "Продукти", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 5 },
-                new Category { Id = 1506, Name = "Солодощі", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 6 },
-                new Category { Id = 1507, Name = "Снеки", IconUrl = null, ImgUrl = null, ParentCategoryId = 15, DisplayOrder = 7 }
+                new Category { Id = 1501, Name = "Алкоголь", IconUrl = "categoryIcon-Alcohol.svg", ImgUrl = "categoryImg-Alcohol.svg", ParentCategoryId = 15, DisplayOrder = 1 },
+                new Category { Id = 1502, Name = "Вино", IconUrl = "categoryIcon-Wine.svg", ImgUrl = "categoryImg-Wine.svg", ParentCategoryId = 15, DisplayOrder = 2 },
+                new Category { Id = 1503, Name = "Пиво", IconUrl = "categoryIcon-Beer.svg", ImgUrl = "categoryImg-Beer.svg", ParentCategoryId = 15, DisplayOrder = 3 },
+                new Category { Id = 1504, Name = "Віскі", IconUrl = "categoryIcon-Whiskey.svg", ImgUrl = "categoryImg-Whiskey.svg", ParentCategoryId = 15, DisplayOrder = 4 },
+                new Category { Id = 1505, Name = "Продукти", IconUrl = "categoryIcon-Food.svg", ImgUrl = "categoryImg-Food.svg", ParentCategoryId = 15, DisplayOrder = 5 },
+                new Category { Id = 1506, Name = "Солодощі", IconUrl = "categoryIcon-Sweets.svg", ImgUrl = "categoryImg-Sweets.svg", ParentCategoryId = 15, DisplayOrder = 6 },
+                new Category { Id = 1507, Name = "Снеки", IconUrl = "categoryIcon-Snacks.svg", ImgUrl = "categoryImg-Snacks.svg", ParentCategoryId = 15, DisplayOrder = 7 }
             );
 
             // Категория 16 - Товари для бізнесу та послуги
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1601, Name = "Офіс", IconUrl = null, ImgUrl = null, ParentCategoryId = 16, DisplayOrder = 1 },
-                new Category { Id = 1602, Name = "Офісна техніка", IconUrl = null, ImgUrl = null, ParentCategoryId = 16, DisplayOrder = 2 },
-                new Category { Id = 1603, Name = "Меблі", IconUrl = null, ImgUrl = null, ParentCategoryId = 16, DisplayOrder = 3 },
-                new Category { Id = 1604, Name = "Бізнес обладнання", IconUrl = null, ImgUrl = null, ParentCategoryId = 16, DisplayOrder = 4 },
-                new Category { Id = 1605, Name = "POS системи", IconUrl = null, ImgUrl = null, ParentCategoryId = 16, DisplayOrder = 5 },
-                new Category { Id = 1606, Name = "Касові апарати", IconUrl = null, ImgUrl = null, ParentCategoryId = 16, DisplayOrder = 6 }
+                new Category { Id = 1601, Name = "Офіс", IconUrl = "categoryIcon-Office.svg", ImgUrl = "categoryImg-Office.svg", ParentCategoryId = 16, DisplayOrder = 1 },
+                new Category { Id = 1602, Name = "Офісна техніка", IconUrl = "categoryIcon-OfficeEquipment.svg", ImgUrl = "categoryImg-OfficeEquipment.svg", ParentCategoryId = 16, DisplayOrder = 2 },
+                new Category { Id = 1603, Name = "Меблі", IconUrl = "categoryIcon-OfficeFurniture.svg", ImgUrl = "categoryImg-OfficeFurniture.svg", ParentCategoryId = 16, DisplayOrder = 3 },
+                new Category { Id = 1604, Name = "Бізнес обладнання", IconUrl = "categoryIcon-BusinessEquipment.svg", ImgUrl = "categoryImg-BusinessEquipment.svg", ParentCategoryId = 16, DisplayOrder = 4 },
+                new Category { Id = 1605, Name = "POS системи", IconUrl = "categoryIcon-POS.svg", ImgUrl = "categoryImg-POS.svg", ParentCategoryId = 16, DisplayOrder = 5 },
+                new Category { Id = 1606, Name = "Касові апарати", IconUrl = "categoryIcon-CashRegisters.svg", ImgUrl = "categoryImg-CashRegisters.svg", ParentCategoryId = 16, DisplayOrder = 6 }
             );
 
             // Категория 17 - Туризм та відпочинок
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1701, Name = "Туристичне спорядження", IconUrl = null, ImgUrl = null, ParentCategoryId = 17, DisplayOrder = 1 },
-                new Category { Id = 1702, Name = "Намет", IconUrl = null, ImgUrl = null, ParentCategoryId = 17, DisplayOrder = 2 },
-                new Category { Id = 1703, Name = "Спальні мішки", IconUrl = null, ImgUrl = null, ParentCategoryId = 17, DisplayOrder = 3 },
-                new Category { Id = 1704, Name = "Подорожі", IconUrl = null, ImgUrl = null, ParentCategoryId = 17, DisplayOrder = 4 },
-                new Category { Id = 1705, Name = "Валізи", IconUrl = null, ImgUrl = null, ParentCategoryId = 17, DisplayOrder = 5 },
-                new Category { Id = 1706, Name = "Рюкзаки", IconUrl = null, ImgUrl = null, ParentCategoryId = 17, DisplayOrder = 6 }
+                new Category { Id = 1701, Name = "Туристичне спорядження", IconUrl = "categoryIcon-TourismGear.svg", ImgUrl = "categoryImg-TourismGear.svg", ParentCategoryId = 17, DisplayOrder = 1 },
+                new Category { Id = 1702, Name = "Намет", IconUrl = "categoryIcon-Tents.svg", ImgUrl = "categoryImg-Tents.svg", ParentCategoryId = 17, DisplayOrder = 2 },
+                new Category { Id = 1703, Name = "Спальні мішки", IconUrl = "categoryIcon-SleepingBags.svg", ImgUrl = "categoryImg-SleepingBags.svg", ParentCategoryId = 17, DisplayOrder = 3 },
+                new Category { Id = 1704, Name = "Подорожі", IconUrl = "categoryIcon-Travel.svg", ImgUrl = "categoryImg-Travel.svg", ParentCategoryId = 17, DisplayOrder = 4 },
+                new Category { Id = 1705, Name = "Валізи", IconUrl = "categoryIcon-Suitcases.svg", ImgUrl = "categoryImg-Suitcases.svg", ParentCategoryId = 17, DisplayOrder = 5 },
+                new Category { Id = 1706, Name = "Рюкзаки", IconUrl = "categoryIcon-Backpacks.svg", ImgUrl = "categoryImg-Backpacks.svg", ParentCategoryId = 17, DisplayOrder = 6 }
             );
 
             // Категория 18 - Акції
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1801, Name = "Товари зі знижками", IconUrl = null, ImgUrl = null, ParentCategoryId = 18, DisplayOrder = 1 },
-                new Category { Id = 1802, Name = "Сезонні розпродажі", IconUrl = null, ImgUrl = null, ParentCategoryId = 18, DisplayOrder = 2 }
+                new Category { Id = 1801, Name = "Товари зі знижками", IconUrl = "categoryIcon-Discounted.svg", ImgUrl = "categoryImg-Discounted.svg", ParentCategoryId = 18, DisplayOrder = 1 },
+                new Category { Id = 1802, Name = "Сезонні розпродажі", IconUrl = "categoryIcon-SeasonalSales.svg", ImgUrl = "categoryImg-SeasonalSales.svg", ParentCategoryId = 18, DisplayOrder = 2 }
             );
 
             // Категория 19 - Тотальний розпродаж
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1901, Name = "До −50%", IconUrl = null, ImgUrl = null, ParentCategoryId = 19, DisplayOrder = 1 },
-                new Category { Id = 1902, Name = "До −70%", IconUrl = null, ImgUrl = null, ParentCategoryId = 19, DisplayOrder = 2 },
-                new Category { Id = 1903, Name = "Останні екземпляри", IconUrl = null, ImgUrl = null, ParentCategoryId = 19, DisplayOrder = 3 }
+                new Category { Id = 1901, Name = "До −50%", IconUrl = "categoryIcon-UpTo50.svg", ImgUrl = "categoryImg-UpTo50.svg", ParentCategoryId = 19, DisplayOrder = 1 },
+                new Category { Id = 1902, Name = "До −70%", IconUrl = "categoryIcon-UpTo70.svg", ImgUrl = "categoryImg-UpTo70.svg", ParentCategoryId = 19, DisplayOrder = 2 },
+                new Category { Id = 1903, Name = "Останні екземпляри", IconUrl = "categoryIcon-LastItems.svg", ImgUrl = "categoryImg-LastItems.svg", ParentCategoryId = 19, DisplayOrder = 3 }
             );
 
             // 6. Связи категорий с брендами
