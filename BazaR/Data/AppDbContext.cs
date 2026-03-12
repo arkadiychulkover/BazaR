@@ -203,7 +203,7 @@ namespace BazaR.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.Description).HasMaxLength(1000);
-                entity.Property(e => e.Price).HasPrecision(18, 2); // Добавлено для decimal
+                entity.Property(e => e.Price).HasPrecision(18, 2);
 
                 entity.HasOne(u => u.Item)
                     .WithMany(i => i.Uslugi)
@@ -217,7 +217,7 @@ namespace BazaR.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.DeliveryPlace).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.SendingPlace).IsRequired().HasMaxLength(200);
-                entity.Property(e => e.Price).HasPrecision(18, 2); // Добавлено для decimal
+                entity.Property(e => e.Price).HasPrecision(18, 2);
                 entity.Property(e => e.PaymentType).HasConversion<int>();
 
                 entity.HasOne(d => d.Item)
@@ -252,7 +252,6 @@ namespace BazaR.Data
                     .HasForeignKey(ci => ci.ItemId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // Уникальность: один пользователь может добавить конкретный товар только один раз
                 entity.HasIndex(ci => new { ci.UserId, ci.ItemId }).IsUnique();
             });
 
@@ -271,7 +270,6 @@ namespace BazaR.Data
                     .HasForeignKey(wi => wi.ItemId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // Уникальность: один пользователь может добавить конкретный товар в избранное только один раз
                 entity.HasIndex(wi => new { wi.UserId, wi.ItemId }).IsUnique();
             });
 
@@ -287,7 +285,7 @@ namespace BazaR.Data
                 entity.Property(e => e.PaymentStatus).HasMaxLength(50);
                 entity.Property(e => e.DeliveryMethod).HasMaxLength(100);
                 entity.Property(e => e.Ttn).HasMaxLength(100);
-                entity.Property(e => e.TotalAmount).HasPrecision(18, 2); // Добавлено для decimal
+                entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
 
                 entity.HasOne(o => o.User)
                     .WithMany(u => u.Orders)
@@ -305,7 +303,7 @@ namespace BazaR.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Quantity).IsRequired();
-                entity.Property(e => e.PriceAtMoment).HasPrecision(18, 2); // Добавлено для decimal
+                entity.Property(e => e.PriceAtMoment).HasPrecision(18, 2);
 
                 entity.HasOne(oi => oi.Order)
                     .WithMany(o => o.OrderItems)
@@ -775,6 +773,277 @@ namespace BazaR.Data
             }
 
             modelBuilder.Entity<Item>().HasData(items);
+
+            // 8. Добавление фильтров категорий (минимум 2 специфических на каждую категорию)
+            var allCategoryIds = new List<int>();
+
+            // Верхние категории (1-19)
+            allCategoryIds.AddRange(Enumerable.Range(1, 19));
+
+            // Подкатегории (диапазоны из ранее добавленных данных)
+            allCategoryIds.AddRange(Enumerable.Range(101, 29));   // 101–129
+            allCategoryIds.AddRange(Enumerable.Range(201, 21));   // 201–221
+            allCategoryIds.AddRange(Enumerable.Range(301, 15));   // 301–315
+            allCategoryIds.AddRange(Enumerable.Range(401, 16));   // 401–416
+            allCategoryIds.AddRange(Enumerable.Range(501, 12));   // 501–512
+            allCategoryIds.AddRange(Enumerable.Range(601, 10));   // 601–610
+            allCategoryIds.AddRange(Enumerable.Range(701, 11));   // 701–711
+            allCategoryIds.AddRange(Enumerable.Range(801, 9));    // 801–809
+            allCategoryIds.AddRange(Enumerable.Range(901, 9));    // 901–909
+            allCategoryIds.AddRange(Enumerable.Range(1001, 13));  // 1001–1013
+            allCategoryIds.AddRange(Enumerable.Range(1101, 9));   // 1101–1109
+            allCategoryIds.AddRange(Enumerable.Range(1201, 10));  // 1201–1210
+            allCategoryIds.AddRange(Enumerable.Range(1301, 9));   // 1301–1309
+            allCategoryIds.AddRange(Enumerable.Range(1401, 7));   // 1401–1407
+            allCategoryIds.AddRange(Enumerable.Range(1501, 7));   // 1501–1507
+            allCategoryIds.AddRange(Enumerable.Range(1601, 6));   // 1601–1606
+            allCategoryIds.AddRange(Enumerable.Range(1701, 6));   // 1701–1706
+            allCategoryIds.AddRange(Enumerable.Range(1801, 2));   // 1801–1802
+            allCategoryIds.AddRange(Enumerable.Range(1901, 3));   // 1901–1903
+
+            int filterId = -2000;
+            var categoryFilters = new List<CategoryFilter>();
+
+            foreach (var catId in allCategoryIds)
+            {
+                string group = GetCategoryGroup(catId);
+                var filtersForGroup = GetFiltersForGroup(group, ref filterId, catId);
+                categoryFilters.AddRange(filtersForGroup);
+            }
+
+            modelBuilder.Entity<CategoryFilter>().HasData(categoryFilters);
+
+            // После добавления товаров добавьте характеристики
+            var characteristics = new List<ItemCharacteristic>();
+            int charId = -3000;
+
+            // Для товаров в категории ноутбуков (101-110)
+            for (int i = 101; i <= 110; i++)
+            {
+                var itemsInCat = items.Where(item => item.CategoryId == i).ToList();
+                foreach (var item in itemsInCat)
+                {
+                    characteristics.Add(new ItemCharacteristic
+                    {
+                        Id = charId--,
+                        ItemId = item.Id,
+                        Key = "processor",
+                        Value = i % 2 == 0 ? "Intel Core i5" : "Intel Core i7"
+                    });
+
+                    characteristics.Add(new ItemCharacteristic
+                    {
+                        Id = charId--,
+                        ItemId = item.Id,
+                        Key = "ram",
+                        Value = i % 2 == 0 ? "8GB" : "16GB"
+                    });
+
+                    characteristics.Add(new ItemCharacteristic
+                    {
+                        Id = charId--,
+                        ItemId = item.Id,
+                        Key = "storage",
+                        Value = i % 2 == 0 ? "256GB SSD" : "512GB SSD"
+                    });
+                }
+            }
+
+            // Для товаров в категории смартфонов (201-205)
+            for (int i = 201; i <= 205; i++)
+            {
+                var itemsInCat = items.Where(item => item.CategoryId == i).ToList();
+                foreach (var item in itemsInCat)
+                {
+                    characteristics.Add(new ItemCharacteristic
+                    {
+                        Id = charId--,
+                        ItemId = item.Id,
+                        Key = "screen_size",
+                        Value = i % 2 == 0 ? "6.1\"" : "6.7\""
+                    });
+
+                    characteristics.Add(new ItemCharacteristic
+                    {
+                        Id = charId--,
+                        ItemId = item.Id,
+                        Key = "color",
+                        Value = i % 2 == 0 ? "Black" : "Silver"
+                    });
+
+                    characteristics.Add(new ItemCharacteristic
+                    {
+                        Id = charId--,
+                        ItemId = item.Id,
+                        Key = "memory",
+                        Value = i % 2 == 0 ? "128GB" : "256GB"
+                    });
+                }
+            }
+
+            modelBuilder.Entity<ItemCharacteristic>().HasData(characteristics);
         }
+
+        // Вспомогательный метод для определения группы категории по её ID
+        private string GetCategoryGroup(int categoryId)
+        {
+            if (categoryId == 1 || (categoryId >= 101 && categoryId <= 129))
+                return "computers";
+            if (categoryId == 2 || (categoryId >= 201 && categoryId <= 221))
+                return "electronics";
+            if (categoryId == 3 || (categoryId >= 301 && categoryId <= 315))
+                return "gaming";
+            if (categoryId == 4 || (categoryId >= 401 && categoryId <= 416))
+                return "appliances";
+            if (categoryId == 5 || (categoryId >= 501 && categoryId <= 512))
+                return "home";
+            if (categoryId == 6 || (categoryId >= 601 && categoryId <= 610))
+                return "tools";
+            if (categoryId == 7 || (categoryId >= 701 && categoryId <= 711))
+                return "plumbing";
+            if (categoryId == 8 || (categoryId >= 801 && categoryId <= 809))
+                return "garden";
+            if (categoryId == 9 || (categoryId >= 901 && categoryId <= 909))
+                return "sports";
+            if (categoryId == 10 || (categoryId >= 1001 && categoryId <= 1013))
+                return "clothing";
+            if (categoryId == 11 || (categoryId >= 1101 && categoryId <= 1109))
+                return "beauty";
+            if (categoryId == 12 || (categoryId >= 1201 && categoryId <= 1210))
+                return "kids";
+            if (categoryId == 13 || (categoryId >= 1301 && categoryId <= 1309))
+                return "pets";
+            if (categoryId == 14 || (categoryId >= 1401 && categoryId <= 1407))
+                return "stationery";
+            if (categoryId == 15 || (categoryId >= 1501 && categoryId <= 1507))
+                return "food";
+            if (categoryId == 16 || (categoryId >= 1601 && categoryId <= 1606))
+                return "business";
+            if (categoryId == 17 || (categoryId >= 1701 && categoryId <= 1706))
+                return "tourism";
+            if (categoryId == 18 || (categoryId >= 1801 && categoryId <= 1802))
+                return "promo";
+            if (categoryId == 19 || (categoryId >= 1901 && categoryId <= 1903))
+                return "sale";
+
+            return "default"; // на всякий случай
+        }
+
+        // Вспомогательный метод для получения списка фильтров по группе
+        private List<CategoryFilter> GetFiltersForGroup(string group, ref int filterId, int categoryId)
+        {
+            var filters = new List<CategoryFilter>();
+
+            switch (group)
+            {
+                case "computers":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "processor", DisplayName = "Тип процесора", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "ram", DisplayName = "Об'єм оперативної пам'яті", ValueType = FilterValueType.Number });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "storage", DisplayName = "Об'єм накопичувача", ValueType = FilterValueType.Number });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "graphics", DisplayName = "Тип відеокарти", ValueType = FilterValueType.String });
+                    break;
+
+                case "electronics":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "screen_size", DisplayName = "Діагональ екрану", ValueType = FilterValueType.Number });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "color", DisplayName = "Колір", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "memory", DisplayName = "Вбудована пам'ять", ValueType = FilterValueType.Number });
+                    break;
+
+                case "gaming":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "platform", DisplayName = "Платформа", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "genre", DisplayName = "Жанр", ValueType = FilterValueType.String });
+                    break;
+
+                case "appliances":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "energy_class", DisplayName = "Клас енергоспоживання", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "color", DisplayName = "Колір", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "type", DisplayName = "Тип", ValueType = FilterValueType.String });
+                    break;
+
+                case "home":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "material", DisplayName = "Матеріал", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "color", DisplayName = "Колір", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "size", DisplayName = "Розмір", ValueType = FilterValueType.String });
+                    break;
+
+                case "tools":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "power", DisplayName = "Потужність", ValueType = FilterValueType.Number });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "type", DisplayName = "Тип інструменту", ValueType = FilterValueType.String });
+                    break;
+
+                case "plumbing":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "material", DisplayName = "Матеріал", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "size", DisplayName = "Розмір", ValueType = FilterValueType.String });
+                    break;
+
+                case "garden":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "type", DisplayName = "Тип", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "material", DisplayName = "Матеріал", ValueType = FilterValueType.String });
+                    break;
+
+                case "sports":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "sport_type", DisplayName = "Вид спорту", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "size", DisplayName = "Розмір", ValueType = FilterValueType.String });
+                    break;
+
+                case "clothing":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "size", DisplayName = "Розмір", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "color", DisplayName = "Колір", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "material", DisplayName = "Матеріал", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "gender", DisplayName = "Стать", ValueType = FilterValueType.String });
+                    break;
+
+                case "beauty":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "type", DisplayName = "Тип", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "for_whom", DisplayName = "Для кого", ValueType = FilterValueType.String });
+                    break;
+
+                case "kids":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "age", DisplayName = "Вік", ValueType = FilterValueType.Number });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "type", DisplayName = "Тип", ValueType = FilterValueType.String });
+                    break;
+
+                case "pets":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "animal_type", DisplayName = "Тип тварини", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "product_type", DisplayName = "Вид товару", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "animal_age", DisplayName = "Вік тварини", ValueType = FilterValueType.String });
+                    break;
+
+                case "stationery":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "type", DisplayName = "Тип", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "format", DisplayName = "Формат", ValueType = FilterValueType.String });
+                    break;
+
+                case "food":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "type", DisplayName = "Тип", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "volume", DisplayName = "Об'єм", ValueType = FilterValueType.Number });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "strength", DisplayName = "Міцність", ValueType = FilterValueType.Number });
+                    break;
+
+                case "business":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "equipment_type", DisplayName = "Тип обладнання", ValueType = FilterValueType.String });
+                    break;
+
+                case "tourism":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "type", DisplayName = "Тип", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "capacity", DisplayName = "Місткість", ValueType = FilterValueType.Number });
+                    break;
+
+                case "promo":
+                case "sale":
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "discount_size", DisplayName = "Розмір знижки", ValueType = FilterValueType.Number });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "category", DisplayName = "Категорія товару", ValueType = FilterValueType.String });
+                    break;
+
+                default:
+                    // Если группа не определена, добавим универсальные фильтры
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "brand", DisplayName = "Бренд", ValueType = FilterValueType.String });
+                    filters.Add(new CategoryFilter { Id = filterId--, CategoryId = categoryId, Key = "price", DisplayName = "Ціна", ValueType = FilterValueType.Range });
+                    break;
+            }
+
+            return filters;
+        }
+
     }
 }

@@ -25,6 +25,7 @@
         Kropyvnytskyi,
         Khmelnytskyi
     }
+
     public enum SellerType
     {
         bazar = 1,

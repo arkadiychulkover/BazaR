@@ -12,6 +12,10 @@
         ? Model.Reviews.Average(r => r.Rating)
         : 0;
     var reviewsCount = Model.Reviews?.Count ?? 0;
+
+    var isInCart = ViewBag.IsInCart != null && (bool)ViewBag.IsInCart;
+    var isInWishlist = ViewBag.IsInWishlist != null && (bool)ViewBag.IsInWishlist;
+    var user = ViewBag.User as BazaR.Models.User;
 }
 
 <div class="item-card h-100">
@@ -35,14 +39,14 @@
             </a>
 
             <!-- Кнопка избранного -->
-            @if (ViewBag.User != null)
+            @if (user != null)
             {
                 <button class="wishlist-btn position-absolute top-0 end-0 m-2 btn btn-light rounded-circle p-0"
                         style="width: 35px; height: 35px;"
                         data-item-id="@Model.Id"
                         onclick="addToWishlist(this)"
                         title="Додати до обраного">
-                    <i class="bi bi-heart @(ViewBag.IsInWishlist == true ? "text-danger" : "")" style="font-size: 1.2rem;"></i>
+                    <i class="bi bi-heart @(isInWishlist ? "text-danger" : "")" style="font-size: 1.2rem;"></i>
                 </button>
             }
             else
@@ -150,11 +154,11 @@
             <div class="d-grid gap-2">
                 @if (Model.IsAvailable)
                 {
-                    <button class="btn btn-primary btn-sm add-to-cart"
+                    <button class="btn @(isInCart ? "btn-success" : "btn-primary") btn-sm add-to-cart"
                             data-item-id="@Model.Id"
                             onclick="addToCart(this, @Model.Id)"
-                            @(ViewBag.IsInCart == true ? "disabled" : "")>
-                        @if (ViewBag.IsInCart == true)
+                            @(isInCart ? "disabled" : "")>
+                        @if (isInCart)
                         {
                             <i class="bi bi-check-lg">Вже в кошику</i>
                             
@@ -263,6 +267,7 @@
                     button.innerHTML = '<i class="bi bi-check-lg"></i> Вже в кошику';
                     button.classList.remove('btn-primary');
                     button.classList.add('btn-success');
+                    button.disabled = true;
                     showNotification('Товар додано до кошика', 'success');
                 } else if (response.requireLogin) {
                     $('#loginModal').modal('show');
@@ -350,15 +355,5 @@
 
 <!-- Добавляем анимацию в глобальные стили страницы, если её нет -->
 <style>
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+    
 </style>

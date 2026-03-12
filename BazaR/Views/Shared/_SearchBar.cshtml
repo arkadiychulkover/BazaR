@@ -9,7 +9,6 @@
 <form asp-action="Browse" asp-controller="Site" method="get" class="search-form">
 
     <div class="search-container">
-
         <input type="text"
                name="query"
                value="@ViewBag.Query"
@@ -21,22 +20,17 @@
         <button type="submit" class="search-button">
             Знайти
         </button>
-
     </div>
 
-
     <div class="mega-overlay" id="megaOverlay">
-
         <div class="mega">
 
             <div class="mega-left">
-
                 @foreach (var category in mainCategories.Take(20))
                 {
                     <a href="@Url.Action("CategoryPage", "Site", new { category = category.Id })"
                        class="mega-category @(category == mainCategories.FirstOrDefault() ? "active" : "")"
                        data-id="@category.Id">
-
                         @if (!string.IsNullOrEmpty(category.IconUrl))
                         {
                             <i class="bi @category.IconUrl"></i>
@@ -45,20 +39,14 @@
                         {
                             <i class="bi bi-grid"></i>
                         }
-
                         <span>@category.Name</span>
-
                     </a>
                 }
-
             </div>
 
-
             <div class="mega-right">
-
                 @foreach (var mainCategory in mainCategories)
                 {
-
                     var subCategories = Model?
                     .Where(x => x.ParentCategoryId == mainCategory.Id)
                     .OrderBy(x => x.DisplayOrder)
@@ -67,17 +55,14 @@
                     <div class="mega-block"
                          data-id="@mainCategory.Id"
                          style="display:@(mainCategory == mainCategories.FirstOrDefault() ? "grid" : "none")">
-
                         @foreach (var sub in subCategories ?? new List<BazaR.Models.Category>())
                         {
-
                             var subSub = Model?
                             .Where(x => x.ParentCategoryId == sub.Id)
                             .OrderBy(x => x.DisplayOrder)
                             .ToList();
 
                             <div class="mega-col">
-
                                 <h3>
                                     <a href="@Url.Action("Browse", "Site", new { categoryIds = new List<int> { sub.Id } })">
                                         @sub.Name
@@ -94,27 +79,18 @@
                                         </a>
                                     }
                                 }
-
                             </div>
-
                         }
-
                     </div>
-
                 }
-
             </div>
 
         </div>
-
     </div>
 
 </form>
 
-
-
 <style>
-
     .search-form {
         position: relative;
         width: 100%;
@@ -153,12 +129,13 @@
             background: #6ac000;
         }
 
-
-
+    /* --- OVERLAY --- */
     .mega-overlay {
         position: absolute;
-        left: 0;
-        right: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 1200px;
         top: 55px;
         background: white;
         border-radius: 12px;
@@ -174,24 +151,24 @@
         visibility: visible;
     }
 
-
-
+    /* --- MEGA CONTAINER --- */
     .mega {
         display: flex;
+        width: 100%;
         min-height: 420px;
     }
 
-
-
+    /* --- LEFT CATEGORY LIST --- */
     .mega-left {
         width: 260px;
+        min-width: 260px;
+        height: 420px;
         background: #f5f5f5;
         border-right: 1px solid #e5e5e5;
         padding: 10px 0;
         overflow-y: auto;
+        box-sizing: border-box;
     }
-
-
 
     .mega-category {
         display: flex;
@@ -202,11 +179,18 @@
         text-decoration: none;
         font-size: 14px;
         transition: 0.2s;
+        white-space: nowrap;
     }
 
         .mega-category i {
             font-size: 18px;
             color: #888;
+            flex-shrink: 0;
+        }
+
+        .mega-category span {
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .mega-category:hover {
@@ -220,42 +204,45 @@
             color: #7bd500;
         }
 
-
-
+    /* --- RIGHT SIDE --- */
     .mega-right {
         flex: 1;
         padding: 30px;
         display: flex;
-        align-items: flex-start;
-    }
-
-
-
-    .mega-block {
-        display: grid;
-        grid-template-columns: repeat(4,1fr);
+        flex-wrap: wrap;
         gap: 30px;
+        box-sizing: border-box;
+    }
+
+    /* --- SUBCATEGORY GRID --- */
+    .mega-block {
+        display: none;
         width: 100%;
+        gap: 30px;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-auto-rows: min-content;
     }
 
-
-
-    .mega-col h3 {
-        font-size: 15px;
-        margin-bottom: 10px;
+    /* --- COLUMN --- */
+    .mega-col {
+        min-width: 160px;
     }
 
-        .mega-col h3 a {
-            color: #222;
-            text-decoration: none;
+        .mega-col h3 {
+            font-size: 15px;
+            margin-bottom: 10px;
         }
 
-            .mega-col h3 a:hover {
-                color: #7bd500;
+            .mega-col h3 a {
+                color: #222;
+                text-decoration: none;
             }
 
+                .mega-col h3 a:hover {
+                    color: #7bd500;
+                }
 
-
+    /* --- LINKS --- */
     .mega-link {
         display: block;
         font-size: 13px;
@@ -269,52 +256,41 @@
             color: #7bd500;
             padding-left: 6px;
         }
-
 </style>
 
-
-
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.querySelector(".search-form");
+        const input = document.getElementById("searchInput");
 
-    document.addEventListener("DOMContentLoaded",function(){
+        const cats = document.querySelectorAll(".mega-category");
+        const blocks = document.querySelectorAll(".mega-block");
 
-    const form=document.querySelector(".search-form")
-    const input=document.getElementById("searchInput")
+        input.addEventListener("focus", () => {
+            form.classList.add("active");
+        });
 
-    const cats=document.querySelectorAll(".mega-category")
-    const blocks=document.querySelectorAll(".mega-block")
+        document.addEventListener("click", (e) => {
+            if (!form.contains(e.target)) {
+                form.classList.remove("active");
+            }
+        });
 
-    input.addEventListener("focus",()=>{
-    form.classList.add("active")
-    })
+        function openCat(id) {
+            cats.forEach(c => {
+                c.classList.toggle("active", c.dataset.id === id);
+            });
 
-    document.addEventListener("click",(e)=>{
-    if(!form.contains(e.target)){
-    form.classList.remove("active")
-    }
-    })
+            blocks.forEach(b => {
+                b.style.display = (b.dataset.id === id) ? "grid" : "none";
+            });
+        }
 
-    function openCat(id){
+        cats.forEach(c => {
+            c.addEventListener("mouseenter", () => openCat(c.dataset.id));
+        });
 
-    cats.forEach(c=>{
-    c.classList.remove("active")
-    if(c.dataset.id==id) c.classList.add("active")
-    })
-
-    blocks.forEach(b=>{
-    b.style.display = b.dataset.id==id ? "grid":"none"
-    })
-
-    }
-
-    cats.forEach(c=>{
-
-    c.addEventListener("mouseenter",()=>{
-    openCat(c.dataset.id)
-    })
-
-    })
-
-    })
-
+        // Показать первый блок по умолчанию
+        if (blocks.length > 0) blocks[0].style.display = "grid";
+    });
 </script>

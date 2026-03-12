@@ -52,5 +52,7 @@ namespace BazaR.Interfaces
         bool RemoveDeliveryVariant(int deliveryId);
 
         bool Save();
+
+        List<Item> FilterWithCharacteristicFilters(int? categoryId, Dictionary<string, List<string>> filters);
     }
 }

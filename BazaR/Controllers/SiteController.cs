@@ -108,7 +108,7 @@ namespace BazaR.Controllers
             var allCategories = _db.Categories
                 .Include(c => c.CategoryBrands)
                     .ThenInclude(cb => cb.Brand)
-                .Include(c => c.Filters)
+                .Include(c => c.Filters) // ВАЖНО: загружаем фильтры категорий
                 .ToList();
 
             ViewBag.AllCategories = allCategories;
@@ -120,6 +120,7 @@ namespace BazaR.Controllers
                 .Include(i => i.Brand)
                 .Include(i => i.Category)
                 .Include(i => i.Reviews)
+                .Include(i => i.Characteristics) // ВАЖНО: загружаем характеристики
                 .AsQueryable()
                 .AsNoTracking();
 
@@ -128,10 +129,12 @@ namespace BazaR.Controllers
                 itemsQuery = itemsQuery.Where(i => i.Name.Contains(query) ||
                                                   (i.Desc != null && i.Desc.Contains(query)));
 
-            // Фильтр по категориям (включая подкатегории)
+            // Получаем ID всех подкатегорий для выбранных категорий
+            var allCategoryIds = new List<int>();
+            Category? currentCategory = null;
+
             if (categoryIds != null && categoryIds.Any())
             {
-                var allCategoryIds = new List<int>();
                 foreach (var catId in categoryIds)
                 {
                     allCategoryIds.Add(catId);
@@ -141,7 +144,8 @@ namespace BazaR.Controllers
                 itemsQuery = itemsQuery.Where(i => allCategoryIds.Contains(i.CategoryId));
 
                 // Для фильтра брендов в выбранной категории
-                var currentCategory = allCategories.FirstOrDefault(c => c.Id == categoryIds[0]);
+                currentCategory = allCategories.FirstOrDefault(c => c.Id == categoryIds[0]);
+                List<Brand> allBrands = new List<Brand>();
                 if (currentCategory != null)
                 {
                     ViewBag.CurrentCategory = currentCategory;
@@ -152,10 +156,22 @@ namespace BazaR.Controllers
                         .ToList();
 
                     // Бренды для текущей категории
-                    ViewBag.CategoryBrands = currentCategory.CategoryBrands?
+                    allBrands = currentCategory.CategoryBrands?
                         .Select(cb => cb.Brand)
                         .OrderBy(b => b.Name)
                         .ToList() ?? new List<Brand>();
+
+                    if (currentCategory.ParentCategory != null) 
+                    {
+                        allBrands.AddRange(
+                        currentCategory.ParentCategory.CategoryBrands
+                        .Select(cb => cb.Brand)
+                        .OrderBy(b => b.Name)
+                        .ToList() ?? new List<Brand>());
+                    }
+
+                    //Console.WriteLine(allBrands.Count() + " Brand count ==============================");
+                    ViewBag.CategoryBrands = allBrands;
                 }
             }
 
@@ -170,9 +186,94 @@ namespace BazaR.Controllers
             if (brandIds != null && brandIds.Any())
                 itemsQuery = itemsQuery.Where(i => brandIds.Contains(i.BrandId));
 
+            // Собираем динамические фильтры из QueryString
+            var selectedFilters = new Dictionary<string, List<string>>();
+            foreach (var key in Request.Query.Keys.Where(k => k.StartsWith("filter_")))
+            {
+                var filterKey = key.Substring("filter_".Length);
+                var values = Request.Query[key].ToString().Split(',').ToList();
+                selectedFilters[filterKey] = values;
+
+                // Применяем фильтр
+                itemsQuery = itemsQuery.Where(i => i.Characteristics
+                    .Any(c => c.Key == filterKey && values.Contains(c.Value)));
+            }
+            ViewBag.SelectedFilters = selectedFilters;
+
+            // Собираем варианты для каждого фильтра категории (из всех товаров в категории, без учета текущих фильтров)
+            var filterOptions = new Dictionary<string, List<string>>();
+
+            if (currentCategory != null && currentCategory.Filters != null && currentCategory.Filters.Any())
+            {
+                // Запрос для получения всех товаров в категории (без фильтров)
+                IQueryable<Item> itemsForOptionsQuery = _db.Items
+                    .Include(i => i.Characteristics)
+                    .AsQueryable();
+
+                if (allCategoryIds.Any())
+                {
+                    itemsForOptionsQuery = itemsForOptionsQuery.Where(i => allCategoryIds.Contains(i.CategoryId));
+                }
+
+                var itemsInCategory = itemsForOptionsQuery.ToList();
+
+                foreach (var filter in currentCategory.Filters)
+                {
+                    var values = itemsInCategory
+                        .SelectMany(i => i.Characteristics.Where(c => c.Key == filter.Key))
+                        .Select(c => c.Value)
+                        .Where(v => !string.IsNullOrEmpty(v))
+                        .Distinct()
+                        .OrderBy(v => v)
+                        .ToList();
+
+                    filterOptions[filter.Key] = values;
+                }
+            }
+            else
+            {
+                // Если нет фильтров категории, но есть характеристики товаров, 
+                // можем создать динамические фильтры на основе характеристик
+                IQueryable<Item> itemsForOptionsQuery = _db.Items
+                    .Include(i => i.Characteristics)
+                    .AsQueryable();
+
+                if (allCategoryIds.Any())
+                {
+                    itemsForOptionsQuery = itemsForOptionsQuery.Where(i => allCategoryIds.Contains(i.CategoryId));
+                }
+
+                var itemsInCategory = itemsForOptionsQuery.ToList();
+
+                // Группируем характеристики по ключам
+                var allCharKeys = itemsInCategory
+                    .SelectMany(i => i.Characteristics)
+                    .Select(c => c.Key)
+                    .Distinct()
+                    .ToList();
+
+                foreach (var key in allCharKeys)
+                {
+                    var values = itemsInCategory
+                        .SelectMany(i => i.Characteristics.Where(c => c.Key == key))
+                        .Select(c => c.Value)
+                        .Where(v => !string.IsNullOrEmpty(v))
+                        .Distinct()
+                        .OrderBy(v => v)
+                        .ToList();
+
+                    if (values.Any())
+                    {
+                        filterOptions[key] = values;
+                    }
+                }
+            }
+
+            ViewBag.FilterOptions = filterOptions;
+
+            // Применяем сортировку к уже отфильтрованным данным
             var items = itemsQuery.ToList();
 
-            // Применяем сортировку
             items = sort switch
             {
                 "price_asc" => items.OrderBy(i => i.Price).ToList(),
@@ -202,7 +303,6 @@ namespace BazaR.Controllers
 
             return View(paged);
         }
-
         private List<int> GetSubCategoryIds(int categoryId)
         {
             var ids = new List<int>();
@@ -238,12 +338,13 @@ namespace BazaR.Controllers
             List<Category> categories = new();
             ViewBag.CategotyName = _itMan.GetCategoryById(category).Name;
 
-            foreach (int cat in categorysId) 
+            foreach (int cat in categorysId)
             {
                 categories.Add(_itMan.GetCategoryById(cat));
             }
             return View(categories.Take(12).ToList());
         }
+
         [HttpGet]
         public IActionResult ItemDetails(int id)
         {
@@ -872,7 +973,7 @@ namespace BazaR.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult AddCategoriesTest() 
+        public IActionResult AddCategoriesTest()
         {
             _db.Categories.AddRange(new List<Category>
             {
@@ -900,7 +1001,5 @@ namespace BazaR.Controllers
             if (string.IsNullOrWhiteSpace(json)) return default;
             return JsonSerializer.Deserialize<T>(json);
         }
-
-        
     }
 }

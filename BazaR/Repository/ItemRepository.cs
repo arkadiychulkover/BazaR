@@ -456,5 +456,37 @@ namespace BazaR.Repositories
                 return false;
             }
         }
+
+        public List<Item> FilterWithCharacteristicFilters(int? categoryId, Dictionary<string, List<string>> filters)
+        {
+            var query = _context.Items
+                .Include(i => i.Brand)
+                .Include(i => i.Category)
+                .Include(i => i.Characteristics)
+                .Include(i => i.Reviews)
+                .AsQueryable();
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(i => i.CategoryId == categoryId.Value);
+            }
+
+            if (filters != null && filters.Any())
+            {
+                foreach (var filter in filters)
+                {
+                    var key = filter.Key;
+                    var values = filter.Value;
+
+                    if (values != null && values.Any())
+                    {
+                        query = query.Where(i => i.Characteristics
+                            .Any(c => c.Key == key && values.Contains(c.Value)));
+                    }
+                }
+            }
+
+            return query.ToList();
+        }
     }
 }

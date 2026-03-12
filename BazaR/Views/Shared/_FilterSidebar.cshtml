@@ -1,4 +1,5 @@
-﻿@using BazaR.Models
+﻿@using BazaR.Models.ViewModels
+@using BazaR.Models
 @model dynamic
 
 @{
@@ -13,6 +14,8 @@
     var minPrice = ViewBag.MinPrice as decimal?;
     var maxPrice = ViewBag.MaxPrice as decimal?;
     var currentSort = ViewBag.CurrentSort as string ?? "default";
+    var filterOptions = ViewBag.FilterOptions as Dictionary<string, List<string>> ?? new Dictionary<string, List<string>>();
+    var selectedFilters = ViewBag.SelectedFilters as Dictionary<string, List<string>> ?? new Dictionary<string, List<string>>();
 }
 
 <div class="filter-sidebar">
@@ -40,7 +43,8 @@
                                 minPrice = minPrice,
                                 maxPrice = maxPrice,
                                 brandIds = selectedBrandIds
-                            })" class="category-link d-flex align-items-center p-3 text-decoration-none">
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="category-link d-flex align-items-center p-3 text-decoration-none">
                                 <i class="bi @icon me-2"></i>
                                 <span class="flex-grow-1">@category.Name</span>
                                 @if (hasSubCategories)
@@ -63,7 +67,8 @@
                                                 minPrice = minPrice,
                                                 maxPrice = maxPrice,
                                                 brandIds = selectedBrandIds
-                                            })" class="subcategory-link d-block p-2 ps-4 text-decoration-none">
+                                            })@GetFilterQueryString(selectedFilters)" 
+                                               class="subcategory-link d-block p-2 ps-4 text-decoration-none">
                                                 @subCat.Name
                                             </a>
                                         </li>
@@ -99,6 +104,14 @@
                 {
                     <input type="hidden" name="brandIds" value="@brandId" />
                 }
+
+                @foreach (var filter in selectedFilters)
+                {
+                    foreach (var value in filter.Value)
+                    {
+                        <input type="hidden" name="filter_@filter.Key" value="@value" />
+                    }
+                }
                 
                 <div class="row g-2">
                     <div class="col-6">
@@ -132,7 +145,8 @@
                             categoryIds = selectedCategoryIds,
                             sort = currentSort,
                             brandIds = selectedBrandIds
-                        })" class="btn btn-outline-secondary btn-sm">
+                        })@GetFilterQueryString(selectedFilters)" 
+                           class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-x-lg"></i>
                         </a>
                     }
@@ -162,6 +176,14 @@
                     {
                         <input type="hidden" name="categoryIds" value="@catId" />
                     }
+
+                    @foreach (var filter in selectedFilters)
+                    {
+                        foreach (var value in filter.Value)
+                        {
+                            <input type="hidden" name="filter_@filter.Key" value="@value" />
+                        }
+                    }
                     
                     <div class="brand-list" style="max-height: 250px; overflow-y: auto;">
                         @if (categoryBrands.Any())
@@ -170,12 +192,13 @@
                             {
                                 var isChecked = selectedBrandIds.Contains(brand.Id);
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" 
+                                    <input class="form-check-input brand-checkbox" 
                                            type="checkbox" 
                                            name="brandIds" 
                                            value="@brand.Id" 
                                            id="brand_@brand.Id"
-                                           @(isChecked ? "checked" : "")>
+                                           @(isChecked ? "checked" : "")
+                                           onchange="this.form.submit()">
                                     <label class="form-check-label d-flex justify-content-between" for="brand_@brand.Id">
                                         <span>@brand.Name</span>
                                         @if (brand.Logo != null)
@@ -195,114 +218,89 @@
                             <p class="text-muted small mb-0">Виберіть категорію</p>
                         }
                     </div>
-                    
-                    @if (categoryBrands.Any())
-                    {
-                        <div class="d-flex gap-2 mt-3">
-                            <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
-                                <i class="bi bi-check-lg"></i> Застосувати
-                            </button>
-                            @if (selectedBrandIds.Any())
-                            {
-                                <a href="@Url.Action("Browse", "Site", new { 
-                                    query = query,
-                                    categoryIds = selectedCategoryIds,
-                                    sort = currentSort,
-                                    minPrice = minPrice,
-                                    maxPrice = maxPrice
-                                })" class="btn btn-outline-secondary btn-sm">
-                                    <i class="bi bi-x-lg"></i>
-                                </a>
-                            }
-                        </div>
-                    }
                 </form>
             </div>
         </div>
     }
 
-    <!-- Динамические фильтры из CategoryFilter -->
     @if (currentCategory?.Filters != null && currentCategory.Filters.Any())
     {
-        <div class="card mb-3">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i class="bi bi-sliders"></i> Характеристики
-                </h5>
-            </div>
-            <div class="card-body">
+        <form method="get" action="@Url.Action("Browse", "Site")" id="filterForm">
+
+            <input type="hidden" name="query" value="@query" />
+            <input type="hidden" name="sort" value="@currentSort" />
+            <input type="hidden" name="page" value="1" />
+            <input type="hidden" name="minPrice" value="@minPrice" />
+            <input type="hidden" name="maxPrice" value="@maxPrice" />
+
+            @foreach (var catId in selectedCategoryIds)
+            {
+                <input type="hidden" name="categoryIds" value="@catId" />
+            }
+
+            @foreach (var brandId in selectedBrandIds)
+            {
+                <input type="hidden" name="brandIds" value="@brandId" />
+            }
+
+            <div id="filterGroups">
+
                 @foreach (var filter in currentCategory.Filters.OrderBy(f => f.DisplayName))
                 {
-                    <div class="filter-group mb-3">
-                        <label class="form-label fw-bold small">@filter.DisplayName</label>
-                        
-                        @switch (filter.ValueType)
-                        {
-                            case FilterValueType.String:
-                                <input type="text" 
-                                       class="form-control form-control-sm dynamic-filter" 
-                                       data-filter-key="@filter.Key"
-                                       placeholder="Введіть @filter.DisplayName" />
-                                break;
-                                
-                            case FilterValueType.Number:
-                                <div class="row g-1">
-                                    <div class="col-6">
-                                        <input type="number" 
-                                               class="form-control form-control-sm dynamic-filter-min" 
-                                               data-filter-key="@filter.Key"
-                                               placeholder="Від" />
-                                    </div>
-                                    <div class="col-6">
-                                        <input type="number" 
-                                               class="form-control form-control-sm dynamic-filter-max" 
-                                               data-filter-key="@filter.Key"
-                                               placeholder="До" />
-                                    </div>
-                                </div>
-                                break;
-                                
-                            case FilterValueType.Boolean:
-                                <div class="form-check">
-                                    <input class="form-check-input dynamic-filter" 
-                                           type="checkbox" 
-                                           data-filter-key="@filter.Key"
-                                           id="filter_@filter.Key">
-                                    <label class="form-check-label small" for="filter_@filter.Key">
-                                        Так
-                                    </label>
-                                </div>
-                                break;
-                                
-                            case FilterValueType.Range:
-                                <div class="row g-1">
-                                    <div class="col-6">
-                                        <input type="range" 
-                                               class="form-range dynamic-filter-min" 
-                                               data-filter-key="@filter.Key"
-                                               min="0" max="100000" step="1000" />
-                                    </div>
-                                    <div class="col-6">
-                                        <input type="number" 
-                                               class="form-control form-control-sm dynamic-filter-value" 
-                                               data-filter-key="@filter.Key"
-                                               placeholder="Значення" />
-                                    </div>
-                                </div>
-                                break;
-                        }
-                    </div>
-                }
-                
-                <button class="btn btn-primary btn-sm w-100 mt-2" id="applyDynamicFilters">
-                    <i class="bi bi-funnel"></i> Застосувати фільтри
-                </button>
-            </div>
-        </div>
-    }
+                    var values = filterOptions.ContainsKey(filter.Key) 
+                        ? filterOptions[filter.Key] 
+                        : new List<string>();
 
+                    if (values.Any())
+                    {
+                        var selectedValues = selectedFilters.ContainsKey(filter.Key) 
+                            ? selectedFilters[filter.Key] 
+                            : new List<string>();
+
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-sliders"></i> @filter.DisplayName
+                                </h6>
+                            </div>
+
+                            <div class="card-body">
+                                @await Html.PartialAsync("_FilterCheckboxGroup", new FilterCheckboxGroupViewModel
+                                {
+                                    Key = filter.Key,
+                                    DisplayName = filter.DisplayName,
+                                    Values = values,
+                                    SelectedValues = selectedValues
+                                })
+                            </div>
+                        </div>
+                    }
+                }
+
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">
+                <i class="bi bi-funnel"></i> Застосувати фільтри
+            </button>
+
+            @if (selectedFilters.Any())
+            {
+                <a href="@Url.Action("Browse", "Site", new { 
+                    query = query,
+                    categoryIds = selectedCategoryIds,
+                    brandIds = selectedBrandIds,
+                    sort = currentSort,
+                    minPrice = minPrice,
+                    maxPrice = maxPrice
+                })" class="btn btn-outline-danger btn-sm w-100 mt-2">
+                    <i class="bi bi-x-circle"></i> Скинути всі фільтри
+                </a>
+            }
+
+        </form>
+    }
     <!-- Активные фильтры -->
-    @if (selectedCategoryIds.Any() || selectedBrandIds.Any() || minPrice.HasValue || maxPrice.HasValue)
+    @if (selectedCategoryIds.Any() || selectedBrandIds.Any() || minPrice.HasValue || maxPrice.HasValue || selectedFilters.Any())
     {
         <div class="card mb-3">
             <div class="card-body">
@@ -322,7 +320,8 @@
                                     sort = currentSort,
                                     minPrice = minPrice,
                                     maxPrice = maxPrice
-                                })" class="text-white ms-1 text-decoration-none">
+                                })@GetFilterQueryString(selectedFilters)" 
+                                   class="text-white ms-1 text-decoration-none">
                                     <i class="bi bi-x"></i>
                                 </a>
                             </span>
@@ -343,7 +342,8 @@
                                     sort = currentSort,
                                     minPrice = minPrice,
                                     maxPrice = maxPrice
-                                })" class="text-white ms-1 text-decoration-none">
+                                })@GetFilterQueryString(selectedFilters)" 
+                                   class="text-white ms-1 text-decoration-none">
                                     <i class="bi bi-x"></i>
                                 </a>
                             </span>
@@ -360,7 +360,8 @@
                                 brandIds = selectedBrandIds,
                                 sort = currentSort,
                                 maxPrice = maxPrice
-                            })" class="text-white ms-1 text-decoration-none">
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="text-white ms-1 text-decoration-none">
                                 <i class="bi bi-x"></i>
                             </a>
                         </span>
@@ -376,10 +377,40 @@
                                 brandIds = selectedBrandIds,
                                 sort = currentSort,
                                 minPrice = minPrice
-                            })" class="text-white ms-1 text-decoration-none">
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="text-white ms-1 text-decoration-none">
                                 <i class="bi bi-x"></i>
                             </a>
                         </span>
+                    }
+
+                    @foreach (var filter in selectedFilters)
+                    {
+                        var categoryFilter = currentCategory?.Filters?.FirstOrDefault(f => f.Key == filter.Key);
+                        if (categoryFilter != null)
+                        {
+                            foreach (var value in filter.Value)
+                            {
+                                var newSelectedFilters = selectedFilters
+                                    .Where(f => f.Key != filter.Key || !f.Value.Contains(value))
+                                    .ToDictionary(f => f.Key, f => f.Value);
+                                
+                                <span class="badge bg-primary d-inline-flex align-items-center">
+                                    @categoryFilter.DisplayName: @value
+                                    <a href="@Url.Action("Browse", "Site", new { 
+                                        query = query,
+                                        categoryIds = selectedCategoryIds,
+                                        brandIds = selectedBrandIds,
+                                        sort = currentSort,
+                                        minPrice = minPrice,
+                                        maxPrice = maxPrice
+                                    })@GetFilterQueryString(newSelectedFilters)" 
+                                       class="text-white ms-1 text-decoration-none">
+                                        <i class="bi bi-x"></i>
+                                    </a>
+                                </span>
+                            }
+                        }
                     }
                 </div>
                 
@@ -489,43 +520,43 @@
     .badge a:hover {
         opacity: 0.8;
     }
+
+    .checkbox-list {
+        scrollbar-width: thin;
+        scrollbar-color: #ccc #f1f1f1;
+    }
+
+        .checkbox-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .checkbox-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .checkbox-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+            .checkbox-list::-webkit-scrollbar-thumb:hover {
+                background: #999;
+            }
 </style>
 
-<script>
-    $(document).ready(function() {
-        // Автоматическая отправка формы при изменении чекбоксов брендов
-        $('.brand-list input[type="checkbox"]').change(function() {
-            $('#brandFilterForm').submit();
-        });
-
-        // Динамические фильтры
-        $('#applyDynamicFilters').click(function() {
-            var url = new URL(window.location.href);
-            
-            // Собираем все динамические фильтры
-            $('.dynamic-filter').each(function() {
-                var key = $(this).data('filter-key');
-                var value = $(this).val();
-                if (value) {
-                    url.searchParams.set('filter_' + key, value);
-                } else {
-                    url.searchParams.delete('filter_' + key);
-                }
-            });
-            
-            $('.dynamic-filter-min').each(function() {
-                var key = $(this).data('filter-key');
-                var min = $(this).val();
-                var max = $('.dynamic-filter-max[data-filter-key="' + key + '"]').val();
-                
-                if (min) url.searchParams.set('filter_' + key + '_min', min);
-                else url.searchParams.delete('filter_' + key + '_min');
-                
-                if (max) url.searchParams.set('filter_' + key + '_max', max);
-                else url.searchParams.delete('filter_' + key + '_max');
-            });
-            
-            window.location.href = url.toString();
-        });
-    });
-</script>
+@functions {
+    public string GetFilterQueryString(Dictionary<string, List<string>> filters)
+    {
+        if (filters == null || !filters.Any()) return "";
+        
+        var queryString = "";
+        foreach (var filter in filters)
+        {
+            foreach (var value in filter.Value)
+            {
+                queryString += $"&filter_{filter.Key}={value}";
+            }
+        }
+        return queryString;
+    }
+}
