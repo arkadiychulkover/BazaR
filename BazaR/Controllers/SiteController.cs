@@ -124,6 +124,7 @@ namespace BazaR.Controllers
                 .AsQueryable()
                 .AsNoTracking();
 
+
             // Фильтр по поисковому запросу
             if (!string.IsNullOrWhiteSpace(query))
                 itemsQuery = itemsQuery.Where(i => i.Name.Contains(query) ||
@@ -303,6 +304,40 @@ namespace BazaR.Controllers
 
             return View(paged);
         }
+
+        [HttpGet]
+        public IActionResult SearchSuggestions(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return Json(new List<object>());
+
+            query = query.Trim().ToLower();
+
+            // Получаем все категории
+            var categories = _db.Categories
+                .Where(c => c.Name.ToLower().Contains(query))
+                .Select(c => new { Type = "Category", Id = c.Id, Name = c.Name })
+                .ToList();
+
+            // Получаем бренды внутри категорий
+            var brands = _db.CategoryBrands
+                .Include(cb => cb.Brand)
+                .Include(cb => cb.Category)
+                .Where(cb => cb.Brand.Name.ToLower().Contains(query))
+                .Select(cb => new
+                {
+                    Type = "Brand",
+                    CategoryId = cb.CategoryId,
+                    BrandId = cb.BrandId,
+                    Name = $"{cb.Category.Name} {cb.Brand.Name}"
+                })
+                .ToList();
+
+            var results = categories.Cast<object>().Concat(brands.Cast<object>()).ToList();
+
+            return Json(results);
+        }
+
         private List<int> GetSubCategoryIds(int categoryId)
         {
             var ids = new List<int>();

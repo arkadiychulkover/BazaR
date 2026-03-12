@@ -1,4 +1,5 @@
-﻿@model List<BazaR.Models.Category>
+﻿@using System.Text.Json
+@model List<BazaR.Models.Category>
 
 @{
     var mainCategories = Model?.Where(c => c.ParentCategoryId == null)
@@ -21,6 +22,9 @@
             Знайти
         </button>
     </div>
+
+    <!-- Меню с категориями по вводу -->
+    <div class="search-suggestions" id="searchSuggestions"></div>
 
     <div class="mega-overlay" id="megaOverlay">
         <div class="mega">
@@ -129,7 +133,35 @@
             background: #6ac000;
         }
 
-    /* --- OVERLAY --- */
+    .search-suggestions {
+        position: absolute;
+        top: 50px;
+        left: 0;
+        width: 100%;
+        max-width: 1200px;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        z-index: 1000;
+        display: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+        .search-suggestions a {
+            display: block;
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #333;
+            transition: 0.2s;
+        }
+
+            .search-suggestions a:hover {
+                background: #f5f5f5;
+                color: #7bd500;
+            }
+
     .mega-overlay {
         position: absolute;
         left: 50%;
@@ -151,14 +183,12 @@
         visibility: visible;
     }
 
-    /* --- MEGA CONTAINER --- */
     .mega {
         display: flex;
         width: 100%;
         min-height: 420px;
     }
 
-    /* --- LEFT CATEGORY LIST --- */
     .mega-left {
         width: 260px;
         min-width: 260px;
@@ -196,6 +226,7 @@
         .mega-category:hover {
             background: white;
             color: #7bd500;
+            cursor: pointer;
         }
 
         .mega-category.active {
@@ -204,7 +235,6 @@
             color: #7bd500;
         }
 
-    /* --- RIGHT SIDE --- */
     .mega-right {
         flex: 1;
         padding: 30px;
@@ -214,7 +244,6 @@
         box-sizing: border-box;
     }
 
-    /* --- SUBCATEGORY GRID --- */
     .mega-block {
         display: none;
         width: 100%;
@@ -223,7 +252,6 @@
         grid-auto-rows: min-content;
     }
 
-    /* --- COLUMN --- */
     .mega-col {
         min-width: 160px;
     }
@@ -242,7 +270,6 @@
                     color: #7bd500;
                 }
 
-    /* --- LINKS --- */
     .mega-link {
         display: block;
         font-size: 13px;
@@ -258,39 +285,93 @@
         }
 </style>
 
+
+
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const form = document.querySelector(".search-form");
-        const input = document.getElementById("searchInput");
+document.addEventListener("DOMContentLoaded", function() {
 
-        const cats = document.querySelectorAll(".mega-category");
-        const blocks = document.querySelectorAll(".mega-block");
+    const form = document.querySelector(".search-form");
+    const input = document.getElementById("searchInput");
+    const megaOverlay = document.getElementById("megaOverlay");
+    const suggestions = document.getElementById("searchSuggestions");
 
-        input.addEventListener("focus", () => {
-            form.classList.add("active");
+    // Категории + бренды для подсказок
+    const allCategories = @Html.Raw(JsonSerializer.Serialize(
+        Model.Select(c => new { 
+            id = c.Id, 
+            name = c.Name, 
+            brands = c.CategoryBrands.Select(b => b.Brand.Name).ToList() 
+        })
+    ));
+
+    const cats = document.querySelectorAll(".mega-category");
+    const blocks = document.querySelectorAll(".mega-block");
+
+    function openCat(id) {
+        cats.forEach(c => c.classList.toggle("active", c.dataset.id === id));
+        blocks.forEach(b => b.style.display = (b.dataset.id === id) ? "grid" : "none");
+    }
+
+    cats.forEach(c => {
+        c.addEventListener("mouseenter", () => {
+            if (!input.value) openCat(c.dataset.id);
         });
+    });
 
-        document.addEventListener("click", (e) => {
-            if (!form.contains(e.target)) {
-                form.classList.remove("active");
-            }
-        });
+    if (blocks.length > 0) blocks[0].style.display = "grid";
 
-        function openCat(id) {
-            cats.forEach(c => {
-                c.classList.toggle("active", c.dataset.id === id);
-            });
+    // --- Поиск категорий + брендов ---
+        input.addEventListener("input", () => {
+        const val = input.value.trim().toLowerCase();
+        suggestions.innerHTML = "";
 
-            blocks.forEach(b => {
-                b.style.display = (b.dataset.id === id) ? "grid" : "none";
-            });
+        if (val.length === 0) {
+            suggestions.style.display = "none";
+            megaOverlay.style.display = "block";
+            return;
         }
 
-        cats.forEach(c => {
-            c.addEventListener("mouseenter", () => openCat(c.dataset.id));
+        megaOverlay.style.display = "none";
+
+        allCategories.forEach(c => {
+            let matched = false;
+
+            // Проверка категории
+            if (c.name.toLowerCase().includes(val)) {
+                const aCat = document.createElement("a");
+                aCat.href = "@Url.Action("Browse", "Site")?categoryIds=" + c.id;
+                aCat.textContent = c.name;
+                suggestions.appendChild(aCat);
+                matched = true;
+            }
+
+            // Проверка брендов
+            c.brands.forEach(b => {
+                if (b.toLowerCase().includes(val)) {
+                    const aBrand = document.createElement("a");
+                    aBrand.href = "@Url.Action("Browse", "Site")?categoryIds=" + c.id;
+                    aBrand.textContent = c.name + " – " + b;
+                    suggestions.appendChild(aBrand);
+                    matched = true;
+                }
+            });
         });
 
-        // Показать первый блок по умолчанию
-        if (blocks.length > 0) blocks[0].style.display = "grid";
+        suggestions.style.display = suggestions.children.length > 0 ? "block" : "none";
     });
+
+    input.addEventListener("focus", () => {
+        form.classList.add("active");
+        if (!input.value) megaOverlay.style.display = "block";
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!form.contains(e.target)) {
+            form.classList.remove("active");
+            suggestions.style.display = "none";
+            megaOverlay.style.display = "block";
+        }
+    });
+
+});
 </script>
