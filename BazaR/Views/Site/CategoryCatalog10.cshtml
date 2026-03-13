@@ -1,0 +1,294 @@
+﻿@model List<BazaR.Models.Category>
+
+@{
+    string name = ViewBag.CategotyName ?? "";
+    var brands = ViewBag.Brands as List<BazaR.Models.Brand> ?? new();
+    var popular = ViewBag.PopularItems as List<BazaR.Models.Item> ?? new();
+}
+
+<div class="category-wrapper">
+
+    <!-- TITLE -->
+
+    <h1 class="category-title">@name</h1>
+
+
+    <!-- BANNER -->
+
+    <div class="category-banner">
+
+        <div class="banner-left">
+            <img src="/img/banner-appliances.png">
+        </div>
+
+        <div class="banner-right">
+
+            <div class="banner-sub">
+                Техніка для кухні
+            </div>
+
+            <div class="banner-sale">
+                ЗНИЖКИ
+            </div>
+
+            <div class="banner-percent">
+                до -70%
+            </div>
+
+            <button class="banner-btn">
+                Перейти
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- BRANDS ROW -->
+    @if (brands.Any())
+    {
+        <div class="brand-row">
+
+            @foreach (var brand in brands)
+            {
+                <a asp-action="Browse"
+                   asp-controller="Site"
+                   asp-route-brand="@brand.Id"
+                   class="brand-item">
+
+                    @if (!string.IsNullOrEmpty(brand.Logo))
+                    {
+                        <img src="@brand.Logo">
+                    }
+                    else
+                    {
+                        <span>@brand.Name</span>
+                    }
+
+                </a>
+            }
+
+        </div>
+    }
+
+
+    <!-- CATEGORY CARDS -->
+
+    <div class="category-grid">
+
+        @foreach (var cat in Model)
+        {
+            <div class="category-card-wrapper">
+                <a asp-controller="Site"
+                   asp-action="Browse"
+                   asp-route-categoryIds="@cat.Id"
+                   class="category-card">
+
+                    <div class="cat-img">
+                        @if (!string.IsNullOrEmpty(cat.ImgUrl))
+                        {
+                            <img src="@cat.ImgUrl" />
+                        }
+                    </div>
+
+                    <div class="cat-title">
+                        @cat.Name
+                    </div>
+                </a>
+
+                @if (cat.SubCategories != null && cat.SubCategories.Any())
+                {
+                    <ul class="subcategories-list">
+                       
+                        @foreach (var sub in cat.SubCategories)
+                        {
+                            Console.WriteLine(sub.Name);
+                            <li>
+                                <a asp-controller="Site"
+                                   asp-action="Browse"
+                                   asp-route-categoryIds="@sub.Id">@sub.Name</a>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
+
+    </div>
+
+
+    <!-- POPULAR PRODUCTS -->
+    @if (popular.Any())
+    {
+
+        <h2 class="popular-title">
+            Популярні товари
+        </h2>
+
+        <div class="popular-grid">
+
+            @foreach (var item in popular)
+            {
+
+                <div class="product-card">
+
+                    @await Html.PartialAsync("Card", item)
+
+                </div>
+
+            }
+
+        </div>
+
+    }
+
+
+</div>
+
+
+
+<style>
+
+
+    .category-wrapper {
+        max-width: 1400px;
+        margin: auto;
+        padding: 20px;
+        font-family: Inter;
+    }
+
+
+
+    /* TITLE */
+
+    .category-title {
+        font-size: 28px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+
+
+    /* BANNER */
+
+    .category-banner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f3f3f3;
+        border-radius: 10px;
+        height: 220px;
+        padding: 20px 40px;
+        margin-bottom: 30px;
+    }
+
+    .banner-left img {
+        height: 170px;
+    }
+
+    .banner-sub {
+        font-size: 22px;
+        color: #666;
+    }
+
+    .banner-sale {
+        font-size: 48px;
+        color: #ff2c2c;
+        font-weight: 700;
+    }
+
+    .banner-percent {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+    .banner-btn {
+        background: #6d6d6d;
+        border: none;
+        color: white;
+        padding: 10px 30px;
+        border-radius: 25px;
+    }
+
+
+
+    /* BRAND ROW */
+
+    .brand-row {
+        display: flex;
+        gap: 40px;
+        align-items: center;
+        overflow-x: auto;
+        padding: 10px 0;
+        margin-bottom: 30px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .brand-item img {
+        height: 28px;
+        opacity: .6;
+        transition: .2s;
+    }
+
+        .brand-item img:hover {
+            opacity: 1;
+        }
+
+
+
+    /* CATEGORY GRID */
+
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(5,1fr);
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+
+
+    .category-card {
+        background: white;
+        border: 1px solid #e8e8e8;
+        border-radius: 12px;
+        height: 190px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: #333;
+        transition: .2s;
+    }
+
+        .category-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 18px rgba(0,0,0,.08);
+        }
+
+    .cat-img img {
+        max-height: 80px;
+        margin-bottom: 12px;
+    }
+
+    .cat-title {
+        font-size: 14px;
+        text-align: center;
+    }
+
+
+
+    /* POPULAR */
+
+    .popular-title {
+        font-size: 22px;
+        margin-bottom: 20px;
+    }
+
+    .popular-grid {
+        display: grid;
+        grid-template-columns: repeat(6,1fr);
+        gap: 20px;
+    }
+
+</style>

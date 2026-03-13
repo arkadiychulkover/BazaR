@@ -419,16 +419,47 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult CategoryPage(int category)
         {
+            SetLayoutData();
+
             List<int> categorysId = GetSubCategoryIds(category);
             List<Category> categories = new();
-            ViewBag.CategotyName = _itMan.GetCategoryById(category).Name;
+
+            var categoryObj = _itMan.GetCategoryById(category);
+            ViewBag.CategotyName = categoryObj?.Name;
 
             foreach (int cat in categorysId)
             {
-                categories.Add(_itMan.GetCategoryById(cat));
+                var c = _itMan.GetCategoryById(cat);
+                if (c != null)
+                    categories.Add(c);
             }
-            return View(categories.Take(12).ToList());
+
+            // популярные товары
+            var allCategoryIds = new List<int> { category };
+            allCategoryIds.AddRange(categorysId);
+
+            var popularItems = _db.Items
+                .Include(i => i.Brand)
+                .Include(i => i.Category)
+                .Include(i => i.Reviews)
+                .Where(i => allCategoryIds.Contains(i.CategoryId))
+                .OrderByDescending(i =>
+                    i.Reviews.Any()
+                        ? i.Reviews.Average(r => r.Rating)
+                        : 0)
+                .Take(4)
+                .ToList();
+
+            ViewBag.PopularItems = popularItems;
+
+            //if (categories.Count < 10)
+            //    return View("CategoryCatalog10" ,categories.Take(16).ToList());
+            if (categories.Count < 20)
+                return View(categories.Take(16).ToList());
+            else
+                return View("CategoryCatalog", categories);
         }
+
 
         [HttpGet]
         public IActionResult ItemDetails(int id)

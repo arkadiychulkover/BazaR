@@ -24,7 +24,6 @@
         </button>
     </div>
 
-    <!-- Меню с категориями по вводу -->
     <div class="search-suggestions" id="searchSuggestions"></div>
 
     <div class="mega-overlay" id="megaOverlay">
@@ -320,7 +319,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (blocks.length > 0) blocks[0].style.display = "grid";
 
-    // --- Поиск категорий + брендов ---
         input.addEventListener("input", () => {
         const val = input.value.trim().toLowerCase();
         suggestions.innerHTML = "";
@@ -336,7 +334,6 @@ document.addEventListener("DOMContentLoaded", function() {
         allCategories.forEach(c => {
             let matched = false;
 
-            // Проверка категории
             if (c.name.toLowerCase().includes(val)) {
                 const aCat = document.createElement("a");
                 aCat.href = "@Url.Action("Browse", "Site")?categoryIds=" + c.id;
@@ -344,11 +341,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 suggestions.appendChild(aCat);
                 matched = true;
                 
-                    // Проверка брендов
                 c.brands.forEach(b => {
                         const aBrand = document.createElement("a");
                             aBrand.href = "@Url.Action("Browse", "Site")?categoryIds=" + c.id + "&brandIds=" + b.Id;
-                        aBrand.textContent = c.name + " – " + b.Name;
+                        aBrand.textContent = c.name + " " + b.Name;
                         suggestions.appendChild(aBrand);
                 });
             }
