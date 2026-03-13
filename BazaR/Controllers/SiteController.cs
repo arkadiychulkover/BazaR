@@ -66,7 +66,11 @@ namespace BazaR.Controllers
         {
             SetLayoutData();
 
-            var categories = _db.Categories.ToList();
+            // Загружаем категории с брендами!
+            var categories = _db.Categories
+                .Include(c => c.CategoryBrands)
+                    .ThenInclude(cb => cb.Brand)
+                .ToList();
 
             var featuredItems = _db.Items
                 .Where(i => i.IsAvailable)
@@ -90,8 +94,6 @@ namespace BazaR.Controllers
             ViewBag.FeaturedItems = featuredItems;
             ViewBag.NewItems = newItems;
             ViewBag.PopularItems = popularItems;
-
-            Console.WriteLine(_db.Items.Count());
 
             return View();
         }
