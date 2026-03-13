@@ -1,4 +1,5 @@
 ﻿@using System.Text.Json
+@using System.Text.Encodings.Web
 @using BazaR.DTO
 @model List<BazaR.Models.Category>
 
@@ -6,6 +7,16 @@
     var mainCategories = Model?.Where(c => c.ParentCategoryId == null)
         .OrderBy(c => c.DisplayOrder)
         .ToList() ?? new List<BazaR.Models.Category>();
+
+    var categoriesJson = JsonSerializer.Serialize(
+        Model.Select(c => new
+        {
+            id = c.Id,
+            name = c.Name,
+            brands = c.CategoryBrands.Select(b => new SearchBarBrandDTO(b.Brand)).ToList()
+        }),
+        new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }
+    );
 }
 
 <form asp-action="Browse" asp-controller="Site" method="get" class="search-form">
@@ -95,6 +106,7 @@
 </form>
 
 <style>
+    /* ======= Общие стили ======= */
     .search-form {
         position: relative;
         width: 100%;
@@ -145,22 +157,53 @@
         z-index: 1000;
         display: none;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        max-height: 300px;
+        max-height: 400px;
         overflow-y: auto;
     }
 
-        .search-suggestions a {
-            display: block;
-            padding: 10px 15px;
-            text-decoration: none;
-            color: #333;
-            transition: 0.2s;
+    /* ======= Секции подсказок ======= */
+    .suggestions-section {
+        padding: 4px 0;
+    }
+
+        .suggestions-section:not(:last-child) {
+            border-bottom: 1px solid #eee;
         }
 
-            .search-suggestions a:hover {
-                background: #f5f5f5;
-                color: #7bd500;
-            }
+    .suggestions-section-header {
+        padding: 6px 15px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #666;
+        background: #f8f9fa;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .suggestion-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 15px;
+        text-decoration: none;
+        color: #333;
+        transition: 0.2s;
+        cursor: pointer;
+    }
+
+        .suggestion-item:hover {
+            background: #f0f0f0;
+        }
+
+        .suggestion-item i {
+            margin-right: 10px;
+            font-size: 16px;
+            color: #7bd500;
+        }
+
+        .suggestion-item.partial {
+            font-style: italic;
+            opacity: 0.85;
+        }
 
     .mega-overlay {
         position: absolute;
@@ -285,86 +328,109 @@
         }
 </style>
 
-
-
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function() {
 
-    const form = document.querySelector(".search-form");
-    const input = document.getElementById("searchInput");
-    const megaOverlay = document.getElementById("megaOverlay");
-    const suggestions = document.getElementById("searchSuggestions");
+        const form = document.querySelector(".search-form");
+        const input = document.getElementById("searchInput");
+        const megaOverlay = document.getElementById("megaOverlay");
+        const suggestions = document.getElementById("searchSuggestions");
 
-    const allCategories = @Html.Raw(JsonSerializer.Serialize(
-        Model.Select(c => new { 
-            id = c.Id, 
-            name = c.Name, 
-            brands = c.CategoryBrands.Select(b => new SearchBarBrandDTO(b.Brand)).ToList()
-        })
-    ));
+        const allCategories = @Html.Raw(categoriesJson);
 
-    const cats = document.querySelectorAll(".mega-category");
-    const blocks = document.querySelectorAll(".mega-block");
+        const cats = document.querySelectorAll(".mega-category");
+        const blocks = document.querySelectorAll(".mega-block");
 
-    function openCat(id) {
-        cats.forEach(c => c.classList.toggle("active", c.dataset.id === id));
-        blocks.forEach(b => b.style.display = (b.dataset.id === id) ? "grid" : "none");
-    }
-
-    cats.forEach(c => {
-        c.addEventListener("mouseenter", () => {
-            if (!input.value) openCat(c.dataset.id);
-        });
-    });
-
-    if (blocks.length > 0) blocks[0].style.display = "grid";
-
-        input.addEventListener("input", () => {
-        const val = input.value.trim().toLowerCase();
-        suggestions.innerHTML = "";
-
-        if (val.length === 0) {
-            suggestions.style.display = "none";
-            megaOverlay.style.display = "block";
-            return;
+        function openCat(id) {
+            cats.forEach(c => c.classList.toggle("active", c.dataset.id == id));
+            blocks.forEach(b => b.style.display = (b.dataset.id == id) ? "grid" : "none");
         }
 
-        megaOverlay.style.display = "none";
+        cats.forEach(c => {
+            c.addEventListener("mouseenter", () => {
+                if (!input.value) openCat(c.dataset.id);
+            });
+        });
 
-        allCategories.forEach(c => {
-            let matched = false;
+        if (blocks.length > 0) blocks[0].style.display = "grid";
 
-            if (c.name.toLowerCase().includes(val)) {
-                const aCat = document.createElement("a");
-                aCat.href = "@Url.Action("Browse", "Site")?categoryIds=" + c.id;
-                aCat.textContent = c.name;
-                suggestions.appendChild(aCat);
-                matched = true;
-                
-                c.brands.forEach(b => {
-                        const aBrand = document.createElement("a");
+        input.addEventListener("input", () => {
+            const val = input.value.trim().toLowerCase();
+            suggestions.innerHTML = "";
+
+            if (val.length === 0) {
+                suggestions.style.display = "none";
+                megaOverlay.style.display = "block";
+                return;
+            }
+
+            megaOverlay.style.display = "none";
+
+            // ===== Основные совпадения =====
+            if (allCategories.filter(c => c.name.toLowerCase().startsWith(val)).length > 0) {
+                const sectionMain = document.createElement("div");
+                sectionMain.className = "suggestions-section";
+                const header = document.createElement("div");
+                header.className = "suggestions-section-header";
+                header.textContent = "Основные совпадения";
+                sectionMain.appendChild(header);
+
+                allCategories.filter(c => c.name.toLowerCase().startsWith(val))
+                    .forEach(c => {
+                        const aCat = document.createElement("a");
+                        aCat.className = "suggestion-item";
+                        aCat.href = "@Url.Action("Browse", "Site")?categoryIds=" + c.id;
+                        aCat.textContent = c.name;
+                        sectionMain.appendChild(aCat);
+
+                        c.brands.forEach(b => {
+                            const aBrand = document.createElement("a");
+                            aBrand.className = "suggestion-item";
                             aBrand.href = "@Url.Action("Browse", "Site")?categoryIds=" + c.id + "&brandIds=" + b.Id;
-                        aBrand.textContent = c.name + " " + b.Name;
-                        suggestions.appendChild(aBrand);
+                            aBrand.textContent = c.name + " " + b.Name;
+                            sectionMain.appendChild(aBrand);
+                        });
+                    });
+
+                suggestions.appendChild(sectionMain);
+            }
+
+            // ===== Частичные совпадения =====
+            const partialMatches = allCategories.filter(c => !c.name.toLowerCase().startsWith(val) && c.name.toLowerCase().includes(val));
+            if (partialMatches.length > 0) {
+                const sectionPartial = document.createElement("div");
+                sectionPartial.className = "suggestions-section";
+                const header = document.createElement("div");
+                header.className = "suggestions-section-header";
+                header.textContent = "Частичные совпадения";
+                sectionPartial.appendChild(header);
+
+                partialMatches.forEach(c => {
+                    const aCat = document.createElement("a");
+                    aCat.className = "suggestion-item partial";
+                    aCat.href = "@Url.Action("Browse", "Site")?categoryIds=" + c.id;
+                    aCat.textContent = c.name;
+                    sectionPartial.appendChild(aCat);
                 });
+
+                suggestions.appendChild(sectionPartial);
+            }
+
+            suggestions.style.display = suggestions.children.length > 0 ? "block" : "none";
+        });
+
+        input.addEventListener("focus", () => {
+            form.classList.add("active");
+            if (!input.value) megaOverlay.style.display = "block";
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!form.contains(e.target)) {
+                form.classList.remove("active");
+                suggestions.style.display = "none";
+                megaOverlay.style.display = "block";
             }
         });
 
-        suggestions.style.display = suggestions.children.length > 0 ? "block" : "none";
     });
-
-    input.addEventListener("focus", () => {
-        form.classList.add("active");
-        if (!input.value) megaOverlay.style.display = "block";
-    });
-
-    document.addEventListener("click", (e) => {
-        if (!form.contains(e.target)) {
-            form.classList.remove("active");
-            suggestions.style.display = "none";
-            megaOverlay.style.display = "block";
-        }
-    });
-
-});
 </script>
