@@ -16,11 +16,40 @@
     var currentSort = ViewBag.CurrentSort as string ?? "default";
     var filterOptions = ViewBag.FilterOptions as Dictionary<string, List<string>> ?? new Dictionary<string, List<string>>();
     var selectedFilters = ViewBag.SelectedFilters as Dictionary<string, List<string>> ?? new Dictionary<string, List<string>>();
+    
+    // НОВЫЕ ПАРАМЕТРЫ
+    var sellerType = ViewBag.SellerType as int?;
+    var isReadyToSend = ViewBag.IsReadyToSend as bool?;
+    var isNoPercentCredit = ViewBag.IsNoPercentCredit as bool?;
+    var country = ViewBag.Country as int?;
+    
+    // Словарь для отображения названий стран
+    var countryNames = new Dictionary<int, string>
+    {
+        { 1, "Україна" },
+        { 2, "США" },
+        { 3, "Німеччина" },
+        { 4, "Франція" },
+        { 5, "Польща" },
+        { 6, "Італія" },
+        { 7, "Іспанія" },
+        { 8, "Канада" },
+        { 9, "Японія" },
+        { 10, "Китай" }
+    };
+    
+    // Словарь для отображения названий типов продавцов
+    var sellerTypeNames = new Dictionary<int, string>
+    {
+        { 1, "Базар" },
+        { 2, "Інший продавець" },
+        { 3, "Інший продавець на складі" }
+    };
 }
 
 <div class="filter-sidebar">
     <!-- Категории -->
-    <div class="card mb-3">
+    @* <div class="card mb-3">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">
                 <i class="bi bi-grid"></i> Категорії
@@ -42,7 +71,11 @@
                                 sort = currentSort,
                                 minPrice = minPrice,
                                 maxPrice = maxPrice,
-                                brandIds = selectedBrandIds
+                                brandIds = selectedBrandIds,
+                                sellerType = sellerType,
+                                isReadyToSend = isReadyToSend,
+                                isNoPercentCredit = isNoPercentCredit,
+                                country = country
                             })@GetFilterQueryString(selectedFilters)" 
                                class="category-link d-flex align-items-center p-3 text-decoration-none">
                                 <i class="bi @icon me-2"></i>
@@ -66,7 +99,11 @@
                                                 sort = currentSort,
                                                 minPrice = minPrice,
                                                 maxPrice = maxPrice,
-                                                brandIds = selectedBrandIds
+                                                brandIds = selectedBrandIds,
+                                                sellerType = sellerType,
+                                                isReadyToSend = isReadyToSend,
+                                                isNoPercentCredit = isNoPercentCredit,
+                                                country = country
                                             })@GetFilterQueryString(selectedFilters)" 
                                                class="subcategory-link d-block p-2 ps-4 text-decoration-none">
                                                 @subCat.Name
@@ -80,7 +117,7 @@
                 }
             </ul>
         </div>
-    </div>
+    </div> *@
 
     <!-- Фильтр по цене -->
     <div class="card mb-3">
@@ -104,6 +141,12 @@
                 {
                     <input type="hidden" name="brandIds" value="@brandId" />
                 }
+                
+                <!-- НОВЫЕ СКРЫТЫЕ ПОЛЯ -->
+                <input type="hidden" name="sellerType" value="@sellerType" />
+                <input type="hidden" name="isReadyToSend" value="@isReadyToSend" />
+                <input type="hidden" name="isNoPercentCredit" value="@isNoPercentCredit" />
+                <input type="hidden" name="country" value="@country" />
 
                 @foreach (var filter in selectedFilters)
                 {
@@ -144,7 +187,11 @@
                             query = query,
                             categoryIds = selectedCategoryIds,
                             sort = currentSort,
-                            brandIds = selectedBrandIds
+                            brandIds = selectedBrandIds,
+                            sellerType = sellerType,
+                            isReadyToSend = isReadyToSend,
+                            isNoPercentCredit = isNoPercentCredit,
+                            country = country
                         })@GetFilterQueryString(selectedFilters)" 
                            class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-x-lg"></i>
@@ -171,6 +218,12 @@
                     <input type="hidden" name="page" value="1" />
                     <input type="hidden" name="minPrice" value="@minPrice" />
                     <input type="hidden" name="maxPrice" value="@maxPrice" />
+                    
+                    <!-- НОВЫЕ СКРЫТЫЕ ПОЛЯ -->
+                    <input type="hidden" name="sellerType" value="@sellerType" />
+                    <input type="hidden" name="isReadyToSend" value="@isReadyToSend" />
+                    <input type="hidden" name="isNoPercentCredit" value="@isNoPercentCredit" />
+                    <input type="hidden" name="country" value="@country" />
                     
                     @foreach (var catId in selectedCategoryIds)
                     {
@@ -223,6 +276,336 @@
         </div>
     }
 
+    <!-- НОВЫЙ БЛОК: Фильтр по типу продавца -->
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-shop"></i> Тип продавця
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" action="@Url.Action("Browse", "Site")" id="sellerTypeFilterForm">
+                <input type="hidden" name="query" value="@query" />
+                <input type="hidden" name="sort" value="@currentSort" />
+                <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="minPrice" value="@minPrice" />
+                <input type="hidden" name="maxPrice" value="@maxPrice" />
+                <input type="hidden" name="isReadyToSend" value="@isReadyToSend" />
+                <input type="hidden" name="isNoPercentCredit" value="@isNoPercentCredit" />
+                <input type="hidden" name="country" value="@country" />
+                
+                @foreach (var catId in selectedCategoryIds)
+                {
+                    <input type="hidden" name="categoryIds" value="@catId" />
+                }
+                
+                @foreach (var brandId in selectedBrandIds)
+                {
+                    <input type="hidden" name="brandIds" value="@brandId" />
+                }
+
+                @foreach (var filter in selectedFilters)
+                {
+                    foreach (var value in filter.Value)
+                    {
+                        <input type="hidden" name="filter_@filter.Key" value="@value" />
+                    }
+                }
+                
+                <div>
+                    @foreach (var seller in sellerTypeNames)
+                    {
+                        var isChecked = sellerType == seller.Key;
+                        <div class="form-check mb-2">
+                            <input class="form-check-input seller-type-checkbox" 
+                                   type="radio" 
+                                   name="sellerType" 
+                                   value="@seller.Key" 
+                                   id="seller_@seller.Key"
+                                   @(isChecked ? "checked" : "")
+                                   onchange="this.form.submit()">
+                            <label class="form-check-label" for="seller_@seller.Key">
+                                @seller.Value
+                            </label>
+                        </div>
+                    }
+                    
+                    @if (sellerType.HasValue)
+                    {
+                        <div class="mt-2">
+                            <a href="@Url.Action("Browse", "Site", new { 
+                                query = query,
+                                categoryIds = selectedCategoryIds,
+                                brandIds = selectedBrandIds,
+                                sort = currentSort,
+                                minPrice = minPrice,
+                                maxPrice = maxPrice,
+                                isReadyToSend = isReadyToSend,
+                                isNoPercentCredit = isNoPercentCredit,
+                                country = country
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="btn btn-outline-danger btn-sm w-100">
+                                <i class="bi bi-x-circle"></i> Скинути
+                            </a>
+                        </div>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- НОВЫЙ БЛОК: Фильтр по готовности к отправке -->
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-truck"></i> Готовність до відправки
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" action="@Url.Action("Browse", "Site")" id="readyToSendFilterForm">
+                <input type="hidden" name="query" value="@query" />
+                <input type="hidden" name="sort" value="@currentSort" />
+                <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="minPrice" value="@minPrice" />
+                <input type="hidden" name="maxPrice" value="@maxPrice" />
+                <input type="hidden" name="sellerType" value="@sellerType" />
+                <input type="hidden" name="isNoPercentCredit" value="@isNoPercentCredit" />
+                <input type="hidden" name="country" value="@country" />
+                
+                @foreach (var catId in selectedCategoryIds)
+                {
+                    <input type="hidden" name="categoryIds" value="@catId" />
+                }
+                
+                @foreach (var brandId in selectedBrandIds)
+                {
+                    <input type="hidden" name="brandIds" value="@brandId" />
+                }
+
+                @foreach (var filter in selectedFilters)
+                {
+                    foreach (var value in filter.Value)
+                    {
+                        <input type="hidden" name="filter_@filter.Key" value="@value" />
+                    }
+                }
+                
+                <div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input ready-checkbox" 
+                               type="radio" 
+                               name="isReadyToSend" 
+                               value="true" 
+                               id="ready_true"
+                               @(isReadyToSend == true ? "checked" : "")
+                               onchange="this.form.submit()">
+                        <label class="form-check-label" for="ready_true">
+                            Готові до відправки
+                        </label>
+                    </div>
+                    
+                    <div class="form-check mb-2">
+                        <input class="form-check-input ready-checkbox" 
+                               type="radio" 
+                               name="isReadyToSend" 
+                               value="false" 
+                               id="ready_false"
+                               @(isReadyToSend == false ? "checked" : "")
+                               onchange="this.form.submit()">
+                        <label class="form-check-label" for="ready_false">
+                            Не готові до відправки
+                        </label>
+                    </div>
+                    
+                    @if (isReadyToSend.HasValue)
+                    {
+                        <div class="mt-2">
+                            <a href="@Url.Action("Browse", "Site", new { 
+                                query = query,
+                                categoryIds = selectedCategoryIds,
+                                brandIds = selectedBrandIds,
+                                sort = currentSort,
+                                minPrice = minPrice,
+                                maxPrice = maxPrice,
+                                sellerType = sellerType,
+                                isNoPercentCredit = isNoPercentCredit,
+                                country = country
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="btn btn-outline-danger btn-sm w-100">
+                                <i class="bi bi-x-circle"></i> Скинути
+                            </a>
+                        </div>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- НОВЫЙ БЛОК: Фильтр по беспроцентному кредиту -->
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-credit-card"></i> Безвідсотковий кредит
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" action="@Url.Action("Browse", "Site")" id="creditFilterForm">
+                <input type="hidden" name="query" value="@query" />
+                <input type="hidden" name="sort" value="@currentSort" />
+                <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="minPrice" value="@minPrice" />
+                <input type="hidden" name="maxPrice" value="@maxPrice" />
+                <input type="hidden" name="sellerType" value="@sellerType" />
+                <input type="hidden" name="isReadyToSend" value="@isReadyToSend" />
+                <input type="hidden" name="country" value="@country" />
+                
+                @foreach (var catId in selectedCategoryIds)
+                {
+                    <input type="hidden" name="categoryIds" value="@catId" />
+                }
+                
+                @foreach (var brandId in selectedBrandIds)
+                {
+                    <input type="hidden" name="brandIds" value="@brandId" />
+                }
+
+                @foreach (var filter in selectedFilters)
+                {
+                    foreach (var value in filter.Value)
+                    {
+                        <input type="hidden" name="filter_@filter.Key" value="@value" />
+                    }
+                }
+                
+                <div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input credit-checkbox" 
+                               type="radio" 
+                               name="isNoPercentCredit" 
+                               value="true" 
+                               id="credit_true"
+                               @(isNoPercentCredit == true ? "checked" : "")
+                               onchange="this.form.submit()">
+                        <label class="form-check-label" for="credit_true">
+                            Доступний кредит 0%
+                        </label>
+                    </div>
+                    
+                    <div class="form-check mb-2">
+                        <input class="form-check-input credit-checkbox" 
+                               type="radio" 
+                               name="isNoPercentCredit" 
+                               value="false" 
+                               id="credit_false"
+                               @(isNoPercentCredit == false ? "checked" : "")
+                               onchange="this.form.submit()">
+                        <label class="form-check-label" for="credit_false">
+                            Тільки повна оплата
+                        </label>
+                    </div>
+                    
+                    @if (isNoPercentCredit.HasValue)
+                    {
+                        <div class="mt-2">
+                            <a href="@Url.Action("Browse", "Site", new { 
+                                query = query,
+                                categoryIds = selectedCategoryIds,
+                                brandIds = selectedBrandIds,
+                                sort = currentSort,
+                                minPrice = minPrice,
+                                maxPrice = maxPrice,
+                                sellerType = sellerType,
+                                isReadyToSend = isReadyToSend,
+                                country = country
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="btn btn-outline-danger btn-sm w-100">
+                                <i class="bi bi-x-circle"></i> Скинути
+                            </a>
+                        </div>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- НОВЫЙ БЛОК: Фильтр по стране производителю -->
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-globe"></i> Країна виробник
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" action="@Url.Action("Browse", "Site")" id="countryFilterForm">
+                <input type="hidden" name="query" value="@query" />
+                <input type="hidden" name="sort" value="@currentSort" />
+                <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="minPrice" value="@minPrice" />
+                <input type="hidden" name="maxPrice" value="@maxPrice" />
+                <input type="hidden" name="sellerType" value="@sellerType" />
+                <input type="hidden" name="isReadyToSend" value="@isReadyToSend" />
+                <input type="hidden" name="isNoPercentCredit" value="@isNoPercentCredit" />
+                
+                @foreach (var catId in selectedCategoryIds)
+                {
+                    <input type="hidden" name="categoryIds" value="@catId" />
+                }
+                
+                @foreach (var brandId in selectedBrandIds)
+                {
+                    <input type="hidden" name="brandIds" value="@brandId" />
+                }
+
+                @foreach (var filter in selectedFilters)
+                {
+                    foreach (var value in filter.Value)
+                    {
+                        <input type="hidden" name="filter_@filter.Key" value="@value" />
+                    }
+                }
+                
+                <div class="country-list" style="max-height: 200px; overflow-y: auto;">
+                    @foreach (var c in countryNames)
+                    {
+                        var isChecked = country == c.Key;
+                        <div class="form-check mb-2">
+                            <input class="form-check-input country-checkbox" 
+                                   type="radio" 
+                                   name="country" 
+                                   value="@c.Key" 
+                                   id="country_@c.Key"
+                                   @(isChecked ? "checked" : "")
+                                   onchange="this.form.submit()">
+                            <label class="form-check-label" for="country_@c.Key">
+                                @c.Value
+                            </label>
+                        </div>
+                    }
+                </div>
+                
+                @if (country.HasValue)
+                {
+                    <div class="mt-2">
+                        <a href="@Url.Action("Browse", "Site", new { 
+                            query = query,
+                            categoryIds = selectedCategoryIds,
+                            brandIds = selectedBrandIds,
+                            sort = currentSort,
+                            minPrice = minPrice,
+                            maxPrice = maxPrice,
+                            sellerType = sellerType,
+                            isReadyToSend = isReadyToSend,
+                            isNoPercentCredit = isNoPercentCredit
+                        })@GetFilterQueryString(selectedFilters)" 
+                           class="btn btn-outline-danger btn-sm w-100">
+                            <i class="bi bi-x-circle"></i> Скинути
+                        </a>
+                    </div>
+                }
+            </form>
+        </div>
+    </div>
+
     @if (currentCategory?.Filters != null && currentCategory.Filters.Any())
     {
         <form method="get" action="@Url.Action("Browse", "Site")" id="filterForm">
@@ -232,6 +615,12 @@
             <input type="hidden" name="page" value="1" />
             <input type="hidden" name="minPrice" value="@minPrice" />
             <input type="hidden" name="maxPrice" value="@maxPrice" />
+            
+            <!-- НОВЫЕ СКРЫТЫЕ ПОЛЯ -->
+            <input type="hidden" name="sellerType" value="@sellerType" />
+            <input type="hidden" name="isReadyToSend" value="@isReadyToSend" />
+            <input type="hidden" name="isNoPercentCredit" value="@isNoPercentCredit" />
+            <input type="hidden" name="country" value="@country" />
 
             @foreach (var catId in selectedCategoryIds)
             {
@@ -291,7 +680,11 @@
                     brandIds = selectedBrandIds,
                     sort = currentSort,
                     minPrice = minPrice,
-                    maxPrice = maxPrice
+                    maxPrice = maxPrice,
+                    sellerType = sellerType,
+                    isReadyToSend = isReadyToSend,
+                    isNoPercentCredit = isNoPercentCredit,
+                    country = country
                 })" class="btn btn-outline-danger btn-sm w-100 mt-2">
                     <i class="bi bi-x-circle"></i> Скинути всі фільтри
                 </a>
@@ -299,8 +692,10 @@
 
         </form>
     }
+    
     <!-- Активные фильтры -->
-    @if (selectedCategoryIds.Any() || selectedBrandIds.Any() || minPrice.HasValue || maxPrice.HasValue || selectedFilters.Any())
+    @if (selectedCategoryIds.Any() || selectedBrandIds.Any() || minPrice.HasValue || maxPrice.HasValue || selectedFilters.Any() || 
+         sellerType.HasValue || isReadyToSend.HasValue || isNoPercentCredit.HasValue || country.HasValue)
     {
         <div class="card mb-3">
             <div class="card-body">
@@ -319,7 +714,11 @@
                                     brandIds = selectedBrandIds,
                                     sort = currentSort,
                                     minPrice = minPrice,
-                                    maxPrice = maxPrice
+                                    maxPrice = maxPrice,
+                                    sellerType = sellerType,
+                                    isReadyToSend = isReadyToSend,
+                                    isNoPercentCredit = isNoPercentCredit,
+                                    country = country
                                 })@GetFilterQueryString(selectedFilters)" 
                                    class="text-white ms-1 text-decoration-none">
                                     <i class="bi bi-x"></i>
@@ -341,7 +740,11 @@
                                     brandIds = selectedBrandIds.Where(id => id != brandId).ToList(),
                                     sort = currentSort,
                                     minPrice = minPrice,
-                                    maxPrice = maxPrice
+                                    maxPrice = maxPrice,
+                                    sellerType = sellerType,
+                                    isReadyToSend = isReadyToSend,
+                                    isNoPercentCredit = isNoPercentCredit,
+                                    country = country
                                 })@GetFilterQueryString(selectedFilters)" 
                                    class="text-white ms-1 text-decoration-none">
                                     <i class="bi bi-x"></i>
@@ -359,7 +762,11 @@
                                 categoryIds = selectedCategoryIds,
                                 brandIds = selectedBrandIds,
                                 sort = currentSort,
-                                maxPrice = maxPrice
+                                maxPrice = maxPrice,
+                                sellerType = sellerType,
+                                isReadyToSend = isReadyToSend,
+                                isNoPercentCredit = isNoPercentCredit,
+                                country = country
                             })@GetFilterQueryString(selectedFilters)" 
                                class="text-white ms-1 text-decoration-none">
                                 <i class="bi bi-x"></i>
@@ -376,7 +783,96 @@
                                 categoryIds = selectedCategoryIds,
                                 brandIds = selectedBrandIds,
                                 sort = currentSort,
-                                minPrice = minPrice
+                                minPrice = minPrice,
+                                sellerType = sellerType,
+                                isReadyToSend = isReadyToSend,
+                                isNoPercentCredit = isNoPercentCredit,
+                                country = country
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="text-white ms-1 text-decoration-none">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </span>
+                    }
+
+                    <!-- НОВЫЕ АКТИВНЫЕ ФИЛЬТРЫ -->
+                    @if (sellerType.HasValue && sellerTypeNames.ContainsKey(sellerType.Value))
+                    {
+                        <span class="badge bg-primary d-inline-flex align-items-center">
+                            @sellerTypeNames[sellerType.Value]
+                            <a href="@Url.Action("Browse", "Site", new { 
+                                query = query,
+                                categoryIds = selectedCategoryIds,
+                                brandIds = selectedBrandIds,
+                                sort = currentSort,
+                                minPrice = minPrice,
+                                maxPrice = maxPrice,
+                                isReadyToSend = isReadyToSend,
+                                isNoPercentCredit = isNoPercentCredit,
+                                country = country
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="text-white ms-1 text-decoration-none">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </span>
+                    }
+                    
+                    @if (isReadyToSend.HasValue)
+                    {
+                        <span class="badge bg-primary d-inline-flex align-items-center">
+                            @(isReadyToSend.Value ? "Готові до відправки" : "Не готові до відправки")
+                            <a href="@Url.Action("Browse", "Site", new { 
+                                query = query,
+                                categoryIds = selectedCategoryIds,
+                                brandIds = selectedBrandIds,
+                                sort = currentSort,
+                                minPrice = minPrice,
+                                maxPrice = maxPrice,
+                                sellerType = sellerType,
+                                isNoPercentCredit = isNoPercentCredit,
+                                country = country
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="text-white ms-1 text-decoration-none">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </span>
+                    }
+                    
+                    @if (isNoPercentCredit.HasValue)
+                    {
+                        <span class="badge bg-primary d-inline-flex align-items-center">
+                            @(isNoPercentCredit.Value ? "Кредит 0%" : "Повна оплата")
+                            <a href="@Url.Action("Browse", "Site", new { 
+                                query = query,
+                                categoryIds = selectedCategoryIds,
+                                brandIds = selectedBrandIds,
+                                sort = currentSort,
+                                minPrice = minPrice,
+                                maxPrice = maxPrice,
+                                sellerType = sellerType,
+                                isReadyToSend = isReadyToSend,
+                                country = country
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="text-white ms-1 text-decoration-none">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </span>
+                    }
+                    
+                    @if (country.HasValue && countryNames.ContainsKey(country.Value))
+                    {
+                        <span class="badge bg-primary d-inline-flex align-items-center">
+                            @countryNames[country.Value]
+                            <a href="@Url.Action("Browse", "Site", new { 
+                                query = query,
+                                categoryIds = selectedCategoryIds,
+                                brandIds = selectedBrandIds,
+                                sort = currentSort,
+                                minPrice = minPrice,
+                                maxPrice = maxPrice,
+                                sellerType = sellerType,
+                                isReadyToSend = isReadyToSend,
+                                isNoPercentCredit = isNoPercentCredit
                             })@GetFilterQueryString(selectedFilters)" 
                                class="text-white ms-1 text-decoration-none">
                                 <i class="bi bi-x"></i>
@@ -403,7 +899,11 @@
                                         brandIds = selectedBrandIds,
                                         sort = currentSort,
                                         minPrice = minPrice,
-                                        maxPrice = maxPrice
+                                        maxPrice = maxPrice,
+                                        sellerType = sellerType,
+                                        isReadyToSend = isReadyToSend,
+                                        isNoPercentCredit = isNoPercentCredit,
+                                        country = country
                                     })@GetFilterQueryString(newSelectedFilters)" 
                                        class="text-white ms-1 text-decoration-none">
                                         <i class="bi bi-x"></i>
@@ -485,25 +985,25 @@
         font-weight: 500;
     }
 
-    .brand-list {
+    .brand-list, .country-list {
         scrollbar-width: thin;
         scrollbar-color: #ccc #f1f1f1;
     }
 
-        .brand-list::-webkit-scrollbar {
+        .brand-list::-webkit-scrollbar, .country-list::-webkit-scrollbar {
             width: 4px;
         }
 
-        .brand-list::-webkit-scrollbar-track {
+        .brand-list::-webkit-scrollbar-track, .country-list::-webkit-scrollbar-track {
             background: #f1f1f1;
         }
 
-        .brand-list::-webkit-scrollbar-thumb {
+        .brand-list::-webkit-scrollbar-thumb, .country-list::-webkit-scrollbar-thumb {
             background: #ccc;
             border-radius: 4px;
         }
 
-            .brand-list::-webkit-scrollbar-thumb:hover {
+            .brand-list::-webkit-scrollbar-thumb:hover, .country-list::-webkit-scrollbar-thumb:hover {
                 background: #999;
             }
 

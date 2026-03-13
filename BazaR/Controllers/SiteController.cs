@@ -101,7 +101,8 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult Browse(string? query, List<int>? categoryIds, int page = 1,
     string sort = "default", decimal? minPrice = null, decimal? maxPrice = null,
-    List<int>? brandIds = null)
+    List<int>? brandIds = null, int? sellerType = null, bool? isReadyToSend = null,
+    bool? isNoPercentCredit = null, int? country = null)
         {
             SetLayoutData();
             if (page < 1) page = 1;
@@ -186,6 +187,23 @@ namespace BazaR.Controllers
             // Фильтр по брендам
             if (brandIds != null && brandIds.Any())
                 itemsQuery = itemsQuery.Where(i => brandIds.Contains(i.BrandId));
+
+            // НОВЫЕ ФИЛЬТРЫ
+            // Фильтр по типу продавца
+            if (sellerType.HasValue)
+                itemsQuery = itemsQuery.Where(i => (int)i.SellerType == sellerType.Value);
+
+            // Фильтр по готовности к отправке
+            if (isReadyToSend.HasValue)
+                itemsQuery = itemsQuery.Where(i => i.IsReadyToSend == isReadyToSend.Value);
+
+            // Фильтр по беспроцентному кредиту
+            if (isNoPercentCredit.HasValue)
+                itemsQuery = itemsQuery.Where(i => i.IsNoPercentCredit == isNoPercentCredit.Value);
+
+            // Фильтр по стране производителю
+            if (country.HasValue)
+                itemsQuery = itemsQuery.Where(i => (int)i.Country == country.Value);
 
             // Собираем динамические фильтры из QueryString
             var selectedFilters = new Dictionary<string, List<string>>();
@@ -275,9 +293,10 @@ namespace BazaR.Controllers
             // Применяем сортировку к уже отфильтрованным данным
             var items = itemsQuery.ToList();
 
-            // ИСПРАВЛЕННАЯ СОРТИРОВКА ПО РЕЙТИНГУ
+            // РАСШИРЕННАЯ СОРТИРОВКА
             items = sort switch
             {
+                // Существующие сортировки
                 "price_asc" => items.OrderBy(i => i.Price).ToList(),
                 "price_desc" => items.OrderByDescending(i => i.Price).ToList(),
                 "name_asc" => items.OrderBy(i => i.Name).ToList(),
@@ -287,6 +306,29 @@ namespace BazaR.Controllers
                         ? i.Reviews.Average(r => r.Rating)
                         : 0).ToList(),
                 "newest" => items.OrderByDescending(i => i.Id).ToList(),
+
+                // НОВЫЕ СОРТИРОВКИ
+                // По типу продавца
+                "seller_bazar" => items.Where(i => i.SellerType == SellerType.bazar).ToList(),
+                "seller_other" => items.Where(i => i.SellerType == SellerType.otherSeller).ToList(),
+                "seller_sklad" => items.Where(i => i.SellerType == SellerType.otherSellerOnSklad).ToList(),
+
+                // По готовности к отправке
+                "ready_to_send" => items.Where(i => i.IsReadyToSend).ToList(),
+                "not_ready_to_send" => items.Where(i => !i.IsReadyToSend).ToList(),
+
+                // По беспроцентному кредиту
+                "no_percent_credit" => items.Where(i => i.IsNoPercentCredit).ToList(),
+                "with_percent_credit" => items.Where(i => !i.IsNoPercentCredit).ToList(),
+
+                // По стране производителю
+                "country_ukraine" => items.Where(i => i.Country == ProductionCountry.Ukraine).ToList(),
+                "country_usa" => items.Where(i => i.Country == ProductionCountry.USA).ToList(),
+                "country_china" => items.Where(i => i.Country == ProductionCountry.China).ToList(),
+                "country_germany" => items.Where(i => i.Country == ProductionCountry.Germany).ToList(),
+                "country_japan" => items.Where(i => i.Country == ProductionCountry.Japan).ToList(),
+
+                // По умолчанию
                 _ => items.OrderBy(i => i.Id).ToList()
             };
 
@@ -294,12 +336,16 @@ namespace BazaR.Controllers
             var totalPages = (int)Math.Ceiling(total / (double)PageSize);
             var paged = items.Skip((page - 1) * PageSize).Take(PageSize).ToList();
 
-            // Сохраняем параметры для фильтров
+            // Сохраняем параметры для фильтров (добавлены новые)
             ViewBag.Query = query ?? "";
             ViewBag.CategoryIds = categoryIds ?? new List<int>();
             ViewBag.BrandIds = brandIds ?? new List<int>();
             ViewBag.MinPrice = minPrice;
             ViewBag.MaxPrice = maxPrice;
+            ViewBag.SellerType = sellerType;
+            ViewBag.IsReadyToSend = isReadyToSend;
+            ViewBag.IsNoPercentCredit = isNoPercentCredit;
+            ViewBag.Country = country;
             ViewBag.Page = page;
             ViewBag.PageSize = PageSize;
             ViewBag.TotalPages = totalPages;
