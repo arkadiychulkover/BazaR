@@ -110,7 +110,7 @@ namespace BazaR.Controllers
             var allCategories = _db.Categories
                 .Include(c => c.CategoryBrands)
                     .ThenInclude(cb => cb.Brand)
-                .Include(c => c.Filters) // ВАЖНО: загружаем фильтры категорий
+                .Include(c => c.Filters)
                 .ToList();
 
             ViewBag.AllCategories = allCategories;
@@ -122,10 +122,9 @@ namespace BazaR.Controllers
                 .Include(i => i.Brand)
                 .Include(i => i.Category)
                 .Include(i => i.Reviews)
-                .Include(i => i.Characteristics) // ВАЖНО: загружаем характеристики
+                .Include(i => i.Characteristics)
                 .AsQueryable()
                 .AsNoTracking();
-
 
             // Фильтр по поисковому запросу
             if (!string.IsNullOrWhiteSpace(query))
@@ -164,16 +163,15 @@ namespace BazaR.Controllers
                         .OrderBy(b => b.Name)
                         .ToList() ?? new List<Brand>();
 
-                    if (currentCategory.ParentCategory != null) 
+                    if (currentCategory.ParentCategory != null)
                     {
                         allBrands.AddRange(
                         currentCategory.ParentCategory.CategoryBrands
-                        .Select(cb => cb.Brand)
-                        .OrderBy(b => b.Name)
-                        .ToList() ?? new List<Brand>());
+                            .Select(cb => cb.Brand)
+                            .OrderBy(b => b.Name)
+                            .ToList() ?? new List<Brand>());
                     }
 
-                    //Console.WriteLine(allBrands.Count() + " Brand count ==============================");
                     ViewBag.CategoryBrands = allBrands;
                 }
             }
@@ -277,13 +275,17 @@ namespace BazaR.Controllers
             // Применяем сортировку к уже отфильтрованным данным
             var items = itemsQuery.ToList();
 
+            // ИСПРАВЛЕННАЯ СОРТИРОВКА ПО РЕЙТИНГУ
             items = sort switch
             {
                 "price_asc" => items.OrderBy(i => i.Price).ToList(),
                 "price_desc" => items.OrderByDescending(i => i.Price).ToList(),
                 "name_asc" => items.OrderBy(i => i.Name).ToList(),
                 "name_desc" => items.OrderByDescending(i => i.Name).ToList(),
-                "rating_desc" => items.OrderByDescending(i => i.Reviews?.Average(r => r.Rating) ?? 0).ToList(),
+                "rating_desc" => items.OrderByDescending(i =>
+                    i.Reviews != null && i.Reviews.Any()
+                        ? i.Reviews.Average(r => r.Rating)
+                        : 0).ToList(),
                 "newest" => items.OrderByDescending(i => i.Id).ToList(),
                 _ => items.OrderBy(i => i.Id).ToList()
             };
