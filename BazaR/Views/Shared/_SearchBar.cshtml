@@ -1,4 +1,5 @@
 ﻿@using System.Text.Json
+@using BazaR.DTO
 @model List<BazaR.Models.Category>
 
 @{
@@ -295,12 +296,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const megaOverlay = document.getElementById("megaOverlay");
     const suggestions = document.getElementById("searchSuggestions");
 
-    // Категории + бренды для подсказок
     const allCategories = @Html.Raw(JsonSerializer.Serialize(
         Model.Select(c => new { 
             id = c.Id, 
             name = c.Name, 
-            brands = c.CategoryBrands.Select(b => b.Brand.Name).ToList() 
+            brands = c.CategoryBrands.Select(b => new SearchBarBrandDTO(b.Brand)).ToList()
         })
     ));
 
@@ -343,18 +343,15 @@ document.addEventListener("DOMContentLoaded", function() {
                 aCat.textContent = c.name;
                 suggestions.appendChild(aCat);
                 matched = true;
+                
+                    // Проверка брендов
+                c.brands.forEach(b => {
+                        const aBrand = document.createElement("a");
+                            aBrand.href = "@Url.Action("Browse", "Site")?categoryIds=" + c.id + "&brandIds=" + b.Id;
+                        aBrand.textContent = c.name + " – " + b.Name;
+                        suggestions.appendChild(aBrand);
+                });
             }
-
-            // Проверка брендов
-            c.brands.forEach(b => {
-                if (b.toLowerCase().includes(val)) {
-                    const aBrand = document.createElement("a");
-                    aBrand.href = "@Url.Action("Browse", "Site")?categoryIds=" + c.id;
-                    aBrand.textContent = c.name + " – " + b;
-                    suggestions.appendChild(aBrand);
-                    matched = true;
-                }
-            });
         });
 
         suggestions.style.display = suggestions.children.length > 0 ? "block" : "none";
