@@ -1,6 +1,7 @@
-﻿using BazaR.Interfaces;
+using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.ViewModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
@@ -11,21 +12,22 @@ namespace BazaR.Controllers
     {
         private readonly IUserDb _usMan;
         private readonly IItemRepository _itMan;
+        private readonly UserManager<User> _userManager;
 
         private const int PageSize = 12;
 
-        public SiteController(IUserDb usMan, IItemRepository itMan)
+        public SiteController(IUserDb usMan, IItemRepository itMan, UserManager<User> userManager)
         {
             _usMan = usMan;
             _itMan = itMan;
+            _userManager = userManager;
         }
 
-        private int? CurrentUserId => HttpContext.Session.GetInt32("uid");
+        private User? CurrentUser => User.Identity?.IsAuthenticated == true 
+            ? _userManager.GetUserAsync(User).Result 
+            : null;
 
-        private User? CurrentUser =>
-            CurrentUserId.HasValue ? _usMan.GetUser(CurrentUserId.Value) : null;
-
-        private bool IsAuthenticated => CurrentUserId.HasValue;
+        private bool IsAuthenticated => User.Identity?.IsAuthenticated == true;
 
         private bool IsAdmin => CurrentUser?.IsAdmin == true;
 
@@ -33,9 +35,9 @@ namespace BazaR.Controllers
         {
             ViewBag.User = CurrentUser;
 
-            if (IsAuthenticated)
+            if (IsAuthenticated && CurrentUser != null)
             {
-                var userId = CurrentUserId!.Value;
+                var userId = CurrentUser.Id;
                 ViewBag.CartCount = _usMan.GetCartItems(userId)?.Count() ?? 0;
                 ViewBag.WishlistCount = _usMan.GetWishList(userId)?.Count() ?? 0;
             }
@@ -67,9 +69,9 @@ namespace BazaR.Controllers
             var items = _itMan.GetAll();
 
             HashSet<int> wishlistIds = new();
-            if (IsAuthenticated)
+            if (IsAuthenticated && CurrentUser != null)
             {
-                var userId = CurrentUserId!.Value;
+                var userId = CurrentUser.Id;
                 wishlistIds = _usMan.GetWishList(userId)
                                     .Select(i => i.Id)
                                     .ToHashSet();
@@ -122,9 +124,9 @@ namespace BazaR.Controllers
                 .ToList();
 
             HashSet<int> wishlistIds = new();
-            if (IsAuthenticated)
+            if (IsAuthenticated && CurrentUser != null)
             {
-                var userId = CurrentUserId!.Value;
+                var userId = CurrentUser.Id;
                 wishlistIds = _usMan.GetWishList(userId)
                                     .Select(i => i.Id)
                                     .ToHashSet();
@@ -167,9 +169,9 @@ namespace BazaR.Controllers
                 .ToList();
             ViewBag.Seller = item.User;
 
-            if (IsAuthenticated)
+            if (IsAuthenticated && CurrentUser != null)
             {
-                var userId = CurrentUserId!.Value;
+                var userId = CurrentUser.Id;
                 ViewBag.IsInCart = _usMan.GetCartItems(userId).Any(i => i.Id == id);
                 ViewBag.IsInWishlist = _usMan.GetWishList(userId).Any(i => i.Id == id);
             }
@@ -185,11 +187,11 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult Cart()
         {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Cart)));
+            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(Cart)));
 
             SetLayoutData();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser.Id;
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
             var items = cartItems.Select(ci => ci.Item).ToList();
 
@@ -207,7 +209,7 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddToCart(int itemId, int quantity = 1)
         {
-            if (!IsAuthenticated)
+            if (!IsAuthenticated || CurrentUser == null)
             {
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
@@ -221,7 +223,7 @@ namespace BazaR.Controllers
             var item = _itMan.GetById(itemId);
             if (item == null) return NotFound();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser.Id;
 
             for (int i = 0; i < quantity; i++)
             {
@@ -244,9 +246,9 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult RemoveFromCart(int itemId)
         {
-            if (!IsAuthenticated) return RequireLogin();
+            if (!IsAuthenticated || CurrentUser == null) return RequireLogin();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser.Id;
 
             _usMan.RemoveFromCart(userId, itemId);
 
@@ -266,9 +268,9 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult UpdateCartQuantity(int itemId, int quantity)
         {
-            if (!IsAuthenticated) return RequireLogin();
+            if (!IsAuthenticated || CurrentUser == null) return RequireLogin();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser.Id;
 
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
             var currentItem = cartItems.FirstOrDefault(ci => ci.ItemId == itemId);
@@ -302,9 +304,9 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ClearCart()
         {
-            if (!IsAuthenticated) return RequireLogin();
+            if (!IsAuthenticated || CurrentUser == null) return RequireLogin();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser.Id;
 
             _usMan.ClearCart(userId);
 
@@ -315,11 +317,11 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult Wishlist()
         {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Wishlist)));
+            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(Wishlist)));
 
             SetLayoutData();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser.Id;
             var items = _usMan.GetWishList(userId).ToList();
 
             return View(items);
@@ -329,7 +331,7 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddToWishlist(int id)
         {
-            if (!IsAuthenticated)
+            if (!IsAuthenticated || CurrentUser == null)
             {
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
@@ -341,7 +343,7 @@ namespace BazaR.Controllers
             var item = _itMan.GetById(id);
             if (item == null) return NotFound();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser.Id;
 
             _usMan.AddToWishList(userId, id);
 
@@ -361,9 +363,9 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult RemoveFromWishlist(int id)
         {
-            if (!IsAuthenticated) return RequireLogin();
+            if (!IsAuthenticated || CurrentUser == null) return RequireLogin();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser.Id;
 
             _usMan.RemoveFromWishList(userId, id);
 
@@ -382,11 +384,11 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult Checkout()
         {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Checkout)));
+            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(Checkout)));
 
             SetLayoutData();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser.Id;
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
 
             if (!cartItems.Any())
@@ -405,9 +407,9 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CreateOrder(string address, string paymentMethod, string deliveryMethod)
         {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Checkout)));
+            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(Checkout)));
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser.Id;
 
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
             if (!cartItems.Any())
@@ -426,7 +428,7 @@ namespace BazaR.Controllers
                 PaymentMethod = paymentMethod,
                 DeliveryMethod = deliveryMethod,
                 PaymentStatus = "Pending",
-                CityId = 1 // По умолчанию Киев, нужно добавить выбор города
+                CityId = 1
             };
 
             foreach (var cartItem in cartItems)
@@ -456,11 +458,11 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult Orders()
         {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Orders)));
+            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(Orders)));
 
             SetLayoutData();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser.Id;
             var orders = _usMan.GetUserOrders(userId)
                 .OrderByDescending(o => o.Id)
                 .ToList();
@@ -473,14 +475,14 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult OrderDetails(int id)
         {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(OrderDetails), new { id }));
+            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(OrderDetails), new { id }));
 
             SetLayoutData();
 
             var order = _usMan.GetOrderById(id);
             if (order == null) return NotFound();
 
-            if (!IsAdmin && order.UserId != CurrentUserId!.Value)
+            if (!IsAdmin && order.UserId != CurrentUser.Id)
                 return RedirectToAction(nameof(AccessDenied));
 
             ViewBag.Items = order.OrderItems;
@@ -494,192 +496,17 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CancelOrder(int id)
         {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Orders)));
+            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(Orders)));
 
             var order = _usMan.GetOrderById(id);
             if (order == null) return NotFound();
 
-            if (!IsAdmin && order.UserId != CurrentUserId!.Value)
+            if (!IsAdmin && order.UserId != CurrentUser.Id)
                 return RedirectToAction(nameof(AccessDenied));
 
             var ok = _usMan.CancelOrder(id);
             TempData[ok ? "Ok" : "Error"] = ok ? "Заказ отменён." : "Не удалось отменить заказ.";
             return RedirectToAction(nameof(Orders));
-        }
-
-        [HttpGet]
-        public IActionResult Profile()
-        {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Profile)));
-
-            SetLayoutData();
-
-            var user = CurrentUser;
-            ViewBag.OrdersCount = user?.Orders?.Count ?? 0;
-            ViewBag.WishlistCount = _usMan.GetWishList(CurrentUserId!.Value).Count();
-            ViewBag.CartCount = _usMan.GetCartItems(CurrentUserId.Value).Count();
-
-            return View(user);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Logout()
-        {
-            HttpContext.Session.Remove("uid");
-            TempData["Ok"] = "Вы вышли из аккаунта.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        public IActionResult OpenLoginModal()
-        {
-            return PartialView("LoginModal");
-        }
-
-        [HttpGet]
-        public IActionResult OpenRegisterModal()
-        {
-            return PartialView("RegisterModal");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Login(string email, string password)
-        {
-            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-            {
-                if (isAjax)
-                    return Json(new { success = false, error = "Введіть невірну адресу ел. пошти або номер телефону." });
-
-                ViewBag.OpenLoginModal = true;
-                ViewBag.LoginEmail = email;
-                ViewBag.LoginEmailInvalid = string.IsNullOrWhiteSpace(email);
-                ViewBag.LoginPasswordInvalid = string.IsNullOrWhiteSpace(password);
-
-                ViewBag.LoginEmailError = string.IsNullOrWhiteSpace(email) ? "Введіть адресу ел. пошти або номер телефону" : "";
-                ViewBag.LoginPasswordError = string.IsNullOrWhiteSpace(password) ? "Введіть пароль" : "";
-
-                return View("Index"); 
-            }
-
-            email = email.Trim();
-            var user = _usMan.GetByEmail(email);
-
-            if (user == null || user.PasswordHash != password)
-            {
-                if (isAjax)
-                    return Json(new { success = false, error = "Введено невірну адресу ел. пошти або номер телефону" });
-
-                ViewBag.OpenLoginModal = true;
-                ViewBag.LoginEmail = email;
-                ViewBag.LoginEmailInvalid = true;
-                ViewBag.LoginPasswordInvalid = true;
-
-                ViewBag.LoginEmailError = "Введено невірну адресу ел. пошти або номер телефону";
-                ViewBag.LoginPasswordError = "Введено невірий пароль";
-
-                return View("Index");
-            }
-
-            HttpContext.Session.SetInt32("uid", user.Id);
-
-            if (isAjax)
-                return Json(new { success = true, redirect = Url.Action(nameof(Index)) });
-
-            TempData["Ok"] = "Успешный вход.";
-            return RedirectToAction(nameof(Index));
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Register(string email, string firstName, string lastName, string password, string phoneNumber)
-        {
-            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-
-            email = (email ?? "").Trim();
-            firstName = (firstName ?? "").Trim();
-            lastName = (lastName ?? "").Trim();
-            phoneNumber = (phoneNumber ?? "").Trim();
-
-            if (string.IsNullOrWhiteSpace(firstName) ||
-                string.IsNullOrWhiteSpace(lastName) ||
-                string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(password) ||
-                string.IsNullOrWhiteSpace(phoneNumber))
-            {
-                if (isAjax)
-                    return Json(new { success = false, error = "Заповніть обов'язкові поля." });
-
-                ViewBag.OpenRegisterModal = true;
-
-                ViewBag.RegFirstName = firstName;
-                ViewBag.RegLastName = lastName;
-                ViewBag.RegEmail = email;
-                ViewBag.RegPhone = phoneNumber;
-
-                ViewBag.RegFirstNameInvalid = string.IsNullOrWhiteSpace(firstName);
-                ViewBag.RegLastNameInvalid = string.IsNullOrWhiteSpace(lastName);
-                ViewBag.RegEmailInvalid = string.IsNullOrWhiteSpace(email);
-                ViewBag.RegPhoneInvalid = string.IsNullOrWhiteSpace(phoneNumber);
-                ViewBag.RegPasswordInvalid = string.IsNullOrWhiteSpace(password);
-
-                ViewBag.RegFirstNameError = ViewBag.RegFirstNameInvalid ? "Введіть своє ім’я кирилицею" : "";
-                ViewBag.RegLastNameError = ViewBag.RegLastNameInvalid ? "Введіть своє прізвище кирилицею" : "";
-                ViewBag.RegPhoneError = ViewBag.RegPhoneInvalid ? "Введіть номер мобільного телефону" : "";
-                ViewBag.RegEmailError = ViewBag.RegEmailInvalid ? "Введіть свою ел. пошту" : "";
-                ViewBag.RegPasswordError = ViewBag.RegPasswordInvalid ? "Введіть пароль" : "";
-
-                return View("Index");
-            }
-
-            if (_usMan.GetByEmail(email) != null)
-            {
-                if (isAjax)
-                    return Json(new { success = false, error = "Користувач з таким email вже існує." });
-
-                ViewBag.OpenRegisterModal = true;
-
-                ViewBag.RegFirstName = firstName;
-                ViewBag.RegLastName = lastName;
-                ViewBag.RegEmail = email;
-                ViewBag.RegPhone = phoneNumber;
-
-                ViewBag.RegEmailInvalid = true;
-                ViewBag.RegEmailError = "Email вже використовується";
-
-                return View("Index");
-            }
-
-            var user = new User
-            {
-                Email = email,
-                Name = (firstName + " " + lastName).Trim(),
-                PasswordHash = password,
-                IsAdmin = false,
-                PhoneNumber = phoneNumber
-            };
-
-            var ok = _usMan.AddUser(user);
-            if (!ok)
-            {
-                if (isAjax)
-                    return Json(new { success = false, error = "Не вдалось зареєструватись." });
-
-                ViewBag.OpenRegisterModal = true;
-                return View("Index");
-            }
-
-            var created = _usMan.GetByEmail(email);
-            if (created != null)
-                HttpContext.Session.SetInt32("uid", created.Id);
-
-            if (isAjax)
-                return Json(new { success = true, redirect = Url.Action(nameof(Index)) });
-
-            TempData["Ok"] = "Реєстрація вдала.";
-            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
@@ -754,9 +581,9 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddReview(int itemId, Review review)
         {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(ItemDetails), new { id = itemId }));
+            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(ItemDetails), new { id = itemId }));
 
-            review.UserId = CurrentUserId!.Value;
+            review.UserId = CurrentUser.Id;
             review.CreatedAt = DateTime.UtcNow;
 
             var ok = _itMan.AddReview(itemId, review);
@@ -840,14 +667,15 @@ namespace BazaR.Controllers
             TempData[ok ? "Ok" : "Error"] = ok ? "Вариант доставки удалён." : "Не удалось удалить доставку.";
             return RedirectToAction(nameof(Index));
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult ToggleWishlist(int id)
         {
-            if (!IsAuthenticated)
+            if (!IsAuthenticated || CurrentUser == null)
                 return Json(new { success = false, requireLogin = true });
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser.Id;
 
             bool isInWishlist = _usMan.GetWishList(userId).Any(i => i.Id == id);
 
@@ -865,6 +693,7 @@ namespace BazaR.Controllers
                 wishlistCount
             });
         }
+
         public IActionResult Reviews()
         {
             ViewBag.ActiveMenu = "Reviews";

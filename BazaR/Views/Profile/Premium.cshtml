@@ -1,0 +1,67 @@
+@model BazaR.ViewModels.PremiumViewModel
+@{
+    ViewData["Title"] = "Підписка Premium";
+}
+
+<div class="profile-page">
+    <div class="profile-page__layout">
+        @await Html.PartialAsync("_ProfileSidebar", Model.Profile)
+
+        <section class="profile-page__content">
+            <h1 class="profile-page__title">Підписка Premium</h1>
+            <p class="profile-page__subtitle">Більше переваг, ексклюзивні пропозиції та пріоритетне обслуговування.</p>
+
+            @if (Model.IsActive)
+            {
+                <div class="premium-banner premium-banner--active">
+                    <h2>Premium активовано</h2>
+                    <p>Ваш поточний план діє до @Model.EndDate?.ToString("dd.MM.yyyy")</p>
+                    <p class="premium-banner__plan">План: @Model.PlanType | @Model.MonthlyPrice.ToString("F2") ₴/місяць</p>
+                </div>
+            }
+            else
+            {
+                <div class="premium-banner premium-banner--inactive">
+                    <h2>Активуйте Premium</h2>
+                    <p>Користуйтеся всіма преимуществами преміум-підписки</p>
+                    <p class="premium-banner__plan">Від @Model.MonthlyPrice.ToString("F2") ₴/місяць</p>
+                    <button class="btn-main" type="button">Активувати Premium</button>
+                </div>
+            }
+
+            <div class="premium-features">
+                @foreach (var feature in Model.Features)
+                {
+                    <div class="premium-feature @(feature.IsAvailable ? "premium-feature--available" : "premium-feature--unavailable")">
+                        <div class="premium-feature__icon">
+                            @if (feature.IsAvailable)
+                            {
+                                <span class="icon">✓</span>
+                            }
+                            else
+                            {
+                                <span class="icon">✕</span>
+                            }
+                        </div>
+                        <div class="premium-feature__content">
+                            <h3>@feature.Name</h3>
+                            <p>@feature.Description</p>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (Model.IsActive)
+            {
+                <div class="premium-actions">
+                    <label class="checkbox-label">
+                        <input type="checkbox" @(Model.AutoRenewal ? "checked" : "") disabled />
+                        <span>Автоматичне поновлення</span>
+                    </label>
+                    <button class="btn-outline" type="button">Керувати підпискою</button>
+                </div>
+            }
+        </section>
+    </div>
+</div>
+

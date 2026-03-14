@@ -1,20 +1,25 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using BazaR.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace BazaR.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
+            //Database.EnsureDeleted();
+            //Database.EnsureCreated();
         }
 
-        public DbSet<User> Users { get; set; }
         public DbSet<Item> Items { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Message> Messages { get; set; }
         public DbSet<Brand> Brands { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<UserPromotion> UserPromotions { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<WishlistItem> WishlistItems { get; set; }
         public DbSet<Review> Reviews { get; set; }
@@ -27,6 +32,12 @@ namespace BazaR.Data
         public DbSet<Complect> Complects { get; set; }
         public DbSet<ComplectItem> ComplectItems { get; set; }
         public DbSet<ItemCharacteristic> ItemCharacteristics { get; set; }
+        public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<Promotion> Promotions { get; set; }
+        public DbSet<PremiumSubscription> PremiumSubscriptions { get; set; }
+        public DbSet<MailingSetting> MailingSettings { get; set; }
+        public DbSet<BonusAccount> BonusAccounts { get; set; }
+        public DbSet<LookedCard> LookedCards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -178,6 +189,64 @@ namespace BazaR.Data
                 .WithMany(c => c.Filters)
                 .HasForeignKey(cf => cf.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Wallet
+            modelBuilder.Entity<Wallet>()
+                .HasOne(w => w.User)
+                .WithOne()
+                .HasForeignKey<Wallet>(w => w.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Promotion
+            modelBuilder.Entity<UserPromotion>()
+                .HasOne(up => up.User)
+                .WithMany()
+                .HasForeignKey(up => up.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserPromotion>()
+                .HasOne(up => up.Promotion)
+                .WithMany()
+                .HasForeignKey(up => up.PromotionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // PremiumSubscription
+            modelBuilder.Entity<PremiumSubscription>()
+                .HasOne(p => p.User)
+                .WithOne()
+                .HasForeignKey<PremiumSubscription>(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // MailingSetting
+            modelBuilder.Entity<MailingSetting>()
+                .HasOne(m => m.User)
+                .WithOne()
+                .HasForeignKey<MailingSetting>(m => m.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // BonusAccount
+            modelBuilder.Entity<BonusAccount>()
+                .HasOne(b => b.User)
+                .WithOne()
+                .HasForeignKey<BonusAccount>(b => b.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // LookedCard
+            modelBuilder.Entity<LookedCard>()
+                .HasOne(lc => lc.User)
+                .WithMany()
+                .HasForeignKey(lc => lc.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<LookedCard>()
+                .HasOne(lc => lc.Item)
+                .WithMany()
+                .HasForeignKey(lc => lc.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LookedCard>()
+                .HasIndex(lc => new { lc.UserId, lc.ItemId })
+                .IsUnique();
         }
     }
 }

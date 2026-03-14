@@ -1,0 +1,56 @@
+@model BazaR.ViewModels.WalletViewModel
+@{
+    ViewData["Title"] = "Мій гаманець";
+}
+
+<div class="profile-page">
+    <div class="profile-page__layout">
+        @await Html.PartialAsync("_ProfileSidebar", Model.Profile)
+
+        <section class="profile-page__content">
+            <h1 class="profile-page__title">Мій гаманець</h1>
+            <p class="profile-page__subtitle">Переглядайте баланс, поповнення та історію операцій.</p>
+
+            <div class="wallet-balance">
+                <div class="wallet-balance__label">Доступний баланс</div>
+                <div class="wallet-balance__sum">@Model.Balance.ToString("F2") ₴</div>
+            </div>
+
+            <div class="wallet-grid">
+                <div class="wallet-box">
+                    <h3>Останнє поповнення</h3>
+                    @if (Model.LastReplenishmentDate.HasValue)
+                    {
+                        <p>@Model.LastReplenishmentDate.Value.ToString("dd.MM.yyyy") · +@Model.LastReplenishmentAmount?.ToString("F2") ₴</p>
+                    }
+                    else
+                    {
+                        <p>Не було поповнень</p>
+                    }
+                </div>
+                <div class="wallet-box">
+                    <h3>Витрачено цього місяця</h3>
+                    <p>@Model.MonthlySpent.ToString("F2") ₴</p>
+                </div>
+                <div class="wallet-box">
+                    <h3>Статус</h3>
+                    <p>@Model.Status</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+                </div>
+            </div>
+
+            <div class="wallet-actions">
+                <button class="btn-main" type="button">Поповнити</button>
+                <button class="btn-outline" type="button">Історія операцій</button>
+            </div>
+        </section>
+    </div>
+</div>
+        </section>
+    </div>
+</div>
