@@ -1,4 +1,4 @@
-﻿@inject BazaR.Interfaces.IItemRepository ItemRepository
+@inject BazaR.Interfaces.IItemRepository ItemRepository
 
 @{
     var title = ViewData["Title"] ?? "BazaR";
@@ -20,8 +20,18 @@
     <link href="~/css/site.css" rel="stylesheet" />
 
     <style>
+        html, body {
+            height: 100%;
+        }
+
         body {
+            display: flex;
+            flex-direction: column;
             background-color: #f5f5f5;
+        }
+
+        main {
+            flex: 1 0 auto;
         }
 
         .navbar-brand {
@@ -37,6 +47,7 @@
         }
 
         footer {
+            flex-shrink: 0;
             background: #212529;
             color: #ccc;
             padding: 30px 0;
@@ -81,6 +92,8 @@
     </style>
 </head>
 <body>
+    @* Глобальний токен для AJAX-запитів (кошик, обране тощо) *@
+    @Html.AntiForgeryToken()
 
     <!-- Контейнер для всплывающих сообщений -->
     <div class="alert-container">
@@ -132,14 +145,12 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link position-relative" asp-controller="Cart" asp-action="Index">
+                            <a class="nav-link position-relative" href="#" onclick="openCartModal(); return false;">
                                 <i class="bi bi-cart"></i> Кошик
-                                @if (ViewBag.CartCount > 0)
-                                {
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        @ViewBag.CartCount
-                                    </span>
-                                }
+                                <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                      style="@(((int)(ViewBag.CartCount ?? 0)) == 0 ? "display:none" : "")">
+                                    @(ViewBag.CartCount ?? 0)
+                                </span>
                             </a>
                         </li>
 
@@ -171,13 +182,13 @@
                                 @if (ViewBag.User != null)
                                 {
                                     <li>
-                                        <a class="dropdown-item" asp-controller="User" asp-action="Profile">
+                                        <a class="dropdown-item" asp-controller="Site" asp-action="Profile">
                                             <i class="bi bi-person-circle me-2"></i> Мій профіль
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" asp-controller="User" asp-action="Orders">
-                                            <i class="bi bi-box me-2"></i> Замовлення
+                                        <a class="dropdown-item" asp-controller="Site" asp-action="Orders">
+                                            <i class="bi bi-bag-check me-2"></i> Мої замовлення
                                         </a>
                                     </li>
                                     <li>
@@ -385,37 +396,306 @@
     <!-- jQuery (для валидации) -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
+    <!-- ===== МОДАЛЬНА КОРЗИНА ===== -->
+    <div class="cart-modal-overlay" id="cartOverlay" onclick="closeCartModal()"></div>
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-modal__header">
+            <span class="cart-modal__title">Кошик</span>
+            <button class="cart-modal__close" onclick="closeCartModal()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="cart-modal__body" id="cartModalBody">
+            <div class="cart-modal__loading">
+                <div class="spinner-border text-success" role="status"></div>
+            </div>
+        </div>
+
+        <div class="cart-modal__footer" id="cartModalFooter" style="display:none;">
+            <a href="@Url.Action("Browse", "Site")" class="btn cart-modal__btn-continue">
+                Продовжити покупки
+            </a>
+            <div class="cart-modal__footer-right">
+                <span class="cart-modal__total-label">Разом:</span>
+                <span class="cart-modal__total-amount" id="cartTotalAmount">0 ₴</span>
+                <a href="@Url.Action("Checkout", "Site")" class="btn cart-modal__btn-order">
+                    Оформити замовлення
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* === Overlay === */
+        .cart-modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0); z-index: 1050;
+            transition: background 0.3s ease;
+        }
+        .cart-modal-overlay.active { display: block; background: rgba(0,0,0,0.42); }
+
+        /* === Modal container === */
+        .cart-modal {
+            display: none; position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.92);
+            width: 640px; max-width: 96vw; max-height: 88vh;
+            background: #fff; border-radius: 20px; z-index: 1051;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.22);
+            flex-direction: column; overflow: hidden;
+            opacity: 0; transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .cart-modal.active { display: flex; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+        /* === Header === */
+        .cart-modal__header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 22px 28px 18px; border-bottom: 1px solid #f0f0f0;
+        }
+        .cart-modal__title { font-size: 22px; font-weight: 800; color: #1a1a1a; }
+        .cart-modal__close {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: #f5f5f5; border: none; cursor: pointer;
+            font-size: 18px; color: #666;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s, color 0.2s;
+        }
+        .cart-modal__close:hover { background: #e8e8e8; color: #111; }
+
+        /* === Body === */
+        .cart-modal__body { flex: 1; overflow-y: auto; padding: 8px 28px 16px; }
+        .cart-modal__body::-webkit-scrollbar { width: 5px; }
+        .cart-modal__body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+        .cart-modal__loading { display: flex; justify-content: center; padding: 48px 0; }
+
+        /* === Пустая корзина === */
+        .cart-empty {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 52px 0; text-align: center;
+        }
+        .cart-empty__icon { margin-bottom: 24px; }
+        .cart-empty__icon img {
+            width: 160px; height: auto;
+            filter: drop-shadow(0 8px 24px rgba(0,0,0,0.08));
+        }
+        .cart-empty__title {
+            font-size: 22px; font-weight: 800; color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        .cart-empty__sub { font-size: 15px; color: #999; margin-bottom: 24px; }
+        .cart-empty__btn {
+            display: inline-block; padding: 12px 32px;
+            background: #7ab800; color: #fff; border: none; border-radius: 12px;
+            font-size: 15px; font-weight: 600; text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .cart-empty__btn:hover { background: #5a9a00; color: #fff; transform: translateY(-1px); }
+
+        /* === Строка товара === */
+        .cart-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 16px 0; border-bottom: 1px solid #f4f4f4;
+            transition: background 0.15s;
+        }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-item:hover { background: #fafffe; border-radius: 12px; margin: 0 -8px; padding: 16px 8px; }
+
+        .cart-item__img {
+            width: 76px; height: 76px; flex-shrink: 0;
+            border-radius: 12px; overflow: hidden;
+            border: 1px solid #ebebeb; background: #fafafa;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cart-item__img img { width: 100%; height: 100%; object-fit: contain; }
+
+        .cart-item__info { flex: 1; min-width: 0; }
+        .cart-item__name {
+            font-size: 13px; color: #1a1a1a; line-height: 1.4;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+            margin-bottom: 6px; text-decoration: none; font-weight: 500;
+        }
+        .cart-item__name:hover { color: #5a9a00; }
+
+        .cart-item__price-row { display: flex; align-items: center; gap: 10px; }
+        .cart-item__price {
+            font-size: 16px; font-weight: 700; color: #1a1a1a;
+            letter-spacing: -0.02em;
+        }
+
+        .cart-item__qty {
+            display: flex; align-items: center;
+            border: 1.5px solid #e4e4e4; border-radius: 10px; overflow: hidden;
+            background: #fafafa;
+        }
+        .cart-item__qty-btn {
+            width: 34px; height: 34px; background: none; border: none;
+            font-size: 17px; color: #555; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s, color 0.15s;
+        }
+        .cart-item__qty-btn:hover { background: #7ab800; color: #fff; }
+        .cart-item__qty-num {
+            width: 38px; text-align: center; font-size: 14px;
+            font-weight: 700; color: #1a1a1a;
+        }
+
+        .cart-item__remove {
+            background: none; border: none; color: #d0d0d0; font-size: 18px;
+            cursor: pointer; padding: 6px; transition: color 0.2s, transform 0.15s;
+            flex-shrink: 0; border-radius: 8px;
+        }
+        .cart-item__remove:hover { color: #dc3545; transform: scale(1.15); }
+
+        /* === Футер === */
+        .cart-modal__footer {
+            padding: 18px 28px; border-top: 1px solid #f0f0f0;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; flex-wrap: wrap; background: #fafafa;
+        }
+        .cart-modal__btn-continue {
+            border: 1.5px solid #d0d0d0; background: #fff; color: #333;
+            border-radius: 12px; padding: 11px 22px; font-size: 14px;
+            font-weight: 600; white-space: nowrap; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .cart-modal__btn-continue:hover { border-color: #7ab800; color: #5a9a00; }
+        .cart-modal__footer-right { display: flex; align-items: center; gap: 16px; }
+        .cart-modal__total-label { font-size: 14px; color: #999; white-space: nowrap; }
+        .cart-modal__total-amount {
+            font-size: 24px; font-weight: 800; color: #1a1a1a;
+            white-space: nowrap; letter-spacing: -0.02em;
+        }
+        .cart-modal__btn-order {
+            background: #7ab800; color: #fff; border: none;
+            border-radius: 12px; padding: 11px 24px; font-size: 14px;
+            font-weight: 700; white-space: nowrap; text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 4px 12px rgba(122,184,0,0.25);
+        }
+        .cart-modal__btn-order:hover {
+            background: #5a9a00; color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(122,184,0,0.35);
+        }
+    </style>
+
     <!-- Render page scripts -->
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>
+        var _cartToken = '';
+
         // Автоматическое скрытие сообщений через 5 секунд
         $(document).ready(function() {
             setTimeout(function() {
                 $('.alert').alert('close');
             }, 5000);
+
+            // Подхватываем CSRF-токен если есть на странице
+            _cartToken = $('input[name="__RequestVerificationToken"]').first().val() || '';
         });
 
-        // Функции для работы с корзиной и избранным (если используются AJAX)
-        function addToCart(itemId) {
-            $.post('@Url.Action("AddToCart", "Site")',
-                { itemId: itemId, quantity: 1, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
-                function(response) {
-                    if (response.success) {
-                        // Обновляем счетчик корзины
-                        location.reload(); // Или обновите счетчик через JS
+        function openCartModal() {
+            $('#cartOverlay').addClass('active');
+            $('#cartModal').addClass('active');
+            loadCartModal();
+        }
+
+        function closeCartModal() {
+            $('#cartOverlay').removeClass('active');
+            $('#cartModal').removeClass('active');
+        }
+
+        function loadCartModal() {
+            $('#cartModalBody').html('<div class="cart-modal__loading"><div class="spinner-border text-success"></div></div>');
+            $('#cartModalFooter').hide();
+
+            $.get('@Url.Action("GetCartJson", "Site")', function(data) {
+                renderCartModal(data);
+            });
+        }
+
+        function renderCartModal(data) {
+            if (!data.items || data.items.length === 0) {
+                $('#cartModalBody').html(
+                    '<div class="cart-empty">' +
+                    '<div class="cart-empty__icon"><img src="/images/items/shopping-cart.png" alt="Кошик порожній"></div>' +
+                    '<div class="cart-empty__title">Ой! Кошик порожній!</div>' +
+                    '<div class="cart-empty__sub">Але це легко виправити!</div>' +
+                    '<a href="/Site/Browse" class="cart-empty__btn" onclick="closeCartModal()">Перейти до каталогу</a>' +
+                    '</div>'
+                );
+                $('#cartModalFooter').hide();
+                return;
+            }
+
+            var html = '';
+            data.items.forEach(function(item) {
+                html += '<div class="cart-item" id="cart-item-' + item.id + '">' +
+                    '<div class="cart-item__img"><img src="' + item.image + '" alt="' + item.name + '" onerror="this.src=\'/images/items/default.jpg\'"></div>' +
+                    '<div class="cart-item__info">' +
+                    '<a href="/Site/ItemDetails/' + item.id + '" class="cart-item__name">' + item.name + '</a>' +
+                    '<div class="cart-item__price-row">' +
+                    '<span class="cart-item__price">' + item.price.toLocaleString('uk-UA') + ' ₴</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="cart-item__qty">' +
+                    '<button class="cart-item__qty-btn" onclick="cartChangeQty(' + item.id + ', ' + (item.quantity - 1) + ')">−</button>' +
+                    '<span class="cart-item__qty-num" id="qty-' + item.id + '">' + item.quantity + '</span>' +
+                    '<button class="cart-item__qty-btn" onclick="cartChangeQty(' + item.id + ', ' + (item.quantity + 1) + ')">+</button>' +
+                    '</div>' +
+                    '<button class="cart-item__remove" onclick="cartRemove(' + item.id + ')" title="Видалити"><i class="bi bi-trash3"></i></button>' +
+                    '</div>';
+            });
+
+            $('#cartModalBody').html(html);
+            $('#cartTotalAmount').text(data.total.toLocaleString('uk-UA') + ' ₴');
+            $('#cartModalFooter').show();
+        }
+
+        function cartChangeQty(itemId, newQty) {
+            if (newQty < 1) newQty = 0;
+            var token = $('input[name="__RequestVerificationToken"]').first().val();
+            if (!token) { console.error('Antiforgery token не знайдено'); return; }
+            $.ajax({
+                url: '@Url.Action("UpdateCartQuantity", "Site")',
+                type: 'POST',
+                traditional: true,
+                data: { itemId: itemId, quantity: newQty, __RequestVerificationToken: token },
+                success: function(r) {
+                    if (r.success) {
+                        if (newQty === 0) {
+                            $('#cart-item-' + itemId).fadeOut(200, function() { $(this).remove(); });
+                            if (r.cartCount === 0) loadCartModal();
+                        } else {
+                            $('#qty-' + itemId).text(newQty);
+                        }
+                        $('#cartTotalAmount').text(r.totalAmount.toLocaleString('uk-UA') + ' ₴');
+                        var badge = $('#cartBadge');
+                        if (badge.length) badge.text(r.cartCount);
                     }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 400) console.error('Помилка валідації (400). Перевірте antiforgery token.');
                 }
-            );
+            });
+        }
+
+        function cartRemove(itemId) {
+            cartChangeQty(itemId, 0);
         }
 
         function addToWishlist(button) {
             var itemId = $(button).data('item-id');
             $.post('@Url.Action("AddToWishlist", "Site")',
-                { id: itemId, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+                { id: itemId, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val() },
                 function(response) {
                     if (response.success) {
                         $(button).find('i').toggleClass('text-danger');
+                        var cnt = $('#wishlistCount');
+                        if (cnt.length) cnt.text(response.wishlistCount);
                     } else if (response.requireLogin) {
                         $('#loginModal').modal('show');
                     }

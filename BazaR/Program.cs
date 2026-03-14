@@ -1,5 +1,6 @@
 using BazaR.Data;
 using BazaR.Interfaces;
+using BazaR.Models;
 using BazaR.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +27,23 @@ builder.Services.AddScoped<IUserDb, UserRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 
 var app = builder.Build();
+
+// Seed тестового користувача, якщо його ще немає
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    if (!db.Users.Any(u => u.Email == "admin@bazar.ua"))
+    {
+        db.Users.Add(new User
+        {
+            Email = "admin@bazar.ua",
+            Name = "Адмін",
+            PasswordHash = "admin123",
+            IsAdmin = true
+        });
+        db.SaveChanges();
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

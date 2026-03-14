@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Models;
@@ -68,30 +68,39 @@ namespace BazaR.Controllers
 
             var categories = _db.Categories.ToList();
 
+            // Акційні пропозиції (дорогі, доступні)
             var featuredItems = _db.Items
                 .Where(i => i.IsAvailable)
                 .OrderByDescending(i => i.Price)
-                .Take(3)
+                .Take(5)
                 .ToList();
 
-            var newItems = _db.Items
+            // Зараз шукають (по кількості відгуків)
+            var trendingItems = _db.Items
+                .Where(i => i.IsAvailable)
+                .OrderByDescending(i => i.Reviews.Count)
+                .Take(5)
+                .ToList();
+
+            // Рекомендації (нові товари)
+            var recommendedItems = _db.Items
                 .Where(i => i.IsAvailable)
                 .OrderByDescending(i => i.Id)
-                .Take(3)
+                .Take(5)
                 .ToList();
 
+            // Найбільш очікувані (за середнім рейтингом)
             var popularItems = _db.Items
                 .Where(i => i.IsAvailable)
-                .OrderByDescending(i => i.Reviews.Average(r => r.Rating))
-                .Take(3)
+                .OrderByDescending(i => i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0)
+                .Take(5)
                 .ToList();
 
             ViewBag.Categories = categories;
             ViewBag.FeaturedItems = featuredItems;
-            ViewBag.NewItems = newItems;
+            ViewBag.TrendingItems = trendingItems;
+            ViewBag.RecommendedItems = recommendedItems;
             ViewBag.PopularItems = popularItems;
-
-            Console.WriteLine(_db.Items.Count());
 
             return View();
         }
@@ -499,21 +508,7 @@ namespace BazaR.Controllers
 
             var userId = CurrentUserId!.Value;
 
-            var cartItems = _usMan.GetCartItemsWithQuantity(userId);
-            var currentItem = cartItems.FirstOrDefault(ci => ci.ItemId == itemId);
-
-            if (currentItem != null)
-            {
-                for (int i = 0; i < currentItem.Quantity; i++)
-                {
-                    _usMan.RemoveFromCart(userId, itemId);
-                }
-            }
-
-            for (int i = 0; i < quantity; i++)
-            {
-                _usMan.AddToCart(userId, itemId);
-            }
+            _usMan.SetCartQuantity(userId, itemId, quantity);
 
             var newCartItems = _usMan.GetCartItemsWithQuantity(userId);
             var newCartCount = newCartItems.Sum(ci => ci.Quantity);
@@ -539,6 +534,35 @@ namespace BazaR.Controllers
 
             TempData["Ok"] = "Корзина очищена.";
             return RedirectToAction(nameof(Cart));
+        }
+
+        [HttpGet]
+        public IActionResult GetCartJson()
+        {
+            if (!IsAuthenticated)
+                return Json(new { items = new object[0], total = 0, count = 0 });
+
+            var userId = CurrentUserId!.Value;
+            var cartItems = _usMan.GetCartItemsWithQuantity(userId);
+
+            var result = cartItems.Select(ci => new
+            {
+                id = ci.ItemId,
+                name = ci.Item.Name,
+                price = ci.Item.Price,
+                quantity = ci.Quantity,
+                subtotal = ci.Item.Price * ci.Quantity,
+                image = !string.IsNullOrEmpty(ci.Item.ImageUrl)
+                    ? ci.Item.ImageUrl
+                    : (ci.Item.Colors?.FirstOrDefault()?.Color ?? "/images/items/default.jpg")
+            });
+
+            return Json(new
+            {
+                items = result,
+                total = cartItems.Sum(ci => ci.Item.Price * ci.Quantity),
+                count = cartItems.Sum(ci => ci.Quantity)
+            });
         }
 
         [HttpGet]
