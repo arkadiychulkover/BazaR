@@ -771,8 +771,15 @@ namespace BazaR.Controllers
             ViewBag.OrdersCount = user?.Orders?.Count ?? 0;
             ViewBag.WishlistCount = _usMan.GetWishList(CurrentUserId!.Value).Count();
             ViewBag.CartCount = _usMan.GetCartItems(CurrentUserId.Value).Count();
+            ViewBag.ActiveMenu = "Profile";
 
-            return View(user);
+            var vm = new BazaR.ViewModels.AccountProfileViewModel
+            {
+                FullName = user?.Name ?? "",
+                Email = user?.Email ?? ""
+            };
+
+            return View(vm);
         }
 
         [HttpPost]
