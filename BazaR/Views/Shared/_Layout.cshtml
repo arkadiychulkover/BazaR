@@ -15,6 +15,7 @@
     <!-- Bootstrap CSS -->
     <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Site CSS -->
     <link href="~/css/site.css" rel="stylesheet" />
@@ -157,12 +158,7 @@
                         <li class="nav-item">
                             <a class="nav-link position-relative" asp-controller="Wishlist" asp-action="Index">
                                 <i class="bi bi-heart"></i> Обране
-                                @if (ViewBag.WishlistCount > 0)
-                                {
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        @ViewBag.WishlistCount
-                                    </span>
-                                }
+                                <span id="wishlistCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="@((ViewBag.WishlistCount ?? 0) > 0 ? "" : "display: none;")">@(ViewBag.WishlistCount ?? 0)</span>
                             </a>
                         </li>
 
@@ -218,12 +214,12 @@
                                 else
                                 {
                                     <li>
-                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                        <a class="dropdown-item" href="#" data-open-login="true">
                                             <i class="bi bi-box-arrow-in-right me-2"></i> Увійти
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">
+                                        <a class="dropdown-item" href="#" data-open-register="true">
                                             <i class="bi bi-person-plus me-2"></i> Реєстрація
                                         </a>
                                     </li>
@@ -303,98 +299,18 @@
         </div>
     </footer>
 
-    <!-- Модальные окна для входа и регистрации -->
-    <div class="modal fade" id="loginModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">
-                        <i class="bi bi-box-arrow-in-right"></i> Вхід
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <form asp-controller="Site" asp-action="Login" method="post">
-                    @Html.AntiForgeryToken()
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Пароль</label>
-                            <input type="password" name="password" class="form-control" required />
-                        </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="rememberMe">
-                            <label class="form-check-label" for="rememberMe">Запам'ятати мене</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-box-arrow-in-right"></i> Увійти
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="registerModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">
-                        <i class="bi bi-person-plus"></i> Реєстрація
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <form asp-controller="Site" asp-action="Register" method="post">
-                    @Html.AntiForgeryToken()
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Ім'я</label>
-                            <input type="text" name="name" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Телефон</label>
-                            <input type="tel" name="phoneNumber" class="form-control" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Пароль</label>
-                            <input type="password" name="password" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Підтвердження пароля</label>
-                            <input type="password" name="confirmPassword" class="form-control" required />
-                        </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="agreeTerms" required>
-                            <label class="form-check-label" for="agreeTerms">
-                                Я погоджуюсь з <a href="#">умовами використання</a>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-person-plus"></i> Зареєструватися
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Модальні вікна (Ivan) -->
+    @await Html.PartialAsync("_Login")
+    @await Html.PartialAsync("_Register")
 
     <!-- Bootstrap JS -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- jQuery (для валидации) -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <!-- Auth modals JS -->
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
     <!-- ===== МОДАЛЬНА КОРЗИНА ===== -->
     <div class="cart-modal-overlay" id="cartOverlay" onclick="closeCartModal()"></div>
@@ -695,13 +611,38 @@
                     if (response.success) {
                         $(button).find('i').toggleClass('text-danger');
                         var cnt = $('#wishlistCount');
-                        if (cnt.length) cnt.text(response.wishlistCount);
+                        if (cnt.length) { cnt.text(response.wishlistCount); cnt.toggle(response.wishlistCount > 0); }
+                        if (typeof showNotification === 'function') showNotification('Додано в обране', 'success');
                     } else if (response.requireLogin) {
-                        $('#loginModal').modal('show');
+                        var $login = $('[data-open-login="true"]').first();
+                        if ($login.length) $login.trigger('click'); else $('#loginModal').modal('show');
                     }
                 }
             );
         }
+
+        // При кліку по картці товара на головній — додаємо в обране, потім переходимо на сторінку товару
+        $(document).on('click', '.tovar-card__link', function(e) {
+            var $card = $(this).closest('.tovar-card');
+            var id = $card.data('item-id');
+            var url = $(this).attr('href');
+            if (!id || !url) return;
+            e.preventDefault();
+            var token = $('input[name="__RequestVerificationToken"]').first().val();
+            $.post('@Url.Action("AddToWishlist", "Site")', { id: id, __RequestVerificationToken: token }, function(response) {
+                if (response.success) {
+                    var cnt = $('#wishlistCount');
+                    if (cnt.length) { cnt.text(response.wishlistCount); cnt.toggle(response.wishlistCount > 0); }
+                    if (typeof showNotification === 'function') showNotification('Додано в обране', 'success');
+                    window.location = url;
+                } else if (response.requireLogin) {
+                    var $login = $('[data-open-login="true"]').first();
+                    if ($login.length) $login.trigger('click'); else $('#loginModal').modal('show');
+                } else {
+                    window.location = url;
+                }
+            }).fail(function() { window.location = url; });
+        });
     </script>
 
 </body>

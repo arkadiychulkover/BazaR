@@ -1,4 +1,4 @@
-﻿@model AccountProfileViewModel
+@model AccountProfileViewModel
 
 @{
     var activeMenu = ViewBag.ActiveMenu as string;
@@ -33,7 +33,7 @@
             <span>Мої замовлення</span>
         </a>
 
-        <a href="#" class="account-menu__item @(activeMenu == "Wishlist" ? "account-menu__item--active" : "")">
+        <a href="@Url.Action("Index", "Wishlist")" class="account-menu__item @(activeMenu == "Wishlist" ? "account-menu__item--active" : "")">
             <span class="account-menu__icon">
                 <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12.5 4.42999C13.2057 3.64561 14.0769 3.02786 15.0506 2.62144C16.0242 2.21502 17.0761 2.03008 18.13 2.07999C19.1929 2.14189 20.2191 2.49074 21.0996 3.08944C21.98 3.68813 22.6817 4.51427 23.13 5.47999C23.6702 6.86918 23.7405 8.3971 23.33 9.82999C22.9138 11.2525 22.2796 12.6018 21.45 13.83C19.0807 17.4011 16.0576 20.492 12.54 22.94" stroke="#1D1D1B" stroke-miterlimit="10" stroke-linecap="round" />

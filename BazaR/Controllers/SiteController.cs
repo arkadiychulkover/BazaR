@@ -399,7 +399,7 @@ namespace BazaR.Controllers
 
             ViewBag.Images = item.Colors?.Select(c => c.Color).ToList() ?? new List<string>();
             ViewBag.Category = item.Category;
-            ViewBag.RelatedItems = _itMan.GetByCategory(item.CategoryId)
+            ViewBag.RelationItems = _itMan.GetByCategory(item.CategoryId)
                 .Where(i => i.Id != id)
                 .Take(4)
                 .ToList();
@@ -568,14 +568,8 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult Wishlist()
         {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Wishlist)));
-
-            SetLayoutData();
-
-            var userId = CurrentUserId!.Value;
-            var items = _usMan.GetWishList(userId).ToList();
-
-            return View(items);
+            if (!IsAuthenticated) return RequireLogin(Url.Action("Index", "Wishlist"));
+            return RedirectToAction("Index", "Wishlist");
         }
 
         [HttpPost]
@@ -738,6 +732,7 @@ namespace BazaR.Controllers
 
             ViewBag.Items = order.OrderItems;
             ViewBag.City = order.City ?? new City { Name = "Киев", Id = 1 };
+            ViewBag.eUser = order.User;
             ViewBag.User = order.User;
 
             return View(order);
@@ -833,28 +828,39 @@ namespace BazaR.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Register(string email, string name, string password, string phoneNumber)
+        public IActionResult Register(string email, string? name, string password, string phoneNumber,
+            string? firstName, string? lastName, string? confirmPassword)
         {
             email = (email ?? "").Trim();
 
+            var fullName = name;
+            if (string.IsNullOrWhiteSpace(fullName))
+                fullName = ((firstName ?? "") + " " + (lastName ?? "")).Trim();
+
             if (string.IsNullOrWhiteSpace(email) ||
                 string.IsNullOrWhiteSpace(password) ||
-                string.IsNullOrWhiteSpace(name))
+                string.IsNullOrWhiteSpace(fullName))
             {
-                TempData["Error"] = "Заполните обязательные поля.";
+                TempData["Error"] = "Заповніть обов'язкові поля.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (!string.IsNullOrWhiteSpace(confirmPassword) && password != confirmPassword)
+            {
+                TempData["Error"] = "Паролі не співпадають.";
                 return RedirectToAction(nameof(Index));
             }
 
             if (_usMan.GetByEmail(email) != null)
             {
-                TempData["Error"] = "Пользователь с таким email уже существует.";
+                TempData["Error"] = "Користувач з таким email вже існує.";
                 return RedirectToAction(nameof(Index));
             }
 
             var user = new User
             {
                 Email = email,
-                Name = name,
+                Name = fullName,
                 PasswordHash = password,
                 IsAdmin = false
             };
