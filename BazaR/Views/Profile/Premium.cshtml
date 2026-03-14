@@ -2,14 +2,21 @@
 @{
     ViewData["Title"] = "Підписка Premium";
 }
-
 <div class="profile-page">
     <div class="profile-page__layout">
         @await Html.PartialAsync("_ProfileSidebar", Model.Profile)
-
         <section class="profile-page__content">
             <h1 class="profile-page__title">Підписка Premium</h1>
             <p class="profile-page__subtitle">Більше переваг, ексклюзивні пропозиції та пріоритетне обслуговування.</p>
+
+            @if (TempData["PremiumError"] != null)
+            {
+                <div class="alert alert--error">@TempData["PremiumError"]</div>
+            }
+            @if (TempData["PremiumSuccess"] != null)
+            {
+                <div class="alert alert--success">@TempData["PremiumSuccess"]</div>
+            }
 
             @if (Model.IsActive)
             {
@@ -23,9 +30,12 @@
             {
                 <div class="premium-banner premium-banner--inactive">
                     <h2>Активуйте Premium</h2>
-                    <p>Користуйтеся всіма преимуществами преміум-підписки</p>
+                    <p>Користуйтеся всіма перевагами преміум-підписки</p>
                     <p class="premium-banner__plan">Від @Model.MonthlyPrice.ToString("F2") ₴/місяць</p>
-                    <button class="btn-main" type="button">Активувати Premium</button>
+                    <form asp-action="ActivatePremium" asp-controller="Profile" method="post">
+                        @Html.AntiForgeryToken()
+                        <button class="btn-main" type="submit">Активувати Premium</button>
+                    </form>
                 </div>
             }
 
@@ -50,18 +60,6 @@
                     </div>
                 }
             </div>
-
-            @if (Model.IsActive)
-            {
-                <div class="premium-actions">
-                    <label class="checkbox-label">
-                        <input type="checkbox" @(Model.AutoRenewal ? "checked" : "") disabled />
-                        <span>Автоматичне поновлення</span>
-                    </label>
-                    <button class="btn-outline" type="button">Керувати підпискою</button>
-                </div>
-            }
         </section>
     </div>
 </div>
-

@@ -390,6 +390,40 @@ namespace BazaR.Controllers
 
             return View(vm);
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActivatePremium()
+        {
+            var user = await GetCurrentUserAsync();
+
+            var premiumSub = await _db.PremiumSubscriptions
+                .FirstOrDefaultAsync(p => p.UserId == user.Id);
+
+            var wallet = await _db.Wallets
+                .FirstOrDefaultAsync(w => w.UserId == user.Id);
+
+            if (premiumSub == null || wallet == null)
+                return RedirectToAction(nameof(Premium));
+
+            if (wallet.Balance < premiumSub.MonthlyPrice)
+            {
+                TempData["PremiumError"] = $"Недостатньо коштів. Потрібно {premiumSub.MonthlyPrice:F2} ₴, на рахунку {wallet.Balance:F2} ₴.";
+                return RedirectToAction(nameof(Premium));
+            }
+
+            wallet.Balance -= premiumSub.MonthlyPrice;
+            wallet.MonthlySpent += premiumSub.MonthlyPrice;
+
+            premiumSub.IsActive = true;
+            premiumSub.StartDate = DateTime.UtcNow;
+            premiumSub.EndDate = DateTime.UtcNow.AddMonths(1);
+            premiumSub.AutoRenewal = true;
+
+            await _db.SaveChangesAsync();
+
+            TempData["PremiumSuccess"] = "Premium успішно активовано!";
+            return RedirectToAction(nameof(Premium));
+        }
 
         public async Task<IActionResult> Reviews()
         {
