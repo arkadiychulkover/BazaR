@@ -1,8 +1,11 @@
-﻿using BazaR.Models;
+﻿using BazaR.Helper;
+using BazaR.Models;
 using BazaR.ViewModels;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text;
 
@@ -94,6 +97,50 @@ namespace BazaR.Controllers
 
             TempData["Ok"] = "Успешный вход.";
             return Redirect(returnUrl);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public IActionResult LinkLogin(string provider)
+        {
+            var redirectUrl = Url.Action("LinkLoginCallback", "Account");
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(
+                provider,
+                redirectUrl,
+                _userManager.GetUserId(User)
+            );
+            return Challenge(properties, provider);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> LinkLoginCallback()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction("_Login", "Account");
+
+            var info = await _signInManager.GetExternalLoginInfoAsync(user.Id.ToString());
+            if (info == null)
+            {
+                TempData["Error"] = "Не вдалося отримати дані від Google.";
+                return RedirectToAction("Profile", "Profile");
+            }
+
+            var result = await _userManager.AddLoginAsync(user, info);
+            if (result.Succeeded)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+                TempData["Success"] = "Акаунт успішно прив'язано до Google.";
+            }
+            else
+            {
+                TempData["Error"] = result.Errors.FirstOrDefault()?.Description
+                    ?? "Помилка при прив'язці акаунту.";
+            }
+
+            return RedirectToAction("Profile", "Profile");
         }
 
         [HttpPost]
@@ -204,85 +251,6 @@ namespace BazaR.Controllers
             return RedirectToAction(nameof(SiteController.Index), "Site");
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(string email, string? returnUrl = null)
-        {
-            returnUrl ??= Url.Action("Index", "Site");
-            email = (email ?? string.Empty).Trim();
-
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                TempData["OpenAuth"] = "login";
-                TempData["LoginEmail"] = email;
-                TempData["LoginEmailInvalid"] = true;
-                TempData["LoginEmailError"] = "Введіть ел. пошту для відновлення пароля";
-                return Redirect(returnUrl);
-            }
-
-            var user = await _userManager.FindByEmailAsync(email);
-
-            if (user == null)
-            {
-                TempData["Ok"] = "Якщо такий email існує, інструкція для відновлення буде надіслана.";
-                return Redirect(returnUrl);
-            }
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var encodedToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(token));
-
-            var resetUrl = Url.Action(
-                nameof(ResetPassword),
-                "Account",
-                new { email = user.Email, token = encodedToken },
-                Request.Scheme);
-
-            TempData["Ok"] = $"Токен згенеровано. Посилання для скидання: {resetUrl}";
-            return Redirect(returnUrl);
-        }
-
-        [HttpGet]
-        public IActionResult ResetPassword(string email, string token)
-        {
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(token))
-                return RedirectToAction("Index", "Site");
-
-            ViewBag.Email = email;
-            ViewBag.Token = token;
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(string email, string token, string password)
-        {
-            if (string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(token) ||
-                string.IsNullOrWhiteSpace(password))
-            {
-                TempData["Ok"] = "Некоректні дані для скидання пароля.";
-                return RedirectToAction("Index", "Site");
-            }
-
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                TempData["Ok"] = "Користувача не знайдено.";
-                return RedirectToAction("Index", "Site");
-            }
-
-            var decodedToken = Encoding.UTF8.GetString(Convert.FromBase64String(token));
-            var result = await _userManager.ResetPasswordAsync(user, decodedToken, password);
-
-            if (!result.Succeeded)
-            {
-                TempData["Ok"] = result.Errors.FirstOrDefault()?.Description ?? "Не вдалося змінити пароль.";
-                return RedirectToAction("Index", "Site");
-            }
-
-            TempData["Ok"] = "Пароль успішно змінено.";
-            return RedirectToAction("Index", "Site");
-        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -386,6 +354,94 @@ namespace BazaR.Controllers
             });
 
             return Redirect(returnUrl);
+        }
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction("Index", "Site");
+
+            await _signInManager.SignOutAsync();
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (!result.Succeeded)
+            {
+                TempData["Error"] = result.Errors.FirstOrDefault()?.Description
+                    ?? "Не вдалося видалити акаунт.";
+                return RedirectToAction("Profile", "Profile");
+            }
+
+            TempData["Ok"] = "Акаунт успішно видалено.";
+            return RedirectToAction("Index", "Site");
+        }
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword([Required] string email)
+        {
+            if (!ModelState.IsValid)
+                return View(model: email);
+
+            var user = await _userManager.FindByEmailAsync(email);
+            // Do not reveal whether the email exists. Redirect to confirmation regardless.
+            if (user == null)
+                return RedirectToAction(nameof(ForgotPasswordConfirmation));
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var link = Url.Action("ResetPassword", "Account", new { token, email = user.Email }, Request.Scheme);
+
+            EmailHelper emailHelper = new EmailHelper();
+            // log the reset link (fake email) and continue
+            await emailHelper.SendEmailPasswordReset(user.Email, link);
+
+            return RedirectToAction(nameof(ForgotPasswordConfirmation));
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPasswordConfirmation()
+        {
+            return View();
+        }
+        public IActionResult ResetPassword(string token, string email)
+        {
+            var model = new ResetPasswordViewModel { Token = token, Email = email };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel resetPassword)
+        {
+            if (!ModelState.IsValid)
+                return View(resetPassword);
+
+            var user = await _userManager.FindByEmailAsync(resetPassword.Email);
+            if (user == null)
+                RedirectToAction(nameof(ResetPasswordConfirmation));
+
+            var resetPassResult = await _userManager.ResetPasswordAsync(user, resetPassword.Token, resetPassword.Password);
+            if (!resetPassResult.Succeeded)
+            {
+                foreach (var error in resetPassResult.Errors)
+                    ModelState.AddModelError(error.Code, error.Description);
+                return View(resetPassword);
+            }
+
+            return RedirectToAction(nameof(ResetPasswordConfirmation));
+        }
+
+        public IActionResult ResetPasswordConfirmation()
+        {
+            return View();
         }
     }
 }

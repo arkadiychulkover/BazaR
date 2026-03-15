@@ -23,11 +23,16 @@ namespace BazaR.Controllers
         private async Task<(User user, AccountProfileViewModel vm)> GetUserAndProfileAsync()
         {
             var user = await _userManager.GetUserAsync(User);
+            var newMessagesCount = await _db.Messages
+                .Where(m => m.UserId == user!.Id.ToString() && !m.IsRead)
+                .CountAsync();
+
             var vm = new AccountProfileViewModel
             {
                 FirstName = user?.Name ?? string.Empty,
                 Email = user?.Email ?? string.Empty,
-                PhoneNumber = user?.PhoneNumber
+                PhoneNumber = user?.PhoneNumber,
+                NewMessagesCount = newMessagesCount
             };
             return (user!, vm);
         }
@@ -459,24 +464,59 @@ namespace BazaR.Controllers
             var (user, profile) = await GetUserAndProfileAsync();
 
             var messages = await _db.Messages
-                .Where(m => m.UserId == user.Id.ToString())
-                .OrderByDescending(m => m.DateTime)
-                .Select(m => new MessageVm
-                {
-                    Id = m.Id,
-                    Name = m.Name,
-                    Content = m.Content,
-                    DateTime = m.DateTime
-                })
-                .ToListAsync();
+                        .Include(m => m.User)
+                        .Where(m => m.UserId == user.Id.ToString())
+                        .OrderByDescending(m => m.DateTime)
+                        .Select(m => new MessageVm
+                        {
+                            Id = m.Id,
+                            Name = m.Name,
+                            Content = m.Content,
+                            SenderName = m.User != null ? m.User.Name : m.Name,
+                            DateTime = m.DateTime,
+                            IsRead = m.IsRead
+                        })
+                        .ToListAsync();
+
+            var newMessagesCount = messages.Count(m => !m.IsRead);
 
             var vm = new AccountMessagesViewModel
             {
                 Profile = profile,
-                Messages = messages
+                Messages = messages,
+                NewMessagesCount = newMessagesCount
             };
 
             return View(vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkMessageAsRead([FromBody] int id)
+        {
+            var user = await GetCurrentUserAsync();
+
+            var message = await _db.Messages
+                .FirstOrDefaultAsync(m => m.Id == id && m.UserId == user.Id.ToString());
+
+            if (message != null && !message.IsRead)
+            {
+                message.IsRead = true;
+                await _db.SaveChangesAsync();
+            }
+
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetNewMessagesCount()
+        {
+            var user = await GetCurrentUserAsync();
+
+            var newMessagesCount = await _db.Messages
+                .Where(m => m.UserId == user.Id.ToString() && !m.IsRead)
+                .CountAsync();
+
+            return Json(new { count = newMessagesCount });
         }
 
         [HttpPost]
@@ -497,7 +537,8 @@ namespace BazaR.Controllers
                     UserId = user.Id,
                     ItemId = itemId,
                     IsLooked = true,
-                    ViewCount = 1
+                    ViewCount = 1,
+                    LookedAt = DateTime.UtcNow
                 };
                 _db.LookedCards.Add(lookedCard);
             }

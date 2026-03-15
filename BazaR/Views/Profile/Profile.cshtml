@@ -1,3 +1,5 @@
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
 @model BazaR.ViewModels.AccountProfileViewModel
 
 @{
@@ -5,6 +7,12 @@
     var fullName = (Model.FirstName ?? "").Split(' ');
     var firstName = fullName.Length > 0 ? fullName[0] : "Не вказано";
     var lastName = fullName.Length > 1 ? fullName[1] : "Не вказано";
+
+    var externalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+    var userId = UserManager.GetUserId(User);
+    var currentLogins = await UserManager.GetLoginsAsync(await UserManager.GetUserAsync(User));
+    var isGoogleLinked = currentLogins.Any(l => l.LoginProvider == "Google");
 }
 
 <div class="profile-page">
@@ -244,45 +252,65 @@
                     Зв'язуйте обліковий запис Розетки з обліковими записами соцмереж і заходьте на сайт, як користувач Facebook або Google
                 </p>
                 <div class="profile-social__list">
-                    <a href="#" class="social-connect-card">
-                        <div class="social-connect-card__icon">
-                            <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
-                                <path d="M32.1235 34.0001C33.1597 34.0001 34 33.16 34 32.1236V1.87651C34 0.840039 33.1597 0 32.1235 0H1.87651C0.839906 0 0 0.840039 0 1.87651V32.1236C0 33.16 0.839906 34.0001 1.87651 34.0001H32.1235Z" fill="#395185" />
-                                <path d="M23.4602 33.9997V20.8331H27.8798L28.5415 15.7019H23.4602V12.4256C23.4602 10.94 23.8728 9.92757 26.0033 9.92757L28.7205 9.92637V5.33704C28.2503 5.27448 26.6375 5.13477 24.7611 5.13477C20.8434 5.13477 18.1614 7.52605 18.1614 11.9176V15.7019H13.7305V20.8331H18.1614V33.9997H23.4602Z" fill="white" />
-                            </svg>
-                        </div>
-                        <div class="social-connect-card__content">
-                            <div class="social-connect-card__title">Facebook</div>
-                            <div class="social-connect-card__link">Зв'язати з соц.мережею</div>
-                        </div>
-                    </a>
-                    <a href="#" class="social-connect-card">
-                        <div class="social-connect-card__icon">
-                            <svg width="38" height="38" viewBox="0 0 48 48" fill="none">
-                                <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12S17.4 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z" />
-                                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.2 19 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4c-7.7 0-14.4 4.3-17.7 10.7z" />
-                                <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.5-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.5 5C9.6 39.5 16.3 44 24 44z" />
-                                <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3.1-3.3 5.1-6.2 6.4l6.2 5.2C38.5 37 44 31.2 44 24c0-1.3-.1-2.3-.4-3.5z" />
-                            </svg>
-                        </div>
-                        <div class="social-connect-card__content">
-                            <div class="social-connect-card__title">Google</div>
-                            <div class="social-connect-card__link">Зв'язати з соц.мережею</div>
-                        </div>
-                    </a>
+                    @{
+                        if (externalLogins.Count == 0)
+                        {
+                            <div>No external logins configured</div>
+                        }
+                        else
+                        {
+                            <form method="post" asp-controller="Account" asp-action="LinkLogin" asp-route-returnUrl="@returnUrl" class="externalLogin-form-profile">
+                                <button class="social-connect-card social-connect-card__left">
+                                    <div class="social-connect-card__icon">
+                                        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+                                            <path d="M32.1235 34.0001C33.1597 34.0001 34 33.16 34 32.1236V1.87651C34 0.840039 33.1597 0 32.1235 0H1.87651C0.839906 0 0 0.840039 0 1.87651V32.1236C0 33.16 0.839906 34.0001 1.87651 34.0001H32.1235Z" fill="#395185" />
+                                            <path d="M23.4602 33.9997V20.8331H27.8798L28.5415 15.7019H23.4602V12.4256C23.4602 10.94 23.8728 9.92757 26.0033 9.92757L28.7205 9.92637V5.33704C28.2503 5.27448 26.6375 5.13477 24.7611 5.13477C20.8434 5.13477 18.1614 7.52605 18.1614 11.9176V15.7019H13.7305V20.8331H18.1614V33.9997H23.4602Z" fill="white" />
+                                        </svg>
+                                    </div>
+                                    <div class="social-connect-card__content">
+                                        <div class="social-connect-card__title">Facebook</div>
+                                        <div class="social-connect-card__link">Зв'язати з соц.мережею</div>
+                                    </div>
+                                </button>
+                                @foreach (var provider in externalLogins)
+                                {
+                                    if (@provider.DisplayName == "Google")
+                                    {
+                                        <button class="social-connect-card">
+                                            <div class="social-connect-card__icon">
+                                                <svg width="38" height="38" viewBox="0 0 48 48" fill="none">
+                                                    <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12S17.4 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z" />
+                                                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.2 19 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4c-7.7 0-14.4 4.3-17.7 10.7z" />
+                                                    <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.5-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.5 5C9.6 39.5 16.3 44 24 44z" />
+                                                    <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3.1-3.3 5.1-6.2 6.4l6.2 5.2C38.5 37 44 31.2 44 24c0-1.3-.1-2.3-.4-3.5z" />
+                                                </svg>
+                                            </div>
+                                            <div class="social-connect-card__content">
+                                                <div class="social-connect-card__title">Google</div>
+                                                <div class="social-connect-card__link">Зв'язати з соц.мережею</div>
+                                            </div>
+                                        </button>
+                                    }
+                                }
+                            </form>
+                        }
+                    }
                 </div>
             </section>
 
             <div class="profile-bottom-links">
                 <div class="profile-bottom-links__left">
-                    <a href="#" class="profile-bottom-links__item">Змінити пароль</a>
+                    <a asp-action="ForgotPassword" asp-controller="Account" class="profile-bottom-links__item">Змінити пароль</a>
                     <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="profile-bottom-links__item" style="background:none;border:none;padding:0;cursor:pointer;">Вихід</button>
                     </form>
                 </div>
                 <div class="profile-bottom-links__right">
-                    <a href="#" class="profile-bottom-links__item">Видалити аккаунт</a>
+                    <form asp-action="DeleteAccount" asp-controller="Account" method="post">
+                        @Html.AntiForgeryToken()
+                        <button class="profile-bottom-links__item bg-transparent border-0">Видалити аккаунт</button>
+                    </form>
                 </div>
             </div>
         </main>

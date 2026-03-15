@@ -117,7 +117,10 @@
                 </svg>
             </span>
             <span>Моє листування</span>
-            <span class="account-menu__badge"></span>
+            @if (Model.NewMessagesCount > 0)
+            {
+                <span class="account-menu__badge">@Model.NewMessagesCount</span>
+            }
         </a>
 
         <a asp-controller="Profile" asp-action="Promotions" class="account-menu__item @(activeMenu == "Promotions" ? "account-menu__item--active" : "")">

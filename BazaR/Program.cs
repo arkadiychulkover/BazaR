@@ -40,11 +40,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     options.Cookie.SameSite = SameSiteMode.Lax;
-
     options.ExpireTimeSpan = TimeSpan.FromHours(12);
     options.SlidingExpiration = true;
-
-    options.LoginPath = "/Account/Login";
+    options.LoginPath = "/";
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
@@ -55,12 +53,8 @@ builder.Services
     {
         options.ClientId = "596714054566-thnvk9mt56pa9fr64escum0ucj1hsr9b.apps.googleusercontent.com";
         options.ClientSecret = "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";
+        options.SaveTokens = true;
     });
-    //.AddFacebook(options =>
-    //{
-    //    options.AppId = builder.Configuration["Authentication:Facebook:AppId"] ?? "";
-    //    options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"] ?? "";
-    //});
 
 builder.Services.AddScoped<IUserDb, UserRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
