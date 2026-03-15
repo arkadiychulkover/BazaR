@@ -1,4 +1,4 @@
-﻿using BazaR.Models;
+using BazaR.Models;
 
 namespace BazaR.Interfaces
 {
@@ -22,6 +22,7 @@ namespace BazaR.Interfaces
         // Корзина
         bool AddToCart(int userId, int itemId);
         bool RemoveFromCart(int userId, int itemId);
+        bool SetCartQuantity(int userId, int itemId, int quantity);
         bool ClearCart(int userId);
         IQueryable<Item> GetCartItems(int userId);
         List<CartItem> GetCartItemsWithQuantity(int userId);

@@ -1,0 +1,41 @@
+@model List<BazaR.Models.Item>
+
+@{
+    ViewData["Title"] = "Обране";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Обране</h2>
+    @if (Model.Any())
+    {
+        <div class="row g-3">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-4 col-lg-3">
+                    <div class="card h-100">
+                        <a href="@Url.Action("ItemDetails", "Site", new { id = item.Id })" class="text-decoration-none text-dark">
+                            <img src="@(item.ImageUrl ?? item.Colors?.FirstOrDefault()?.Color ?? WebPaths.DefaultItemImage)" class="card-img-top" style="height:180px;object-fit:contain;" alt="@item.Name" />
+                            <div class="card-body">
+                                <h6 class="card-title">@item.Name</h6>
+                                <p class="card-text text-muted mb-0">@item.Price грн</p>
+                            </div>
+                        </a>
+                        <div class="card-footer bg-transparent border-0">
+                            <form asp-action="Remove" asp-controller="Wishlist" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm w-100">Видалити з обраного</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            У обраному поки нічого немає. <a href="@Url.Action("Browse", "Site")">Перейти до покупок</a>
+        </div>
+    }
+</div>

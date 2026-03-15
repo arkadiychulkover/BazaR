@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Models;
@@ -66,33 +66,40 @@ namespace BazaR.Controllers
         {
             SetLayoutData();
 
-            // Загружаем категории с брендами!
-            var categories = _db.Categories
-                .Include(c => c.CategoryBrands)
-                    .ThenInclude(cb => cb.Brand)
-                .ToList();
+            var categories = _db.Categories.ToList();
 
+            // Акційні пропозиції (дорогі, доступні)
             var featuredItems = _db.Items
                 .Where(i => i.IsAvailable)
                 .OrderByDescending(i => i.Price)
-                .Take(3)
+                .Take(5)
                 .ToList();
 
-            var newItems = _db.Items
+            // Зараз шукають (по кількості відгуків)
+            var trendingItems = _db.Items
+                .Where(i => i.IsAvailable)
+                .OrderByDescending(i => i.Reviews.Count)
+                .Take(5)
+                .ToList();
+
+            // Рекомендації (нові товари)
+            var recommendedItems = _db.Items
                 .Where(i => i.IsAvailable)
                 .OrderByDescending(i => i.Id)
-                .Take(3)
+                .Take(5)
                 .ToList();
 
+            // Найбільш очікувані (за середнім рейтингом)
             var popularItems = _db.Items
                 .Where(i => i.IsAvailable)
-                .OrderByDescending(i => i.Reviews.Average(r => r.Rating))
-                .Take(3)
+                .OrderByDescending(i => i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0)
+                .Take(5)
                 .ToList();
 
             ViewBag.Categories = categories;
             ViewBag.FeaturedItems = featuredItems;
-            ViewBag.NewItems = newItems;
+            ViewBag.TrendingItems = trendingItems;
+            ViewBag.RecommendedItems = recommendedItems;
             ViewBag.PopularItems = popularItems;
 
             return View();
@@ -101,8 +108,7 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult Browse(string? query, List<int>? categoryIds, int page = 1,
     string sort = "default", decimal? minPrice = null, decimal? maxPrice = null,
-    List<int>? brandIds = null, int? sellerType = null, bool? isReadyToSend = null,
-    bool? isNoPercentCredit = null, int? country = null)
+    List<int>? brandIds = null)
         {
             SetLayoutData();
             if (page < 1) page = 1;
@@ -111,7 +117,7 @@ namespace BazaR.Controllers
             var allCategories = _db.Categories
                 .Include(c => c.CategoryBrands)
                     .ThenInclude(cb => cb.Brand)
-                .Include(c => c.Filters)
+                .Include(c => c.Filters) // ВАЖНО: загружаем фильтры категорий
                 .ToList();
 
             ViewBag.AllCategories = allCategories;
@@ -123,9 +129,10 @@ namespace BazaR.Controllers
                 .Include(i => i.Brand)
                 .Include(i => i.Category)
                 .Include(i => i.Reviews)
-                .Include(i => i.Characteristics)
+                .Include(i => i.Characteristics) // ВАЖНО: загружаем характеристики
                 .AsQueryable()
                 .AsNoTracking();
+
 
             // Фильтр по поисковому запросу
             if (!string.IsNullOrWhiteSpace(query))
@@ -164,15 +171,16 @@ namespace BazaR.Controllers
                         .OrderBy(b => b.Name)
                         .ToList() ?? new List<Brand>();
 
-                    if (currentCategory.ParentCategory != null)
+                    if (currentCategory.ParentCategory != null) 
                     {
                         allBrands.AddRange(
                         currentCategory.ParentCategory.CategoryBrands
-                            .Select(cb => cb.Brand)
-                            .OrderBy(b => b.Name)
-                            .ToList() ?? new List<Brand>());
+                        .Select(cb => cb.Brand)
+                        .OrderBy(b => b.Name)
+                        .ToList() ?? new List<Brand>());
                     }
 
+                    //Console.WriteLine(allBrands.Count() + " Brand count ==============================");
                     ViewBag.CategoryBrands = allBrands;
                 }
             }
@@ -187,23 +195,6 @@ namespace BazaR.Controllers
             // Фильтр по брендам
             if (brandIds != null && brandIds.Any())
                 itemsQuery = itemsQuery.Where(i => brandIds.Contains(i.BrandId));
-
-            // НОВЫЕ ФИЛЬТРЫ
-            // Фильтр по типу продавца
-            if (sellerType.HasValue)
-                itemsQuery = itemsQuery.Where(i => (int)i.SellerType == sellerType.Value);
-
-            // Фильтр по готовности к отправке
-            if (isReadyToSend.HasValue)
-                itemsQuery = itemsQuery.Where(i => i.IsReadyToSend == isReadyToSend.Value);
-
-            // Фильтр по беспроцентному кредиту
-            if (isNoPercentCredit.HasValue)
-                itemsQuery = itemsQuery.Where(i => i.IsNoPercentCredit == isNoPercentCredit.Value);
-
-            // Фильтр по стране производителю
-            if (country.HasValue)
-                itemsQuery = itemsQuery.Where(i => (int)i.Country == country.Value);
 
             // Собираем динамические фильтры из QueryString
             var selectedFilters = new Dictionary<string, List<string>>();
@@ -293,42 +284,14 @@ namespace BazaR.Controllers
             // Применяем сортировку к уже отфильтрованным данным
             var items = itemsQuery.ToList();
 
-            // РАСШИРЕННАЯ СОРТИРОВКА
             items = sort switch
             {
-                // Существующие сортировки
                 "price_asc" => items.OrderBy(i => i.Price).ToList(),
                 "price_desc" => items.OrderByDescending(i => i.Price).ToList(),
                 "name_asc" => items.OrderBy(i => i.Name).ToList(),
                 "name_desc" => items.OrderByDescending(i => i.Name).ToList(),
-                "rating_desc" => items.OrderByDescending(i =>
-                    i.Reviews != null && i.Reviews.Any()
-                        ? i.Reviews.Average(r => r.Rating)
-                        : 0).ToList(),
+                "rating_desc" => items.OrderByDescending(i => i.Reviews?.Average(r => r.Rating) ?? 0).ToList(),
                 "newest" => items.OrderByDescending(i => i.Id).ToList(),
-
-                // НОВЫЕ СОРТИРОВКИ
-                // По типу продавца
-                "seller_bazar" => items.Where(i => i.SellerType == SellerType.bazar).ToList(),
-                "seller_other" => items.Where(i => i.SellerType == SellerType.otherSeller).ToList(),
-                "seller_sklad" => items.Where(i => i.SellerType == SellerType.otherSellerOnSklad).ToList(),
-
-                // По готовности к отправке
-                "ready_to_send" => items.Where(i => i.IsReadyToSend).ToList(),
-                "not_ready_to_send" => items.Where(i => !i.IsReadyToSend).ToList(),
-
-                // По беспроцентному кредиту
-                "no_percent_credit" => items.Where(i => i.IsNoPercentCredit).ToList(),
-                "with_percent_credit" => items.Where(i => !i.IsNoPercentCredit).ToList(),
-
-                // По стране производителю
-                "country_ukraine" => items.Where(i => i.Country == ProductionCountry.Ukraine).ToList(),
-                "country_usa" => items.Where(i => i.Country == ProductionCountry.USA).ToList(),
-                "country_china" => items.Where(i => i.Country == ProductionCountry.China).ToList(),
-                "country_germany" => items.Where(i => i.Country == ProductionCountry.Germany).ToList(),
-                "country_japan" => items.Where(i => i.Country == ProductionCountry.Japan).ToList(),
-
-                // По умолчанию
                 _ => items.OrderBy(i => i.Id).ToList()
             };
 
@@ -336,16 +299,12 @@ namespace BazaR.Controllers
             var totalPages = (int)Math.Ceiling(total / (double)PageSize);
             var paged = items.Skip((page - 1) * PageSize).Take(PageSize).ToList();
 
-            // Сохраняем параметры для фильтров (добавлены новые)
+            // Сохраняем параметры для фильтров
             ViewBag.Query = query ?? "";
             ViewBag.CategoryIds = categoryIds ?? new List<int>();
             ViewBag.BrandIds = brandIds ?? new List<int>();
             ViewBag.MinPrice = minPrice;
             ViewBag.MaxPrice = maxPrice;
-            ViewBag.SellerType = sellerType;
-            ViewBag.IsReadyToSend = isReadyToSend;
-            ViewBag.IsNoPercentCredit = isNoPercentCredit;
-            ViewBag.Country = country;
             ViewBag.Page = page;
             ViewBag.PageSize = PageSize;
             ViewBag.TotalPages = totalPages;
@@ -419,47 +378,16 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult CategoryPage(int category)
         {
-            SetLayoutData();
-
             List<int> categorysId = GetSubCategoryIds(category);
             List<Category> categories = new();
-
-            var categoryObj = _itMan.GetCategoryById(category);
-            ViewBag.CategotyName = categoryObj?.Name;
+            ViewBag.CategotyName = _itMan.GetCategoryById(category).Name;
 
             foreach (int cat in categorysId)
             {
-                var c = _itMan.GetCategoryById(cat);
-                if (c != null)
-                    categories.Add(c);
+                categories.Add(_itMan.GetCategoryById(cat));
             }
-
-            // популярные товары
-            var allCategoryIds = new List<int> { category };
-            allCategoryIds.AddRange(categorysId);
-
-            var popularItems = _db.Items
-                .Include(i => i.Brand)
-                .Include(i => i.Category)
-                .Include(i => i.Reviews)
-                .Where(i => allCategoryIds.Contains(i.CategoryId))
-                .OrderByDescending(i =>
-                    i.Reviews.Any()
-                        ? i.Reviews.Average(r => r.Rating)
-                        : 0)
-                .Take(4)
-                .ToList();
-
-            ViewBag.PopularItems = popularItems;
-
-            //if (categories.Count < 10)
-            //    return View("CategoryCatalog10" ,categories.Take(16).ToList());
-            if (categories.Count < 20)
-                return View(categories.Take(16).ToList());
-            else
-                return View("CategoryCatalog", categories);
+            return View(categories.Take(12).ToList());
         }
-
 
         [HttpGet]
         public IActionResult ItemDetails(int id)
@@ -471,7 +399,7 @@ namespace BazaR.Controllers
 
             ViewBag.Images = item.Colors?.Select(c => c.Color).ToList() ?? new List<string>();
             ViewBag.Category = item.Category;
-            ViewBag.RelatedItems = _itMan.GetByCategory(item.CategoryId)
+            ViewBag.RelationItems = _itMan.GetByCategory(item.CategoryId)
                 .Where(i => i.Id != id)
                 .Take(4)
                 .ToList();
@@ -580,21 +508,7 @@ namespace BazaR.Controllers
 
             var userId = CurrentUserId!.Value;
 
-            var cartItems = _usMan.GetCartItemsWithQuantity(userId);
-            var currentItem = cartItems.FirstOrDefault(ci => ci.ItemId == itemId);
-
-            if (currentItem != null)
-            {
-                for (int i = 0; i < currentItem.Quantity; i++)
-                {
-                    _usMan.RemoveFromCart(userId, itemId);
-                }
-            }
-
-            for (int i = 0; i < quantity; i++)
-            {
-                _usMan.AddToCart(userId, itemId);
-            }
+            _usMan.SetCartQuantity(userId, itemId, quantity);
 
             var newCartItems = _usMan.GetCartItemsWithQuantity(userId);
             var newCartCount = newCartItems.Sum(ci => ci.Quantity);
@@ -623,16 +537,39 @@ namespace BazaR.Controllers
         }
 
         [HttpGet]
-        public IActionResult Wishlist()
+        public IActionResult GetCartJson()
         {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Wishlist)));
-
-            SetLayoutData();
+            if (!IsAuthenticated)
+                return Json(new { items = new object[0], total = 0, count = 0 });
 
             var userId = CurrentUserId!.Value;
-            var items = _usMan.GetWishList(userId).ToList();
+            var cartItems = _usMan.GetCartItemsWithQuantity(userId);
 
-            return View(items);
+            var result = cartItems.Select(ci => new
+            {
+                id = ci.ItemId,
+                name = ci.Item.Name,
+                price = ci.Item.Price,
+                quantity = ci.Quantity,
+                subtotal = ci.Item.Price * ci.Quantity,
+                image = !string.IsNullOrEmpty(ci.Item.ImageUrl)
+                    ? ci.Item.ImageUrl
+                    : (ci.Item.Colors?.FirstOrDefault()?.Color ?? "/images/items/default.jpg")
+            });
+
+            return Json(new
+            {
+                items = result,
+                total = cartItems.Sum(ci => ci.Item.Price * ci.Quantity),
+                count = cartItems.Sum(ci => ci.Quantity)
+            });
+        }
+
+        [HttpGet]
+        public IActionResult Wishlist()
+        {
+            if (!IsAuthenticated) return RequireLogin(Url.Action("Index", "Wishlist"));
+            return RedirectToAction("Index", "Wishlist");
         }
 
         [HttpPost]
@@ -795,6 +732,7 @@ namespace BazaR.Controllers
 
             ViewBag.Items = order.OrderItems;
             ViewBag.City = order.City ?? new City { Name = "Киев", Id = 1 };
+            ViewBag.eUser = order.User;
             ViewBag.User = order.User;
 
             return View(order);
@@ -828,8 +766,15 @@ namespace BazaR.Controllers
             ViewBag.OrdersCount = user?.Orders?.Count ?? 0;
             ViewBag.WishlistCount = _usMan.GetWishList(CurrentUserId!.Value).Count();
             ViewBag.CartCount = _usMan.GetCartItems(CurrentUserId.Value).Count();
+            ViewBag.ActiveMenu = "Profile";
 
-            return View(user);
+            var vm = new BazaR.ViewModels.AccountProfileViewModel
+            {
+                FullName = user?.Name ?? "",
+                Email = user?.Email ?? ""
+            };
+
+            return View(vm);
         }
 
         [HttpPost]
@@ -883,28 +828,39 @@ namespace BazaR.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Register(string email, string name, string password, string phoneNumber)
+        public IActionResult Register(string email, string? name, string password, string phoneNumber,
+            string? firstName, string? lastName, string? confirmPassword)
         {
             email = (email ?? "").Trim();
 
+            var fullName = name;
+            if (string.IsNullOrWhiteSpace(fullName))
+                fullName = ((firstName ?? "") + " " + (lastName ?? "")).Trim();
+
             if (string.IsNullOrWhiteSpace(email) ||
                 string.IsNullOrWhiteSpace(password) ||
-                string.IsNullOrWhiteSpace(name))
+                string.IsNullOrWhiteSpace(fullName))
             {
-                TempData["Error"] = "Заполните обязательные поля.";
+                TempData["Error"] = "Заповніть обов'язкові поля.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (!string.IsNullOrWhiteSpace(confirmPassword) && password != confirmPassword)
+            {
+                TempData["Error"] = "Паролі не співпадають.";
                 return RedirectToAction(nameof(Index));
             }
 
             if (_usMan.GetByEmail(email) != null)
             {
-                TempData["Error"] = "Пользователь с таким email уже существует.";
+                TempData["Error"] = "Користувач з таким email вже існує.";
                 return RedirectToAction(nameof(Index));
             }
 
             var user = new User
             {
                 Email = email,
-                Name = name,
+                Name = fullName,
                 PasswordHash = password,
                 IsAdmin = false
             };

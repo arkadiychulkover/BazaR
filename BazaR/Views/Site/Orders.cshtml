@@ -1,0 +1,459 @@
+@model List<BazaR.Models.Order>
+
+@{
+    ViewData["Title"] = "Мої замовлення";
+    var user = ViewBag.User as BazaR.Models.User;
+    var initial = !string.IsNullOrEmpty(user?.Name) ? user.Name[0].ToString().ToUpper() : "?";
+}
+
+<style>
+    /* ─── Загальний фон ─── */
+    body { background: #f0f4f8 !important; }
+
+    .orders-page {
+        max-width: 1140px;
+        margin: 28px auto;
+        padding: 0 16px;
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    /* ════════════════════════
+       SIDEBAR
+    ════════════════════════ */
+    .psb {                               /* profile sidebar */
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 14px rgba(20,60,120,.09);
+        overflow: hidden;
+    }
+
+    .psb__user {
+        background: linear-gradient(135deg, #1565c0, #1e88e5);
+        padding: 22px 18px;
+        display: flex;
+        align-items: center;
+        gap: 13px;
+    }
+
+    .psb__avatar {
+        width: 50px; height: 50px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.25);
+        border: 2px solid rgba(255,255,255,.5);
+        color: #fff;
+        font-size: 22px;
+        font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        letter-spacing: -1px;
+    }
+
+    .psb__name {
+        font-size: 14px; font-weight: 700; color: #fff;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .psb__email {
+        font-size: 11px; color: rgba(255,255,255,.72);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        margin-top: 2px;
+    }
+
+    .psb__nav { list-style: none; padding: 6px 0; margin: 0; }
+
+    .psb__nav li a {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 18px;
+        font-size: 13.5px; color: #333;
+        text-decoration: none;
+        transition: background .15s, color .15s;
+        position: relative;
+    }
+
+    .psb__nav li a i,
+    .psb__nav li a img.nav-icon {
+        font-size: 17px;
+        width: 22px; height: 22px;
+        flex-shrink: 0;
+        object-fit: contain;
+        opacity: .65;
+    }
+
+    .psb__nav li a:hover { background: #e8f0fe; color: #1565c0; }
+    .psb__nav li a:hover i,
+    .psb__nav li a:hover img.nav-icon { opacity: 1; }
+
+    .psb__nav li a.active {
+        background: #e3eefe;
+        color: #1565c0;
+        font-weight: 700;
+        border-left: 3px solid #1565c0;
+    }
+
+    .psb__nav li a.active i,
+    .psb__nav li a.active img.nav-icon { opacity: 1; }
+
+    .psb__divider { border: none; border-top: 1px solid #f0f0f0; margin: 4px 0; }
+
+    /* ════════════════════════
+       MAIN PANEL
+    ════════════════════════ */
+    .orders-panel {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 14px rgba(20,60,120,.09);
+        overflow: hidden;
+    }
+
+    .orders-panel__head {
+        padding: 22px 28px 0;
+        background: linear-gradient(135deg, #1565c0, #1e88e5);
+    }
+
+    .orders-panel__title {
+        font-size: 22px; font-weight: 800; color: #fff;
+        margin-bottom: 16px;
+    }
+
+    /* Tabs */
+    .orders-tabs {
+        display: flex; list-style: none; padding: 0; margin: 0; gap: 0;
+    }
+
+    .orders-tabs li a {
+        display: block;
+        padding: 10px 22px;
+        font-size: 14px; font-weight: 500;
+        color: rgba(255,255,255,.75);
+        text-decoration: none;
+        border-bottom: 2.5px solid transparent;
+        margin-bottom: -1px;
+        transition: color .15s, border-color .15s;
+    }
+
+    .orders-tabs li a:hover { color: #fff; }
+
+    .orders-tabs li a.active {
+        color: #fff;
+        font-weight: 700;
+        border-bottom-color: #fff;
+    }
+
+    /* ── Empty state ── */
+    .orders-empty {
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        padding: 64px 24px; text-align: center;
+    }
+
+    .orders-empty__img {
+        width: 120px; height: auto;
+        margin-bottom: 24px;
+        filter: drop-shadow(0 6px 18px rgba(21,101,192,.18));
+    }
+
+    .orders-empty__title {
+        font-size: 17px; font-weight: 600; color: #1a1a1a;
+        margin-bottom: 24px;
+    }
+
+    .orders-empty__btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #1565c0, #1e88e5);
+        color: #fff;
+        border-radius: 10px;
+        font-size: 14px; font-weight: 600;
+        text-decoration: none;
+        box-shadow: 0 4px 14px rgba(21,101,192,.35);
+        transition: opacity .2s, transform .15s;
+    }
+
+    .orders-empty__btn:hover { opacity: .9; color: #fff; transform: translateY(-1px); }
+
+    /* ── Order card ── */
+    .order-card {
+        border-bottom: 1px solid #f0f4f8;
+        padding: 20px 28px;
+        transition: background .15s;
+    }
+
+    .order-card:last-child { border-bottom: none; }
+    .order-card:hover { background: #f7faff; }
+
+    .order-card__top {
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+    }
+
+    .order-card__meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .order-card__number {
+        font-size: 15px; font-weight: 700; color: #1565c0;
+    }
+
+    .order-card__date { font-size: 13px; color: #999; }
+
+    /* Status badges */
+    .order-status {
+        display: inline-block; padding: 4px 13px;
+        border-radius: 20px; font-size: 12px; font-weight: 600;
+    }
+    .os--new        { background: #e3eefe; color: #1565c0; }
+    .os--processing { background: #fff3cd; color: #856404; }
+    .os--shipped    { background: #d0f0e0; color: #1a7a45; }
+    .os--delivered  { background: #d4edda; color: #155724; }
+    .os--cancelled  { background: #fde8e8; color: #c62828; }
+
+    /* Item thumbnails */
+    .order-card__thumbs {
+        display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+    }
+
+    .order-card__thumb {
+        width: 58px; height: 58px;
+        border-radius: 10px; border: 1px solid #e8eef6;
+        overflow: hidden; background: #f7faff;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .order-card__thumb img { width: 100%; height: 100%; object-fit: contain; }
+
+    .order-card__thumb--more {
+        font-size: 13px; font-weight: 700; color: #1565c0;
+        background: #e3eefe;
+        border: 1.5px dashed #90caf9;
+    }
+
+    /* Bottom row */
+    .order-card__bottom {
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 10px;
+    }
+
+    .order-card__total {
+        font-size: 16px; font-weight: 800; color: #1a1a1a;
+    }
+
+    .order-card__total small {
+        font-size: 12px; font-weight: 400; color: #999; margin-right: 4px;
+    }
+
+    .order-card__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .oc-btn {
+        padding: 8px 20px; border-radius: 8px;
+        font-size: 13px; font-weight: 600;
+        text-decoration: none; cursor: pointer;
+        border: none; transition: all .18s;
+    }
+
+    .oc-btn--details {
+        background: #e3eefe; color: #1565c0;
+        border: 1.5px solid #90caf9;
+    }
+
+    .oc-btn--details:hover {
+        background: #1565c0; color: #fff;
+        border-color: #1565c0;
+    }
+
+    .oc-btn--cancel {
+        background: #fff; color: #c62828;
+        border: 1.5px solid #ffcdd2;
+    }
+
+    .oc-btn--cancel:hover {
+        background: #c62828; color: #fff;
+        border-color: #c62828;
+    }
+
+    /* ─── Responsive ─── */
+    @@media (max-width: 820px) {
+        .orders-page { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="orders-page">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside class="psb">
+        <div class="psb__user">
+            <div class="psb__avatar">@initial</div>
+            <div style="min-width:0;">
+                <div class="psb__name">@(user?.Name ?? "Користувач")</div>
+                <div class="psb__email">@(user?.Email ?? "")</div>
+            </div>
+        </div>
+
+        <ul class="psb__nav">
+            <li>
+                <a href="@Url.Action("Orders","Site")" class="active">
+                    <i class="bi bi-bag-check-fill"></i>
+                    Мої замовлення
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "Wishlist")">
+                    <i class="bi bi-heart"></i>
+                    Список бажань
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Profile","Site")">
+                    <i class="bi bi-person-circle"></i>
+                    Мій профіль
+                </a>
+            </li>
+            <hr class="psb__divider"/>
+            <li>
+                <a href="#">
+                    <i class="bi bi-clock-history"></i>
+                    Переглянуті товари
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="bi bi-bell"></i>
+                    Розсилки
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="bi bi-wallet2"></i>
+                    Мій гаманець
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="bi bi-award"></i>
+                    Бонусний рахунок
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="bi bi-star-fill" style="color:#f5c518;"></i>
+                    Підписка Premium
+                </a>
+            </li>
+            <hr class="psb__divider"/>
+            <li>
+                <a href="#">
+                    <i class="bi bi-chat-square-text"></i>
+                    Мої відгуки
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="bi bi-tag"></i>
+                    Участь в акціях
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- ═══ MAIN PANEL ═══ -->
+    <main class="orders-panel">
+
+        <div class="orders-panel__head">
+            <h1 class="orders-panel__title">Мої замовлення</h1>
+            <ul class="orders-tabs">
+                <li><a href="#" class="active">Всі замовлення</a></li>
+                <li><a href="#">Гарантія на повернення</a></li>
+            </ul>
+        </div>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="orders-empty">
+                <img src="~/images/items/check-list.png"
+                     alt="Немає замовлень"
+                     class="orders-empty__img" />
+                <div class="orders-empty__title">
+                    У вас поки що немає жодного замовлення :(
+                </div>
+                <a href="@Url.Action("Browse","Site")" class="orders-empty__btn">
+                    <i class="bi bi-arrow-left-circle"></i>
+                    Повернутись до каталогу
+                </a>
+            </div>
+        }
+        else
+        {
+            foreach (var order in Model)
+            {
+                var statusClass = order.Status switch
+                {
+                    "Нове"        => "os--new",
+                    "В обробці"   => "os--processing",
+                    "Відправлено" => "os--shipped",
+                    "Доставлено"  => "os--delivered",
+                    "Скасовано"   => "os--cancelled",
+                    _             => "os--new"
+                };
+
+                <div class="order-card">
+                    <div class="order-card__top">
+                        <div class="order-card__meta">
+                            <span class="order-card__number">№&nbsp;@order.Number</span>
+                            <span class="order-card__date">@order.CreatedAt.ToString("dd.MM.yyyy")</span>
+                        </div>
+                        <span class="order-status @statusClass">@order.Status</span>
+                    </div>
+
+                    @if (order.OrderItems?.Any() == true)
+                    {
+                        <div class="order-card__thumbs">
+                            @foreach (var oi in order.OrderItems.Take(5))
+                            {
+                                var img = oi.Item?.ImageUrl
+                                       ?? oi.Item?.Colors?.FirstOrDefault()?.Color
+                                       ?? "/images/items/default.jpg";
+                                <div class="order-card__thumb" title="@oi.Item?.Name">
+                                    <img src="@img" alt="@oi.Item?.Name"
+                                         onerror="this.src='/images/items/default.jpg'" />
+                                </div>
+                            }
+                            @if (order.OrderItems.Count > 5)
+                            {
+                                <div class="order-card__thumb order-card__thumb--more">
+                                    +@(order.OrderItems.Count - 5)
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <div class="order-card__bottom">
+                        <div class="order-card__total">
+                            <small>Сума:</small>
+                            @order.TotalAmount.ToString("N0")&nbsp;₴
+                        </div>
+                        <div class="order-card__actions">
+                            <a href="@Url.Action("OrderDetails","Site", new { id = order.Id })"
+                               class="oc-btn oc-btn--details">
+                                Деталі
+                            </a>
+                            @if (order.Status != "Скасовано" && order.Status != "Доставлено")
+                            {
+                                <form asp-action="CancelOrder" asp-controller="Site"
+                                      method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@order.Id" />
+                                    <button type="submit" class="oc-btn oc-btn--cancel"
+                                            onclick="return confirm('Скасувати замовлення №@order.Number?')">
+                                        Скасувати
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+    </main>
+</div>

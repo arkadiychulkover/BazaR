@@ -1,4 +1,4 @@
-﻿using BazaR.Data;
+using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Models;
 using Microsoft.EntityFrameworkCore;
@@ -196,6 +196,45 @@ namespace BazaR.Repositories
                 else
                 {
                     _context.CartItems.Remove(cartItem);
+                }
+
+                return _context.SaveChanges() > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool SetCartQuantity(int userId, int itemId, int quantity)
+        {
+            try
+            {
+                var cartItem = _context.CartItems
+                    .FirstOrDefault(ci => ci.UserId == userId && ci.ItemId == itemId);
+
+                if (quantity <= 0)
+                {
+                    if (cartItem != null)
+                    {
+                        _context.CartItems.Remove(cartItem);
+                        return _context.SaveChanges() > 0;
+                    }
+                    return true;
+                }
+
+                if (cartItem != null)
+                {
+                    cartItem.Quantity = quantity;
+                }
+                else
+                {
+                    _context.CartItems.Add(new CartItem
+                    {
+                        UserId = userId,
+                        ItemId = itemId,
+                        Quantity = quantity
+                    });
                 }
 
                 return _context.SaveChanges() > 0;

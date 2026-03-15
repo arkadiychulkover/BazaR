@@ -1,0 +1,86 @@
+@model BazaR.Models.Order
+
+@{
+    ViewData["Title"] = "Детали заказа";
+    var items = ViewBag.Items as List<BazaR.Models.OrderItem> ?? Model.OrderItems ?? new List<BazaR.Models.OrderItem>();
+    var city = ViewBag.City as BazaR.Models.City ?? Model.City;
+    var user = ViewBag.eUser as BazaR.Models.User ?? Model.User;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            @await Html.PartialAsync("SideBarCabinet")
+        </div>
+
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="mb-0">Заказ @Model.Number</h2>
+                    <div class="text-muted small">Создан: @Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                </div>
+                <span class="badge bg-@(Model.Status == "Cancelled" ? "secondary" : "primary")">@Model.Status</span>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="fw-semibold mb-2">Доставка</div>
+                            <div class="text-muted">Город: @(city?.Name ?? "—")</div>
+                            <div class="text-muted">Адрес: @Model.Address</div>
+                            <div class="text-muted">Метод: @Model.DeliveryMethod</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="fw-semibold mb-2">Оплата</div>
+                            <div class="text-muted">Метод: @Model.PaymentMethod</div>
+                            <div class="text-muted">Статус: @Model.PaymentStatus</div>
+                            <div class="text-muted">Сумма: <span class="fw-semibold">@Model.TotalAmount грн</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="mb-3">Товары</h5>
+
+            @if (items.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Товар</th>
+                                <th class="text-end">Цена</th>
+                                <th class="text-end">Кол-во</th>
+                                <th class="text-end">Итого</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var oi in items)
+                            {
+                                <tr>
+                                    <td>
+                                        <a class="text-decoration-none" href="@Url.Action("ItemDetails", "Site", new { id = oi.ItemId })">
+                                            @oi.Item?.Name
+                                        </a>
+                                    </td>
+                                    <td class="text-end">@oi.PriceAtMoment грн</td>
+                                    <td class="text-end">@oi.Quantity</td>
+                                    <td class="text-end fw-semibold">@((oi.PriceAtMoment * oi.Quantity)) грн</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-muted">Позиции заказа не найдены.</div>
+            }
+        </div>
+    </div>
+</div>

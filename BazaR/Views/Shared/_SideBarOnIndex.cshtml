@@ -1,4 +1,4 @@
-﻿@model List<BazaR.Models.Category>
+@model List<BazaR.Models.Category>
 
 @{
     var mainCategories = Model?.Where(c => c.ParentCategoryId == null).OrderBy(c => c.DisplayOrder).ToList() ?? new List<BazaR.Models.Category>();

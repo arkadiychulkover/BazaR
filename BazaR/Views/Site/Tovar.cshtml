@@ -1,0 +1,79 @@
+@model BazaR.Models.Item
+
+@{
+    var img = Model.ImageUrl;
+    if (string.IsNullOrWhiteSpace(img))
+    {
+        img = Model.Colors?.FirstOrDefault()?.Color;
+    }
+    if (string.IsNullOrWhiteSpace(img))
+    {
+        img = WebPaths.DefaultItemImage;
+    }
+
+    var isSale = ViewData["IsSale"] as bool? ?? false;
+    var discount = ViewData["Discount"] as int? ?? 0;
+    var oldPrice = isSale && discount > 0 ? (int)Math.Ceiling(Model.Price / (1.0 - discount / 100.0)) : 0;
+}
+
+<div class="tovar-card">
+    <div class="tovar-card__img">
+        <a href="@Url.Action("ItemDetails", "Site", new { id = Model.Id })">
+            <img src="@img" alt="@Model.Name" />
+        </a>
+
+        @if (ViewBag.User != null)
+        {
+            <form asp-action="Add" asp-controller="Wishlist" method="post" class="tovar-card__wish">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" title="В обране">
+                    <i class="bi bi-heart"></i>
+                </button>
+            </form>
+        }
+        else
+        {
+            <div class="tovar-card__wish">
+                <button type="button" data-open-login="true" title="В обране">
+                    <i class="bi bi-heart"></i>
+                </button>
+            </div>
+        }
+
+        @if (!Model.IsAvailable)
+        {
+            <span class="tovar-card__badge tovar-card__badge--out">Немає в наявності</span>
+        }
+    </div>
+
+    <div class="tovar-card__body">
+        <a href="@Url.Action("ItemDetails", "Site", new { id = Model.Id })" class="tovar-card__title">
+            @Model.Name
+        </a>
+
+        <div class="tovar-card__footer">
+            <div>
+                @if (isSale && oldPrice > 0)
+                {
+                    <div class="tovar-card__old-price">@oldPrice.ToString("N0") ₴</div>
+                }
+                <div class="tovar-card__price @(isSale ? "tovar-card__price--sale" : "")">
+                    @Model.Price.ToString("N0") <span class="tovar-card__currency">₴</span>
+                </div>
+            </div>
+
+            @if (Model.IsAvailable)
+            {
+                <form asp-action="Add" asp-controller="Cart" method="post" class="tovar-card__cart-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="itemId" value="@Model.Id" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <button type="submit" class="tovar-card__cart-btn" title="Додати в кошик">
+                        <i class="bi bi-cart3"></i>
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+</div>

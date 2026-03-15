@@ -1,4 +1,4 @@
-﻿@using BazaR.Models
+@using BazaR.Models
 @model List<BazaR.Models.Item>
 
 @{
@@ -13,10 +13,6 @@
     var selectedBrandIds = ViewBag.BrandIds as List<int> ?? new List<int>();
     var minPrice = ViewBag.MinPrice as decimal?;
     var maxPrice = ViewBag.MaxPrice as decimal?;
-    var sellerType = ViewBag.SellerType as int?;
-    var isReadyToSend = ViewBag.IsReadyToSend as bool?;
-    var isNoPercentCredit = ViewBag.IsNoPercentCredit as bool?;
-    var country = ViewBag.Country as int?;
     var currentCategory = ViewBag.CurrentCategory as Category;
     var categoryPath = ViewBag.CategoryPath as List<Category> ?? new List<Category>();
     var selectedFilters = ViewBag.SelectedFilters as Dictionary<string, List<string>> ?? new Dictionary<string, List<string>>();
@@ -125,22 +121,13 @@
                                 <option value="newest" selected="@(currentSort == "newest")">
                                     Спочатку нові
                                 </option>
-                                
-                                
                             </select>
                         </div>
 
-                        <!-- Скрытые поля для существующих фильтров -->
                         <input type="hidden" name="query" value="@query" />
                         <input type="hidden" name="page" value="1" />
                         <input type="hidden" name="minPrice" value="@minPrice" />
                         <input type="hidden" name="maxPrice" value="@maxPrice" />
-
-                        <!-- Скрытые поля для новых фильтров -->
-                        <input type="hidden" name="sellerType" value="@sellerType" />
-                        <input type="hidden" name="isReadyToSend" value="@isReadyToSend" />
-                        <input type="hidden" name="isNoPercentCredit" value="@isNoPercentCredit" />
-                        <input type="hidden" name="country" value="@country" />
 
                         @foreach (var catId in selectedCategoryIds)
                         {
@@ -166,10 +153,10 @@
             <!-- ТОВАРЫ -->
             @if (Model.Any())
             {
-                <div class="row g-4">
+                <div class="catalog-grid">
                     @foreach (var item in Model)
                     {
-                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                        <div>
                             @await Html.PartialAsync("Card", item)
                         </div>
                     }
@@ -189,11 +176,7 @@
                                        brandIds = selectedBrandIds,
                                        sort = currentSort,
                                        minPrice,
-                                       maxPrice,
-                                       sellerType,
-                                       isReadyToSend,
-                                       isNoPercentCredit,
-                                       country
+                                       maxPrice
                                    })@GetFilterQueryString(selectedFilters)">
                                     <i class="bi bi-chevron-left"></i>
                                 </a>
@@ -210,11 +193,7 @@
                                            brandIds = selectedBrandIds,
                                            sort = currentSort,
                                            minPrice,
-                                           maxPrice,
-                                           sellerType,
-                                           isReadyToSend,
-                                           isNoPercentCredit,
-                                           country
+                                           maxPrice
                                        })@GetFilterQueryString(selectedFilters)">
                                         @i
                                     </a>
@@ -230,11 +209,7 @@
                                        brandIds = selectedBrandIds,
                                        sort = currentSort,
                                        minPrice,
-                                       maxPrice,
-                                       sellerType,
-                                       isReadyToSend,
-                                       isNoPercentCredit,
-                                       country
+                                       maxPrice
                                    })@GetFilterQueryString(selectedFilters)">
                                     <i class="bi bi-chevron-right"></i>
                                 </a>

@@ -1,0 +1,182 @@
+@model BazaR.Models.Item
+
+@{
+    ViewData["Title"] = Model?.Name ?? "Товар";
+    var images = ViewBag.Images as List<string> ?? new List<string>();
+    var category = ViewBag.Category as BazaR.Models.Category;
+    var related = ViewBag.RelationItems as List<BazaR.Models.Item> ?? new List<BazaR.Models.Item>();
+    var seller = ViewBag.Seller as BazaR.Models.User;
+    var isInCart = ViewBag.IsInCart as bool? ?? false;
+    var isInWishlist = ViewBag.IsInWishlist as bool? ?? false;
+}
+
+<div class="container mt-4">
+    <div class="row g-4">
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-body">
+                    @if (images.Any())
+                    {
+                        <div id="itemCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                @for (int i = 0; i < images.Count; i++)
+                                {
+                                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                                        <img src="@images[i]" class="d-block w-100" style="object-fit: cover; height: 340px;" alt="@Model.Name" />
+                                    </div>
+                                }
+                            </div>
+                            @if (images.Count > 1)
+                            {
+                                <button class="carousel-control-prev" type="button" data-bs-target="#itemCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#itemCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <img src="@WebPaths.DefaultItemImage" class="img-fluid" alt="@Model.Name" />
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <h2 class="mb-2">@Model.Name</h2>
+            <div class="text-muted mb-3">
+                Категорія: @(category?.Name ?? "—")
+                @if (seller != null)
+                {
+                    <span class="ms-3">Продавець: <strong>@seller.Name</strong></span>
+                }
+            </div>
+
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="fs-3 fw-bold">@Model.Price грн</div>
+                @if (!Model.IsAvailable)
+                {
+                    <span class="badge bg-secondary">Немає в наявності</span>
+                }
+            </div>
+
+            <div class="d-flex gap-2 mb-4">
+                <form asp-action="AddToCart" asp-controller="Site" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="itemId" value="@Model.Id" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <button type="submit" class="btn btn-primary" @(Model.IsAvailable ? "" : "disabled")>
+                        <i class="bi bi-cart-plus"></i>
+                        @(isInCart ? "Додати ще" : "В кошик")
+                    </button>
+                </form>
+
+                <form asp-action="AddToWishlist" asp-controller="Site" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="bi bi-heart"></i>
+                        @(isInWishlist ? "В обраному" : "Додати в обране")
+                    </button>
+                </form>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="mb-2">Опис</h5>
+                    <div class="text-muted" style="white-space: pre-wrap;">@Model.Desc</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3">Відгуки</h5>
+
+                    @if (Model.Reviews != null && Model.Reviews.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var r in Model.Reviews.OrderByDescending(x => x.Id).Take(20))
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="fw-semibold">@r.User?.Name</div>
+                                        <div class="text-warning">
+                                            <i class="bi bi-star-fill"></i> @r.Rating
+                                        </div>
+                                    </div>
+                                    <div class="text-muted">@r.Comment</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted">Поки немає відгуків.</div>
+                    }
+
+                    <hr />
+
+                    <form asp-action="AddReview" asp-controller="Site" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="itemId" value="@Model.Id" />
+
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label">Оцінка</label>
+                                <select name="review.Rating" class="form-select" required>
+                                    <option value="5">5</option>
+                                    <option value="4">4</option>
+                                    <option value="3">3</option>
+                                    <option value="2">2</option>
+                                    <option value="1">1</option>
+                                </select>
+                            </div>
+                            <div class="col-md-7">
+                                <label class="form-label">Текст</label>
+                                <input name="review.Comment" class="form-control" required />
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-primary w-100" type="submit">Додати</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3">Схожі товари</h5>
+                    @if (related.Any())
+                    {
+                        <div class="d-flex flex-column gap-3">
+                            @foreach (var it in related)
+                            {
+                                <div>
+                                    <a class="text-decoration-none" href="@Url.Action("ItemDetails", "Site", new { id = it.Id })">
+                                        <div class="fw-semibold">@it.Name</div>
+                                    </a>
+                                    <div class="text-muted small">@it.Price грн</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted">Немає рекомендацій.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
