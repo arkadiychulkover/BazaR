@@ -41,6 +41,9 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <li>
+                            <button type="button" data-sidebar-open>☰ Меню</button>
+                        </li>
 
                         @if (User.Identity?.IsAuthenticated ?? false)
                         {
@@ -93,7 +96,7 @@
     @await Html.PartialAsync("_LoadOurApp")
     @await Html.PartialAsync("_SocialMedia")
     @await Html.PartialAsync("Error404")
-
+    @await Html.PartialAsync("~/Views/Shared/_Sidebar.cshtml")
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

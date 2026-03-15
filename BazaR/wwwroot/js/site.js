@@ -29,6 +29,9 @@
         const modal = getModal(name);
         if (!modal) return;
 
+        // Закрываем sidebar перед открытием модалки
+        document.dispatchEvent(new CustomEvent('sidebar:close'));
+
         closeAllModals();
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
@@ -64,7 +67,6 @@
         </svg>`;
 
         button.addEventListener('click', function () {
-
             const wrap = button.closest('.auth-input-wrap');
             const input = wrap ? wrap.querySelector('input[type="password"], input[type="text"]') : null;
 
@@ -77,7 +79,6 @@
                 input.type = 'password';
                 button.innerHTML = eyeClosed;
             }
-
         });
     });
 
@@ -90,3 +91,59 @@
         closeAllModals();
     }
 });
+
+
+// ══════════════════════════════════════════
+//   SIDEBAR DRAWER  —  BazaR
+// ══════════════════════════════════════════
+
+(function () {
+    'use strict';
+
+    const drawer = document.getElementById('sidebarDrawer');
+    const overlay = document.getElementById('sidebarOverlay');
+    const closeBtn = document.getElementById('sidebarClose');
+
+    if (!drawer) return;
+
+    function openSidebar() {
+        drawer.classList.add('is-open');
+        drawer.setAttribute('aria-hidden', 'false');
+
+        if (overlay) overlay.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+
+        const first = drawer.querySelector('button, a, [tabindex]');
+        if (first) first.focus();
+    }
+
+    function closeSidebar() {
+        drawer.classList.remove('is-open');
+        drawer.setAttribute('aria-hidden', 'true');
+
+        if (overlay) overlay.classList.remove('is-open');
+        document.body.style.overflow = '';
+    }
+
+    // Слушаем событие закрытия из других частей кода
+    document.addEventListener('sidebar:close', closeSidebar);
+
+    document.querySelectorAll('[data-sidebar-open]').forEach(function (btn) {
+        btn.addEventListener('click', openSidebar);
+    });
+
+    if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+    if (overlay) overlay.addEventListener('click', closeSidebar);
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
+            closeSidebar();
+        }
+    });
+
+    document.querySelectorAll('.sidebar-accordion').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            btn.classList.toggle('is-open');
+        });
+    });
+})();
