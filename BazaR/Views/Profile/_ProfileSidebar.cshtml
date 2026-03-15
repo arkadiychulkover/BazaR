@@ -1,0 +1,133 @@
+@model BazaR.ViewModels.AccountProfileViewModel
+
+@{
+    var activeMenu = ViewBag.ActiveMenu as string;
+}
+<aside class="account-sidebar">
+    <div class="account-user-card @(activeMenu == "Profile" ? "account-menu__item--active" : "")">
+        <div class="account-user-card__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </svg>
+        </div>
+        <a asp-controller="Profile" asp-action="Profile">
+            <div class="account-user-card__info">
+                <div class="account-user-card__name">@(Model?.FullName)</div>
+                <div class="account-user-card__email">@(Model?.Email)</div>
+            </div>
+        </a>
+    </div>
+
+    <nav class="account-menu">
+        <a asp-controller="Profile" asp-action="Orders" class="account-menu__item @(activeMenu == "Orders" ? "account-menu__item--active" : "")">
+            <span class="account-menu__icon">
+                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20.8786 1.65002H3.69859C2.65478 1.65002 1.80859 2.49621 1.80859 3.54002V21.46C1.80859 22.5038 2.65478 23.35 3.69859 23.35H20.8786C21.9224 23.35 22.7686 22.5038 22.7686 21.46V3.54002C22.7686 2.49621 21.9224 1.65002 20.8786 1.65002Z" stroke="#1D1D1B" stroke-miterlimit="10" stroke-linecap="round"/>
+                    <path d="M7.60938 7.46002H19.9794" stroke="#1D1D1B" stroke-miterlimit="10" stroke-linecap="round"/>
+                    <path d="M7.60938 12.37H19.9794" stroke="#1D1D1B" stroke-miterlimit="10" stroke-linecap="round"/>
+                    <path d="M7.60938 17.28H19.9794" stroke="#1D1D1B" stroke-miterlimit="10" stroke-linecap="round"/>
+                    <path d="M5.38984 8.25997C5.83167 8.25997 6.18984 7.9018 6.18984 7.45997C6.18984 7.01815 5.83167 6.65997 5.38984 6.65997C4.94802 6.65997 4.58984 7.01815 4.58984 7.45997C4.58984 7.9018 4.94802 8.25997 5.38984 8.25997Z" fill="#1D1D1B"/>
+                    <path d="M5.38984 13.17C5.83167 13.17 6.18984 12.8118 6.18984 12.37C6.18984 11.9282 5.83167 11.57 5.38984 11.57C4.94802 11.57 4.58984 11.9282 4.58984 12.37C4.58984 12.8118 4.94802 13.17 5.38984 13.17Z" fill="#1D1D1B"/>
+                    <path d="M5.38984 18.08C5.83167 18.08 6.18984 17.7218 6.18984 17.28C6.18984 16.8382 5.83167 16.48 5.38984 16.48C4.94802 16.48 4.58984 16.8382 4.58984 17.28C4.58984 17.7218 4.94802 18.08 5.38984 18.08Z" fill="#1D1D1B"/>
+                </svg>
+            </span>
+            <span>Мої замовлення</span>
+        </a>
+
+        <a asp-controller="Profile" asp-action="Wishlist" class="account-menu__item @(activeMenu == "Wishlist" ? "account-menu__item--active" : "")">
+            <span class="account-menu__icon">
+                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.5 4.42999C13.2057 3.64561 14.0769 3.02786 15.0506 2.62144C16.0242 2.21502 17.0761 2.03008 18.13 2.07999C19.1929 2.14189 20.2191 2.49074 21.0996 3.08944C21.98 3.68813 22.6817 4.51427 23.13 5.47999C23.6702 6.86918 23.7405 8.3971 23.33 9.82999C22.9138 11.2525 22.2796 12.6018 21.45 13.83C19.0807 17.4011 16.0576 20.492 12.54 22.94" stroke="#1D1D1B" stroke-miterlimit="10" stroke-linecap="round"/>
+                    <path d="M12.5 4.42999C11.7943 3.64561 10.9231 3.02786 9.94941 2.62144C8.97573 2.21502 7.92388 2.03008 6.86996 2.07999C5.80706 2.14189 4.78081 2.49074 3.90038 3.08944C3.01995 3.68813 2.31827 4.51427 1.86996 5.47999C1.32973 6.86918 1.25949 8.3971 1.66996 9.82999C2.08615 11.2525 2.72035 12.6018 3.54996 13.83C5.91928 17.4011 8.94236 20.492 12.46 22.94" stroke="#1D1D1B" stroke-miterlimit="10" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <span>Список бажань</span>
+        </a>
+
+        <a asp-controller="Profile" asp-action="LoockedCards" class="account-menu__item @(activeMenu == "LoockedCards" ? "account-menu__item--active" : "")">
+            <span class="account-menu__icon">
+                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.35938 12.5C2.35938 12.5 6.14937 5.44 12.6994 5.44C19.2494 5.44 22.6394 12.5 22.6394 12.5" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round"/>
+                    <path d="M2.35938 12.5C2.35938 12.5 6.14937 19.56 12.6994 19.56C19.2494 19.56 22.6394 12.5 22.6394 12.5" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round"/>
+                    <path d="M12.5008 16.45C14.6823 16.45 16.4508 14.6815 16.4508 12.5C16.4508 10.3185 14.6823 8.54999 12.5008 8.54999C10.3193 8.54999 8.55078 10.3185 8.55078 12.5C8.55078 14.6815 10.3193 16.45 12.5008 16.45Z" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <span>Переглянуті товари</span>
+        </a>
+
+        <a asp-controller="Profile" asp-action="Mailings" class="account-menu__item @(activeMenu == "Mailings" ? "account-menu__item--active" : "")">
+            <span class="account-menu__icon">
+                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5.53906 15.9999V11.1899C5.53906 9.33343 6.27656 7.55295 7.58931 6.24019C8.90207 4.92744 10.6825 4.18994 12.5391 4.18994C13.4583 4.18994 14.3686 4.371 15.2178 4.72278C16.0671 5.07457 16.8388 5.59018 17.4888 6.24019C18.1388 6.8902 18.6544 7.66188 19.0062 8.51116C19.358 9.36044 19.5391 10.2707 19.5391 11.1899V15.9999" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round"/>
+                    <path d="M5.54047 16.26C4.7134 16.5835 4.00296 17.1486 3.50174 17.8817C3.00051 18.6148 2.73174 19.4819 2.73047 20.37H22.2705C22.2629 19.5197 22.0097 18.6898 21.5413 17.9801C21.0729 17.2704 20.4093 16.7113 19.6305 16.37" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round"/>
+                    <path d="M12.5316 23.41C13.3086 23.41 14.0539 23.1013 14.6034 22.5518C15.1529 22.0023 15.4616 21.2571 15.4616 20.48H9.60156C9.60156 21.2571 9.91026 22.0023 10.4597 22.5518C11.0092 23.1013 11.7545 23.41 12.5316 23.41Z" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round"/>
+                    <path d="M12.5206 4.35998C13.697 4.35998 14.6506 3.74213 14.6506 2.97998C14.6506 2.21782 13.697 1.59998 12.5206 1.59998C11.3443 1.59998 10.3906 2.21782 10.3906 2.97998C10.3906 3.74213 11.3443 4.35998 12.5206 4.35998Z" fill="#1E1E1C"/>
+                </svg>
+            </span>
+            <span>Розсилки</span>
+        </a>
+
+        <a asp-controller="Profile" asp-action="Wallet" class="account-menu__item @(activeMenu == "Wallet" ? "account-menu__item--active" : "")">
+            <span class="account-menu__icon">
+                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.8592 4.69922H3.14922C2.07226 4.69922 1.19922 5.57226 1.19922 6.64922V18.2492C1.19922 19.3262 2.07226 20.1992 3.14922 20.1992H21.8592C22.9362 20.1992 23.8092 19.3262 23.8092 18.2492V6.64922C23.8092 5.57226 22.9362 4.69922 21.8592 4.69922Z" stroke="#1D1D1B" stroke-miterlimit="10"/>
+                    <path d="M19.7681 17.96C20.8396 17.96 21.7081 17.0914 21.7081 16.02C21.7081 14.9485 20.8396 14.08 19.7681 14.08C18.6967 14.08 17.8281 14.9485 17.8281 16.02C17.8281 17.0914 18.6967 17.96 19.7681 17.96Z" stroke="#1D1D1B" stroke-miterlimit="10"/>
+                    <path d="M1.19922 8.24023H23.7992" stroke="#1D1D1B" stroke-miterlimit="10"/>
+                    <path d="M1.19922 10.6309H23.7992" stroke="#1D1D1B" stroke-miterlimit="10"/>
+                </svg>
+            </span>
+            <span>Мій гаманець</span>
+        </a>
+
+        <a asp-controller="Profile" asp-action="BonusAccount" class="account-menu__item @(activeMenu == "BonusAccount" ? "account-menu__item--active" : "")">
+            <span class="account-menu__icon">
+                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.4002 23.44C18.4698 23.44 23.3902 18.5196 23.3902 12.45C23.3902 6.38035 18.4698 1.45996 12.4002 1.45996C6.33055 1.45996 1.41016 6.38035 1.41016 12.45C1.41016 18.5196 6.33055 23.44 12.4002 23.44Z" stroke="#1E1E1C" stroke-miterlimit="10"/>
+                    <path d="M12.7892 6.84003L14.3792 10.07C14.4084 10.1335 14.453 10.1887 14.5088 10.2306C14.5647 10.2725 14.6302 10.2998 14.6992 10.31L18.2692 10.83C18.5092 10.87 18.6092 11.17 18.4292 11.34L15.8492 13.85C15.7492 13.95 15.7092 14.09 15.7392 14.23L16.3492 17.77C16.3992 18.01 16.1392 18.19 15.9192 18.07L12.7292 16.39C12.6092 16.33 12.4692 16.33 12.3492 16.39L9.14922 18.08C8.92922 18.2 8.66922 18.02 8.71922 17.78L9.33922 14.24C9.36922 14.1 9.32922 13.96 9.22922 13.86L6.63922 11.35C6.45922 11.18 6.55922 10.88 6.79922 10.84L10.3592 10.32C10.4992 10.3 10.6192 10.21 10.6792 10.08L12.2692 6.85003C12.3892 6.60003 12.6692 6.60003 12.7892 6.84003Z" stroke="#1E1E1C" stroke-miterlimit="10"/>
+                </svg>
+            </span>
+            <span>Мій бонусний рахунок</span>
+        </a>
+
+        <a asp-controller="Profile" asp-action="Premium" class="account-menu__item @(activeMenu == "Premium" ? "account-menu__item--active" : "")">
+            <span class="account-menu__icon">
+                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.5017 23.49C18.5713 23.49 23.4917 18.5696 23.4917 12.5C23.4917 6.4304 18.5713 1.51001 12.5017 1.51001C6.43211 1.51001 1.51172 6.4304 1.51172 12.5C1.51172 18.5696 6.43211 23.49 12.5017 23.49Z" stroke="#1E1E1C" stroke-miterlimit="10"/>
+                    <path d="M8.62228 7.85599H12.5843C13.4429 7.85599 14.0636 7.91199 14.4463 8.02399C14.8289 8.12666 15.1556 8.33199 15.4263 8.63999C15.8556 9.13466 16.0703 9.77399 16.0703 10.558C16.0703 11.258 15.8836 11.8553 15.5103 12.35C15.1929 12.7607 14.7916 13.022 14.3063 13.134C13.8209 13.2367 13.0976 13.288 12.1363 13.288H9.51828V17.74H8.62228V7.85599ZM9.51828 8.63999V12.462H12.9763C14.4323 12.462 15.1603 11.8227 15.1603 10.544C15.1603 10.1053 15.0669 9.73199 14.8803 9.42399C14.6749 9.08799 14.4136 8.87332 14.0963 8.77999C13.7789 8.68666 13.3683 8.63999 12.8643 8.63999H9.51828Z" fill="#1D1D1B"/>
+                </svg>
+            </span>
+            <span>Підписка Premium</span>
+        </a>
+
+        <a asp-controller="Profile" asp-action="Reviews" class="account-menu__item @(activeMenu == "Reviews" ? "account-menu__item--active" : "")">
+            <span class="account-menu__icon">
+                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6.1 18.8401H4.15C2.79 18.8401 1.75 17.8001 1.75 16.4501V5.67005C1.75 4.32005 2.79 3.28005 4.15 3.28005H20.42C21.77 3.28005 22.82 4.32005 22.82 5.67005V16.4501C22.82 17.8001 21.77 18.8401 20.42 18.8401H10.7" stroke="#1D1D1B" stroke-miterlimit="10" stroke-linecap="round"/>
+                    <path d="M10.7003 18.84L6.52032 23.05C6.30032 23.28 5.91032 23.12 5.91032 22.81V18.81" stroke="#1D1D1B" stroke-miterlimit="10" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <span>Мої відгуки</span>
+        </a>
+
+        <a asp-controller="Profile" asp-action="Messages" class="account-menu__item account-menu__item--messages @(activeMenu == "Messages" ? "account-menu__item--active" : "")">
+            <span class="account-menu__icon">
+                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.1914 4.88H3.82141C2.50697 4.88 1.44141 5.94557 1.44141 7.26V17.65C1.44141 18.9644 2.50697 20.03 3.82141 20.03H21.1914C22.5058 20.03 23.5714 18.9644 23.5714 17.65V7.26C23.5714 5.94557 22.5058 4.88 21.1914 4.88Z" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round"/>
+                    <path d="M3.26953 6.95996L12.4995 13.73L21.5595 6.95996" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <span>Моє листування</span>
+            <span class="account-menu__badge"></span>
+        </a>
+
+        <a asp-controller="Profile" asp-action="Promotions" class="account-menu__item @(activeMenu == "Promotions" ? "account-menu__item--active" : "")">
+            <span class="account-menu__icon">
+                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.7601 1.47995L1.46012 12.7799C1.0748 13.1661 0.858398 13.6894 0.858398 14.2349C0.858398 14.7805 1.0748 15.3038 1.46012 15.6899L9.34012 23.5699C9.72544 23.9663 10.2487 24.1977 10.7951 24.1977C11.3415 24.1977 11.8648 23.9663 12.2501 23.5699L23.5401 12.2799C23.9327 11.8912 24.1401 11.3699 24.1401 10.8299V1.63995C24.1401 1.04995 23.6601 0.819946 23.3201 0.819946L14.2001 0.879946C13.6607 0.886598 13.1447 1.10159 12.7601 1.47995Z" stroke="#1E1E1C" stroke-width="0.5" stroke-miterlimit="10"/>
+                    <path d="M20.9 5.37998C21.5627 5.37998 22.1 4.84272 22.1 4.17998C22.1 3.51724 21.5627 2.97998 20.9 2.97998C20.2372 2.97998 19.7 3.51724 19.7 4.17998C19.7 4.84272 20.2372 5.37998 20.9 5.37998Z" stroke="#1E1E1C" stroke-width="0.5" stroke-miterlimit="10"/>
+                </svg>
+            </span>
+            <span>Участь в акціях</span>
+        </a>
+    </nav>
+</aside>

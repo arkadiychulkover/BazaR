@@ -1,649 +1,99 @@
-@inject BazaR.Interfaces.IItemRepository ItemRepository
-
-@{
-    var title = ViewData["Title"] ?? "BazaR";
-    var categories = ItemRepository.GetAllCategories();
-}
+﻿@using System.Security.Claims
 
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@title - BazaR</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Site CSS -->
-    <link href="~/css/site.css" rel="stylesheet" />
-
-    <style>
-        html, body {
-            height: 100%;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            background-color: #f5f5f5;
-        }
-
-        main {
-            flex: 1 0 auto;
-        }
-
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 22px;
-        }
-
-        .sale-banner {
-            height: 320px;
-            background: linear-gradient(135deg, #ff4d4d, #cc0000);
-            color: white;
-            border-radius: 12px;
-        }
-
-        footer {
-            flex-shrink: 0;
-            background: #212529;
-            color: #ccc;
-            padding: 30px 0;
-            margin-top: 50px;
-        }
-
-            footer a {
-                color: #ccc;
-                text-decoration: none;
-            }
-
-                footer a:hover {
-                    color: white;
-                }
-
-        /* Стили для сообщений TempData */
-        .alert-container {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 9999;
-            max-width: 350px;
-        }
-
-        .alert {
-            margin-bottom: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            animation: slideIn 0.3s ease;
-        }
-
-        @@keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BazaR</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BazaR.styles.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400&display=swap" rel="stylesheet">
 </head>
-<body>
-    @* Глобальний токен для AJAX-запитів (кошик, обране тощо) *@
-    @Html.AntiForgeryToken()
+<body data-open-auth="@TempData.Peek("OpenAuth")"
+      data-is-authenticated="@((User.Identity?.IsAuthenticated ?? false).ToString().ToLower())">
+    @await Html.PartialAsync("~/Views/Account/_Login.cshtml")
+    @await Html.PartialAsync("~/Views/Account/_Register.cshtml")
 
-    <!-- Контейнер для всплывающих сообщений -->
-    <div class="alert-container">
-        @if (TempData["Ok"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                @TempData["Ok"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                @TempData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-    </div>
-
-    <!-- HEADER -->
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BazaR</a>
 
-                <a class="navbar-brand" asp-controller="Site" asp-action="Index">
-                    <i class="bi bi-shop"></i> BazaR
-                </a>
-
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="mainNavbar">
-
-                    <!-- Search Bar с мега-меню -->
-                    <div class="mx-auto w-50">
-                        @await Html.PartialAsync("_SearchBar", categories)
-                    </div>
-
-                    <!-- Right menu -->
-                    <ul class="navbar-nav ms-auto">
-
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Site" asp-action="Browse">
-                                <i class="bi bi-grid"></i> Каталог
-                            </a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link position-relative" href="#" onclick="openCartModal(); return false;">
-                                <i class="bi bi-cart"></i> Кошик
-                                <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                      style="@(((int)(ViewBag.CartCount ?? 0)) == 0 ? "display:none" : "")">
-                                    @(ViewBag.CartCount ?? 0)
-                                </span>
-                            </a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" asp-controller="Wishlist" asp-action="Index">
-                                <i class="bi bi-heart"></i> Обране
-                                <span id="wishlistCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="@((ViewBag.WishlistCount ?? 0) > 0 ? "" : "display: none;")">@(ViewBag.WishlistCount ?? 0)</span>
-                            </a>
-                        </li>
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Profile" asp-action="Profile">
+                                    @User.Identity?.Name
+                                </a>
+                            </li>
 
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person"></i>
-                                @if (ViewBag.User != null)
-                                {
-                                    <span>@ViewBag.User.Name</span>
-                                }
-                                else
-                                {
-                                    <span>Профіль</span>
-                                }
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                @if (ViewBag.User != null)
-                                {
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Site" asp-action="Profile">
-                                            <i class="bi bi-person-circle me-2"></i> Мій профіль
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Site" asp-action="Orders">
-                                            <i class="bi bi-bag-check me-2"></i> Мої замовлення
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="User" asp-action="SellingItems">
-                                            <i class="bi bi-shop me-2"></i> Мої товари
-                                        </a>
-                                    </li>
-                                    @if (ViewBag.User.IsAdmin)
-                                    {
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <a class="dropdown-item text-primary" asp-controller="Admin" asp-action="Dashboard">
-                                                <i class="bi bi-shield-lock me-2"></i> Адмін панель
-                                            </a>
-                                        </li>
-                                    }
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form asp-controller="Site" asp-action="Logout" method="post">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="dropdown-item text-danger">
-                                                <i class="bi bi-box-arrow-right me-2"></i> Вийти
-                                            </button>
-                                        </form>
-                                    </li>
-                                }
-                                else
-                                {
-                                    <li>
-                                        <a class="dropdown-item" href="#" data-open-login="true">
-                                            <i class="bi bi-box-arrow-in-right me-2"></i> Увійти
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#" data-open-register="true">
-                                            <i class="bi bi-person-plus me-2"></i> Реєстрація
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="nav-link text-dark border-0 bg-transparent p-0">
+                                        Вийти
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <button type="button"
+                                        class="nav-link text-dark border-0 bg-transparent p-0"
+                                        data-auth-open="login">
+                                    Увійти
+                                </button>
+                            </li>
 
+                            <li class="nav-item">
+                                <button type="button"
+                                        class="nav-link text-dark border-0 bg-transparent p-0"
+                                        data-auth-open="register">
+                                    Реєстрація
+                                </button>
+                            </li>
+                        }
                     </ul>
-
                 </div>
             </div>
         </nav>
     </header>
 
-    <!-- BODY -->
-    <main role="main" class="pb-3">
-        @RenderBody()
-    </main>
-
-    <!-- FOOTER -->
-    <footer>
-        <div class="container">
-            <div class="row">
-
-                <div class="col-md-4">
-                    <h5>BazaR</h5>
-                    <p>Інтернет-магазин електроніки, техніки та аксесуарів.</p>
-                    <div class="mt-3">
-                        <a href="#" class="text-white me-2"><i class="bi bi-facebook fs-5"></i></a>
-                        <a href="#" class="text-white me-2"><i class="bi bi-telegram fs-5"></i></a>
-                        <a href="#" class="text-white me-2"><i class="bi bi-instagram fs-5"></i></a>
-                        <a href="#" class="text-white"><i class="bi bi-youtube fs-5"></i></a>
-                    </div>
-                </div>
-
-                <div class="col-md-2">
-                    <h6>Інформація</h6>
-                    <ul class="list-unstyled">
-                        <li><a asp-controller="Site" asp-action="About">Про нас</a></li>
-                        <li><a asp-controller="Site" asp-action="Delivery">Доставка</a></li>
-                        <li><a asp-controller="Site" asp-action="Payment">Оплата</a></li>
-                        <li><a asp-controller="Site" asp-action="Contacts">Контакти</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-md-2">
-                    <h6>Покупцям</h6>
-                    <ul class="list-unstyled">
-                        <li><a asp-controller="Site" asp-action="HowToOrder">Як замовити</a></li>
-                        <li><a asp-controller="Site" asp-action="Warranty">Гарантія</a></li>
-                        <li><a asp-controller="Site" asp-action="Returns">Повернення</a></li>
-                        <li><a asp-controller="Site" asp-action="FAQ">FAQ</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-md-4">
-                    <h6>Контакти</h6>
-                    <p><i class="bi bi-telephone me-2"></i> 0-800-123-456</p>
-                    <p><i class="bi bi-envelope me-2"></i> support@bazar.ua</p>
-                    <p><i class="bi bi-geo-alt me-2"></i> Київ, вул. Хрещатик, 1</p>
-                    <p><i class="bi bi-clock me-2"></i> Пн-Пт: 9:00 - 20:00</p>
-                </div>
-
-            </div>
-
-            <hr class="mt-4" />
-
-            <div class="row">
-                <div class="col-md-6 text-center text-md-start">
-                    &copy; @DateTime.Now.Year - BazaR. Всі права захищені.
-                </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <a href="#" class="text-white-50 me-3">Політика конфіденційності</a>
-                    <a href="#" class="text-white-50">Умови використання</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Модальні вікна (Ivan) -->
-    @await Html.PartialAsync("_Login")
-    @await Html.PartialAsync("_Register")
-
-    <!-- Bootstrap JS -->
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- jQuery (для валидации) -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
-    <!-- Auth modals JS -->
-    <script src="~/js/site.js" asp-append-version="true"></script>
-
-    <!-- ===== МОДАЛЬНА КОРЗИНА ===== -->
-    <div class="cart-modal-overlay" id="cartOverlay" onclick="closeCartModal()"></div>
-    <div class="cart-modal" id="cartModal">
-        <div class="cart-modal__header">
-            <span class="cart-modal__title">Кошик</span>
-            <button class="cart-modal__close" onclick="closeCartModal()">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-
-        <div class="cart-modal__body" id="cartModalBody">
-            <div class="cart-modal__loading">
-                <div class="spinner-border text-success" role="status"></div>
-            </div>
-        </div>
-
-        <div class="cart-modal__footer" id="cartModalFooter" style="display:none;">
-            <a href="@Url.Action("Browse", "Site")" class="btn cart-modal__btn-continue">
-                Продовжити покупки
-            </a>
-            <div class="cart-modal__footer-right">
-                <span class="cart-modal__total-label">Разом:</span>
-                <span class="cart-modal__total-amount" id="cartTotalAmount">0 ₴</span>
-                <a href="@Url.Action("Checkout", "Site")" class="btn cart-modal__btn-order">
-                    Оформити замовлення
-                </a>
-            </div>
-        </div>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
     </div>
 
-    <style>
-        /* === Overlay === */
-        .cart-modal-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0); z-index: 1050;
-            transition: background 0.3s ease;
-        }
-        .cart-modal-overlay.active { display: block; background: rgba(0,0,0,0.42); }
+    @await Html.PartialAsync("_Footer")
+    @await Html.PartialAsync("_LoadOurApp")
+    @await Html.PartialAsync("_SocialMedia")
+    @await Html.PartialAsync("Error404")
 
-        /* === Modal container === */
-        .cart-modal {
-            display: none; position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0.92);
-            width: 640px; max-width: 96vw; max-height: 88vh;
-            background: #fff; border-radius: 20px; z-index: 1051;
-            box-shadow: 0 32px 80px rgba(0,0,0,0.22);
-            flex-direction: column; overflow: hidden;
-            opacity: 0; transition: opacity 0.25s ease, transform 0.25s ease;
-        }
-        .cart-modal.active { display: flex; opacity: 1; transform: translate(-50%, -50%) scale(1); }
-
-        /* === Header === */
-        .cart-modal__header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 22px 28px 18px; border-bottom: 1px solid #f0f0f0;
-        }
-        .cart-modal__title { font-size: 22px; font-weight: 800; color: #1a1a1a; }
-        .cart-modal__close {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: #f5f5f5; border: none; cursor: pointer;
-            font-size: 18px; color: #666;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s, color 0.2s;
-        }
-        .cart-modal__close:hover { background: #e8e8e8; color: #111; }
-
-        /* === Body === */
-        .cart-modal__body { flex: 1; overflow-y: auto; padding: 8px 28px 16px; }
-        .cart-modal__body::-webkit-scrollbar { width: 5px; }
-        .cart-modal__body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
-        .cart-modal__loading { display: flex; justify-content: center; padding: 48px 0; }
-
-        /* === Пустая корзина === */
-        .cart-empty {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; padding: 52px 0; text-align: center;
-        }
-        .cart-empty__icon { margin-bottom: 24px; }
-        .cart-empty__icon img {
-            width: 160px; height: auto;
-            filter: drop-shadow(0 8px 24px rgba(0,0,0,0.08));
-        }
-        .cart-empty__title {
-            font-size: 22px; font-weight: 800; color: #1a1a1a;
-            margin-bottom: 8px;
-        }
-        .cart-empty__sub { font-size: 15px; color: #999; margin-bottom: 24px; }
-        .cart-empty__btn {
-            display: inline-block; padding: 12px 32px;
-            background: #7ab800; color: #fff; border: none; border-radius: 12px;
-            font-size: 15px; font-weight: 600; text-decoration: none;
-            transition: background 0.2s, transform 0.15s;
-        }
-        .cart-empty__btn:hover { background: #5a9a00; color: #fff; transform: translateY(-1px); }
-
-        /* === Строка товара === */
-        .cart-item {
-            display: flex; align-items: center; gap: 14px;
-            padding: 16px 0; border-bottom: 1px solid #f4f4f4;
-            transition: background 0.15s;
-        }
-        .cart-item:last-child { border-bottom: none; }
-        .cart-item:hover { background: #fafffe; border-radius: 12px; margin: 0 -8px; padding: 16px 8px; }
-
-        .cart-item__img {
-            width: 76px; height: 76px; flex-shrink: 0;
-            border-radius: 12px; overflow: hidden;
-            border: 1px solid #ebebeb; background: #fafafa;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .cart-item__img img { width: 100%; height: 100%; object-fit: contain; }
-
-        .cart-item__info { flex: 1; min-width: 0; }
-        .cart-item__name {
-            font-size: 13px; color: #1a1a1a; line-height: 1.4;
-            display: -webkit-box; -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical; overflow: hidden;
-            margin-bottom: 6px; text-decoration: none; font-weight: 500;
-        }
-        .cart-item__name:hover { color: #5a9a00; }
-
-        .cart-item__price-row { display: flex; align-items: center; gap: 10px; }
-        .cart-item__price {
-            font-size: 16px; font-weight: 700; color: #1a1a1a;
-            letter-spacing: -0.02em;
-        }
-
-        .cart-item__qty {
-            display: flex; align-items: center;
-            border: 1.5px solid #e4e4e4; border-radius: 10px; overflow: hidden;
-            background: #fafafa;
-        }
-        .cart-item__qty-btn {
-            width: 34px; height: 34px; background: none; border: none;
-            font-size: 17px; color: #555; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.15s, color 0.15s;
-        }
-        .cart-item__qty-btn:hover { background: #7ab800; color: #fff; }
-        .cart-item__qty-num {
-            width: 38px; text-align: center; font-size: 14px;
-            font-weight: 700; color: #1a1a1a;
-        }
-
-        .cart-item__remove {
-            background: none; border: none; color: #d0d0d0; font-size: 18px;
-            cursor: pointer; padding: 6px; transition: color 0.2s, transform 0.15s;
-            flex-shrink: 0; border-radius: 8px;
-        }
-        .cart-item__remove:hover { color: #dc3545; transform: scale(1.15); }
-
-        /* === Футер === */
-        .cart-modal__footer {
-            padding: 18px 28px; border-top: 1px solid #f0f0f0;
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 12px; flex-wrap: wrap; background: #fafafa;
-        }
-        .cart-modal__btn-continue {
-            border: 1.5px solid #d0d0d0; background: #fff; color: #333;
-            border-radius: 12px; padding: 11px 22px; font-size: 14px;
-            font-weight: 600; white-space: nowrap; text-decoration: none;
-            transition: all 0.2s;
-        }
-        .cart-modal__btn-continue:hover { border-color: #7ab800; color: #5a9a00; }
-        .cart-modal__footer-right { display: flex; align-items: center; gap: 16px; }
-        .cart-modal__total-label { font-size: 14px; color: #999; white-space: nowrap; }
-        .cart-modal__total-amount {
-            font-size: 24px; font-weight: 800; color: #1a1a1a;
-            white-space: nowrap; letter-spacing: -0.02em;
-        }
-        .cart-modal__btn-order {
-            background: #7ab800; color: #fff; border: none;
-            border-radius: 12px; padding: 11px 24px; font-size: 14px;
-            font-weight: 700; white-space: nowrap; text-decoration: none;
-            transition: background 0.2s, transform 0.15s;
-            box-shadow: 0 4px 12px rgba(122,184,0,0.25);
-        }
-        .cart-modal__btn-order:hover {
-            background: #5a9a00; color: #fff;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(122,184,0,0.35);
-        }
-    </style>
-
-    <!-- Render page scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
-
-    <script>
-        var _cartToken = '';
-
-        // Автоматическое скрытие сообщений через 5 секунд
-        $(document).ready(function() {
-            setTimeout(function() {
-                $('.alert').alert('close');
-            }, 5000);
-
-            // Подхватываем CSRF-токен если есть на странице
-            _cartToken = $('input[name="__RequestVerificationToken"]').first().val() || '';
-        });
-
-        function openCartModal() {
-            $('#cartOverlay').addClass('active');
-            $('#cartModal').addClass('active');
-            loadCartModal();
-        }
-
-        function closeCartModal() {
-            $('#cartOverlay').removeClass('active');
-            $('#cartModal').removeClass('active');
-        }
-
-        function loadCartModal() {
-            $('#cartModalBody').html('<div class="cart-modal__loading"><div class="spinner-border text-success"></div></div>');
-            $('#cartModalFooter').hide();
-
-            $.get('@Url.Action("GetCartJson", "Site")', function(data) {
-                renderCartModal(data);
-            });
-        }
-
-        function renderCartModal(data) {
-            if (!data.items || data.items.length === 0) {
-                $('#cartModalBody').html(
-                    '<div class="cart-empty">' +
-                    '<div class="cart-empty__icon"><img src="/images/items/shopping-cart.png" alt="Кошик порожній"></div>' +
-                    '<div class="cart-empty__title">Ой! Кошик порожній!</div>' +
-                    '<div class="cart-empty__sub">Але це легко виправити!</div>' +
-                    '<a href="/Site/Browse" class="cart-empty__btn" onclick="closeCartModal()">Перейти до каталогу</a>' +
-                    '</div>'
-                );
-                $('#cartModalFooter').hide();
-                return;
-            }
-
-            var html = '';
-            data.items.forEach(function(item) {
-                html += '<div class="cart-item" id="cart-item-' + item.id + '">' +
-                    '<div class="cart-item__img"><img src="' + item.image + '" alt="' + item.name + '" onerror="this.src=\'/images/items/default.jpg\'"></div>' +
-                    '<div class="cart-item__info">' +
-                    '<a href="/Site/ItemDetails/' + item.id + '" class="cart-item__name">' + item.name + '</a>' +
-                    '<div class="cart-item__price-row">' +
-                    '<span class="cart-item__price">' + item.price.toLocaleString('uk-UA') + ' ₴</span>' +
-                    '</div>' +
-                    '</div>' +
-                    '<div class="cart-item__qty">' +
-                    '<button class="cart-item__qty-btn" onclick="cartChangeQty(' + item.id + ', ' + (item.quantity - 1) + ')">−</button>' +
-                    '<span class="cart-item__qty-num" id="qty-' + item.id + '">' + item.quantity + '</span>' +
-                    '<button class="cart-item__qty-btn" onclick="cartChangeQty(' + item.id + ', ' + (item.quantity + 1) + ')">+</button>' +
-                    '</div>' +
-                    '<button class="cart-item__remove" onclick="cartRemove(' + item.id + ')" title="Видалити"><i class="bi bi-trash3"></i></button>' +
-                    '</div>';
-            });
-
-            $('#cartModalBody').html(html);
-            $('#cartTotalAmount').text(data.total.toLocaleString('uk-UA') + ' ₴');
-            $('#cartModalFooter').show();
-        }
-
-        function cartChangeQty(itemId, newQty) {
-            if (newQty < 1) newQty = 0;
-            var token = $('input[name="__RequestVerificationToken"]').first().val();
-            if (!token) { console.error('Antiforgery token не знайдено'); return; }
-            $.ajax({
-                url: '@Url.Action("UpdateCartQuantity", "Site")',
-                type: 'POST',
-                traditional: true,
-                data: { itemId: itemId, quantity: newQty, __RequestVerificationToken: token },
-                success: function(r) {
-                    if (r.success) {
-                        if (newQty === 0) {
-                            $('#cart-item-' + itemId).fadeOut(200, function() { $(this).remove(); });
-                            if (r.cartCount === 0) loadCartModal();
-                        } else {
-                            $('#qty-' + itemId).text(newQty);
-                        }
-                        $('#cartTotalAmount').text(r.totalAmount.toLocaleString('uk-UA') + ' ₴');
-                        var badge = $('#cartBadge');
-                        if (badge.length) badge.text(r.cartCount);
-                    }
-                },
-                error: function(xhr) {
-                    if (xhr.status === 400) console.error('Помилка валідації (400). Перевірте antiforgery token.');
-                }
-            });
-        }
-
-        function cartRemove(itemId) {
-            cartChangeQty(itemId, 0);
-        }
-
-        function addToWishlist(button) {
-            var itemId = $(button).data('item-id');
-            $.post('@Url.Action("AddToWishlist", "Site")',
-                { id: itemId, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val() },
-                function(response) {
-                    if (response.success) {
-                        $(button).find('i').toggleClass('text-danger');
-                        var cnt = $('#wishlistCount');
-                        if (cnt.length) { cnt.text(response.wishlistCount); cnt.toggle(response.wishlistCount > 0); }
-                        if (typeof showNotification === 'function') showNotification('Додано в обране', 'success');
-                    } else if (response.requireLogin) {
-                        var $login = $('[data-open-login="true"]').first();
-                        if ($login.length) $login.trigger('click'); else $('#loginModal').modal('show');
-                    }
-                }
-            );
-        }
-
-        // При кліку по картці товара на головній — додаємо в обране, потім переходимо на сторінку товару
-        $(document).on('click', '.tovar-card__link', function(e) {
-            var $card = $(this).closest('.tovar-card');
-            var id = $card.data('item-id');
-            var url = $(this).attr('href');
-            if (!id || !url) return;
-            e.preventDefault();
-            var token = $('input[name="__RequestVerificationToken"]').first().val();
-            $.post('@Url.Action("AddToWishlist", "Site")', { id: id, __RequestVerificationToken: token }, function(response) {
-                if (response.success) {
-                    var cnt = $('#wishlistCount');
-                    if (cnt.length) { cnt.text(response.wishlistCount); cnt.toggle(response.wishlistCount > 0); }
-                    if (typeof showNotification === 'function') showNotification('Додано в обране', 'success');
-                    window.location = url;
-                } else if (response.requireLogin) {
-                    var $login = $('[data-open-login="true"]').first();
-                    if ($login.length) $login.trigger('click'); else $('#loginModal').modal('show');
-                } else {
-                    window.location = url;
-                }
-            }).fail(function() { window.location = url; });
-        });
-    </script>
-
 </body>
 </html>
