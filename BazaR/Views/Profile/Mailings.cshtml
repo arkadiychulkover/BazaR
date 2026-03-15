@@ -1,0 +1,102 @@
+@model BazaR.ViewModels.MailingViewModel
+@{
+    ViewData["Title"] = "Розсилки";
+}
+
+<div class="profile-page">
+    <div class="profile-page__layout">
+        @await Html.PartialAsync("_ProfileSidebar", Model.Profile)
+
+        <section class="profile-page__content">
+            <h1 class="profile-page__title">Розсилки</h1>
+            <p class="profile-page__subtitle">Керуйте підписками на новини, акції та персональні пропозиції.</p>
+
+            <form asp-action="MailingsUpdate" method="post">
+                <div class="settings-list">
+                    <div class="settings-item">
+                        <div class="settings-item__top">
+                            <div>
+                                <h3 class="settings-item__title">Новини та оновлення</h3>
+                                <p class="settings-item__text">Отримуйте важливі новини про сервіс та нові можливості.</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" name="NewsAndUpdates" value="true" @(Model.NewsAndUpdates ? "checked" : "") />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item__top">
+                            <div>
+                                <h3 class="settings-item__title">Спеціальні пропозиції</h3>
+                                <p class="settings-item__text">Особливі пропозиції, знижки та промоції.</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" name="SpecialOffers" value="true" @(Model.SpecialOffers ? "checked" : "") />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item__top">
+                            <div>
+                                <h3 class="settings-item__title">Персональні рекомендації</h3>
+                                <p class="settings-item__text">Рекомендації на основі ваших інтересів та історії.</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" name="PersonalRecommendations" value="true" @(Model.PersonalRecommendations ? "checked" : "") />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item__top">
+                            <div>
+                                <h3 class="settings-item__title">Сповіщення про товари</h3>
+                                <p class="settings-item__text">Оповіщення про нові товари та оновлення наявності.</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" name="ProductAlerts" value="true" @(Model.ProductAlerts ? "checked" : "") />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-item__top">
+                            <div>
+                                <h3 class="settings-item__title">Щотижневий дайджест</h3>
+                                <p class="settings-item__text">Щотижневе резюме найважливіших новин та пропоз ій.</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" name="WeeklyDigest" value="true" @(Model.WeeklyDigest ? "checked" : "") />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-frequency">
+                    <h3>Частота розсилок</h3>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="PreferredFrequency" value="daily" @(Model.PreferredFrequency == "daily" ? "checked" : "") />
+                            <span>Щодня</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="PreferredFrequency" value="weekly" @(Model.PreferredFrequency == "weekly" ? "checked" : "") />
+                            <span>Щотижня</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="PreferredFrequency" value="monthly" @(Model.PreferredFrequency == "monthly" ? "checked" : "") />
+                            <span>Щомісяця</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn-main" type="submit">Зберегти налаштування</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>

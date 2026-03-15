@@ -1,55 +1,69 @@
-﻿(function () {
-    function openModal(id) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.classList.add("is-open");
-        document.body.style.overflow = "hidden";
+﻿document.addEventListener('DOMContentLoaded', function () {
+    const body = document.body;
+    const loginModal = document.getElementById('loginModal');
+    const registerModal = document.getElementById('registerModal');
+    const isAuthenticated = (body.dataset.isAuthenticated || '').toLowerCase() === 'true';
+
+    function getModal(name) {
+        if (name === 'login') return loginModal;
+        if (name === 'register') return registerModal;
+        return null;
     }
 
-    function closeModal(el) {
-        el.classList.remove("is-open");
-        document.body.style.overflow = "";
+    function closeModal(modal) {
+        if (!modal) return;
+
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        body.classList.remove('auth-modal-open');
     }
 
-    document.addEventListener("click", function (e) {
-        // закриття
-        const closeBtn = e.target.closest("[data-auth-close='true']");
-        if (closeBtn) {
-            const modal = e.target.closest(".auth-modal");
-            if (modal) closeModal(modal);
-            return;
-        }
+    function closeAllModals() {
+        closeModal(loginModal);
+        closeModal(registerModal);
+    }
 
-        // відкриття логіну
-        const toLogin = e.target.closest("[data-open-login='true']");
-        if (toLogin) {
-            const login = document.getElementById("loginModal");
-            const reg = document.getElementById("registerModal");
-            if (reg) reg.classList.remove("is-open");
-            if (login) openModal("loginModal");
-            return;
-        }
+    function openModal(name) {
+        if (isAuthenticated) return;
 
-        // відкриття реєстрації
-        const toReg = e.target.closest("[data-open-register='true']");
-        if (toReg) {
-            const login = document.getElementById("loginModal");
-            const reg = document.getElementById("registerModal");
-            if (login) login.classList.remove("is-open");
-            if (reg) openModal("registerModal");
-            return;
-        }
+        const modal = getModal(name);
+        if (!modal) return;
 
-        // перемикання видимості пароля
-        const passToggle = e.target.closest("[data-pass-toggle='true']");
-        if (passToggle) {
-            const field = passToggle.closest(".auth-field--password");
-            if (!field) return;
-            const input = field.querySelector("input");
-            if (!input) return;
-            input.type = input.type === "password" ? "text" : "password";
-        }
+        closeAllModals();
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        body.classList.add('auth-modal-open');
+    }
+
+    document.querySelectorAll('[data-auth-open]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            openModal(button.dataset.authOpen);
+        });
     });
 
-    window.authModals = { openModal };
-})();
+    document.querySelectorAll('[data-auth-switch]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            openModal(button.dataset.authSwitch);
+        });
+    });
+
+    document.querySelectorAll('.auth-pass-toggle').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const wrap = button.closest('.auth-input-wrap');
+            const input = wrap ? wrap.querySelector('input[type="password"], input[type="text"]') : null;
+
+            if (!input) return;
+
+            input.type = input.type === 'password' ? 'text' : 'password';
+        });
+    });
+
+    if (!isAuthenticated) {
+        const openAuth = (body.dataset.openAuth || '').toLowerCase().trim();
+        if (openAuth === 'login' || openAuth === 'register') {
+            openModal(openAuth);
+        }
+    } else {
+        closeAllModals();
+    }
+});

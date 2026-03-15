@@ -2,50 +2,71 @@ using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.Repositories;
+using BazaR.Repository;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Добавьте сессии
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
+
+builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
-    options.IdleTimeout = TimeSpan.FromDays(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 6;
+    options.User.RequireUniqueEmail = true;
+
+    options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(12);
 });
 
-// Регистрация DbContext (замените на вашу строку подключения)
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = "BazaR";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 
-// Регистрация репозиториев
+    options.ExpireTimeSpan = TimeSpan.FromHours(12);
+    options.SlidingExpiration = true;
+
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+});
+
+builder.Services
+    .AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = "596714054566-thnvk9mt56pa9fr64escum0ucj1hsr9b.apps.googleusercontent.com";
+        options.ClientSecret = "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";
+    });
+    //.AddFacebook(options =>
+    //{
+    //    options.AppId = builder.Configuration["Authentication:Facebook:AppId"] ?? "";
+    //    options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"] ?? "";
+    //});
+
 builder.Services.AddScoped<IUserDb, UserRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 
 var app = builder.Build();
 
-// Seed тестового користувача, якщо його ще немає
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    if (!db.Users.Any(u => u.Email == "admin@bazar.ua"))
-    {
-        db.Users.Add(new User
-        {
-            Email = "admin@bazar.ua",
-            Name = "Адмін",
-            PasswordHash = "admin123",
-            IsAdmin = true
-        });
-        db.SaveChanges();
-    }
-}
-
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -57,10 +78,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
-
-// Важно: UseSession должен быть после UseRouting и перед UseEndpoints
-app.UseSession();
 
 app.MapControllerRoute(
     name: "default",

@@ -1,21 +1,14 @@
-﻿// User.cs
+﻿using Microsoft.AspNetCore.Identity;
+
 namespace BazaR.Models
 {
-    public class User
+    public class User : IdentityUser<int>
     {
-        public int Id { get; set; }
-
-        public string Email { get; set; }
-
-        public string PasswordHash { get; set; }
-
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public bool IsAdmin { get; set; }
 
         public List<CartItem> CartItems { get; set; } = new();
-
-        public List<SearchItem> SearchHistory { get; set; } = new();
 
         public List<WishlistItem> WishlistItems { get; set; } = new();
 

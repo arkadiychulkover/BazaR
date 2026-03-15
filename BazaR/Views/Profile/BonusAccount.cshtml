@@ -1,0 +1,55 @@
+@model BazaR.ViewModels.BonusAccountViewModel
+@{
+    ViewData["Title"] = "Мій бонусний рахунок";
+}
+
+<div class="profile-page">
+    <div class="profile-page__layout">
+        @await Html.PartialAsync("_ProfileSidebar", Model.Profile)
+
+        <section class="profile-page__content">
+            <h1 class="profile-page__title">Мій бонусний рахунок</h1>
+            <p class="profile-page__subtitle">Накопичуйте бонуси та використовуйте їх під час покупок.</p>
+
+            <div class="bonus-highlight">
+                <small>Ваш бонусний баланс</small>
+                <strong>@Model.TotalBalance бонусів</strong>
+            </div>
+
+            <div class="bonus-info">
+                <div class="bonus-box">
+                    <h3>Нараховано цього місяця</h3>
+                    <p>+@Model.MonthlyAccrued бонусів</p>
+                </div>
+                <div class="bonus-box">
+                    <h3>Використано</h3>
+                    <p>@Model.MonthlySpent бонусів</p>
+                </div>
+                <div class="bonus-box">
+                    <h3>Термін дії</h3>
+                    @if (Model.ExpirationDate.HasValue)
+                    {
+                        <p>До @Model.ExpirationDate.Value.ToString("dd.MM.yyyy")</p>
+                    }
+                    else
+                    {
+                        <p>Без обмежень</p>
+                    }
+                </div>
+            </div>
+
+            <div class="bonus-details">
+                <h3>Як отримуються бонуси?</h3>
+                <p>Ви отримуєте @Model.AccrualRate бонус за кожну гривню потрачену при покупці.</p>
+                <h3>Як використовувати бонуси?</h3>
+                <p>Застосуйте накопичені бонуси як знижку при оформленні замовлення. Один бонус дорівнює одній гривні.</p>
+            </div>
+        </section>
+    </div>
+</div>
+
+                </div>
+            </div>
+        </section>
+    </div>
+</div>

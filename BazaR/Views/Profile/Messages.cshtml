@@ -1,0 +1,42 @@
+@model BazaR.ViewModels.AccountMessagesViewModel
+
+@{
+    ViewData["Title"] = "Моє листування";
+}
+
+<div class="profile-page">
+    <div class="profile-page__layout">
+        @await Html.PartialAsync("_ProfileSidebar", Model.Profile)
+
+        <section class="profile-page__content">
+            <h1 class="profile-page__title">Моє листування</h1>
+            <p class="profile-page__subtitle">Ваші діалоги з продавцями, менеджерами та підтримкою.</p>
+
+            @if (!Model.Messages.Any())
+            {
+                <div class="empty-state">
+                    <p>У вас ще немає повідомлень.</p>
+                </div>
+            }
+            else
+            {
+                <div class="chat-list">
+                    @foreach (var msg in Model.Messages)
+                    {
+                        <a href="#" class="chat-item">
+                            <div>
+                                <div class="chat-item__name">@msg.Name</div>
+                                <div class="chat-item__text">@msg.Content</div>
+                            </div>
+                            <div class="chat-item__date">
+                                @(msg.DateTime.Date == DateTime.Today
+                                                        ? "Сьогодні"
+                                                        : msg.DateTime.ToString("dd.MM.yyyy"))
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+        </section>
+    </div>
+</div>
