@@ -1,10 +1,9 @@
+using System.Text.Json;
+using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Models;
-using BazaR.ViewModels;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace BazaR.Controllers
 {
@@ -12,22 +11,23 @@ namespace BazaR.Controllers
     {
         private readonly IUserDb _usMan;
         private readonly IItemRepository _itMan;
-        private readonly UserManager<User> _userManager;
+        private readonly AppDbContext _db;
 
         private const int PageSize = 12;
 
-        public SiteController(IUserDb usMan, IItemRepository itMan, UserManager<User> userManager)
+        public SiteController(IUserDb usMan, IItemRepository itMan, AppDbContext db)
         {
             _usMan = usMan;
             _itMan = itMan;
-            _userManager = userManager;
+            _db = db;
         }
 
-        private User? CurrentUser => User.Identity?.IsAuthenticated == true 
-            ? _userManager.GetUserAsync(User).Result 
-            : null;
+        private int? CurrentUserId => HttpContext.Session.GetInt32("uid");
 
-        private bool IsAuthenticated => User.Identity?.IsAuthenticated == true;
+        private User? CurrentUser =>
+            CurrentUserId.HasValue ? _usMan.GetUser(CurrentUserId.Value) : null;
+
+        private bool IsAuthenticated => CurrentUserId.HasValue;
 
         private bool IsAdmin => CurrentUser?.IsAdmin == true;
 
@@ -35,9 +35,9 @@ namespace BazaR.Controllers
         {
             ViewBag.User = CurrentUser;
 
-            if (IsAuthenticated && CurrentUser != null)
+            if (IsAuthenticated)
             {
-                var userId = CurrentUser.Id;
+                var userId = CurrentUserId!.Value;
                 ViewBag.CartCount = _usMan.GetCartItems(userId)?.Count() ?? 0;
                 ViewBag.WishlistCount = _usMan.GetWishList(userId)?.Count() ?? 0;
             }
@@ -66,43 +66,223 @@ namespace BazaR.Controllers
         {
             SetLayoutData();
 
-            var items = _itMan.GetAll();
+            var categories = _db.Categories.ToList();
 
-            HashSet<int> wishlistIds = new();
-            if (IsAuthenticated && CurrentUser != null)
-            {
-                var userId = CurrentUser.Id;
-                wishlistIds = _usMan.GetWishList(userId)
-                                    .Select(i => i.Id)
-                                    .ToHashSet();
-            }
+            // Акційні пропозиції (дорогі, доступні)
+            var featuredItems = _db.Items
+                .Where(i => i.IsAvailable)
+                .OrderByDescending(i => i.Price)
+                .Take(5)
+                .ToList();
 
-            var model = items.Select(x => new ItemCardVm
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Price = x.Price,
-                OldPrice = null,
-                ImageUrl = x.ImageUrl,
-                InWishlist = wishlistIds.Contains(x.Id)
-            }).ToList();
+            // Зараз шукають (по кількості відгуків)
+            var trendingItems = _db.Items
+                .Where(i => i.IsAvailable)
+                .OrderByDescending(i => i.Reviews.Count)
+                .Take(5)
+                .ToList();
 
-            return View(model);
+            // Рекомендації (нові товари)
+            var recommendedItems = _db.Items
+                .Where(i => i.IsAvailable)
+                .OrderByDescending(i => i.Id)
+                .Take(5)
+                .ToList();
+
+            // Найбільш очікувані (за середнім рейтингом)
+            var popularItems = _db.Items
+                .Where(i => i.IsAvailable)
+                .OrderByDescending(i => i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0)
+                .Take(5)
+                .ToList();
+
+            ViewBag.Categories = categories;
+            ViewBag.FeaturedItems = featuredItems;
+            ViewBag.TrendingItems = trendingItems;
+            ViewBag.RecommendedItems = recommendedItems;
+            ViewBag.PopularItems = popularItems;
+
+            return View();
         }
 
-
         [HttpGet]
-        public IActionResult Browse(string? query, List<int>? categoryIds, int page = 1, string sort = "default")
+        public IActionResult Browse(string? query, List<int>? categoryIds, int page = 1,
+    string sort = "default", decimal? minPrice = null, decimal? maxPrice = null,
+    List<int>? brandIds = null)
         {
             SetLayoutData();
             if (page < 1) page = 1;
 
-            var items = string.IsNullOrWhiteSpace(query)
-                ? _itMan.GetAll()
-                : _itMan.Search(query);
+            // Получаем все категории с их фильтрами и брендами
+            var allCategories = _db.Categories
+                .Include(c => c.CategoryBrands)
+                    .ThenInclude(cb => cb.Brand)
+                .Include(c => c.Filters) // ВАЖНО: загружаем фильтры категорий
+                .ToList();
 
-            if (categoryIds != null && categoryIds.Count > 0)
-                items = items.Where(i => categoryIds.Contains(i.CategoryId)).ToList();
+            ViewBag.AllCategories = allCategories;
+            ViewBag.MainCategories = allCategories.Where(c => c.ParentCategoryId == null)
+                .OrderBy(c => c.DisplayOrder)
+                .ToList();
+
+            IQueryable<Item> itemsQuery = _db.Items
+                .Include(i => i.Brand)
+                .Include(i => i.Category)
+                .Include(i => i.Reviews)
+                .Include(i => i.Characteristics) // ВАЖНО: загружаем характеристики
+                .AsQueryable()
+                .AsNoTracking();
+
+
+            // Фильтр по поисковому запросу
+            if (!string.IsNullOrWhiteSpace(query))
+                itemsQuery = itemsQuery.Where(i => i.Name.Contains(query) ||
+                                                  (i.Desc != null && i.Desc.Contains(query)));
+
+            // Получаем ID всех подкатегорий для выбранных категорий
+            var allCategoryIds = new List<int>();
+            Category? currentCategory = null;
+
+            if (categoryIds != null && categoryIds.Any())
+            {
+                foreach (var catId in categoryIds)
+                {
+                    allCategoryIds.Add(catId);
+                    allCategoryIds.AddRange(GetSubCategoryIds(catId));
+                }
+                allCategoryIds = allCategoryIds.Distinct().ToList();
+                itemsQuery = itemsQuery.Where(i => allCategoryIds.Contains(i.CategoryId));
+
+                // Для фильтра брендов в выбранной категории
+                currentCategory = allCategories.FirstOrDefault(c => c.Id == categoryIds[0]);
+                List<Brand> allBrands = new List<Brand>();
+                if (currentCategory != null)
+                {
+                    ViewBag.CurrentCategory = currentCategory;
+                    ViewBag.CategoryPath = GetCategoryPath(categoryIds[0], allCategories);
+                    ViewBag.SubCategories = allCategories
+                        .Where(c => c.ParentCategoryId == categoryIds[0])
+                        .OrderBy(c => c.DisplayOrder)
+                        .ToList();
+
+                    // Бренды для текущей категории
+                    allBrands = currentCategory.CategoryBrands?
+                        .Select(cb => cb.Brand)
+                        .OrderBy(b => b.Name)
+                        .ToList() ?? new List<Brand>();
+
+                    if (currentCategory.ParentCategory != null) 
+                    {
+                        allBrands.AddRange(
+                        currentCategory.ParentCategory.CategoryBrands
+                        .Select(cb => cb.Brand)
+                        .OrderBy(b => b.Name)
+                        .ToList() ?? new List<Brand>());
+                    }
+
+                    //Console.WriteLine(allBrands.Count() + " Brand count ==============================");
+                    ViewBag.CategoryBrands = allBrands;
+                }
+            }
+
+            // Фильтр по цене
+            if (minPrice.HasValue)
+                itemsQuery = itemsQuery.Where(i => i.Price >= minPrice.Value);
+
+            if (maxPrice.HasValue)
+                itemsQuery = itemsQuery.Where(i => i.Price <= maxPrice.Value);
+
+            // Фильтр по брендам
+            if (brandIds != null && brandIds.Any())
+                itemsQuery = itemsQuery.Where(i => brandIds.Contains(i.BrandId));
+
+            // Собираем динамические фильтры из QueryString
+            var selectedFilters = new Dictionary<string, List<string>>();
+            foreach (var key in Request.Query.Keys.Where(k => k.StartsWith("filter_")))
+            {
+                var filterKey = key.Substring("filter_".Length);
+                var values = Request.Query[key].ToString().Split(',').ToList();
+                selectedFilters[filterKey] = values;
+
+                // Применяем фильтр
+                itemsQuery = itemsQuery.Where(i => i.Characteristics
+                    .Any(c => c.Key == filterKey && values.Contains(c.Value)));
+            }
+            ViewBag.SelectedFilters = selectedFilters;
+
+            // Собираем варианты для каждого фильтра категории (из всех товаров в категории, без учета текущих фильтров)
+            var filterOptions = new Dictionary<string, List<string>>();
+
+            if (currentCategory != null && currentCategory.Filters != null && currentCategory.Filters.Any())
+            {
+                // Запрос для получения всех товаров в категории (без фильтров)
+                IQueryable<Item> itemsForOptionsQuery = _db.Items
+                    .Include(i => i.Characteristics)
+                    .AsQueryable();
+
+                if (allCategoryIds.Any())
+                {
+                    itemsForOptionsQuery = itemsForOptionsQuery.Where(i => allCategoryIds.Contains(i.CategoryId));
+                }
+
+                var itemsInCategory = itemsForOptionsQuery.ToList();
+
+                foreach (var filter in currentCategory.Filters)
+                {
+                    var values = itemsInCategory
+                        .SelectMany(i => i.Characteristics.Where(c => c.Key == filter.Key))
+                        .Select(c => c.Value)
+                        .Where(v => !string.IsNullOrEmpty(v))
+                        .Distinct()
+                        .OrderBy(v => v)
+                        .ToList();
+
+                    filterOptions[filter.Key] = values;
+                }
+            }
+            else
+            {
+                // Если нет фильтров категории, но есть характеристики товаров, 
+                // можем создать динамические фильтры на основе характеристик
+                IQueryable<Item> itemsForOptionsQuery = _db.Items
+                    .Include(i => i.Characteristics)
+                    .AsQueryable();
+
+                if (allCategoryIds.Any())
+                {
+                    itemsForOptionsQuery = itemsForOptionsQuery.Where(i => allCategoryIds.Contains(i.CategoryId));
+                }
+
+                var itemsInCategory = itemsForOptionsQuery.ToList();
+
+                // Группируем характеристики по ключам
+                var allCharKeys = itemsInCategory
+                    .SelectMany(i => i.Characteristics)
+                    .Select(c => c.Key)
+                    .Distinct()
+                    .ToList();
+
+                foreach (var key in allCharKeys)
+                {
+                    var values = itemsInCategory
+                        .SelectMany(i => i.Characteristics.Where(c => c.Key == key))
+                        .Select(c => c.Value)
+                        .Where(v => !string.IsNullOrEmpty(v))
+                        .Distinct()
+                        .OrderBy(v => v)
+                        .ToList();
+
+                    if (values.Any())
+                    {
+                        filterOptions[key] = values;
+                    }
+                }
+            }
+
+            ViewBag.FilterOptions = filterOptions;
+
+            // Применяем сортировку к уже отфильтрованным данным
+            var items = itemsQuery.ToList();
 
             items = sort switch
             {
@@ -117,40 +297,96 @@ namespace BazaR.Controllers
 
             var total = items.Count;
             var totalPages = (int)Math.Ceiling(total / (double)PageSize);
+            var paged = items.Skip((page - 1) * PageSize).Take(PageSize).ToList();
 
-            var paged = items
-                .Skip((page - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-
-            HashSet<int> wishlistIds = new();
-            if (IsAuthenticated && CurrentUser != null)
-            {
-                var userId = CurrentUser.Id;
-                wishlistIds = _usMan.GetWishList(userId)
-                                    .Select(i => i.Id)
-                                    .ToHashSet();
-            }
-
-            var model = paged.Select(x => new ItemCardVm
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Price = x.Price,
-                OldPrice = null,
-                ImageUrl = x.ImageUrl,
-                InWishlist = wishlistIds.Contains(x.Id)
-            }).ToList();
-
+            // Сохраняем параметры для фильтров
             ViewBag.Query = query ?? "";
             ViewBag.CategoryIds = categoryIds ?? new List<int>();
+            ViewBag.BrandIds = brandIds ?? new List<int>();
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
             ViewBag.Page = page;
             ViewBag.PageSize = PageSize;
-            ViewBag.Total = total;
             ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = total;
             ViewBag.CurrentSort = sort;
 
-            return View(model);
+            return View(paged);
+        }
+
+        [HttpGet]
+        public IActionResult SearchSuggestions(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return Json(new List<object>());
+
+            query = query.Trim().ToLower();
+
+            // Получаем все категории
+            var categories = _db.Categories
+                .Where(c => c.Name.ToLower().Contains(query))
+                .Select(c => new { Type = "Category", Id = c.Id, Name = c.Name })
+                .ToList();
+
+            // Получаем бренды внутри категорий
+            var brands = _db.CategoryBrands
+                .Include(cb => cb.Brand)
+                .Include(cb => cb.Category)
+                .Where(cb => cb.Brand.Name.ToLower().Contains(query))
+                .Select(cb => new
+                {
+                    Type = "Brand",
+                    CategoryId = cb.CategoryId,
+                    BrandId = cb.BrandId,
+                    Name = $"{cb.Category.Name} {cb.Brand.Name}"
+                })
+                .ToList();
+
+            var results = categories.Cast<object>().Concat(brands.Cast<object>()).ToList();
+
+            return Json(results);
+        }
+
+        private List<int> GetSubCategoryIds(int categoryId)
+        {
+            var ids = new List<int>();
+            var subCats = _db.Categories.Where(c => c.ParentCategoryId == categoryId).ToList();
+            foreach (var subCat in subCats)
+            {
+                ids.Add(subCat.Id);
+                ids.AddRange(GetSubCategoryIds(subCat.Id));
+            }
+            return ids;
+        }
+
+        private List<Category> GetCategoryPath(int categoryId, List<Category> allCategories)
+        {
+            var path = new List<Category>();
+            var current = allCategories.FirstOrDefault(c => c.Id == categoryId);
+
+            while (current != null)
+            {
+                path.Insert(0, current);
+                current = current.ParentCategoryId.HasValue
+                    ? allCategories.FirstOrDefault(c => c.Id == current.ParentCategoryId.Value)
+                    : null;
+            }
+
+            return path;
+        }
+
+        [HttpGet]
+        public IActionResult CategoryPage(int category)
+        {
+            List<int> categorysId = GetSubCategoryIds(category);
+            List<Category> categories = new();
+            ViewBag.CategotyName = _itMan.GetCategoryById(category).Name;
+
+            foreach (int cat in categorysId)
+            {
+                categories.Add(_itMan.GetCategoryById(cat));
+            }
+            return View(categories.Take(12).ToList());
         }
 
         [HttpGet]
@@ -163,15 +399,15 @@ namespace BazaR.Controllers
 
             ViewBag.Images = item.Colors?.Select(c => c.Color).ToList() ?? new List<string>();
             ViewBag.Category = item.Category;
-            ViewBag.RelatedItems = _itMan.GetByCategory(item.CategoryId)
+            ViewBag.RelationItems = _itMan.GetByCategory(item.CategoryId)
                 .Where(i => i.Id != id)
                 .Take(4)
                 .ToList();
             ViewBag.Seller = item.User;
 
-            if (IsAuthenticated && CurrentUser != null)
+            if (IsAuthenticated)
             {
-                var userId = CurrentUser.Id;
+                var userId = CurrentUserId!.Value;
                 ViewBag.IsInCart = _usMan.GetCartItems(userId).Any(i => i.Id == id);
                 ViewBag.IsInWishlist = _usMan.GetWishList(userId).Any(i => i.Id == id);
             }
@@ -187,11 +423,11 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult Cart()
         {
-            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(Cart)));
+            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Cart)));
 
             SetLayoutData();
 
-            var userId = CurrentUser.Id;
+            var userId = CurrentUserId!.Value;
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
             var items = cartItems.Select(ci => ci.Item).ToList();
 
@@ -209,7 +445,7 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddToCart(int itemId, int quantity = 1)
         {
-            if (!IsAuthenticated || CurrentUser == null)
+            if (!IsAuthenticated)
             {
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
@@ -223,7 +459,7 @@ namespace BazaR.Controllers
             var item = _itMan.GetById(itemId);
             if (item == null) return NotFound();
 
-            var userId = CurrentUser.Id;
+            var userId = CurrentUserId!.Value;
 
             for (int i = 0; i < quantity; i++)
             {
@@ -246,9 +482,9 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult RemoveFromCart(int itemId)
         {
-            if (!IsAuthenticated || CurrentUser == null) return RequireLogin();
+            if (!IsAuthenticated) return RequireLogin();
 
-            var userId = CurrentUser.Id;
+            var userId = CurrentUserId!.Value;
 
             _usMan.RemoveFromCart(userId, itemId);
 
@@ -268,25 +504,11 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult UpdateCartQuantity(int itemId, int quantity)
         {
-            if (!IsAuthenticated || CurrentUser == null) return RequireLogin();
+            if (!IsAuthenticated) return RequireLogin();
 
-            var userId = CurrentUser.Id;
+            var userId = CurrentUserId!.Value;
 
-            var cartItems = _usMan.GetCartItemsWithQuantity(userId);
-            var currentItem = cartItems.FirstOrDefault(ci => ci.ItemId == itemId);
-
-            if (currentItem != null)
-            {
-                for (int i = 0; i < currentItem.Quantity; i++)
-                {
-                    _usMan.RemoveFromCart(userId, itemId);
-                }
-            }
-
-            for (int i = 0; i < quantity; i++)
-            {
-                _usMan.AddToCart(userId, itemId);
-            }
+            _usMan.SetCartQuantity(userId, itemId, quantity);
 
             var newCartItems = _usMan.GetCartItemsWithQuantity(userId);
             var newCartCount = newCartItems.Sum(ci => ci.Quantity);
@@ -304,9 +526,9 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ClearCart()
         {
-            if (!IsAuthenticated || CurrentUser == null) return RequireLogin();
+            if (!IsAuthenticated) return RequireLogin();
 
-            var userId = CurrentUser.Id;
+            var userId = CurrentUserId!.Value;
 
             _usMan.ClearCart(userId);
 
@@ -315,23 +537,46 @@ namespace BazaR.Controllers
         }
 
         [HttpGet]
+        public IActionResult GetCartJson()
+        {
+            if (!IsAuthenticated)
+                return Json(new { items = new object[0], total = 0, count = 0 });
+
+            var userId = CurrentUserId!.Value;
+            var cartItems = _usMan.GetCartItemsWithQuantity(userId);
+
+            var result = cartItems.Select(ci => new
+            {
+                id = ci.ItemId,
+                name = ci.Item.Name,
+                price = ci.Item.Price,
+                quantity = ci.Quantity,
+                subtotal = ci.Item.Price * ci.Quantity,
+                image = !string.IsNullOrEmpty(ci.Item.ImageUrl)
+                    ? ci.Item.ImageUrl
+                    : (ci.Item.Colors?.FirstOrDefault()?.Color ?? "/images/items/default.jpg")
+            });
+
+            return Json(new
+            {
+                items = result,
+                total = cartItems.Sum(ci => ci.Item.Price * ci.Quantity),
+                count = cartItems.Sum(ci => ci.Quantity)
+            });
+        }
+
+        [HttpGet]
         public IActionResult Wishlist()
         {
-            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(Wishlist)));
-
-            SetLayoutData();
-
-            var userId = CurrentUser.Id;
-            var items = _usMan.GetWishList(userId).ToList();
-
-            return View(items);
+            if (!IsAuthenticated) return RequireLogin(Url.Action("Index", "Wishlist"));
+            return RedirectToAction("Index", "Wishlist");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult AddToWishlist(int id)
         {
-            if (!IsAuthenticated || CurrentUser == null)
+            if (!IsAuthenticated)
             {
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
@@ -343,7 +588,7 @@ namespace BazaR.Controllers
             var item = _itMan.GetById(id);
             if (item == null) return NotFound();
 
-            var userId = CurrentUser.Id;
+            var userId = CurrentUserId!.Value;
 
             _usMan.AddToWishList(userId, id);
 
@@ -363,9 +608,9 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult RemoveFromWishlist(int id)
         {
-            if (!IsAuthenticated || CurrentUser == null) return RequireLogin();
+            if (!IsAuthenticated) return RequireLogin();
 
-            var userId = CurrentUser.Id;
+            var userId = CurrentUserId!.Value;
 
             _usMan.RemoveFromWishList(userId, id);
 
@@ -384,11 +629,11 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult Checkout()
         {
-            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(Checkout)));
+            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Checkout)));
 
             SetLayoutData();
 
-            var userId = CurrentUser.Id;
+            var userId = CurrentUserId!.Value;
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
 
             if (!cartItems.Any())
@@ -407,9 +652,9 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CreateOrder(string address, string paymentMethod, string deliveryMethod)
         {
-            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(Checkout)));
+            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Checkout)));
 
-            var userId = CurrentUser.Id;
+            var userId = CurrentUserId!.Value;
 
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
             if (!cartItems.Any())
@@ -428,7 +673,7 @@ namespace BazaR.Controllers
                 PaymentMethod = paymentMethod,
                 DeliveryMethod = deliveryMethod,
                 PaymentStatus = "Pending",
-                CityId = 1
+                CityId = 1 // По умолчанию Киев, нужно добавить выбор города
             };
 
             foreach (var cartItem in cartItems)
@@ -458,11 +703,11 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult Orders()
         {
-            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(Orders)));
+            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Orders)));
 
             SetLayoutData();
 
-            var userId = CurrentUser.Id;
+            var userId = CurrentUserId!.Value;
             var orders = _usMan.GetUserOrders(userId)
                 .OrderByDescending(o => o.Id)
                 .ToList();
@@ -475,18 +720,19 @@ namespace BazaR.Controllers
         [HttpGet]
         public IActionResult OrderDetails(int id)
         {
-            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(OrderDetails), new { id }));
+            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(OrderDetails), new { id }));
 
             SetLayoutData();
 
             var order = _usMan.GetOrderById(id);
             if (order == null) return NotFound();
 
-            if (!IsAdmin && order.UserId != CurrentUser.Id)
+            if (!IsAdmin && order.UserId != CurrentUserId!.Value)
                 return RedirectToAction(nameof(AccessDenied));
 
             ViewBag.Items = order.OrderItems;
             ViewBag.City = order.City ?? new City { Name = "Киев", Id = 1 };
+            ViewBag.eUser = order.User;
             ViewBag.User = order.User;
 
             return View(order);
@@ -496,17 +742,148 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CancelOrder(int id)
         {
-            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(Orders)));
+            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Orders)));
 
             var order = _usMan.GetOrderById(id);
             if (order == null) return NotFound();
 
-            if (!IsAdmin && order.UserId != CurrentUser.Id)
+            if (!IsAdmin && order.UserId != CurrentUserId!.Value)
                 return RedirectToAction(nameof(AccessDenied));
 
             var ok = _usMan.CancelOrder(id);
             TempData[ok ? "Ok" : "Error"] = ok ? "Заказ отменён." : "Не удалось отменить заказ.";
             return RedirectToAction(nameof(Orders));
+        }
+
+        [HttpGet]
+        public IActionResult Profile()
+        {
+            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Profile)));
+
+            SetLayoutData();
+
+            var user = CurrentUser;
+            ViewBag.OrdersCount = user?.Orders?.Count ?? 0;
+            ViewBag.WishlistCount = _usMan.GetWishList(CurrentUserId!.Value).Count();
+            ViewBag.CartCount = _usMan.GetCartItems(CurrentUserId.Value).Count();
+            ViewBag.ActiveMenu = "Profile";
+
+            var vm = new BazaR.ViewModels.AccountProfileViewModel
+            {
+                FullName = user?.Name ?? "",
+                Email = user?.Email ?? ""
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Remove("uid");
+            TempData["Ok"] = "Вы вышли из аккаунта.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public IActionResult OpenLoginModal()
+        {
+            return PartialView("LoginModal");
+        }
+
+        [HttpGet]
+        public IActionResult OpenRegisterModal()
+        {
+            return PartialView("RegisterModal");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Login(string email, string password)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            {
+                TempData["Error"] = "Заполните email и пароль.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var user = _usMan.GetByEmail(email.Trim());
+            if (user == null || user.PasswordHash != password)
+            {
+                TempData["Error"] = "Неверный email или пароль.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            HttpContext.Session.SetInt32("uid", user.Id);
+            TempData["Ok"] = "Успешный вход.";
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = true, redirect = Url.Action(nameof(Index)) });
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Register(string email, string? name, string password, string phoneNumber,
+            string? firstName, string? lastName, string? confirmPassword)
+        {
+            email = (email ?? "").Trim();
+
+            var fullName = name;
+            if (string.IsNullOrWhiteSpace(fullName))
+                fullName = ((firstName ?? "") + " " + (lastName ?? "")).Trim();
+
+            if (string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(password) ||
+                string.IsNullOrWhiteSpace(fullName))
+            {
+                TempData["Error"] = "Заповніть обов'язкові поля.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (!string.IsNullOrWhiteSpace(confirmPassword) && password != confirmPassword)
+            {
+                TempData["Error"] = "Паролі не співпадають.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (_usMan.GetByEmail(email) != null)
+            {
+                TempData["Error"] = "Користувач з таким email вже існує.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var user = new User
+            {
+                Email = email,
+                Name = fullName,
+                PasswordHash = password,
+                IsAdmin = false
+            };
+
+            var ok = _usMan.AddUser(user);
+            if (!ok)
+            {
+                TempData["Error"] = "Не удалось зарегистрироваться.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var created = _usMan.GetByEmail(email);
+            if (created != null)
+                HttpContext.Session.SetInt32("uid", created.Id);
+
+            TempData["Ok"] = "Регистрация успешна.";
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = true, redirect = Url.Action(nameof(Index)) });
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
@@ -581,9 +958,9 @@ namespace BazaR.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddReview(int itemId, Review review)
         {
-            if (!IsAuthenticated || CurrentUser == null) return RequireLogin(Url.Action(nameof(ItemDetails), new { id = itemId }));
+            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(ItemDetails), new { id = itemId }));
 
-            review.UserId = CurrentUser.Id;
+            review.UserId = CurrentUserId!.Value;
             review.CreatedAt = DateTime.UtcNow;
 
             var ok = _itMan.AddReview(itemId, review);
@@ -668,36 +1045,17 @@ namespace BazaR.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult ToggleWishlist(int id)
+        public IActionResult AddCategoriesTest()
         {
-            if (!IsAuthenticated || CurrentUser == null)
-                return Json(new { success = false, requireLogin = true });
-
-            var userId = CurrentUser.Id;
-
-            bool isInWishlist = _usMan.GetWishList(userId).Any(i => i.Id == id);
-
-            if (isInWishlist)
-                _usMan.RemoveFromWishList(userId, id);
-            else
-                _usMan.AddToWishList(userId, id);
-
-            var wishlistCount = _usMan.GetWishList(userId).Count();
-
-            return Json(new
+            _db.Categories.AddRange(new List<Category>
             {
-                success = true,
-                inWishlist = !isInWishlist,
-                wishlistCount
+                new Category { Name = "Телефоны", IconUrl = "/images/cat_phone.png" },
+                new Category { Name = "Ноутбуки", IconUrl = "/images/cat_laptop.png" },
+                new Category { Name = "Планшеты", IconUrl = "/images/cat_tablet.png" },
+                new Category { Name = "Аксессуары", IconUrl = "/images/cat_accessory.png" },
             });
-        }
-
-        public IActionResult Reviews()
-        {
-            ViewBag.ActiveMenu = "Reviews";
-            return View("_ProfileSidebar");
+            _db.SaveChanges();
+            return Content("OK");
         }
     }
 
