@@ -13,6 +13,7 @@ namespace BazaR.Controllers
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly AppDbContext _appDbContext;
+        private readonly string adminRoleName = "Admin";
 
         public AdminController(
             UserManager<User> userManager,
@@ -79,6 +80,10 @@ namespace BazaR.Controllers
             us.Name = user.Name;
             us.Email = user.Email;
             //us.PhoneNumber = user.PhoneNumber;
+            us.IsAdmin = user.IsAdmin;
+
+            if (user.IsAdmin)
+                await _userManager.AddToRoleAsync(us, adminRoleName);
 
             await _userManager.UpdateAsync(us);
 

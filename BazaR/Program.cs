@@ -2,6 +2,7 @@ using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.Repositories;
+using BazaR.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +26,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Регистрация репозиториев
 builder.Services.AddScoped<IUserDb, UserRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
+
 
 var app = builder.Build();
 
