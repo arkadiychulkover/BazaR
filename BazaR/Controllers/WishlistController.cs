@@ -1,4 +1,6 @@
 using BazaR.Interfaces;
+using BazaR.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BazaR.Controllers
@@ -6,14 +8,18 @@ namespace BazaR.Controllers
     public class WishlistController : Controller
     {
         private readonly IUserDb _usMan;
+        private readonly UserManager<User> _userManager;
 
-        public WishlistController(IUserDb usMan)
+        public WishlistController(IUserDb usMan, UserManager<User> userManager)
         {
             _usMan = usMan;
+            _userManager = userManager;
         }
 
-        private int? CurrentUserId => HttpContext.Session.GetInt32("uid");
-        private bool IsAuthenticated => CurrentUserId.HasValue;
+        private User? CurrentUser => User.Identity?.IsAuthenticated == true
+            ? _userManager.GetUserAsync(User).Result
+            : null;
+        private bool IsAuthenticated => User.Identity?.IsAuthenticated == true;
 
         private IActionResult RequireLogin(string? returnUrl = null)
         {
@@ -25,7 +31,7 @@ namespace BazaR.Controllers
         public IActionResult Index()
         {
             if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Index)));
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
             var items = _usMan.GetWishList(userId).ToList();
             return View(items);
         }
@@ -35,7 +41,7 @@ namespace BazaR.Controllers
         public IActionResult Add(int id)
         {
             if (!IsAuthenticated) return RequireLogin();
-            _usMan.AddToWishList(CurrentUserId!.Value, id);
+            _usMan.AddToWishList(CurrentUser!.Id, id);
             return RedirectToAction(nameof(Index));
         }
 
@@ -44,7 +50,7 @@ namespace BazaR.Controllers
         public IActionResult Remove(int id)
         {
             if (!IsAuthenticated) return RequireLogin();
-            _usMan.RemoveFromWishList(CurrentUserId!.Value, id);
+            _usMan.RemoveFromWishList(CurrentUser!.Id, id);
             return RedirectToAction(nameof(Index));
         }
     }

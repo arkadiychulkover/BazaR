@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BazaR.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260311194933_FiltersForCategories")]
-    partial class FiltersForCategories
+    [Migration("20260317000154_InitIdentity")]
+    partial class InitIdentity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -8390,6 +8390,953 @@ namespace BazaR.Migrations
                     b.HasIndex("ItemId");
 
                     b.ToTable("ItemCharacteristics");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = -3000,
+                            ItemId = -1053,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3001,
+                            ItemId = -1053,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3002,
+                            ItemId = -1053,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3003,
+                            ItemId = -1054,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3004,
+                            ItemId = -1054,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3005,
+                            ItemId = -1054,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3006,
+                            ItemId = -1055,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3007,
+                            ItemId = -1055,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3008,
+                            ItemId = -1055,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3009,
+                            ItemId = -1056,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3010,
+                            ItemId = -1056,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3011,
+                            ItemId = -1056,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3012,
+                            ItemId = -1057,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3013,
+                            ItemId = -1057,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3014,
+                            ItemId = -1057,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3015,
+                            ItemId = -1058,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3016,
+                            ItemId = -1058,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3017,
+                            ItemId = -1058,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3018,
+                            ItemId = -1059,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3019,
+                            ItemId = -1059,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3020,
+                            ItemId = -1059,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3021,
+                            ItemId = -1060,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3022,
+                            ItemId = -1060,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3023,
+                            ItemId = -1060,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3024,
+                            ItemId = -1061,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3025,
+                            ItemId = -1061,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3026,
+                            ItemId = -1061,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3027,
+                            ItemId = -1062,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3028,
+                            ItemId = -1062,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3029,
+                            ItemId = -1062,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3030,
+                            ItemId = -1063,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3031,
+                            ItemId = -1063,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3032,
+                            ItemId = -1063,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3033,
+                            ItemId = -1064,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3034,
+                            ItemId = -1064,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3035,
+                            ItemId = -1064,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3036,
+                            ItemId = -1065,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3037,
+                            ItemId = -1065,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3038,
+                            ItemId = -1065,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3039,
+                            ItemId = -1066,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3040,
+                            ItemId = -1066,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3041,
+                            ItemId = -1066,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3042,
+                            ItemId = -1067,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3043,
+                            ItemId = -1067,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3044,
+                            ItemId = -1067,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3045,
+                            ItemId = -1068,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3046,
+                            ItemId = -1068,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3047,
+                            ItemId = -1068,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3048,
+                            ItemId = -1069,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3049,
+                            ItemId = -1069,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3050,
+                            ItemId = -1069,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3051,
+                            ItemId = -1070,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3052,
+                            ItemId = -1070,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3053,
+                            ItemId = -1070,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3054,
+                            ItemId = -1071,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3055,
+                            ItemId = -1071,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3056,
+                            ItemId = -1071,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3057,
+                            ItemId = -1072,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3058,
+                            ItemId = -1072,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3059,
+                            ItemId = -1072,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3060,
+                            ItemId = -1073,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3061,
+                            ItemId = -1073,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3062,
+                            ItemId = -1073,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3063,
+                            ItemId = -1074,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3064,
+                            ItemId = -1074,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3065,
+                            ItemId = -1074,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3066,
+                            ItemId = -1075,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3067,
+                            ItemId = -1075,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3068,
+                            ItemId = -1075,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3069,
+                            ItemId = -1076,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3070,
+                            ItemId = -1076,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3071,
+                            ItemId = -1076,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3072,
+                            ItemId = -1077,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3073,
+                            ItemId = -1077,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3074,
+                            ItemId = -1077,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3075,
+                            ItemId = -1078,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3076,
+                            ItemId = -1078,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3077,
+                            ItemId = -1078,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3078,
+                            ItemId = -1079,
+                            Key = "processor",
+                            Value = "Intel Core i7"
+                        },
+                        new
+                        {
+                            Id = -3079,
+                            ItemId = -1079,
+                            Key = "ram",
+                            Value = "16GB"
+                        },
+                        new
+                        {
+                            Id = -3080,
+                            ItemId = -1079,
+                            Key = "storage",
+                            Value = "512GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3081,
+                            ItemId = -1080,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3082,
+                            ItemId = -1080,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3083,
+                            ItemId = -1080,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3084,
+                            ItemId = -1081,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3085,
+                            ItemId = -1081,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3086,
+                            ItemId = -1081,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3087,
+                            ItemId = -1082,
+                            Key = "processor",
+                            Value = "Intel Core i5"
+                        },
+                        new
+                        {
+                            Id = -3088,
+                            ItemId = -1082,
+                            Key = "ram",
+                            Value = "8GB"
+                        },
+                        new
+                        {
+                            Id = -3089,
+                            ItemId = -1082,
+                            Key = "storage",
+                            Value = "256GB SSD"
+                        },
+                        new
+                        {
+                            Id = -3090,
+                            ItemId = -1092,
+                            Key = "screen_size",
+                            Value = "6.7\""
+                        },
+                        new
+                        {
+                            Id = -3091,
+                            ItemId = -1092,
+                            Key = "color",
+                            Value = "Silver"
+                        },
+                        new
+                        {
+                            Id = -3092,
+                            ItemId = -1092,
+                            Key = "memory",
+                            Value = "256GB"
+                        },
+                        new
+                        {
+                            Id = -3093,
+                            ItemId = -1093,
+                            Key = "screen_size",
+                            Value = "6.7\""
+                        },
+                        new
+                        {
+                            Id = -3094,
+                            ItemId = -1093,
+                            Key = "color",
+                            Value = "Silver"
+                        },
+                        new
+                        {
+                            Id = -3095,
+                            ItemId = -1093,
+                            Key = "memory",
+                            Value = "256GB"
+                        },
+                        new
+                        {
+                            Id = -3096,
+                            ItemId = -1094,
+                            Key = "screen_size",
+                            Value = "6.7\""
+                        },
+                        new
+                        {
+                            Id = -3097,
+                            ItemId = -1094,
+                            Key = "color",
+                            Value = "Silver"
+                        },
+                        new
+                        {
+                            Id = -3098,
+                            ItemId = -1094,
+                            Key = "memory",
+                            Value = "256GB"
+                        },
+                        new
+                        {
+                            Id = -3099,
+                            ItemId = -1095,
+                            Key = "screen_size",
+                            Value = "6.1\""
+                        },
+                        new
+                        {
+                            Id = -3100,
+                            ItemId = -1095,
+                            Key = "color",
+                            Value = "Black"
+                        },
+                        new
+                        {
+                            Id = -3101,
+                            ItemId = -1095,
+                            Key = "memory",
+                            Value = "128GB"
+                        },
+                        new
+                        {
+                            Id = -3102,
+                            ItemId = -1096,
+                            Key = "screen_size",
+                            Value = "6.1\""
+                        },
+                        new
+                        {
+                            Id = -3103,
+                            ItemId = -1096,
+                            Key = "color",
+                            Value = "Black"
+                        },
+                        new
+                        {
+                            Id = -3104,
+                            ItemId = -1096,
+                            Key = "memory",
+                            Value = "128GB"
+                        },
+                        new
+                        {
+                            Id = -3105,
+                            ItemId = -1097,
+                            Key = "screen_size",
+                            Value = "6.1\""
+                        },
+                        new
+                        {
+                            Id = -3106,
+                            ItemId = -1097,
+                            Key = "color",
+                            Value = "Black"
+                        },
+                        new
+                        {
+                            Id = -3107,
+                            ItemId = -1097,
+                            Key = "memory",
+                            Value = "128GB"
+                        },
+                        new
+                        {
+                            Id = -3108,
+                            ItemId = -1098,
+                            Key = "screen_size",
+                            Value = "6.7\""
+                        },
+                        new
+                        {
+                            Id = -3109,
+                            ItemId = -1098,
+                            Key = "color",
+                            Value = "Silver"
+                        },
+                        new
+                        {
+                            Id = -3110,
+                            ItemId = -1098,
+                            Key = "memory",
+                            Value = "256GB"
+                        },
+                        new
+                        {
+                            Id = -3111,
+                            ItemId = -1099,
+                            Key = "screen_size",
+                            Value = "6.7\""
+                        },
+                        new
+                        {
+                            Id = -3112,
+                            ItemId = -1099,
+                            Key = "color",
+                            Value = "Silver"
+                        },
+                        new
+                        {
+                            Id = -3113,
+                            ItemId = -1099,
+                            Key = "memory",
+                            Value = "256GB"
+                        },
+                        new
+                        {
+                            Id = -3114,
+                            ItemId = -1100,
+                            Key = "screen_size",
+                            Value = "6.7\""
+                        },
+                        new
+                        {
+                            Id = -3115,
+                            ItemId = -1100,
+                            Key = "color",
+                            Value = "Silver"
+                        },
+                        new
+                        {
+                            Id = -3116,
+                            ItemId = -1100,
+                            Key = "memory",
+                            Value = "256GB"
+                        },
+                        new
+                        {
+                            Id = -3117,
+                            ItemId = -1101,
+                            Key = "screen_size",
+                            Value = "6.1\""
+                        },
+                        new
+                        {
+                            Id = -3118,
+                            ItemId = -1101,
+                            Key = "color",
+                            Value = "Black"
+                        },
+                        new
+                        {
+                            Id = -3119,
+                            ItemId = -1101,
+                            Key = "memory",
+                            Value = "128GB"
+                        },
+                        new
+                        {
+                            Id = -3120,
+                            ItemId = -1102,
+                            Key = "screen_size",
+                            Value = "6.1\""
+                        },
+                        new
+                        {
+                            Id = -3121,
+                            ItemId = -1102,
+                            Key = "color",
+                            Value = "Black"
+                        },
+                        new
+                        {
+                            Id = -3122,
+                            ItemId = -1102,
+                            Key = "memory",
+                            Value = "128GB"
+                        },
+                        new
+                        {
+                            Id = -3123,
+                            ItemId = -1103,
+                            Key = "screen_size",
+                            Value = "6.1\""
+                        },
+                        new
+                        {
+                            Id = -3124,
+                            ItemId = -1103,
+                            Key = "color",
+                            Value = "Black"
+                        },
+                        new
+                        {
+                            Id = -3125,
+                            ItemId = -1103,
+                            Key = "memory",
+                            Value = "128GB"
+                        },
+                        new
+                        {
+                            Id = -3126,
+                            ItemId = -1104,
+                            Key = "screen_size",
+                            Value = "6.7\""
+                        },
+                        new
+                        {
+                            Id = -3127,
+                            ItemId = -1104,
+                            Key = "color",
+                            Value = "Silver"
+                        },
+                        new
+                        {
+                            Id = -3128,
+                            ItemId = -1104,
+                            Key = "memory",
+                            Value = "256GB"
+                        },
+                        new
+                        {
+                            Id = -3129,
+                            ItemId = -1105,
+                            Key = "screen_size",
+                            Value = "6.7\""
+                        },
+                        new
+                        {
+                            Id = -3130,
+                            ItemId = -1105,
+                            Key = "color",
+                            Value = "Silver"
+                        },
+                        new
+                        {
+                            Id = -3131,
+                            ItemId = -1105,
+                            Key = "memory",
+                            Value = "256GB"
+                        },
+                        new
+                        {
+                            Id = -3132,
+                            ItemId = -1106,
+                            Key = "screen_size",
+                            Value = "6.7\""
+                        },
+                        new
+                        {
+                            Id = -3133,
+                            ItemId = -1106,
+                            Key = "color",
+                            Value = "Silver"
+                        },
+                        new
+                        {
+                            Id = -3134,
+                            ItemId = -1106,
+                            Key = "memory",
+                            Value = "256GB"
+                        });
                 });
 
             modelBuilder.Entity("BazaR.Models.ItemColor", b =>
@@ -8555,46 +9502,105 @@ namespace BazaR.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
 
-                    b.ToTable("Users");
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
 
                     b.HasData(
                         new
                         {
                             Id = 1,
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "00000000-0000-0000-0000-000000000001",
                             Email = "admin@example.com",
+                            EmailConfirmed = true,
                             IsAdmin = true,
+                            LockoutEnabled = false,
                             Name = "Admin User",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+                            NormalizedEmail = "ADMIN@EXAMPLE.COM",
+                            NormalizedUserName = "ADMIN@EXAMPLE.COM",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "STATIC-SEED-STAMP-1",
+                            TwoFactorEnabled = false,
+                            UserName = "admin@example.com"
                         },
                         new
                         {
                             Id = 2,
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "00000000-0000-0000-0000-000000000002",
                             Email = "test@example.com",
+                            EmailConfirmed = true,
                             IsAdmin = false,
+                            LockoutEnabled = false,
                             Name = "Test User",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+                            NormalizedEmail = "TEST@EXAMPLE.COM",
+                            NormalizedUserName = "TEST@EXAMPLE.COM",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "STATIC-SEED-STAMP-2",
+                            TwoFactorEnabled = false,
+                            UserName = "test@example.com"
                         });
                 });
 
@@ -8652,6 +9658,139 @@ namespace BazaR.Migrations
                         .IsUnique();
 
                     b.ToTable("WishlistItems");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
             modelBuilder.Entity("BazaR.Models.CartItem", b =>
@@ -8881,6 +10020,57 @@ namespace BazaR.Migrations
                     b.Navigation("Item");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+                {
+                    b.HasOne("BazaR.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+                {
+                    b.HasOne("BazaR.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BazaR.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+                {
+                    b.HasOne("BazaR.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BazaR.Models.Brand", b =>

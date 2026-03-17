@@ -1,0 +1,333 @@
+@model List<BazaR.Models.Item>
+
+@{
+    ViewData["Title"] = "Оформлення замовлення";
+    var cart = ViewBag.CartItems as Dictionary<int, int> ?? new Dictionary<int, int>();
+    var total = Model.Where(i => cart.ContainsKey(i.Id)).Sum(i => i.Price * cart[i.Id]);
+    var totalQty = cart.Values.Sum();
+    var user = ViewBag.User as BazaR.Models.User;
+    var nameParts = (user?.Name ?? "").Split(' ', 2);
+    var lastName = nameParts.Length > 1 ? nameParts[1] : "";
+    var firstName = nameParts.Length > 0 ? nameParts[0] : "";
+}
+
+<style>
+    .co-page { background: #f5f5f5; min-height: 100vh; padding: 24px 0 48px; }
+    .co-container { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+    .co-title { font-size: 28px; font-weight: 800; color: #1a1a1a; margin-bottom: 24px; }
+    .co-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+    .co-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); padding: 24px; margin-bottom: 24px; }
+    .co-card:last-of-type { margin-bottom: 0; }
+    .co-card__title { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .co-card__title .co-num { width: 24px; height: 24px; border-radius: 50%; background: #e8e8e8; color: #666; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .co-card__title.co-card__title--active .co-num { background: #7ab800; color: #fff; }
+    .co-card__title.co-card__title--active { border-bottom: 2px solid #7ab800; padding-bottom: 12px; margin-bottom: 16px; }
+    .co-tabs { display: flex; gap: 0; margin-bottom: 20px; }
+    .co-tab { padding: 10px 20px; font-size: 14px; font-weight: 500; color: #666; background: #f0f0f0; border: none; cursor: pointer; border-radius: 8px 8px 0 0; }
+    .co-tab.active { background: #7ab800; color: #fff; font-weight: 600; }
+    .co-tab:not(.active):hover { background: #e5e5e5; }
+    .co-field { margin-bottom: 14px; }
+    .co-field label { display: block; font-size: 13px; font-weight: 500; color: #555; margin-bottom: 6px; }
+    .co-field input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+    .co-field input:focus { outline: none; border-color: #7ab800; box-shadow: 0 0 0 2px rgba(122,184,0,.2); }
+    .co-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .co-warn { background: #fff5f5; border: 1px solid #ffcdd2; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #c62828; margin-top: 16px; }
+    .co-order-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .co-order-head__sum { font-size: 14px; color: #666; }
+    .co-order-head__sum strong { color: #1a1a1a; }
+    .co-seller { font-size: 13px; color: #666; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .co-seller a { color: #7ab800; text-decoration: none; font-weight: 500; }
+    .co-seller a:hover { text-decoration: underline; }
+    .co-item { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+    .co-item:last-child { border-bottom: none; }
+    .co-item__img { width: 72px; height: 72px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: #fafafa; border: 1px solid #eee; }
+    .co-item__img img { width: 100%; height: 100%; object-fit: contain; }
+    .co-item__info { flex: 1; min-width: 0; }
+    .co-item__name { font-size: 14px; color: #1a1a1a; line-height: 1.4; margin-bottom: 8px; }
+    .co-item__row { display: flex; gap: 24px; font-size: 13px; color: #666; }
+    .co-item__row span { white-space: nowrap; }
+    .co-city { display: flex; align-items: center; gap: 10px; padding: 12px 0; margin-bottom: 16px; cursor: pointer; }
+    .co-city i { color: #7ab800; font-size: 18px; }
+    .co-city__name { font-weight: 600; color: #1a1a1a; }
+    .co-city__region { font-size: 13px; color: #666; }
+    .co-city__arrow { margin-left: auto; color: #999; }
+    .co-delivery-opt, .co-pay-opt { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
+    .co-delivery-opt:last-child, .co-pay-opt:last-child { border-bottom: none; }
+    .co-delivery-opt:hover, .co-pay-opt:hover { background: #fafafa; margin: 0 -24px; padding: 14px 24px; }
+    .co-radio { width: 20px; height: 20px; accent-color: #7ab800; flex-shrink: 0; margin-top: 2px; }
+    .co-opt__body { flex: 1; min-width: 0; }
+    .co-opt__text { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+    .co-opt__sub { font-size: 12px; color: #888; margin-top: 2px; }
+    .co-opt__price { font-size: 14px; font-weight: 600; color: #7ab800; white-space: nowrap; }
+    .co-pickup-btn { display: inline-block; margin-top: 10px; padding: 10px 20px; background: #7ab800; color: #fff; border-radius: 8px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; }
+    .co-pickup-btn:hover { background: #6aa000; color: #fff; }
+    .co-cert { display: flex; justify-content: space-between; align-items: center; }
+    .co-cert a { color: #7ab800; font-weight: 500; text-decoration: none; }
+    .co-cert a:hover { text-decoration: underline; }
+    .co-copy-btn { width: 100%; padding: 14px; background: #7ab800; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+    .co-copy-btn:hover { background: #6aa000; color: #fff; }
+    .co-sidebar { position: sticky; top: 20px; }
+    .co-promo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .co-promo a { color: #1565c0; font-size: 14px; text-decoration: none; }
+    .co-promo a:hover { text-decoration: underline; }
+    .co-total { padding: 20px 0; border-top: 1px solid #eee; }
+    .co-total__row { display: flex; justify-content: space-between; font-size: 14px; color: #666; margin-bottom: 8px; }
+    .co-total__pay { display: flex; justify-content: space-between; font-size: 20px; font-weight: 800; color: #1a1a1a; margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; }
+    .co-submit { width: 100%; padding: 16px; background: #7ab800; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 20px; }
+    .co-submit:hover { background: #6aa000; color: #fff; }
+    .co-legal { font-size: 11px; color: #888; margin-top: 16px; line-height: 1.6; }
+    .co-legal ul { margin: 8px 0 0 16px; padding: 0; }
+    .co-legal li { margin-bottom: 4px; }
+    .co-legal a { color: #7ab800; }
+    @@media (max-width: 900px) { .co-grid { grid-template-columns: 1fr; } .co-sidebar { position: static; } }
+</style>
+
+<div class="co-page">
+    <div class="co-container">
+        <h1 class="co-title">Оформлення замовлення</h1>
+
+        <form asp-action="CreateOrder" asp-controller="Site" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="co-grid">
+                <div>
+                    <!-- 1. Ваші контактні дані -->
+                    <div class="co-card">
+                        <div class="co-card__title co-card__title--active">
+                            <span class="co-num">1</span> Ваші контактні дані
+                        </div>
+                        <div class="co-tabs">
+                            <button type="button" class="co-tab active">Я новий покупець</button>
+                            <button type="button" class="co-tab">Я постійний клієнт</button>
+                        </div>
+                        <div class="co-field-row">
+                            <div class="co-field">
+                                <label>Прізвище</label>
+                                <input type="text" name="lastName" value="@lastName" required placeholder="Прізвище" />
+                            </div>
+                            <div class="co-field">
+                                <label>Ім'я</label>
+                                <input type="text" name="firstName" value="@firstName" required placeholder="Ім'я" />
+                            </div>
+                        </div>
+                        <div class="co-field">
+                            <label>Мобільний телефон</label>
+                            <input type="tel" name="phone" value="@(user?.PhoneNumber ?? "")" required placeholder="+380 XX XXX XX XX" />
+                        </div>
+                        <div class="co-warn">
+                            Увага! Товари, що на різних складах або різних продавців, буде доставлено окремими замовленнями.
+                        </div>
+                    </div>
+
+                    <!-- 2. Замовлення №1 -->
+                    <div class="co-card">
+                        <div class="co-card__title">
+                            <span class="co-num">2</span> Замовлення №1
+                            <span class="co-order-head__sum" style="margin-left:auto;">на суму: <strong>@total.ToString("N0")₴</strong></span>
+                        </div>
+                        <div class="co-seller">
+                            <span>Товари продавця BAZA-R</span>
+                            <a href="@Url.Action("Cart", "Site")">Редагувати</a>
+                        </div>
+                        @foreach (var item in Model)
+                        {
+                            var qty = cart.ContainsKey(item.Id) ? cart[item.Id] : 1;
+                            var img = !string.IsNullOrEmpty(item.ImageUrl) ? item.ImageUrl : (item.Colors?.FirstOrDefault()?.Color ?? "/images/items/default.jpg");
+                            <div class="co-item">
+                                <div class="co-item__img">
+                                    <img src="@img" alt="@item.Name" onerror="this.src='/images/items/default.jpg'" />
+                                </div>
+                                <div class="co-item__info">
+                                    <div class="co-item__name">@item.Name</div>
+                                    <div class="co-item__row">
+                                        <span>Ціна: @item.Price.ToString("N0")₴</span>
+                                        <span>Кількість: @qty</span>
+                                        <span>Сума: @((item.Price * qty).ToString("N0"))₴</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- 3. Доставка -->
+                    <div class="co-card">
+                        <div class="co-card__title">
+                            <span class="co-num">3</span> Доставка
+                        </div>
+                        <div class="co-city">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <div>
+                                <div class="co-city__name">Київ</div>
+                                <div class="co-city__region">Київська обл.</div>
+                            </div>
+                            <i class="bi bi-chevron-right co-city__arrow"></i>
+                        </div>
+                        <input type="hidden" name="address" value="Київ, Київська обл." />
+                        <label class="co-delivery-opt">
+                            <input type="radio" name="deliveryMethod" value="Самовивіз BAZA-R" class="co-radio" checked />
+                            <div class="co-opt__body">
+                                <div class="co-opt__text">Самовивіз з точок видачі BAZA-R</div>
+                                <div class="co-opt__sub">Забрати завтра з 12:00</div>
+                            </div>
+                            <span class="co-opt__price">Безкоштовно</span>
+                        </label>
+                        <label class="co-delivery-opt">
+                            <input type="radio" name="deliveryMethod" value="Відділення пошти" class="co-radio" />
+                            <div class="co-opt__body">
+                                <div class="co-opt__text">Самовивіз з відділень поштових операторів</div>
+                                <div class="co-opt__sub">Відправимо сьогодні</div>
+                                <button type="button" class="co-pickup-btn">Обрати точку видачі</button>
+                            </div>
+                            <span class="co-opt__price">Від 24₴</span>
+                        </label>
+                        <label class="co-delivery-opt">
+                            <input type="radio" name="deliveryMethod" value="Кур'єр" class="co-radio" />
+                            <div class="co-opt__body">
+                                <div class="co-opt__text">Доставка кур'єром</div>
+                                <div class="co-opt__sub">Відправимо завтра</div>
+                            </div>
+                            <span class="co-opt__price">55₴</span>
+                        </label>
+                    </div>
+
+                    <!-- 4. Оплата -->
+                    <div class="co-card">
+                        <div class="co-card__title">
+                            <span class="co-num">4</span> Оплата
+                        </div>
+                        <label class="co-pay-opt">
+                            <input type="radio" name="paymentMethod" value="Оплата під час отримання товару" class="co-radio" checked />
+                            <div class="co-opt__body">
+                                <div class="co-opt__text">Оплата під час отримання товару</div>
+                            </div>
+                        </label>
+                        <label class="co-pay-opt">
+                            <input type="radio" name="paymentMethod" value="Оплатити зараз" class="co-radio" />
+                            <div class="co-opt__body">
+                                <div class="co-opt__text">Оплатити зараз</div>
+                            </div>
+                        </label>
+                        <label class="co-pay-opt">
+                            <input type="radio" name="paymentMethod" value="Безготівковими для юридичних осіб" class="co-radio" />
+                            <div class="co-opt__body">
+                                <div class="co-opt__text">Безготівковими для юридичних осіб</div>
+                                <div class="co-opt__sub">Оплата для юридичних осіб через розрахунковий рахунок</div>
+                            </div>
+                        </label>
+                        <label class="co-pay-opt">
+                            <input type="radio" name="paymentMethod" value="Безготівковий для фізичних осіб" class="co-radio" />
+                            <div class="co-opt__body">
+                                <div class="co-opt__text">Безготівковий для фізичних осіб</div>
+                                <div class="co-opt__sub">Оплата для фізичних осіб через розрахунковий рахунок</div>
+                            </div>
+                        </label>
+                        <label class="co-pay-opt">
+                            <input type="radio" name="paymentMethod" value="PrivatPay" class="co-radio" />
+                            <div class="co-opt__body">
+                                <div class="co-opt__text">PrivatPay</div>
+                            </div>
+                        </label>
+                        <label class="co-pay-opt">
+                            <input type="radio" name="paymentMethod" value="Кредит та оплата частинами" class="co-radio" />
+                            <div class="co-opt__body">
+                                <div class="co-opt__text">Кредит та оплата частинами</div>
+                                <div class="co-opt__sub">Оформлення кредиту в банках-партнерах</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- 5. Сертифікат -->
+                    <div class="co-card">
+                        <div class="co-card__title">
+                            <span class="co-num">5</span> Сертифікат
+                        </div>
+                        <div class="co-cert">
+                            <span><i class="bi bi-gift"></i> Сертифікат</span>
+                            <a href="#">+ Додати</a>
+                        </div>
+                    </div>
+
+                    <!-- 6. Контактні дані отримувача -->
+                    <div class="co-card">
+                        <div class="co-card__title">
+                            <span class="co-num">6</span> Контактні дані отримувача замовлення
+                        </div>
+                        <div class="co-field-row">
+                            <div class="co-field">
+                                <label>Прізвище</label>
+                                <input type="text" name="recipientLastName" value="@lastName" placeholder="Прізвище" />
+                            </div>
+                            <div class="co-field">
+                                <label>Ім'я</label>
+                                <input type="text" name="recipientFirstName" value="@firstName" placeholder="Ім'я" />
+                            </div>
+                        </div>
+                        <div class="co-field-row">
+                            <div class="co-field">
+                                <label>По батькові</label>
+                                <input type="text" name="recipientPatronymic" placeholder="По батькові" />
+                            </div>
+                            <div class="co-field">
+                                <label>Мобільний телефон</label>
+                                <input type="tel" name="recipientPhone" value="@(user?.PhoneNumber ?? "")" placeholder="+380 XX XXX XX XX" />
+                            </div>
+                        </div>
+                        <button type="button" class="co-copy-btn">Копіювати в інші замовлення</button>
+                    </div>
+                </div>
+
+                <!-- Right sidebar -->
+                <div class="co-sidebar">
+                    <div class="co-card">
+                        <div class="co-promo">
+                            <span>Промокод</span>
+                            <a href="#">Додати</a>
+                        </div>
+                        <div class="co-total">
+                            <div class="co-total__row">
+                                <span>@totalQty товар на суму</span>
+                                <span>@total.ToString("N0")₴</span>
+                            </div>
+                            <div class="co-total__row">
+                                <span>Вартість доставки</span>
+                                <span style="color:#7ab800; font-weight:600;">Безкоштовно</span>
+                            </div>
+                            <div class="co-total__pay">
+                                <span>До сплати</span>
+                                <span>@total.ToString("N0")₴</span>
+                            </div>
+                        </div>
+                        <button type="submit" class="co-submit">Замовлення підтверджую</button>
+                        <div class="co-legal">
+                            Отримання замовлення від 5.000₴ тільки за паспортом (Закон від 06.12.2019 № 361-IX)<br />
+                            Підтверджуючи замовлення, я приймаю умови:
+                            <ul>
+                                <li><i class="bi bi-info-circle"></i> положення про обробку і захист персональних даних</li>
+                                <li><i class="bi bi-info-circle"></i> угоди користувача</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.querySelectorAll('.co-tab').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.co-tab').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    document.querySelector('.co-copy-btn').addEventListener('click', function() {
+        var ln = document.querySelector('input[name="lastName"]').value;
+        var fn = document.querySelector('input[name="firstName"]').value;
+        var ph = document.querySelector('input[name="phone"]').value;
+        document.querySelector('input[name="recipientLastName"]').value = ln;
+        document.querySelector('input[name="recipientFirstName"]').value = fn;
+        document.querySelector('input[name="recipientPhone"]').value = ph;
+    });
+</script>
+}

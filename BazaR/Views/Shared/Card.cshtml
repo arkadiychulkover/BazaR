@@ -103,8 +103,12 @@
                     button.innerHTML = '<i class="bi bi-check-lg"></i>';
                     button.classList.add('tovar-card__cart-btn--in-cart');
                     button.disabled = true;
-                    var cnt = $('#cartCount');
-                    if (cnt.length) cnt.text(response.cartCount);
+                    if (typeof updateCartBadge === 'function') {
+                        updateCartBadge(response.cartCount);
+                    } else {
+                        var badge = $('#cartBadge');
+                        if (badge.length) { badge.text(response.cartCount); badge.show(); }
+                    }
                     showNotification('Товар додано до кошика', 'success');
                 } else if (response.requireLogin) {
                     $('#loginModal').modal('show');

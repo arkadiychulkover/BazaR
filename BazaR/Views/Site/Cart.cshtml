@@ -45,9 +45,9 @@
                                 }
                             </div>
                             <div class="cart-page-item__qty">
-                                <button class="cart-page-qty-btn" onclick="pageCartChangeQty(@item.Id, @(qty-1))">−</button>
+                                <button class="cart-page-qty-btn" onclick="pageCartStep(@item.Id, -1)">−</button>
                                 <span class="cart-page-qty-num" id="page-qty-@item.Id">@qty</span>
-                                <button class="cart-page-qty-btn" onclick="pageCartChangeQty(@item.Id, @(qty+1))">+</button>
+                                <button class="cart-page-qty-btn" onclick="pageCartStep(@item.Id, 1)">+</button>
                             </div>
                             <div class="cart-page-item__price">
                                 <span id="page-subtotal-@item.Id">@((item.Price * qty).ToString("N0"))</span> ₴
@@ -184,6 +184,11 @@
             @Html.Raw(string.Join(",\n            ", Model.Select(item => $"{item.Id}: {item.Price}")))
         };
 
+        function pageCartStep(itemId, delta) {
+            var current = parseInt($('#page-qty-' + itemId).text()) || 1;
+            pageCartChangeQty(itemId, current + delta);
+        }
+
         function pageCartChangeQty(itemId, newQty) {
             if (newQty < 1) newQty = 0;
             var token = $('input[name="__RequestVerificationToken"]').first().val();
@@ -205,8 +210,12 @@
                             $('#page-subtotal-' + itemId).text((p * newQty).toLocaleString('uk-UA'));
                         }
                         $('#page-total').text(r.totalAmount.toLocaleString('uk-UA') + ' ₴');
-                        var badge = $('#cartBadge');
-                        if (badge.length) { badge.text(r.cartCount); badge.toggle(r.cartCount > 0); }
+                        if (typeof updateCartBadge === 'function') {
+                            updateCartBadge(r.cartCount);
+                        } else {
+                            var badge = $('#cartBadge');
+                            if (badge.length) { badge.text(r.cartCount); badge.toggle(r.cartCount > 0); }
+                        }
                     }
                 }
             });
