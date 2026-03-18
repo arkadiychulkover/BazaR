@@ -124,8 +124,9 @@ namespace BazaR.Controllers
         public async Task<IActionResult> UserStatistic(int id)
         {
             User us = await _appDbContext.Users
-                .Include(u => u.SellingItems)  // Изменено с Items на SellingItems
+                .Include(u => u.SellingItems)
                 .Include(u => u.Reviews)
+                .Include(u => u.Orders)
                 .FirstOrDefaultAsync(u => u.Id == id);
 
             if (us == null)

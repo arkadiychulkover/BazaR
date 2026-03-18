@@ -294,7 +294,12 @@ namespace BazaR.Controllers
                 "price_desc" => items.OrderByDescending(i => i.Price).ToList(),
                 "name_asc" => items.OrderBy(i => i.Name).ToList(),
                 "name_desc" => items.OrderByDescending(i => i.Name).ToList(),
-                "rating_desc" => items.OrderByDescending(i => i.Reviews?.Average(r => r.Rating) ?? 0).ToList(),
+                "rating_desc" => items
+                                    .OrderByDescending(i => i.Reviews
+                                        .Select(r => r.Rating)
+                                        .DefaultIfEmpty(0)
+                                        .Average())
+                                    .ToList(),
                 "newest" => items.OrderByDescending(i => i.Id).ToList(),
                 _ => items.OrderBy(i => i.Id).ToList()
             };
