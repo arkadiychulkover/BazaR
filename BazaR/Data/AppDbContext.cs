@@ -14,6 +14,10 @@ namespace BazaR.Data
         }
 
         public DbSet<Item> Items { get; set; }
+        public DbSet<DeliveryAddress> DeliveryAddresses { get; set; }
+        public DbSet<AdditionalInfo> AdditionalInfos { get; set; }
+        public DbSet<OrderRecipient> OrderRecipients { get; set; }
+        public DbSet<Pet> Pets { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Brand> Brands { get; set; }

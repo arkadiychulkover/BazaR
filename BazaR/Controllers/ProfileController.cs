@@ -1,4 +1,5 @@
 ﻿using BazaR.Data;
+using BazaR.DTOs;
 using BazaR.Models;
 using BazaR.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +23,13 @@ namespace BazaR.Controllers
 
         private async Task<(User user, AccountProfileViewModel vm)> GetUserAndProfileAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.Users
+                .Include(u => u.OrderRecipients)
+                .Include(u => u.DeliveryAddresses)
+                .Include(u => u.Pets)
+                .Include(u => u.AdditionalInfos)
+                .FirstOrDefaultAsync(u => u.UserName == User.Identity!.Name);
+
             var newMessagesCount = await _db.Messages
                 .Where(m => m.UserId == user!.Id.ToString() && !m.IsRead)
                 .CountAsync();
@@ -30,9 +37,17 @@ namespace BazaR.Controllers
             var vm = new AccountProfileViewModel
             {
                 FirstName = user?.Name ?? string.Empty,
+                LastName = user?.LastName,
+                MiddleName = user?.MiddleName,
+                BirthDate = user?.BirthDate,
+                Gender = user?.Gender,
                 Email = user?.Email ?? string.Empty,
                 PhoneNumber = user?.PhoneNumber,
-                NewMessagesCount = newMessagesCount
+                NewMessagesCount = newMessagesCount,
+                OrderRecipients = user?.OrderRecipients ?? new(),
+                DeliveryAddresses = user?.DeliveryAddresses ?? new(),
+                Pets = user?.Pets ?? new(),
+                AdditionalInfos = user?.AdditionalInfos ?? new()
             };
             return (user!, vm);
         }
@@ -517,6 +532,181 @@ namespace BazaR.Controllers
                 .CountAsync();
 
             return Json(new { count = newMessagesCount });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdatePersonalField([FromBody] UpdateFieldDto dto)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            switch (dto.Field)
+            {
+                case "firstName":
+                    user.Name = dto.Value;
+                    await _userManager.UpdateAsync(user);
+                    break;
+                case "lastName":
+                    user.LastName = dto.Value;
+                    await _userManager.UpdateAsync(user);
+                    break;
+                case "middleName":
+                    user.MiddleName = dto.Value;
+                    await _userManager.UpdateAsync(user);
+                    break;
+                case "birthDate":
+                    user.BirthDate = DateOnly.TryParse(dto.Value, out var d) ? d : null;
+                    await _userManager.UpdateAsync(user);
+                    break;
+                case "gender":
+                    user.Gender = dto.Value;
+                    await _userManager.UpdateAsync(user);
+                    break;
+                case "phoneNumber":
+                    await _userManager.SetPhoneNumberAsync(user, dto.Value);
+                    break;
+                case "email":
+                    if (string.IsNullOrWhiteSpace(dto.Value))
+                        return BadRequest("Email не може бути порожнім");
+                    var setEmailResult = await _userManager.SetEmailAsync(user, dto.Value);
+                    if (!setEmailResult.Succeeded)
+                        return BadRequest(setEmailResult.Errors.FirstOrDefault()?.Description ?? "Помилка");
+                    await _userManager.SetUserNameAsync(user, dto.Value);
+                    break;
+                default:
+                    return BadRequest("Невідоме поле");
+            }
+
+            return Ok(new { success = true, value = dto.Value });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteRecipient([FromBody] int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var rec = await _db.OrderRecipients
+                .FirstOrDefaultAsync(r => r.Id == id && r.UserId == user!.Id);
+            if (rec == null) return NotFound();
+            _db.OrderRecipients.Remove(rec);
+            await _db.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddRecipient([FromBody] OrderRecipientDto dto)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var recipient = new OrderRecipient
+            {
+                UserId = user.Id,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                MiddleName = dto.MiddleName,
+                Phone = dto.Phone
+            };
+
+            _db.OrderRecipients.Add(recipient);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { success = true, id = recipient.Id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddDeliveryAddress([FromBody] DeliveryAddressDto dto)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var address = new DeliveryAddress
+            {
+                UserId = user.Id,
+                City = dto.City,
+                Street = dto.Street,
+                Building = dto.Building,
+                Apartment = dto.Apartment,
+                PostalCode = dto.PostalCode
+            };
+
+            _db.DeliveryAddresses.Add(address);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { success = true, id = address.Id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPet([FromBody] PetDto dto)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var pet = new Pet
+            {
+                UserId = user.Id,
+                Name = dto.Name,
+                Type = dto.Type,
+                Breed = dto.Breed
+            };
+
+            _db.Pets.Add(pet);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { success = true, id = pet.Id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePet([FromBody] int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var pet = await _db.Pets
+                .FirstOrDefaultAsync(p => p.Id == id && p.UserId == user!.Id);
+            if (pet == null) return NotFound();
+            _db.Pets.Remove(pet);
+            await _db.SaveChangesAsync();
+            return Ok();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveAdditionalInfo([FromBody] AdditionalInfo dto)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var existing = await _db.AdditionalInfos
+                .FirstOrDefaultAsync(a => a.Id == dto.Id && a.UserId == user.Id);
+
+            if (existing == null)
+            {
+                dto.UserId = user.Id;
+                _db.AdditionalInfos.Add(dto);
+            }
+            else
+            {
+                existing.Key = dto.Key;
+                existing.Value = dto.Value;
+            }
+
+            await _db.SaveChangesAsync();
+            return Ok();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAdditionalInfo([FromBody] int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var info = await _db.AdditionalInfos
+                .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user!.Id);
+            if (info == null) return NotFound();
+            _db.AdditionalInfos.Remove(info);
+            await _db.SaveChangesAsync();
+            return Ok();
         }
 
         [HttpPost]

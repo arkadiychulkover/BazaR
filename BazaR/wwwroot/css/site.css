@@ -3010,7 +3010,7 @@ html {
 
     .sidebar-card-city {
         display: flex;
-        flex-direction:row;
+        flex-direction: row;
         align-items: center;
         justify-content: space-between;
     }
@@ -3242,4 +3242,51 @@ html {
             padding-left: 16px;
             padding-right: 16px;
         }
+    }
+
+    .profile-edit-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #3E77AA;
+        font-size: 13px;
+        padding: 4px 0;
+        margin-top: 4px;
+    }
+
+        .profile-edit-btn:hover {
+            text-decoration: underline;
+        }
+
+    .profile-inline-input {
+        width: 100%;
+        border: 1px solid #3E77AA;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    .profile-save-btn,
+    .profile-cancel-btn {
+        font-size: 13px;
+        padding: 4px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 6px;
+    }
+
+    .profile-save-btn {
+        background: #3E77AA;
+        color: #fff;
+        border: none;
+    }
+
+    .profile-cancel-btn {
+        background: none;
+        border: 1px solid #aaa;
+        color: #555;
     }

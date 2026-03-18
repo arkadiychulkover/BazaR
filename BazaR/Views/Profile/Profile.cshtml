@@ -4,13 +4,9 @@
 
 @{
     ViewData["Title"] = "Особисті данні";
-    var fullName = (Model.FirstName ?? "").Split(' ');
-    var firstName = fullName.Length > 0 ? fullName[0] : "Не вказано";
-    var lastName = fullName.Length > 1 ? fullName[1] : "Не вказано";
 
     var externalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
     var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
-    var userId = UserManager.GetUserId(User);
     var currentLogins = await UserManager.GetLoginsAsync(await UserManager.GetUserAsync(User));
     var isGoogleLinked = currentLogins.Any(l => l.LoginProvider == "Google");
 }
@@ -21,6 +17,8 @@
 
         <main class="profile-page__content">
             <h1 class="profile-page__title">Особисті данні</h1>
+
+            @Html.AntiForgeryToken()
 
             <div class="profile-accordion">
 
@@ -40,30 +38,78 @@
 
                     <div class="profile-block__body" id="personal-data">
                         <div class="profile-info-grid profile-info-grid--3">
+
+                            <!-- Ім'я -->
                             <div class="profile-info-item">
                                 <div class="profile-info-item__label">Ім'я</div>
-                                <div class="profile-info-item__value">@firstName</div>
+                                <div class="profile-info-item__value" id="val-firstName">@(string.IsNullOrWhiteSpace(Model.FirstName) ? "Не вказано" : Model.FirstName)</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('firstName', 'text')">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
+                                        <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Редагувати</span>
+                                </button>
                             </div>
+
+                            <!-- Призвіще -->
                             <div class="profile-info-item">
                                 <div class="profile-info-item__label">Призвіще</div>
-                                <div class="profile-info-item__value">@lastName</div>
+                                <div class="profile-info-item__value" id="val-lastName">@(string.IsNullOrWhiteSpace(Model.LastName) ? "Не вказано" : Model.LastName)</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('lastName', 'text')">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
+                                        <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Редагувати</span>
+                                </button>
                             </div>
+
+                            <!-- По батькові -->
                             <div class="profile-info-item">
                                 <div class="profile-info-item__label">По батькові</div>
-                                <div class="profile-info-item__value">Не вказано</div>
+                                <div class="profile-info-item__value" id="val-middleName">@(string.IsNullOrWhiteSpace(Model.MiddleName) ? "Не вказано" : Model.MiddleName)</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('middleName', 'text')">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
+                                        <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Редагувати</span>
+                                </button>
                             </div>
+
+                            <!-- Дата народження -->
                             <div class="profile-info-item">
                                 <div class="profile-info-item__label">Дата народження</div>
-                                <div class="profile-info-item__value">Не вказано</div>
+                                <div class="profile-info-item__value" id="val-birthDate">@(Model.BirthDate.HasValue? Model.BirthDate.Value.ToString("dd.MM.yyyy") : "Не вказано")</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('birthDate', 'date')">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
+                                        <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Редагувати</span>
+                                </button>
                             </div>
+
+                            <!-- Стать -->
                             <div class="profile-info-item">
                                 <div class="profile-info-item__label">Стать</div>
-                                <div class="profile-info-item__value">Не вказано</div>
+                                <div class="profile-info-item__value" id="val-gender">@(string.IsNullOrWhiteSpace(Model.Gender) ? "Не вказано" : Model.Gender)</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('gender', 'select')">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
+                                        <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Редагувати</span>
+                                </button>
                             </div>
+
+                            <!-- Мова -->
                             <div class="profile-info-item">
                                 <div class="profile-info-item__label">Мова спілкування з Baza-R</div>
                                 <div class="profile-info-item__value">Українська</div>
                             </div>
+
                         </div>
                     </div>
                 </section>
@@ -86,7 +132,51 @@
                         <span class="profile-block__arrow"></span>
                     </button>
                     <div class="profile-block__body" id="recipients-data" hidden>
-                        <div class="profile-empty">У вас ще немає доданих отримувачів.</div>
+                        @if (Model.OrderRecipients.Count == 0)
+                        {
+                            <div class="profile-empty">У вас ще немає доданих отримувачів.</div>
+                        }
+                        else
+                        {
+                            <div class="profile-info-grid profile-info-grid--3">
+                                @foreach (var r in Model.OrderRecipients)
+                                {
+                                    <div class="profile-info-item">
+                                        <div class="profile-info-item__label">@r.LastName @r.FirstName @r.MiddleName</div>
+                                        <div class="profile-info-item__value">@(r.Phone ?? "Не вказано")</div>
+                                        <button type="button" class="profile-edit-link profile-delete-btn border-0 bg-transparent"
+                                                onclick="deleteItem('recipient', @r.Id, this)">
+                                            <span>Видалити</span>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <button type="button" class="profile-add-btn border-0 bg-transparent" onclick="showAddRecipientForm()">
+                            + Додати отримувача
+                        </button>
+                        <div id="add-recipient-form" style="display:none; margin-top:12px;">
+                            <div class="profile-info-grid profile-info-grid--3">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Ім'я</div>
+                                    <input type="text" id="rec-firstName" class="profile-inline-input" placeholder="Ім'я" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Призвіще</div>
+                                    <input type="text" id="rec-lastName" class="profile-inline-input" placeholder="Призвіще" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">По батькові</div>
+                                    <input type="text" id="rec-middleName" class="profile-inline-input" placeholder="По батькові" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Телефон</div>
+                                    <input type="text" id="rec-phone" class="profile-inline-input" placeholder="+380..." />
+                                </div>
+                            </div>
+                            <button type="button" class="profile-save-btn" onclick="saveRecipient()">Зберегти</button>
+                            <button type="button" class="profile-cancel-btn" onclick="document.getElementById('add-recipient-form').style.display='none'">Скасувати</button>
+                        </div>
                     </div>
                 </section>
 
@@ -112,25 +202,25 @@
                         <div class="profile-info-grid profile-info-grid--2">
                             <div class="profile-login-item">
                                 <div class="profile-login-item__label">Мобільний телефон</div>
-                                <div class="profile-login-item__value">@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "Не вказано" : Model.PhoneNumber)</div>
-                                <a href="#" class="profile-edit-link">
+                                <div class="profile-info-item__value" id="val-phoneNumber">@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "Не вказано" : Model.PhoneNumber)</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('phoneNumber', 'text')">
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                         <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
                                         <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                     <span>Редагувати</span>
-                                </a>
+                                </button>
                             </div>
                             <div class="profile-login-item">
                                 <div class="profile-login-item__label">Email</div>
-                                <div class="profile-login-item__value">@(string.IsNullOrWhiteSpace(Model.Email) ? "Не вказано" : Model.Email)</div>
-                                <a href="#" class="profile-edit-link">
+                                <div class="profile-info-item__value" id="val-email">@(string.IsNullOrWhiteSpace(Model.Email) ? "Не вказано" : Model.Email)</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('email', 'text')">
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                         <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
                                         <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                     <span>Редагувати</span>
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -158,7 +248,58 @@
                         <span class="profile-block__arrow"></span>
                     </button>
                     <div class="profile-block__body" id="delivery-data" hidden>
-                        <div class="profile-empty">Адреси доставки не додані.</div>
+                        @if (Model.DeliveryAddresses.Count == 0)
+                        {
+                            <div class="profile-empty">Адреси доставки не додані.</div>
+                        }
+                        else
+                        {
+                            <div class="profile-info-grid profile-info-grid--3">
+                                @foreach (var a in Model.DeliveryAddresses)
+                                {
+                                    <div class="profile-info-item">
+                                        <div class="profile-info-item__label">@a.City, @a.Street</div>
+                                        <div class="profile-info-item__value">
+                                            @a.Building@(a.Apartment != null ? $", кв. {a.Apartment}" : "")
+                                            @(a.PostalCode != null ? $", {a.PostalCode}" : "")
+                                        </div>
+                                        <button type="button" class="profile-edit-link profile-delete-btn border-0 bg-transparent"
+                                                onclick="deleteItem('address', @a.Id, this)">
+                                            <span>Видалити</span>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <button type="button" class="profile-add-btn border-0 bg-transparent" onclick="showAddAddressForm()">
+                            + Додати адресу
+                        </button>
+                        <div id="add-address-form" style="display:none; margin-top:12px;">
+                            <div class="profile-info-grid profile-info-grid--3">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Місто</div>
+                                    <input type="text" id="addr-city" class="profile-inline-input" placeholder="Місто" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Вулиця</div>
+                                    <input type="text" id="addr-street" class="profile-inline-input" placeholder="Вулиця" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Будинок</div>
+                                    <input type="text" id="addr-building" class="profile-inline-input" placeholder="Будинок" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Квартира</div>
+                                    <input type="text" id="addr-apartment" class="profile-inline-input" placeholder="Квартира" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Поштовий індекс</div>
+                                    <input type="text" id="addr-postal" class="profile-inline-input" placeholder="00000" />
+                                </div>
+                            </div>
+                            <button type="button" class="profile-save-btn" onclick="saveAddress()">Зберегти</button>
+                            <button type="button" class="profile-cancel-btn" onclick="document.getElementById('add-address-form').style.display='none'">Скасувати</button>
+                        </div>
                     </div>
                 </section>
 
@@ -180,26 +321,15 @@
                     <div class="profile-block__body" id="login-data">
                         <div class="profile-info-grid profile-info-grid--2">
                             <div class="profile-login-item">
-                                <div class="profile-login-item__label">Логін (телефон)</div>
-                                <div class="profile-login-item__value">@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "Не вказано" : Model.PhoneNumber)</div>
-                                <a href="#" class="profile-edit-link">
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                        <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
-                                        <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    <span>Редагувати</span>
-                                </a>
-                            </div>
-                            <div class="profile-login-item">
                                 <div class="profile-login-item__label">Логін (ел.пошта)</div>
-                                <div class="profile-login-item__value">@(string.IsNullOrWhiteSpace(Model.Email) ? "Не вказано" : Model.Email)</div>
-                                <a href="#" class="profile-edit-link">
+                                <div class="profile-info-item__value" id="val-email">@(string.IsNullOrWhiteSpace(Model.Email) ? "Не вказано" : Model.Email)</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('email', 'text')">
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                         <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
                                         <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                     <span>Редагувати</span>
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -219,7 +349,47 @@
                         <span class="profile-block__arrow"></span>
                     </button>
                     <div class="profile-block__body" id="pets-data" hidden>
-                        <div class="profile-empty">Інформація про домашніх тварин не додана.</div>
+                        @if (Model.Pets.Count == 0)
+                        {
+                            <div class="profile-empty">Інформація про домашніх тварин не додана.</div>
+                        }
+                        else
+                        {
+                            <div class="profile-info-grid profile-info-grid--3">
+                                @foreach (var p in Model.Pets)
+                                {
+                                    <div class="profile-info-item">
+                                        <div class="profile-info-item__label">@p.Name</div>
+                                        <div class="profile-info-item__value">@(p.Type ?? "Не вказано")@(p.Breed != null ? $", {p.Breed}" : "")</div>
+                                        <button type="button" class="profile-edit-link profile-delete-btn border-0 bg-transparent"
+                                                onclick="deleteItem('pet', @p.Id, this)">
+                                            <span>Видалити</span>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <button type="button" class="profile-add-btn border-0 bg-transparent" onclick="showAddPetForm()">
+                            + Додати тварину
+                        </button>
+                        <div id="add-pet-form" style="display:none; margin-top:12px;">
+                            <div class="profile-info-grid profile-info-grid--3">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Кличка</div>
+                                    <input type="text" id="pet-name" class="profile-inline-input" placeholder="Кличка" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Вид</div>
+                                    <input type="text" id="pet-type" class="profile-inline-input" placeholder="Кіт, Собака..." />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Порода</div>
+                                    <input type="text" id="pet-breed" class="profile-inline-input" placeholder="Порода" />
+                                </div>
+                            </div>
+                            <button type="button" class="profile-save-btn" onclick="savePet()">Зберегти</button>
+                            <button type="button" class="profile-cancel-btn" onclick="document.getElementById('add-pet-form').style.display='none'">Скасувати</button>
+                        </div>
                     </div>
                 </section>
 
@@ -241,7 +411,43 @@
                         <span class="profile-block__arrow"></span>
                     </button>
                     <div class="profile-block__body" id="additional-data" hidden>
-                        <div class="profile-empty">Додаткова інформація відсутня.</div>
+                        @if (Model.AdditionalInfos.Count == 0)
+                        {
+                            <div class="profile-empty">Додаткова інформація відсутня.</div>
+                        }
+                        else
+                        {
+                            <div class="profile-info-grid profile-info-grid--3">
+                                @foreach (var info in Model.AdditionalInfos)
+                                {
+                                    <div class="profile-info-item">
+                                        <div class="profile-info-item__label">@info.Key</div>
+                                        <div class="profile-info-item__value">@(string.IsNullOrWhiteSpace(info.Value) ? "Не вказано" : info.Value)</div>
+                                        <button type="button" class="profile-edit-link profile-delete-btn border-0 bg-transparent"
+                                                onclick="deleteItem('additionalinfo', @info.Id, this)">
+                                            <span>Видалити</span>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <button type="button" class="profile-add-btn border-0 bg-transparent" onclick="showAddInfoForm()">
+                            + Додати інформацію
+                        </button>
+                        <div id="add-info-form" style="display:none; margin-top:12px;">
+                            <div class="profile-info-grid profile-info-grid--2">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Назва</div>
+                                    <input type="text" id="info-key" class="profile-inline-input" placeholder="Наприклад: Алергія" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Значення</div>
+                                    <input type="text" id="info-value" class="profile-inline-input" placeholder="Значення" />
+                                </div>
+                            </div>
+                            <button type="button" class="profile-save-btn" onclick="saveAdditionalInfo()">Зберегти</button>
+                            <button type="button" class="profile-cancel-btn" onclick="document.getElementById('add-info-form').style.display='none'">Скасувати</button>
+                        </div>
                     </div>
                 </section>
 
@@ -274,7 +480,7 @@
                                 </button>
                                 @foreach (var provider in externalLogins)
                                 {
-                                    if (@provider.DisplayName == "Google")
+                                    if (provider.DisplayName == "Google")
                                     {
                                         <button class="social-connect-card">
                                             <div class="social-connect-card__icon">
@@ -317,18 +523,4 @@
     </div>
 </div>
 
-<script>
-        document.addEventListener('DOMContentLoaded', function () {
-        const blocks = document.querySelectorAll('.profile-block');
-        blocks.forEach(block => {
-            const button = block.querySelector('.profile-block__head');
-            const panel = document.getElementById(button.getAttribute('aria-controls'));
-            button.addEventListener('click', function () {
-                const isOpen = button.getAttribute('aria-expanded') === 'true';
-                button.setAttribute('aria-expanded', String(!isOpen));
-                block.classList.toggle('is-open', !isOpen);
-                if (panel) panel.hidden = isOpen;
-            });
-        });
-    });
-</script>
+<script src="~/js/profile.js" asp-append-version="true"></script>
