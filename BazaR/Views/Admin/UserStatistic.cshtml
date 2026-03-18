@@ -34,7 +34,7 @@
             <div class="card bg-success text-white">
                 <div class="card-body">
                     <h6 class="card-title">Товары</h6>
-                    <h2 class="mb-0">@Model.SellingItems?.Count ?? 0</h2>
+                    <h2 class="mb-0">@(Model.SellingItems?.Count ?? 0)</h2>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
             <div class="card bg-info text-white">
                 <div class="card-body">
                     <h6 class="card-title">Отзывы</h6>
-                    <h2 class="mb-0">@Model.Reviews?.Count ?? 0</h2>
+                    <h2 class="mb-0">@(Model.Reviews?.Count ?? 0)</h2>
                 </div>
             </div>
         </div>
@@ -50,7 +50,7 @@
             <div class="card bg-warning text-white">
                 <div class="card-body">
                     <h6 class="card-title">Заказы</h6>
-                    <h2 class="mb-0">@Model.Orders?.Count ?? 0</h2>
+                    <h2 class="mb-0">@(Model.Orders?.Count ?? 0)</h2>
                 </div>
             </div>
         </div>
@@ -60,17 +60,17 @@
     <ul class="nav nav-tabs mb-4" id="statisticTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="items-tab" data-bs-toggle="tab" data-bs-target="#items" type="button">
-                Товары (@Model.SellingItems?.Count ?? 0)
+                Товары (@(Model.SellingItems?.Count ?? 0))
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button">
-                Отзывы (@Model.Reviews?.Count ?? 0)
+                Отзывы (@(Model.Reviews?.Count ?? 0))
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button">
-                Заказы (@Model.Orders?.Count ?? 0)
+                Заказы (@(Model.Orders?.Count ?? 0))
             </button>
         </li>
     </ul>
