@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using BazaR.Models;
 
 namespace BazaR.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -22,7 +24,6 @@ namespace BazaR.Data
         public DbSet<ComplectItem> ComplectItems { get; set; }
         public DbSet<Usluga> Uslugi { get; set; }
         public DbSet<Delivery> Deliveries { get; set; }
-        public DbSet<User> Users { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<WishlistItem> WishlistItems { get; set; }
         public DbSet<Order> Orders { get; set; }
@@ -31,6 +32,8 @@ namespace BazaR.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             // Настройка Category
             modelBuilder.Entity<Category>(entity =>
             {
@@ -226,15 +229,7 @@ namespace BazaR.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Настройка User
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.Email).IsUnique();
-                entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
-                entity.Property(e => e.PasswordHash).IsRequired();
-                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
-            });
+            // User managed by Identity; only custom nav props configured here
 
             // Настройка CartItem
             modelBuilder.Entity<CartItem>(entity =>
@@ -356,21 +351,30 @@ namespace BazaR.Data
                 new City { Id = 22, Name = "Khmelnytskyi" }
             );
 
-            // 2. Затем пользователь (админ)
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
                     Id = 1,
+                    UserName = "admin@example.com",
+                    NormalizedUserName = "ADMIN@EXAMPLE.COM",
                     Email = "admin@example.com",
-                    PasswordHash = "AQAAAAIAAYagAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==", // "admin123"
+                    NormalizedEmail = "ADMIN@EXAMPLE.COM",
+                    EmailConfirmed = true,
+                    SecurityStamp = "STATIC-SEED-STAMP-1",
+                    ConcurrencyStamp = "00000000-0000-0000-0000-000000000001",
                     Name = "Admin User",
                     IsAdmin = true
                 },
                 new User
                 {
                     Id = 2,
+                    UserName = "test@example.com",
+                    NormalizedUserName = "TEST@EXAMPLE.COM",
                     Email = "test@example.com",
-                    PasswordHash = "AQAAAAIAAYagAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==", // "test123"
+                    NormalizedEmail = "TEST@EXAMPLE.COM",
+                    EmailConfirmed = true,
+                    SecurityStamp = "STATIC-SEED-STAMP-2",
+                    ConcurrencyStamp = "00000000-0000-0000-0000-000000000002",
                     Name = "Test User",
                     IsAdmin = false
                 }

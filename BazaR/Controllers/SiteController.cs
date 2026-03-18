@@ -2,6 +2,7 @@ using System.Text.Json;
 using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,22 +13,23 @@ namespace BazaR.Controllers
         private readonly IUserDb _usMan;
         private readonly IItemRepository _itMan;
         private readonly AppDbContext _db;
+        private readonly UserManager<User> _userManager;
 
         private const int PageSize = 12;
 
-        public SiteController(IUserDb usMan, IItemRepository itMan, AppDbContext db)
+        public SiteController(IUserDb usMan, IItemRepository itMan, AppDbContext db, UserManager<User> userManager)
         {
             _usMan = usMan;
             _itMan = itMan;
             _db = db;
+            _userManager = userManager;
         }
 
-        private int? CurrentUserId => HttpContext.Session.GetInt32("uid");
+        private User? CurrentUser => User.Identity?.IsAuthenticated == true
+            ? _userManager.GetUserAsync(User).Result
+            : null;
 
-        private User? CurrentUser =>
-            CurrentUserId.HasValue ? _usMan.GetUser(CurrentUserId.Value) : null;
-
-        private bool IsAuthenticated => CurrentUserId.HasValue;
+        private bool IsAuthenticated => User.Identity?.IsAuthenticated == true;
 
         private bool IsAdmin => CurrentUser?.IsAdmin == true;
 
@@ -35,9 +37,9 @@ namespace BazaR.Controllers
         {
             ViewBag.User = CurrentUser;
 
-            if (IsAuthenticated)
+            if (IsAuthenticated && CurrentUser != null)
             {
-                var userId = CurrentUserId!.Value;
+                var userId = CurrentUser.Id;
                 ViewBag.CartCount = _usMan.GetCartItems(userId)?.Count() ?? 0;
                 ViewBag.WishlistCount = _usMan.GetWishList(userId)?.Count() ?? 0;
             }
@@ -407,7 +409,7 @@ namespace BazaR.Controllers
 
             if (IsAuthenticated)
             {
-                var userId = CurrentUserId!.Value;
+                var userId = CurrentUser!.Id;
                 ViewBag.IsInCart = _usMan.GetCartItems(userId).Any(i => i.Id == id);
                 ViewBag.IsInWishlist = _usMan.GetWishList(userId).Any(i => i.Id == id);
             }
@@ -427,7 +429,7 @@ namespace BazaR.Controllers
 
             SetLayoutData();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
             var items = cartItems.Select(ci => ci.Item).ToList();
 
@@ -459,16 +461,17 @@ namespace BazaR.Controllers
             var item = _itMan.GetById(itemId);
             if (item == null) return NotFound();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
 
             for (int i = 0; i < quantity; i++)
             {
                 _usMan.AddToCart(userId, itemId);
             }
 
-            var cartCount = _usMan.GetCartItems(userId).Count();
+            var cartItems = _usMan.GetCartItemsWithQuantity(userId);
+            var cartCount = cartItems.Sum(ci => ci.Quantity);
 
-            TempData["Ok"] = "Добавлено в корзину.";
+            TempData["Ok"] = "Додано в кошик.";
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
@@ -484,13 +487,14 @@ namespace BazaR.Controllers
         {
             if (!IsAuthenticated) return RequireLogin();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
 
             _usMan.RemoveFromCart(userId, itemId);
 
-            var cartCount = _usMan.GetCartItems(userId).Count();
+            var cartItems = _usMan.GetCartItemsWithQuantity(userId);
+            var cartCount = cartItems.Sum(ci => ci.Quantity);
 
-            TempData["Ok"] = "Удалено из корзины.";
+            TempData["Ok"] = "Видалено з кошика.";
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
@@ -506,7 +510,7 @@ namespace BazaR.Controllers
         {
             if (!IsAuthenticated) return RequireLogin();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
 
             _usMan.SetCartQuantity(userId, itemId, quantity);
 
@@ -528,7 +532,7 @@ namespace BazaR.Controllers
         {
             if (!IsAuthenticated) return RequireLogin();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
 
             _usMan.ClearCart(userId);
 
@@ -542,7 +546,7 @@ namespace BazaR.Controllers
             if (!IsAuthenticated)
                 return Json(new { items = new object[0], total = 0, count = 0 });
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
 
             var result = cartItems.Select(ci => new
@@ -588,7 +592,7 @@ namespace BazaR.Controllers
             var item = _itMan.GetById(id);
             if (item == null) return NotFound();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
 
             _usMan.AddToWishList(userId, id);
 
@@ -610,7 +614,7 @@ namespace BazaR.Controllers
         {
             if (!IsAuthenticated) return RequireLogin();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
 
             _usMan.RemoveFromWishList(userId, id);
 
@@ -633,12 +637,12 @@ namespace BazaR.Controllers
 
             SetLayoutData();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
 
             if (!cartItems.Any())
             {
-                TempData["Error"] = "Корзина пустая.";
+                TempData["Error"] = "Кошик порожній.";
                 return RedirectToAction(nameof(Cart));
             }
 
@@ -654,26 +658,23 @@ namespace BazaR.Controllers
         {
             if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Checkout)));
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
 
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
             if (!cartItems.Any())
             {
-                TempData["Error"] = "Корзина пустая.";
+                TempData["Error"] = "Кошик порожній.";
                 return RedirectToAction(nameof(Cart));
             }
 
             var order = new Order
             {
-                Status = "Created",
-                CreatedAt = DateTime.UtcNow,
                 OrderItems = new List<OrderItem>(),
                 TotalAmount = 0,
                 Address = address,
                 PaymentMethod = paymentMethod,
                 DeliveryMethod = deliveryMethod,
-                PaymentStatus = "Pending",
-                CityId = 1 // По умолчанию Киев, нужно добавить выбор города
+                CityId = 1
             };
 
             foreach (var cartItem in cartItems)
@@ -690,13 +691,13 @@ namespace BazaR.Controllers
             var ok = _usMan.CreateOrder(userId, order);
             if (!ok)
             {
-                TempData["Error"] = "Не удалось создать заказ.";
+                TempData["Error"] = "Не вдалося створити замовлення.";
                 return RedirectToAction(nameof(Checkout));
             }
 
             _usMan.ClearCart(userId);
 
-            TempData["Ok"] = "Заказ создан!";
+            TempData["Ok"] = "Замовлення успішно оформлено!";
             return RedirectToAction(nameof(Orders));
         }
 
@@ -707,7 +708,7 @@ namespace BazaR.Controllers
 
             SetLayoutData();
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
             var orders = _usMan.GetUserOrders(userId)
                 .OrderByDescending(o => o.Id)
                 .ToList();
@@ -727,7 +728,7 @@ namespace BazaR.Controllers
             var order = _usMan.GetOrderById(id);
             if (order == null) return NotFound();
 
-            if (!IsAdmin && order.UserId != CurrentUserId!.Value)
+            if (!IsAdmin && order.UserId != CurrentUser!.Id)
                 return RedirectToAction(nameof(AccessDenied));
 
             ViewBag.Items = order.OrderItems;
@@ -747,143 +748,12 @@ namespace BazaR.Controllers
             var order = _usMan.GetOrderById(id);
             if (order == null) return NotFound();
 
-            if (!IsAdmin && order.UserId != CurrentUserId!.Value)
+            if (!IsAdmin && order.UserId != CurrentUser!.Id)
                 return RedirectToAction(nameof(AccessDenied));
 
             var ok = _usMan.CancelOrder(id);
-            TempData[ok ? "Ok" : "Error"] = ok ? "Заказ отменён." : "Не удалось отменить заказ.";
+            TempData[ok ? "Ok" : "Error"] = ok ? "Замовлення скасовано." : "Не вдалося скасувати замовлення.";
             return RedirectToAction(nameof(Orders));
-        }
-
-        [HttpGet]
-        public IActionResult Profile()
-        {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Profile)));
-
-            SetLayoutData();
-
-            var user = CurrentUser;
-            ViewBag.OrdersCount = user?.Orders?.Count ?? 0;
-            ViewBag.WishlistCount = _usMan.GetWishList(CurrentUserId!.Value).Count();
-            ViewBag.CartCount = _usMan.GetCartItems(CurrentUserId.Value).Count();
-            ViewBag.ActiveMenu = "Profile";
-
-            var vm = new BazaR.ViewModels.AccountProfileViewModel
-            {
-                FullName = user?.Name ?? "",
-                Email = user?.Email ?? ""
-            };
-
-            return View(vm);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Logout()
-        {
-            HttpContext.Session.Remove("uid");
-            TempData["Ok"] = "Вы вышли из аккаунта.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        public IActionResult OpenLoginModal()
-        {
-            return PartialView("LoginModal");
-        }
-
-        [HttpGet]
-        public IActionResult OpenRegisterModal()
-        {
-            return PartialView("RegisterModal");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Login(string email, string password)
-        {
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-            {
-                TempData["Error"] = "Заполните email и пароль.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            var user = _usMan.GetByEmail(email.Trim());
-            if (user == null || user.PasswordHash != password)
-            {
-                TempData["Error"] = "Неверный email или пароль.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            HttpContext.Session.SetInt32("uid", user.Id);
-            TempData["Ok"] = "Успешный вход.";
-
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return Json(new { success = true, redirect = Url.Action(nameof(Index)) });
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Register(string email, string? name, string password, string phoneNumber,
-            string? firstName, string? lastName, string? confirmPassword)
-        {
-            email = (email ?? "").Trim();
-
-            var fullName = name;
-            if (string.IsNullOrWhiteSpace(fullName))
-                fullName = ((firstName ?? "") + " " + (lastName ?? "")).Trim();
-
-            if (string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(password) ||
-                string.IsNullOrWhiteSpace(fullName))
-            {
-                TempData["Error"] = "Заповніть обов'язкові поля.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            if (!string.IsNullOrWhiteSpace(confirmPassword) && password != confirmPassword)
-            {
-                TempData["Error"] = "Паролі не співпадають.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            if (_usMan.GetByEmail(email) != null)
-            {
-                TempData["Error"] = "Користувач з таким email вже існує.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            var user = new User
-            {
-                Email = email,
-                Name = fullName,
-                PasswordHash = password,
-                IsAdmin = false
-            };
-
-            var ok = _usMan.AddUser(user);
-            if (!ok)
-            {
-                TempData["Error"] = "Не удалось зарегистрироваться.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            var created = _usMan.GetByEmail(email);
-            if (created != null)
-                HttpContext.Session.SetInt32("uid", created.Id);
-
-            TempData["Ok"] = "Регистрация успешна.";
-
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return Json(new { success = true, redirect = Url.Action(nameof(Index)) });
-            }
-
-            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
@@ -960,7 +830,7 @@ namespace BazaR.Controllers
         {
             if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(ItemDetails), new { id = itemId }));
 
-            review.UserId = CurrentUserId!.Value;
+            review.UserId = CurrentUser!.Id;
             review.CreatedAt = DateTime.UtcNow;
 
             var ok = _itMan.AddReview(itemId, review);

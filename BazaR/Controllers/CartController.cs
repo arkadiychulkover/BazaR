@@ -1,5 +1,6 @@
 using BazaR.Interfaces;
 using BazaR.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BazaR.Controllers
@@ -7,14 +8,18 @@ namespace BazaR.Controllers
     public class CartController : Controller
     {
         private readonly IUserDb _usMan;
+        private readonly UserManager<User> _userManager;
 
-        public CartController(IUserDb usMan)
+        public CartController(IUserDb usMan, UserManager<User> userManager)
         {
             _usMan = usMan;
+            _userManager = userManager;
         }
 
-        private int? CurrentUserId => HttpContext.Session.GetInt32("uid");
-        private bool IsAuthenticated => CurrentUserId.HasValue;
+        private User? CurrentUser => User.Identity?.IsAuthenticated == true
+            ? _userManager.GetUserAsync(User).Result
+            : null;
+        private bool IsAuthenticated => User.Identity?.IsAuthenticated == true;
 
         private IActionResult RequireLogin(string? returnUrl = null)
         {
@@ -27,7 +32,7 @@ namespace BazaR.Controllers
         {
             if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Index)));
 
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
             var items = cartItems.Select(ci => ci.Item).ToList();
 
@@ -47,7 +52,7 @@ namespace BazaR.Controllers
         {
             if (!IsAuthenticated) return RequireLogin();
             if (quantity < 1) quantity = 1;
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
             for (int i = 0; i < quantity; i++)
                 _usMan.AddToCart(userId, itemId);
             return RedirectToAction(nameof(Index));
@@ -58,7 +63,7 @@ namespace BazaR.Controllers
         public IActionResult Remove(int itemId)
         {
             if (!IsAuthenticated) return RequireLogin();
-            _usMan.RemoveFromCart(CurrentUserId!.Value, itemId);
+            _usMan.RemoveFromCart(CurrentUser!.Id, itemId);
             return RedirectToAction(nameof(Index));
         }
 
@@ -67,7 +72,7 @@ namespace BazaR.Controllers
         public IActionResult Clear()
         {
             if (!IsAuthenticated) return RequireLogin();
-            _usMan.ClearCart(CurrentUserId!.Value);
+            _usMan.ClearCart(CurrentUser!.Id);
             return RedirectToAction(nameof(Index));
         }
 
@@ -75,7 +80,7 @@ namespace BazaR.Controllers
         public IActionResult Checkout()
         {
             if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Checkout)));
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
             if (!cartItems.Any())
             {
@@ -92,7 +97,7 @@ namespace BazaR.Controllers
         public IActionResult CreateOrder(string address, string paymentMethod, string deliveryMethod)
         {
             if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Checkout)));
-            var userId = CurrentUserId!.Value;
+            var userId = CurrentUser!.Id;
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
             if (!cartItems.Any())
             {
