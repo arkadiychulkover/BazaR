@@ -735,7 +735,7 @@ namespace BazaR.Controllers
             var order = _usMan.GetOrderById(id);
             if (order == null) return NotFound();
 
-            if (!IsAdmin && order.UserId != CurrentUser!.Id)
+            if (order.UserId != CurrentUser!.Id)
                 return RedirectToAction(nameof(AccessDenied));
 
             ViewBag.Items = order.OrderItems;

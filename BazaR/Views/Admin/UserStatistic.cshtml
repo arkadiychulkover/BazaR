@@ -198,7 +198,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var review in Model.Reviews)
+                                    @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt))
                                     {
                                         <tr>
                                             <td>@review.Id</td>
@@ -293,28 +293,28 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var order in Model.Orders)
+                                    @foreach (var order in Model.Orders.OrderByDescending(o => o.CreatedAt))
                                     {
                                         <tr>
                                             <td>@order.Number</td>
                                             <td>@order.CreatedAt.ToString("dd.MM.yyyy")</td>
                                             <td>@order.TotalAmount.ToString("C")</td>
                                             <td>
-                                                @switch (order.Status?.ToLower())
+                                                @switch (order.Status)
                                                 {
-                                                    case "new":
+                                                    case "Нове":
                                                         <span class="badge bg-info">Новый</span>
                                                         break;
-                                                    case "processing":
+                                                    case "В обробці":
                                                         <span class="badge bg-primary">В обработке</span>
                                                         break;
-                                                    case "shipped":
+                                                    case "Відправлено":
                                                         <span class="badge bg-success">Отправлен</span>
                                                         break;
-                                                    case "delivered":
+                                                    case "Доставлено":
                                                         <span class="badge bg-success">Доставлен</span>
                                                         break;
-                                                    case "cancelled":
+                                                    case "Скасовано":
                                                         <span class="badge bg-danger">Отменен</span>
                                                         break;
                                                     default:
@@ -323,7 +323,7 @@
                                                 }
                                             </td>
                                             <td>
-                                                @if (order.PaymentStatus?.ToLower() == "paid")
+                                                @if (order.PaymentStatus?.ToLower() == "paid" || order.PaymentStatus == "Оплачено")
                                                 {
                                                     <span class="badge bg-success">Оплачен</span>
                                                 }
@@ -334,9 +334,21 @@
                                             </td>
                                             <td>@order.Ttn</td>
                                             <td class="text-end">
-                                                <a href="#" class="btn btn-sm btn-outline-primary" title="Просмотр">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a asp-action="OrderDetails" asp-route-id="@order.Id"
+                                                       class="btn btn-outline-primary" title="Просмотр">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <form asp-action="DeleteOrder" asp-route-id="@order.Id"
+                                                          method="post" style="display: inline;">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-outline-danger"
+                                                                title="Удалить"
+                                                                onclick="return confirm('Вы уверены, что хотите удалить заказ №@order.Number?');">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         </tr>
                                     }

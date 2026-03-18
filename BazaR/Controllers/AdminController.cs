@@ -1,5 +1,6 @@
 ﻿using BazaR.Data;
 using BazaR.Filters;
+using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -16,24 +17,27 @@ namespace BazaR.Controllers
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly SignInManager<User> _signInManager;
         private readonly AppDbContext _appDbContext;
+        private readonly IUserDb _UserRepo;
         private readonly string adminRoleName = "Admin";
 
         public AdminController(
             UserManager<User> userManager,
             RoleManager<IdentityRole<int>> roleManager,
             SignInManager<User> signInManager,
-            AppDbContext appDbContext)
+            AppDbContext appDbContext,
+            IUserDb userDb)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
             _appDbContext = appDbContext;
+            _UserRepo = userDb;
         }
 
         // =========================
         // USERS
         // =========================
-        #region
+        #region Users
 
         [HttpGet]
         public IActionResult Index([FromServices] ActiveUsersService service)
@@ -125,7 +129,11 @@ namespace BazaR.Controllers
         {
             User us = await _appDbContext.Users
                 .Include(u => u.SellingItems)
+                    .ThenInclude(i => i.Category)
+                .Include(u => u.SellingItems)
+                    .ThenInclude(i => i.Brand)
                 .Include(u => u.Reviews)
+                    .ThenInclude(r => r.Item)
                 .Include(u => u.Orders)
                 .FirstOrDefaultAsync(u => u.Id == id);
 
@@ -140,7 +148,8 @@ namespace BazaR.Controllers
         // =========================
         // ITEMS
         // =========================
-        #region
+        #region Items
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUserItem(int id)
@@ -203,7 +212,7 @@ namespace BazaR.Controllers
         // =========================
         // REVIEWS (COMMENTS)
         // =========================
-        #region
+        #region Reviews
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -254,6 +263,51 @@ namespace BazaR.Controllers
             await _appDbContext.SaveChangesAsync();
 
             return RedirectToAction(nameof(UserStatistic), new { id = rev.UserId });
+        }
+        #endregion
+
+        // =========================
+        // ORDERS
+        // =========================
+        #region Orders
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteOrder(int id)
+        {
+            Order or = await _appDbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
+
+            if (or == null)
+                return RedirectToAction(nameof(Index));
+
+            int userid = or.UserId;
+            _appDbContext.Orders.Remove(or);
+            await _appDbContext.SaveChangesAsync();
+
+            return RedirectToAction(nameof(UserStatistic), new { id = userid });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrderDetails(int id)
+        {
+            Order order = await _appDbContext.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Item)
+                .Include(o => o.City)
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Используем ViewBag для дополнительных данных (хотя они уже есть в модели)
+            ViewBag.Items = order.OrderItems;
+            ViewBag.City = order.City;
+            ViewBag.User = order.User;
+
+            return View(order);
         }
         #endregion
     }
