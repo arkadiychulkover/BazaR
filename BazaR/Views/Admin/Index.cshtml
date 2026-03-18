@@ -1,6 +1,7 @@
 ﻿@model IEnumerable<BazaR.Models.User>
 @{
     ViewData["Title"] = "Управление пользователями";
+    int act = ViewBag.Active;
 }
 
 <div class="container-fluid py-4">
@@ -8,6 +9,7 @@
         <h1 class="h3 mb-0">Управление пользователями</h1>
         <div>
             <span class="badge bg-primary">Всего пользователей: @Model.Count()</span>
+            <span class="badge bg-primary">Всего aктивных пользователей: @act</span>
         </div>
     </div>
 
@@ -32,6 +34,7 @@
                                 <td>@user.Id</td>
                                 <td>@(user.Name ?? "—")</td>
                                 <td>@user.Email</td>
+                                <td>@(user.PhoneNumber ?? "—")</td>
                                 <td>
                                     @if (user.IsAdmin)
                                     {

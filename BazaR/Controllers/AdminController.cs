@@ -1,5 +1,7 @@
 ﻿using BazaR.Data;
+using BazaR.Filters;
 using BazaR.Models;
+using BazaR.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -31,9 +33,10 @@ namespace BazaR.Controllers
         #region
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index([FromServices] ActiveUsersService service)
         {
             IQueryable<User> users = _appDbContext.Users;
+            ViewBag.Active = service.GetOnlineUsersCount();
             return View(users);
         }
 
@@ -79,7 +82,7 @@ namespace BazaR.Controllers
 
             us.Name = user.Name;
             us.Email = user.Email;
-            //us.PhoneNumber = user.PhoneNumber;
+            us.PhoneNumber = user.PhoneNumber;
             us.IsAdmin = user.IsAdmin;
 
             if (user.IsAdmin)
