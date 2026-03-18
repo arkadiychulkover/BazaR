@@ -35,6 +35,12 @@ namespace BazaR.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public IActionResult AccessDenied(string ReturnUrl)
+        {
+            return View("AccessDenied");
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password, string? returnUrl = null, bool remember = true)
@@ -114,7 +120,7 @@ namespace BazaR.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
-                return RedirectToAction("_Login", "Account");
+                return RedirectToAction("Login", "Account");
 
             var info = await _signInManager.GetExternalLoginInfoAsync(user.Id.ToString());
             if (info == null)
@@ -226,6 +232,9 @@ namespace BazaR.Controllers
                 return Redirect(returnUrl);
             }
 
+            // Добавляем роль User по умолчанию
+            await _userManager.AddToRoleAsync(user, "User");
+
             await _signInManager.SignInAsync(user, new AuthenticationProperties
             {
                 IsPersistent = true,
@@ -327,6 +336,9 @@ namespace BazaR.Controllers
                     TempData["LoginEmailError"] = createResult.Errors.FirstOrDefault()?.Description ?? "Не вдалося створити користувача.";
                     return Redirect(returnUrl);
                 }
+
+                // Добавляем роль User
+                await _userManager.AddToRoleAsync(user, "User");
             }
 
             var addLoginResult = await _userManager.AddLoginAsync(user, info);
@@ -371,6 +383,19 @@ namespace BazaR.Controllers
             }
 
             TempData["Ok"] = "Акаунт успішно видалено.";
+            return RedirectToAction("Index", "Site");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> RefreshRoles()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+                TempData["Ok"] = "Ролі оновлено";
+            }
             return RedirectToAction("Index", "Site");
         }
 

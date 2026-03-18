@@ -1,13 +1,15 @@
-using System.Text.Json;
 using BazaR.Data;
+using BazaR.Filters;
 using BazaR.Interfaces;
 using BazaR.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace BazaR.Controllers
 {
+    [ServiceFilter(typeof(OnlineResourceFilter))]
     public class SiteController : Controller
     {
         private readonly IUserDb _usMan;

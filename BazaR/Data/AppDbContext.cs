@@ -29,6 +29,7 @@ namespace BazaR.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<City> Cities { get; set; }
+        public DbSet<SearchItem> SearchItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

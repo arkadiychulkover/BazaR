@@ -9490,28 +9490,6 @@ namespace BazaR.Migrations
                     b.ToTable("Reviews");
                 });
 
-            modelBuilder.Entity("BazaR.Models.SearchItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SearchItem");
-                });
-
             modelBuilder.Entity("BazaR.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -9811,6 +9789,28 @@ namespace BazaR.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SearchItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SearchItems");
+                });
+
             modelBuilder.Entity("BazaR.Models.CartItem", b =>
                 {
                     b.HasOne("BazaR.Models.Item", "Item")
@@ -10010,13 +10010,6 @@ namespace BazaR.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BazaR.Models.SearchItem", b =>
-                {
-                    b.HasOne("BazaR.Models.User", null)
-                        .WithMany("SearchHistory")
-                        .HasForeignKey("UserId");
-                });
-
             modelBuilder.Entity("BazaR.Models.Usluga", b =>
                 {
                     b.HasOne("BazaR.Models.Item", "Item")
@@ -10098,6 +10091,15 @@ namespace BazaR.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SearchItem", b =>
+                {
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BazaR.Models.Brand", b =>
                 {
                     b.Navigation("CategoryBrands");
@@ -10154,8 +10156,6 @@ namespace BazaR.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Reviews");
-
-                    b.Navigation("SearchHistory");
 
                     b.Navigation("SellingItems");
 

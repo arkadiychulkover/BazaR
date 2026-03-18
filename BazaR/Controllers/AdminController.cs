@@ -14,16 +14,19 @@ namespace BazaR.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly AppDbContext _appDbContext;
         private readonly string adminRoleName = "Admin";
 
         public AdminController(
             UserManager<User> userManager,
             RoleManager<IdentityRole<int>> roleManager,
+            SignInManager<User> signInManager,
             AppDbContext appDbContext)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _signInManager = signInManager;
             _appDbContext = appDbContext;
         }
 
@@ -85,10 +88,29 @@ namespace BazaR.Controllers
             us.PhoneNumber = user.PhoneNumber;
             us.IsAdmin = user.IsAdmin;
 
+            // Правильное управление ролью Admin
             if (user.IsAdmin)
-                await _userManager.AddToRoleAsync(us, adminRoleName);
+            {
+                if (!await _userManager.IsInRoleAsync(us, adminRoleName))
+                {
+                    await _userManager.AddToRoleAsync(us, adminRoleName);
+                }
+            }
+            else
+            {
+                if (await _userManager.IsInRoleAsync(us, adminRoleName))
+                {
+                    await _userManager.RemoveFromRoleAsync(us, adminRoleName);
+                }
+            }
 
             await _userManager.UpdateAsync(us);
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null && currentUser.Id == us.Id)
+            {
+                await _signInManager.RefreshSignInAsync(us);
+            }
 
             return RedirectToAction(nameof(Index));
         }
@@ -101,7 +123,10 @@ namespace BazaR.Controllers
         [HttpGet]
         public async Task<IActionResult> UserStatistic(int id)
         {
-            User us = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+            User us = await _appDbContext.Users
+                .Include(u => u.SellingItems)  // Изменено с Items на SellingItems
+                .Include(u => u.Reviews)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (us == null)
             {

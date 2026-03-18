@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BazaR.Migrations
 {
     /// <inheritdoc />
-    public partial class InitIdentity : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -226,6 +226,25 @@ namespace BazaR.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SearchItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SearchItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SearchItems_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CategoryBrands",
                 columns: table => new
                 {
@@ -307,7 +326,7 @@ namespace BazaR.Migrations
                     PaymentMethod = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     PaymentStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     DeliveryMethod = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Ttn = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Ttn = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
                 },
                 constraints: table =>
@@ -1871,6 +1890,11 @@ namespace BazaR.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SearchItems_UserId",
+                table: "SearchItems",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Uslugi_ItemId",
                 table: "Uslugi",
                 column: "ItemId");
@@ -1931,6 +1955,9 @@ namespace BazaR.Migrations
 
             migrationBuilder.DropTable(
                 name: "Reviews");
+
+            migrationBuilder.DropTable(
+                name: "SearchItems");
 
             migrationBuilder.DropTable(
                 name: "Uslugi");

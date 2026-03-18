@@ -3,8 +3,10 @@ using BazaR.Filters;
 using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.Repositories;
+using BazaR.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,7 @@ builder.Services.AddControllersWithViews(o =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Настройка Identity с правильными клеймами для ролей
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
     options.Password.RequireDigit = false;
@@ -24,6 +27,11 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequiredLength = 6;
     options.User.RequireUniqueEmail = true;
+
+    // ВАЖНО: указываем правильные типы клеймов
+    options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
+    options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Name;
+    options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role; // Это ключевое для ролей!
 
     options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
 })
@@ -58,6 +66,9 @@ builder.Services
     });
 
 builder.Services.AddScoped<UserContextFilter>();
+builder.Services.AddScoped<OnlineResourceFilter>();
+builder.Services.AddSingleton<ActiveUsersService>();
+builder.Services.AddScoped<DbMaker>();
 builder.Services.AddScoped<IUserDb, UserRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 
@@ -65,18 +76,8 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    if (await userManager.FindByEmailAsync("admin@bazar.ua") == null)
-    {
-        var admin = new User
-        {
-            Email = "admin@bazar.ua",
-            UserName = "admin@bazar.ua",
-            Name = "Admin User",
-            IsAdmin = true
-        };
-        await userManager.CreateAsync(admin, "admin123");
-    }
+    var dbMaker = scope.ServiceProvider.GetRequiredService<DbMaker>();
+    await dbMaker.MakeAsync();
 }
 
 if (!app.Environment.IsDevelopment())
