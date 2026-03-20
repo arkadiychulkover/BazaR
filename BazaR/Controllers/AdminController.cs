@@ -18,6 +18,7 @@ namespace BazaR.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly AppDbContext _appDbContext;
         private readonly IUserDb _UserRepo;
+        private readonly IUserStatistick _StatistickRepo;
         private readonly string adminRoleName = "Admin";
 
         public AdminController(
@@ -25,13 +26,14 @@ namespace BazaR.Controllers
             RoleManager<IdentityRole<int>> roleManager,
             SignInManager<User> signInManager,
             AppDbContext appDbContext,
-            IUserDb userDb)
+            IUserDb userDb, IUserStatistick StatistickRepo)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
             _appDbContext = appDbContext;
             _UserRepo = userDb;
+            _StatistickRepo = StatistickRepo;
         }
 
         // =========================
@@ -44,6 +46,9 @@ namespace BazaR.Controllers
         {
             IQueryable<User> users = _appDbContext.Users;
             ViewBag.Active = service.GetOnlineUsersCount();
+            ViewBag.ForMonth = _StatistickRepo.GetUsersCountForMonthAsync();
+            ViewBag.ForWeek = _StatistickRepo.GetUsersCountForWeekAsync();
+            ViewBag.ForDay = _StatistickRepo.GetUsersCountForDayAsync();
             return View(users);
         }
 

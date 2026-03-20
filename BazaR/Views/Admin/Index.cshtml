@@ -9,7 +9,45 @@
         <h1 class="h3 mb-0">Управление пользователями</h1>
         <div>
             <span class="badge bg-primary">Всего пользователей: @Model.Count()</span>
-            <span class="badge bg-primary">Всего aктивных пользователей: @act</span>
+            <span class="badge bg-primary">Всего активных пользователей: @act</span>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">За 24 часа</h6>
+                    <h4>@ViewBag.ForDay</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">За неделю</h6>
+                    <h4>@ViewBag.ForWeek</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">За месяц</h6>
+                    <h4>@ViewBag.ForMonth</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Онлайн сейчас</h6>
+                    <h4>@ViewBag.Active</h4>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -62,7 +100,6 @@
                                         </button>
                                     </div>
 
-                                    <!-- Modal for user deletion -->
                                     <div class="modal fade" id="deleteUserModal@(user.Id)" tabindex="-1">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
@@ -72,7 +109,9 @@
                                                 </div>
                                                 <div class="modal-body text-start">
                                                     <p>Вы уверены, что хотите удалить пользователя <strong>@(user.Email)</strong>?</p>
-                                                    <p class="text-danger mb-0"><small>Это действие также удалит все связанные данные (товары, отзывы и т.д.)</small></p>
+                                                    <p class="text-danger mb-0">
+                                                        <small>Это действие также удалит все связанные данные</small>
+                                                    </p>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>

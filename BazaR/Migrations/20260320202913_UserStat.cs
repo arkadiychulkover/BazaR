@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BazaR.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class UserStat : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,6 +35,9 @@ namespace BazaR.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Patronymic = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsAdmin = table.Column<bool>(type: "bit", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -242,6 +245,26 @@ namespace BazaR.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserUseStatisticks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    LastSeen = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserUseStatisticks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserUseStatisticks_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -598,11 +621,11 @@ namespace BazaR.Migrations
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
-                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "IsAdmin", "LockoutEnabled", "LockoutEnd", "Name", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "IsAdmin", "LastName", "LockoutEnabled", "LockoutEnd", "Name", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "Patronymic", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { 1, 0, "00000000-0000-0000-0000-000000000001", "admin@example.com", true, true, false, null, "Admin User", "ADMIN@EXAMPLE.COM", "ADMIN@EXAMPLE.COM", null, null, false, "STATIC-SEED-STAMP-1", false, "admin@example.com" },
-                    { 2, 0, "00000000-0000-0000-0000-000000000002", "test@example.com", true, false, false, null, "Test User", "TEST@EXAMPLE.COM", "TEST@EXAMPLE.COM", null, null, false, "STATIC-SEED-STAMP-2", false, "test@example.com" }
+                    { 1, 0, "00000000-0000-0000-0000-000000000001", "admin@example.com", true, null, true, null, false, null, "Admin User", "ADMIN@EXAMPLE.COM", "ADMIN@EXAMPLE.COM", null, null, null, false, "STATIC-SEED-STAMP-1", false, "admin@example.com" },
+                    { 2, 0, "00000000-0000-0000-0000-000000000002", "test@example.com", true, null, false, null, false, null, "Test User", "TEST@EXAMPLE.COM", "TEST@EXAMPLE.COM", null, null, null, false, "STATIC-SEED-STAMP-2", false, "test@example.com" }
                 });
 
             migrationBuilder.InsertData(
@@ -1895,6 +1918,11 @@ namespace BazaR.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserUseStatisticks_UserId",
+                table: "UserUseStatisticks",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Uslugi_ItemId",
                 table: "Uslugi",
                 column: "ItemId");
@@ -1958,6 +1986,9 @@ namespace BazaR.Migrations
 
             migrationBuilder.DropTable(
                 name: "SearchItems");
+
+            migrationBuilder.DropTable(
+                name: "UserUseStatisticks");
 
             migrationBuilder.DropTable(
                 name: "Uslugi");

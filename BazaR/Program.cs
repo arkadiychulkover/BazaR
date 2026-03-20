@@ -3,6 +3,7 @@ using BazaR.Filters;
 using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.Repositories;
+using BazaR.Repository;
 using BazaR.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -65,12 +66,13 @@ builder.Services
         options.SaveTokens = true;
     });
 
+builder.Services.AddSingleton<ActiveUsersService>();
 builder.Services.AddScoped<UserContextFilter>();
 builder.Services.AddScoped<OnlineResourceFilter>();
-builder.Services.AddSingleton<ActiveUsersService>();
 builder.Services.AddScoped<DbMaker>();
 builder.Services.AddScoped<IUserDb, UserRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
+builder.Services.AddTransient<IUserStatistick ,UserStatistickRpeository>();
 
 var app = builder.Build();
 
