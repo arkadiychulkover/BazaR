@@ -654,7 +654,13 @@ namespace BazaR.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateOrder(string address, string paymentMethod, string deliveryMethod)
+        public async Task<IActionResult> CreateOrder(
+            string address, string paymentMethod, string deliveryMethod,
+            string? promoCode,
+            string? lastName, string? firstName, string? patronymic, string? phone,
+            string? recipientLastName, string? recipientFirstName, string? recipientPatronymic, string? recipientPhone,
+            string? bazarPickupPointId, string? postPickupPointId,
+            bool saveContacts = false)
         {
             if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Checkout)));
 
@@ -667,11 +673,104 @@ namespace BazaR.Controllers
                 return RedirectToAction(nameof(Cart));
             }
 
+            if (string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(firstName)
+                || string.IsNullOrWhiteSpace(patronymic) || string.IsNullOrWhiteSpace(phone))
+            {
+                TempData["Error"] = "Заповніть усі обов'язкові поля в блоці «Ваші контактні дані» (включно з по батькові).";
+                return RedirectToAction(nameof(Checkout));
+            }
+
+            if (string.IsNullOrWhiteSpace(recipientLastName) || string.IsNullOrWhiteSpace(recipientFirstName)
+                || string.IsNullOrWhiteSpace(recipientPhone))
+            {
+                TempData["Error"] = "Заповніть прізвище, ім'я та телефон отримувача. По батькові в блоці отримувача — необов'язково.";
+                return RedirectToAction(nameof(Checkout));
+            }
+
+            if (string.IsNullOrWhiteSpace(paymentMethod))
+            {
+                TempData["Error"] = "Оберіть спосіб оплати.";
+                return RedirectToAction(nameof(Checkout));
+            }
+
+            if (deliveryMethod == "Самовивіз BAZA-R")
+            {
+                if (!int.TryParse(bazarPickupPointId, out var bPid) || bPid is < 1 or > 15)
+                {
+                    TempData["Error"] = "Оберіть місто та точку самовивозу BAZA-R.";
+                    return RedirectToAction(nameof(Checkout));
+                }
+                if (string.IsNullOrWhiteSpace(address) || address.Trim().Length < 10)
+                {
+                    TempData["Error"] = "Підтвердіть точку самовивозу BAZA-R (натисніть «Підтвердити» у вікні вибору).";
+                    return RedirectToAction(nameof(Checkout));
+                }
+            }
+            else if (deliveryMethod == "Відділення пошти")
+            {
+                if (!int.TryParse(postPickupPointId, out var pPid) || pPid is < 101 or > 210)
+                {
+                    TempData["Error"] = "Оберіть місто та відділення пошти.";
+                    return RedirectToAction(nameof(Checkout));
+                }
+                if (string.IsNullOrWhiteSpace(address) || address.Trim().Length < 10)
+                {
+                    TempData["Error"] = "Підтвердіть відділення пошти (натисніть «Підтвердити» у вікні вибору).";
+                    return RedirectToAction(nameof(Checkout));
+                }
+            }
+            else if (deliveryMethod == "Кур'єр")
+            {
+                if (string.IsNullOrWhiteSpace(address) || address.Trim().Length < 8)
+                {
+                    TempData["Error"] = "Вкажіть повну адресу для доставки кур'єром.";
+                    return RedirectToAction(nameof(Checkout));
+                }
+            }
+            else
+            {
+                TempData["Error"] = "Оберіть спосіб доставки.";
+                return RedirectToAction(nameof(Checkout));
+            }
+
+            // Save contact data if requested
+            if (saveContacts)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    user.LastName = lastName;
+                    user.FirstName = firstName;
+                    user.Patronymic = patronymic;
+                    user.PhoneNumber = phone;
+                    if (!string.IsNullOrWhiteSpace(firstName) || !string.IsNullOrWhiteSpace(lastName))
+                        user.Name = $"{firstName} {lastName}".Trim();
+                    await _userManager.UpdateAsync(user);
+                }
+            }
+
+            // Calculate promo discount
+            decimal discount = 0;
+            if (!string.IsNullOrWhiteSpace(promoCode))
+            {
+                discount = GetPromoDiscount(promoCode);
+            }
+
+            decimal rawTotal = cartItems.Sum(ci => ci.Item.Price * ci.Quantity);
+            decimal finalTotal = rawTotal - discount;
+            if (finalTotal < 0) finalTotal = 0;
+
+            var addr = (address ?? "").Trim();
+            var rp = (recipientPatronymic ?? "").Trim();
+            var recipMiddle = string.IsNullOrEmpty(rp) ? "" : " " + rp;
+            var recipLine = $"Отримувач: {recipientLastName!.Trim()} {recipientFirstName!.Trim()}{recipMiddle} · {recipientPhone!.Trim()}";
+            var fullAddress = string.IsNullOrEmpty(addr) ? recipLine : addr + Environment.NewLine + recipLine;
+
             var order = new Order
             {
                 OrderItems = new List<OrderItem>(),
-                TotalAmount = 0,
-                Address = address,
+                TotalAmount = finalTotal,
+                Address = fullAddress,
                 PaymentMethod = paymentMethod,
                 DeliveryMethod = deliveryMethod,
                 CityId = 1
@@ -685,7 +784,6 @@ namespace BazaR.Controllers
                     Quantity = cartItem.Quantity,
                     PriceAtMoment = cartItem.Item.Price
                 });
-                order.TotalAmount += cartItem.Item.Price * cartItem.Quantity;
             }
 
             var ok = _usMan.CreateOrder(userId, order);
@@ -697,7 +795,62 @@ namespace BazaR.Controllers
 
             _usMan.ClearCart(userId);
 
+            // Redirect to payment page for online payment
+            if (paymentMethod == "Оплатити зараз")
+            {
+                return RedirectToAction("Payment", new { orderId = order.Id });
+            }
+
             TempData["Ok"] = "Замовлення успішно оформлено!";
+            return RedirectToAction(nameof(Orders));
+        }
+
+        private decimal GetPromoDiscount(string code)
+        {
+            // Promo codes: code -> discount amount (₴)
+            var promoCodes = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "BAZAR10", 100 },
+                { "SAVE200", 200 },
+                { "WELCOME", 50 },
+                { "BAZAR15", 150 },
+            };
+            return promoCodes.TryGetValue(code.Trim(), out var d) ? d : 0;
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ValidatePromo(string code)
+        {
+            var discount = GetPromoDiscount(code ?? "");
+            if (discount > 0)
+                return Json(new { valid = true, discount, message = $"Промокод застосовано: -{discount:N0}₴" });
+            return Json(new { valid = false, discount = 0, message = "Промокод недійсний" });
+        }
+
+        [HttpGet]
+        public IActionResult Payment(int orderId)
+        {
+            if (!IsAuthenticated) return RequireLogin();
+            SetLayoutData();
+            var order = _usMan.GetOrderById(orderId);
+            if (order == null || order.UserId != CurrentUser!.Id) return NotFound();
+            ViewBag.PayerEmail = CurrentUser?.Email ?? "";
+            return View(order);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ProcessPayment(int orderId, string pm_pan, string pm_holder, string pm_thru, string pm_sec, bool saveCard = false)
+        {
+            if (!IsAuthenticated) return RequireLogin();
+
+            var order = _usMan.GetOrderById(orderId);
+            if (order == null || order.UserId != CurrentUser!.Id) return NotFound();
+
+            // In real app: integrate with payment gateway here
+            // For now: simulate success
+            TempData["Ok"] = $"Оплата замовлення №{order.Number} успішно прийнята!";
             return RedirectToAction(nameof(Orders));
         }
 
