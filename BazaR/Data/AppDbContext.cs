@@ -56,7 +56,7 @@ namespace BazaR.Data
                 entity.HasOne(c => c.ParentCategory)
                     .WithMany(c => c.SubCategories)
                     .HasForeignKey(c => c.ParentCategoryId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Настройка CategoryFilter
@@ -89,13 +89,13 @@ namespace BazaR.Data
                 entity.HasKey(cb => new { cb.CategoryId, cb.BrandId });
 
                 entity.HasOne(cb => cb.Category)
-                    .WithMany(c => c.CategoryBrands)
-                    .HasForeignKey(cb => cb.CategoryId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(c => c.CategoryBrands)
+                .HasForeignKey(cb => cb.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(cb => cb.Brand)
-                    .WithMany(b => b.CategoryBrands)
-                    .HasForeignKey(cb => cb.BrandId)
+                .WithMany(b => b.CategoryBrands)
+                .HasForeignKey(cb => cb.BrandId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -120,18 +120,18 @@ namespace BazaR.Data
 
                 entity.HasOne(i => i.Brand)
                     .WithMany(b => b.Items)
-                    .HasForeignKey(i => i.BrandId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(i => i.BrandId)
+                .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(i => i.Category)
-                    .WithMany()
-                    .HasForeignKey(i => i.CategoryId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                .WithMany()
+                .HasForeignKey(i => i.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(i => i.User)
-                    .WithMany(u => u.SellingItems)
-                    .HasForeignKey(i => i.UserId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                .WithMany(u => u.SellingItems)
+                .HasForeignKey(i => i.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Настройка ItemCharacteristic
@@ -168,14 +168,14 @@ namespace BazaR.Data
                 entity.Property(e => e.CreatedAt).IsRequired();
 
                 entity.HasOne(r => r.Item)
-                    .WithMany(i => i.Reviews)
-                    .HasForeignKey(r => r.ItemId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(i => i.Reviews)
+                .HasForeignKey(r => r.ItemId)
+                .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(r => r.User)
-                    .WithMany(u => u.Reviews)
-                    .HasForeignKey(r => r.UserId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                .WithMany(u => u.Reviews)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Настройка Complect
@@ -193,12 +193,12 @@ namespace BazaR.Data
                 entity.HasOne(ci => ci.Complect)
                     .WithMany(c => c.Items)
                     .HasForeignKey(ci => ci.ComplectId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(ci => ci.Item)
                     .WithMany(i => i.ComplectItems)
                     .HasForeignKey(ci => ci.ItemId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Настройка Usluga
@@ -239,14 +239,14 @@ namespace BazaR.Data
                 entity.Property(e => e.Quantity).IsRequired();
 
                 entity.HasOne(ci => ci.User)
-                    .WithMany(u => u.CartItems)
-                    .HasForeignKey(ci => ci.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(u => u.CartItems)
+                .HasForeignKey(ci => ci.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(ci => ci.Item)
-                    .WithMany(i => i.CartItems)
-                    .HasForeignKey(ci => ci.ItemId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                .WithMany(i => i.CartItems)
+                .HasForeignKey(ci => ci.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasIndex(ci => new { ci.UserId, ci.ItemId }).IsUnique();
             });
@@ -257,12 +257,12 @@ namespace BazaR.Data
                 entity.HasKey(e => e.Id);
 
                 entity.HasOne(wi => wi.User)
-                    .WithMany(u => u.WishlistItems)
+                .WithMany(u => u.WishlistItems)
                     .HasForeignKey(wi => wi.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(wi => wi.Item)
-                    .WithMany(i => i.WishlistItems)
+                .WithMany(i => i.WishlistItems)
                     .HasForeignKey(wi => wi.ItemId)
                     .OnDelete(DeleteBehavior.Restrict);
 
@@ -286,7 +286,7 @@ namespace BazaR.Data
                 entity.HasOne(o => o.User)
                     .WithMany(u => u.Orders)
                     .HasForeignKey(o => o.UserId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(o => o.City)
                     .WithMany()
@@ -304,7 +304,7 @@ namespace BazaR.Data
                 entity.HasOne(oi => oi.Order)
                     .WithMany(o => o.OrderItems)
                     .HasForeignKey(oi => oi.OrderId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(oi => oi.Item)
                     .WithMany(i => i.OrderItems)
