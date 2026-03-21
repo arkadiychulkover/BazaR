@@ -8,6 +8,8 @@ namespace BazaR.Interfaces
         public int GetUsersCountForMonthAsync();
         public int GetUsersCountForWeekAsync();
         public int GetUsersCountForDayAsync();
-        public Task<User> AddUser(User us);
+        public Task<Dictionary<Category, int>> GetPopularCategoryAsync();
+        public Task<CategoryStatistik> AddUserCategoryVisit(User us, int cat);
+        public Task<UserUseStatistick> AddUser(User us);
     }
 }

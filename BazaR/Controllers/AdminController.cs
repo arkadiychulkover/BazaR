@@ -57,14 +57,10 @@ namespace BazaR.Controllers
         public async Task<IActionResult> DeleteUser(int id)
         {
             User us = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
-
-            if (us == null)
+            if (us != null)
             {
-                return RedirectToAction(nameof(Index));
+                await _userManager.DeleteAsync(us);
             }
-
-            await _userManager.DeleteAsync(us);
-
             return RedirectToAction(nameof(Index));
         }
 
@@ -72,12 +68,7 @@ namespace BazaR.Controllers
         public async Task<IActionResult> EditUser(int id)
         {
             User us = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
-
-            if (us == null)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
+            if (us == null) return RedirectToAction(nameof(Index));
             return View(us);
         }
 
@@ -86,67 +77,50 @@ namespace BazaR.Controllers
         public async Task<IActionResult> EditUser(User user)
         {
             User us = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
-
-            if (us == null)
-            {
-                return RedirectToAction(nameof(Index));
-            }
+            if (us == null) return RedirectToAction(nameof(Index));
 
             us.Name = user.Name;
             us.Email = user.Email;
             us.PhoneNumber = user.PhoneNumber;
             us.IsAdmin = user.IsAdmin;
 
-            // Правильное управление ролью Admin
+            // Управление ролью Admin
             if (user.IsAdmin)
             {
                 if (!await _userManager.IsInRoleAsync(us, adminRoleName))
-                {
                     await _userManager.AddToRoleAsync(us, adminRoleName);
-                }
             }
             else
             {
                 if (await _userManager.IsInRoleAsync(us, adminRoleName))
-                {
                     await _userManager.RemoveFromRoleAsync(us, adminRoleName);
-                }
             }
 
             await _userManager.UpdateAsync(us);
 
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser != null && currentUser.Id == us.Id)
-            {
                 await _signInManager.RefreshSignInAsync(us);
-            }
 
             return RedirectToAction(nameof(Index));
         }
+
         #endregion
 
         // =========================
         // USER STATISTIC
         // =========================
-
         [HttpGet]
         public async Task<IActionResult> UserStatistic(int id)
         {
             User us = await _appDbContext.Users
-                .Include(u => u.SellingItems)
-                    .ThenInclude(i => i.Category)
-                .Include(u => u.SellingItems)
-                    .ThenInclude(i => i.Brand)
-                .Include(u => u.Reviews)
-                    .ThenInclude(r => r.Item)
+                .Include(u => u.SellingItems).ThenInclude(i => i.Category)
+                .Include(u => u.SellingItems).ThenInclude(i => i.Brand)
+                .Include(u => u.Reviews).ThenInclude(r => r.Item)
                 .Include(u => u.Orders)
                 .FirstOrDefaultAsync(u => u.Id == id);
 
-            if (us == null)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
+            if (us == null) return RedirectToAction(nameof(Index));
             return View(us);
         }
 
@@ -154,24 +128,19 @@ namespace BazaR.Controllers
         // ITEMS
         // =========================
         #region Items
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUserItem(int id)
         {
             Item it = await _appDbContext.Items.FirstOrDefaultAsync(i => i.Id == id);
-
-            if (it == null)
+            if (it != null)
             {
-                return RedirectToAction(nameof(Index));
+                int userId = it.UserId;
+                _appDbContext.Items.Remove(it);
+                await _appDbContext.SaveChangesAsync();
+                return RedirectToAction(nameof(UserStatistic), new { id = userId });
             }
-
-            int userId = it.UserId;
-
-            _appDbContext.Items.Remove(it);
-            await _appDbContext.SaveChangesAsync();
-
-            return RedirectToAction(nameof(UserStatistic), new { id = userId });
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
@@ -181,12 +150,7 @@ namespace BazaR.Controllers
                 .Include(i => i.Category)
                 .Include(i => i.Brand)
                 .FirstOrDefaultAsync(i => i.Id == id);
-
-            if (it == null)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
+            if (it == null) return RedirectToAction(nameof(Index));
             return View(it);
         }
 
@@ -195,59 +159,46 @@ namespace BazaR.Controllers
         public async Task<IActionResult> EditItem(Item item)
         {
             Item it = await _appDbContext.Items.FirstOrDefaultAsync(i => i.Id == item.Id);
-
-            if (it == null)
+            if (it != null)
             {
-                return RedirectToAction(nameof(Index));
+                it.Name = item.Name;
+                it.Desc = item.Desc;
+                it.Price = item.Price;
+                it.Garantia = item.Garantia;
+                it.IsAvailable = item.IsAvailable;
+                it.ImageUrl = item.ImageUrl;
+
+                await _appDbContext.SaveChangesAsync();
+                return RedirectToAction(nameof(UserStatistic), new { id = it.UserId });
             }
-
-            it.Name = item.Name;
-            it.Desc = item.Desc;
-            it.Price = item.Price;
-            it.Garantia = item.Garantia;
-            it.IsAvailable = item.IsAvailable;
-            it.ImageUrl = item.ImageUrl;
-
-            await _appDbContext.SaveChangesAsync();
-
-            return RedirectToAction(nameof(UserStatistic), new { id = it.UserId });
+            return RedirectToAction(nameof(Index));
         }
         #endregion
 
         // =========================
-        // REVIEWS (COMMENTS)
+        // REVIEWS
         // =========================
         #region Reviews
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUserReview(int id)
         {
             Review rev = await _appDbContext.Reviews.FirstOrDefaultAsync(r => r.Id == id);
-
-            if (rev == null)
+            if (rev != null)
             {
-                return RedirectToAction(nameof(Index));
+                int userId = rev.UserId;
+                _appDbContext.Reviews.Remove(rev);
+                await _appDbContext.SaveChangesAsync();
+                return RedirectToAction(nameof(UserStatistic), new { id = userId });
             }
-
-            int userId = rev.UserId;
-
-            _appDbContext.Reviews.Remove(rev);
-            await _appDbContext.SaveChangesAsync();
-
-            return RedirectToAction(nameof(UserStatistic), new { id = userId });
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
         public async Task<IActionResult> EditReview(int id)
         {
             Review rev = await _appDbContext.Reviews.FirstOrDefaultAsync(r => r.Id == id);
-
-            if (rev == null)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
+            if (rev == null) return RedirectToAction(nameof(Index));
             return View(rev);
         }
 
@@ -256,18 +207,14 @@ namespace BazaR.Controllers
         public async Task<IActionResult> EditReview(Review review)
         {
             Review rev = await _appDbContext.Reviews.FirstOrDefaultAsync(r => r.Id == review.Id);
-
-            if (rev == null)
+            if (rev != null)
             {
-                return RedirectToAction(nameof(Index));
+                rev.Comment = review.Comment;
+                rev.Rating = review.Rating;
+                await _appDbContext.SaveChangesAsync();
+                return RedirectToAction(nameof(UserStatistic), new { id = rev.UserId });
             }
-
-            rev.Comment = review.Comment;
-            rev.Rating = review.Rating;
-
-            await _appDbContext.SaveChangesAsync();
-
-            return RedirectToAction(nameof(UserStatistic), new { id = rev.UserId });
+            return RedirectToAction(nameof(Index));
         }
         #endregion
 
@@ -275,39 +222,32 @@ namespace BazaR.Controllers
         // ORDERS
         // =========================
         #region Orders
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             Order or = await _appDbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
-
-            if (or == null)
-                return RedirectToAction(nameof(Index));
-
-            int userid = or.UserId;
-            _appDbContext.Orders.Remove(or);
-            await _appDbContext.SaveChangesAsync();
-
-            return RedirectToAction(nameof(UserStatistic), new { id = userid });
+            if (or != null)
+            {
+                int userid = or.UserId;
+                _appDbContext.Orders.Remove(or);
+                await _appDbContext.SaveChangesAsync();
+                return RedirectToAction(nameof(UserStatistic), new { id = userid });
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
         public async Task<IActionResult> OrderDetails(int id)
         {
             Order order = await _appDbContext.Orders
-                .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.Item)
+                .Include(o => o.OrderItems).ThenInclude(oi => oi.Item)
                 .Include(o => o.City)
                 .Include(o => o.User)
                 .FirstOrDefaultAsync(o => o.Id == id);
 
-            if (order == null)
-            {
-                return RedirectToAction(nameof(Index));
-            }
+            if (order == null) return RedirectToAction(nameof(Index));
 
-            // Используем ViewBag для дополнительных данных (хотя они уже есть в модели)
             ViewBag.Items = order.OrderItems;
             ViewBag.City = order.City;
             ViewBag.User = order.User;
@@ -315,5 +255,15 @@ namespace BazaR.Controllers
             return View(order);
         }
         #endregion
+
+        // =========================
+        // POPULAR CATEGORIES
+        // =========================
+        [HttpGet]
+        public async Task<IActionResult> PopularCategories()
+        {
+            var popularDict = await _StatistickRepo.GetPopularCategoryAsync();
+            return View(popularDict);
+        }
     }
 }

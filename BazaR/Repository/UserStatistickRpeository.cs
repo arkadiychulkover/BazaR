@@ -14,7 +14,7 @@ namespace BazaR.Repository
             _con = con;
         }
 
-        public async Task<User> AddUser(User us)
+        public async Task<UserUseStatistick> AddUser(User us)
         {
             var stat = await _con.UserUseStatisticks
                 .FirstOrDefaultAsync(x => x.UserId == us.Id);
@@ -31,7 +31,7 @@ namespace BazaR.Repository
 
             await _con.SaveChangesAsync();
 
-            return us;
+            return stat;
         }
 
         public int GetUsersCountForDayAsync()
@@ -59,6 +59,44 @@ namespace BazaR.Repository
             return _con.UserUseStatisticks
                 .Where(u => u.LastSeen >= since)
                 .Count();
+        }
+
+        public async Task<Dictionary<Category, int>> GetPopularCategoryAsync()
+        {
+            var grouped = await _con.CategoryStatistiks
+                .GroupBy(v => v.CategoryId)
+                .Select(g => new
+                {
+                    CategoryId = g.Key,
+                    Count = g.Count()
+                })
+                .OrderByDescending(x => x.Count)
+                .ToListAsync();
+
+            var categoryIds = grouped.Select(x => x.CategoryId).ToList();
+
+            var categories = await _con.Categories
+                .Where(c => categoryIds.Contains(c.Id))
+                .ToListAsync();
+
+            return grouped.ToDictionary(
+                x => categories.First(c => c.Id == x.CategoryId),
+                x => x.Count
+            );
+        }
+
+        public async Task<CategoryStatistik> AddUserCategoryVisit(User us, int cat)
+        {
+            var visit = new CategoryStatistik
+            {
+                UserId = us.Id,
+                CategoryId = cat,
+                VisitedAt = DateTime.Now
+            };
+
+            await _con.CategoryStatistiks.AddAsync(visit);
+            await _con.SaveChangesAsync();
+            return visit;
         }
     }
 }
