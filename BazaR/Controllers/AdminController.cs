@@ -105,6 +105,35 @@ namespace BazaR.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BlockUser(int id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null) return RedirectToAction(nameof(Index));
+
+            user.LockoutEnabled = true;
+            user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(1);
+
+            await _userManager.UpdateAsync(user);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnblockUser(int id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null) return RedirectToAction(nameof(Index));
+
+            user.LockoutEnd = null;
+
+            await _userManager.UpdateAsync(user);
+
+            return RedirectToAction(nameof(Index));
+        }
+
         #endregion
 
         // =========================

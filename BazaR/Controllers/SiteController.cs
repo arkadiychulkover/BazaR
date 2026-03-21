@@ -9,6 +9,7 @@ using System.Text.Json;
 
 namespace BazaR.Controllers
 {
+    [ServiceFilter(typeof(BlockResourseFilter))]
     [ServiceFilter(typeof(OnlineResourceFilter))]
     public class SiteController : Controller
     {

@@ -104,6 +104,18 @@
                                                 title="Удалить">
                                             <i class="bi bi-trash"></i>
                                         </button>
+                                        @if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow)
+                                        {
+                                            <form asp-action="UnblockUser" asp-route-id="@user.Id" method="post" class="d-inline">
+                                                <button class="btn btn-outline-success btn-sm">Разблокировать</button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="BlockUser" asp-route-id="@user.Id" method="post" class="d-inline">
+                                                <button class="btn btn-outline-danger btn-sm">Заблокировать</button>
+                                            </form>
+                                        }
                                     </div>
 
                                     <!-- Модальное окно подтверждения удаления -->

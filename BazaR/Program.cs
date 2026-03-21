@@ -34,6 +34,10 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
     options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Name;
     options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role; // Это ключевое для ролей!
 
+    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromDays(365);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+
     options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
 })
 .AddEntityFrameworkStores<AppDbContext>()
@@ -66,10 +70,11 @@ builder.Services
         options.SaveTokens = true;
     });
 
-builder.Services.AddSingleton<ActiveUsersService>();
-builder.Services.AddScoped<UserContextFilter>();
-builder.Services.AddScoped<OnlineResourceFilter>();
 builder.Services.AddScoped<DbMaker>();
+builder.Services.AddScoped<UserContextFilter>();
+builder.Services.AddScoped<BlockResourseFilter>();
+builder.Services.AddScoped<OnlineResourceFilter>();
+builder.Services.AddSingleton<ActiveUsersService>();
 builder.Services.AddScoped<IUserDb, UserRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddTransient<IUserStatistick ,UserStatistickRpeository>();
