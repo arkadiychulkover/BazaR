@@ -1,20 +1,25 @@
 using BazaR.Data;
+using BazaR.Filters;
 using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.Repositories;
 using BazaR.Repository;
+using BazaR.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(o =>
+{
+    o.Filters.Add<UserContextFilter>();
+});
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Настройка Identity с правильными клеймами для ролей
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
     options.Password.RequireDigit = false;
@@ -23,6 +28,15 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequiredLength = 6;
     options.User.RequireUniqueEmail = true;
+
+    // ВАЖНО: указываем правильные типы клеймов
+    options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
+    options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Name;
+    options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role; // Это ключевое для ролей!
+
+    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromDays(365);
+    options.Lockout.MaxFailedAccessAttempts = 5;
 
     options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
 })
@@ -56,10 +70,22 @@ builder.Services
         options.SaveTokens = true;
     });
 
+builder.Services.AddScoped<DbMaker>();
+builder.Services.AddScoped<UserContextFilter>();
+builder.Services.AddScoped<BlockResourseFilter>();
+builder.Services.AddScoped<OnlineResourceFilter>();
+builder.Services.AddSingleton<ActiveUsersService>();
 builder.Services.AddScoped<IUserDb, UserRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
+builder.Services.AddTransient<IUserStatistick ,UserStatistickRpeository>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbMaker = scope.ServiceProvider.GetRequiredService<DbMaker>();
+    await dbMaker.MakeAsync();
+}
 
 if (!app.Environment.IsDevelopment())
 {

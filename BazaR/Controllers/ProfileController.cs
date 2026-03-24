@@ -1,5 +1,6 @@
 ﻿using BazaR.Data;
 using BazaR.DTOs;
+using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -14,11 +15,13 @@ namespace BazaR.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly AppDbContext _db;
+        private readonly IUserDb _usMan;
 
-        public ProfileController(UserManager<User> userManager, AppDbContext db)
+        public ProfileController(UserManager<User> userManager, AppDbContext db, IUserDb usMan)
         {
             _userManager = userManager;
             _db = db;
+            _usMan = usMan;
         }
 
         private async Task<(User user, AccountProfileViewModel vm)> GetUserAndProfileAsync()
@@ -31,12 +34,13 @@ namespace BazaR.Controllers
                 .FirstOrDefaultAsync(u => u.UserName == User.Identity!.Name);
 
             var newMessagesCount = await _db.Messages
-                .Where(m => m.UserId == user!.Id.ToString() && !m.IsRead)
+                .Where(m => m.UserId == user!.Id && !m.IsRead)
                 .CountAsync();
 
             var vm = new AccountProfileViewModel
             {
-                FirstName = user?.Name ?? string.Empty,
+                
+                FirstName = user?.FirstName,
                 LastName = user?.LastName,
                 MiddleName = user?.MiddleName,
                 BirthDate = user?.BirthDate,
@@ -52,10 +56,10 @@ namespace BazaR.Controllers
             return (user!, vm);
         }
 
-        private async Task<User> GetCurrentUserAsync()
-        {
-            return await _userManager.GetUserAsync(User);
-        }
+        private async Task<User> GetCurrentUserAsync() =>
+            await _userManager.GetUserAsync(User);
+
+        // ─── Profile ────────────────────────────────────────────────────────────
 
         public async Task<IActionResult> Profile()
         {
@@ -63,6 +67,8 @@ namespace BazaR.Controllers
             var (_, profile) = await GetUserAndProfileAsync();
             return View(profile);
         }
+
+        // ─── Orders ─────────────────────────────────────────────────────────────
 
         public async Task<IActionResult> Orders()
         {
@@ -82,14 +88,15 @@ namespace BazaR.Controllers
                 Orders = orders.Select(o => new OrderVm
                 {
                     Id = o.Id,
+                    Number = o.Number,
                     CreatedAt = o.CreatedAt,
                     Status = o.Status,
-                    Total = o.OrderItems.Sum(oi => oi.Item.Price * oi.Quantity),
-                    Items = o.OrderItems.Select(oi => new OrderItemVm
+                    TotalAmount = o.TotalAmount,
+                    OrderItems = o.OrderItems.Select(oi => new OrderItemVm
                     {
                         Name = oi.Item.Name,
                         ImageUrl = oi.Item.ImageUrl,
-                        Price = oi.Item.Price,
+                        Price = (int)oi.Item.Price,
                         Quantity = oi.Quantity
                     }).ToList()
                 }).ToList()
@@ -97,6 +104,48 @@ namespace BazaR.Controllers
 
             return View(vm);
         }
+        [HttpGet]
+        public async Task<IActionResult> OrderDetails(int id)
+        {
+            ViewBag.ActiveMenu = "Orders";
+            var (user, profile) = await GetUserAndProfileAsync();
+
+            var order = await _db.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Item)
+                        .ThenInclude(i => i.Colors)
+                .Include(o => o.City)
+                .FirstOrDefaultAsync(o => o.Id == id && o.UserId == user.Id);
+
+            if (order == null) return NotFound();
+
+            var vm = new AccountOrderDetailViewModel
+            {
+                Profile = profile,
+                Order = order
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelOrder(int id)
+        {
+            var user = await GetCurrentUserAsync();
+
+            var order = _usMan.GetOrderById(id);
+            if (order == null) return NotFound();
+
+            if (order.UserId != user.Id)
+                return Forbid();
+
+            var ok = _usMan.CancelOrder(id);
+            TempData[ok ? "Ok" : "Error"] = ok ? "Замовлення скасовано." : "Не вдалося скасувати замовлення.";
+            return RedirectToAction(nameof(Orders));
+        }
+
+        // ─── Wishlist ────────────────────────────────────────────────────────────
 
         public async Task<IActionResult> Wishlist()
         {
@@ -125,6 +174,8 @@ namespace BazaR.Controllers
 
             return View(vm);
         }
+
+        // ─── Looked Cards ────────────────────────────────────────────────────────
 
         public async Task<IActionResult> LoockedCards()
         {
@@ -157,6 +208,8 @@ namespace BazaR.Controllers
 
             return View(vm);
         }
+
+        // ─── Mailings ────────────────────────────────────────────────────────────
 
         public async Task<IActionResult> Mailings()
         {
@@ -223,26 +276,28 @@ namespace BazaR.Controllers
             return RedirectToAction(nameof(Mailings));
         }
 
+        // ─── Wallet ──────────────────────────────────────────────────────────────
+
         public async Task<IActionResult> Wallet()
         {
             ViewBag.ActiveMenu = "Wallet";
             var user = await GetCurrentUserAsync();
             var (_, profile) = await GetUserAndProfileAsync();
 
-            var wallet = await _db.Wallets
-                .FirstOrDefaultAsync(w => w.UserId == user.Id);
+            var wallet = await _db.Wallets.FirstOrDefaultAsync(w => w.UserId == user.Id);
 
             if (wallet == null)
             {
-                wallet = new Wallet
-                {
-                    UserId = user.Id,
-                    Balance = 0,
-                    MonthlySpent = 0
-                };
+                wallet = new Wallet { UserId = user.Id, Balance = 0, MonthlySpent = 0 };
                 _db.Wallets.Add(wallet);
                 await _db.SaveChangesAsync();
             }
+
+            var transactions = await _db.WalletTransactions
+                .Where(t => t.WalletId == wallet.Id)
+                .OrderByDescending(t => t.CreatedAt)
+                .Take(50)
+                .ToListAsync();
 
             var vm = new WalletViewModel
             {
@@ -252,37 +307,80 @@ namespace BazaR.Controllers
                 LastReplenishmentAmount = wallet.LastReplenishmentAmount > 0
                     ? wallet.LastReplenishmentAmount : null,
                 LastReplenishmentDate = wallet.LastReplenishment,
-                Status = wallet.Balance > 0 ? "Активний гаманець" : "Пустий гаманець"
+                Status = wallet.Balance > 0 ? "Активний гаманець" : "Пустий гаманець",
+                Transactions = transactions
             };
 
             return View(vm);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TopUpWallet([FromBody] TopUpDto dto)
+        {
+            if (dto.Amount <= 0 || dto.Amount > 100_000)
+                return BadRequest(new { error = "Некоректна сума" });
+
+            var user = await GetCurrentUserAsync();
+
+            var wallet = await _db.Wallets.FirstOrDefaultAsync(w => w.UserId == user.Id);
+            if (wallet == null)
+            {
+                wallet = new Wallet { UserId = user.Id };
+                _db.Wallets.Add(wallet);
+            }
+
+            wallet.Balance += dto.Amount;
+            wallet.LastReplenishmentAmount = dto.Amount;
+            wallet.LastReplenishment = DateTime.UtcNow;
+            wallet.UpdatedAt = DateTime.UtcNow;
+
+            var transaction = new WalletTransaction
+            {
+                WalletId = wallet.Id == 0 ? 0 : wallet.Id,
+                Type = "replenishment",
+                Amount = dto.Amount,
+                Description = dto.Method switch
+                {
+                    "card" => "Поповнення карткою",
+                    "crypto" => "Поповнення криптовалютою",
+                    "bank" => "Банківський переказ",
+                    _ => "Поповнення рахунку"
+                },
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _db.SaveChangesAsync();
+
+            transaction.WalletId = wallet.Id;
+            _db.WalletTransactions.Add(transaction);
+            await _db.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                newBalance = wallet.Balance,
+                transaction = new
+                {
+                    transaction.Id,
+                    transaction.Type,
+                    transaction.Amount,
+                    transaction.Description,
+                    createdAt = transaction.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                }
+            });
+        }
+
+        // ─── Promotions ──────────────────────────────────────────────────────────
+
         [HttpGet]
         public async Task<IActionResult> Promotions()
         {
             ViewBag.ActiveMenu = "Promotions";
-            var user = await GetCurrentUserAsync();
             var (_, profile) = await GetUserAndProfileAsync();
 
-            var subscribedIds = await _db.UserPromotions
-                .Where(up => up.UserId == user.Id)
-                .Select(up => up.PromotionId)
-                .ToHashSetAsync();
-
             var promotions = await _db.Promotions
-                .Where(p => p.IsActive)
-                .OrderByDescending(p => p.StartsAt)
-                .Select(p => new PromotionItemViewModel
-                {
-                    Id = p.Id,
-                    Title = p.Title,
-                    Description = p.Description,
-                    CategoryName = p.CategoryName,
-                    DiscountPercent = p.DiscountPercent,
-                    StartsAt = p.StartsAt,
-                    EndsAt = p.EndsAt,
-                    IsSubscribed = subscribedIds.Contains(p.Id)
-                })
+                .OrderByDescending(p => p.Id)
                 .ToListAsync();
 
             var vm = new PromotionsViewModel
@@ -294,32 +392,7 @@ namespace BazaR.Controllers
             return View(vm);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> TogglePromotion(int id)
-        {
-            var user = await GetCurrentUserAsync();
-
-            var existing = await _db.UserPromotions
-                .FirstOrDefaultAsync(up => up.UserId == user.Id && up.PromotionId == id);
-
-            if (existing == null)
-            {
-                _db.UserPromotions.Add(new UserPromotion
-                {
-                    UserId = user.Id,
-                    PromotionId = id,
-                    SubscribedAt = DateTime.UtcNow
-                });
-            }
-            else
-            {
-                _db.UserPromotions.Remove(existing);
-            }
-
-            await _db.SaveChangesAsync();
-            return RedirectToAction(nameof(Promotions));
-        }
+        // ─── Bonus Account ───────────────────────────────────────────────────────
 
         public async Task<IActionResult> BonusAccount()
         {
@@ -327,8 +400,7 @@ namespace BazaR.Controllers
             var user = await GetCurrentUserAsync();
             var (_, profile) = await GetUserAndProfileAsync();
 
-            var bonusAccount = await _db.BonusAccounts
-                .FirstOrDefaultAsync(ba => ba.UserId == user.Id);
+            var bonusAccount = await _db.BonusAccounts.FirstOrDefaultAsync(ba => ba.UserId == user.Id);
 
             if (bonusAccount == null)
             {
@@ -358,14 +430,15 @@ namespace BazaR.Controllers
             return View(vm);
         }
 
+        // ─── Premium ─────────────────────────────────────────────────────────────
+
         public async Task<IActionResult> Premium()
         {
             ViewBag.ActiveMenu = "Premium";
             var user = await GetCurrentUserAsync();
             var (_, profile) = await GetUserAndProfileAsync();
 
-            var premiumSub = await _db.PremiumSubscriptions
-                .FirstOrDefaultAsync(p => p.UserId == user.Id);
+            var premiumSub = await _db.PremiumSubscriptions.FirstOrDefaultAsync(p => p.UserId == user.Id);
 
             if (premiumSub == null)
             {
@@ -382,18 +455,10 @@ namespace BazaR.Controllers
 
             var features = new List<PremiumFeatureViewModel>
             {
-                new() { Name = "Пріоритетна підтримка",
-                        Description = "24/7 підтримка з пріоритетом",
-                        IsAvailable = premiumSub.IsActive },
-                new() { Name = "Ексклюзивні знижки",
-                        Description = "Доступ до спеціальних пропозицій та акцій",
-                        IsAvailable = premiumSub.IsActive },
-                new() { Name = "Ранній доступ до новинок",
-                        Description = "Першим дізнавайтесь про нові товари та оновлення",
-                        IsAvailable = premiumSub.IsActive },
-                new() { Name = "Безпечна доставка",
-                        Description = "Страхування при доставці",
-                        IsAvailable = premiumSub.IsActive }
+                new() { Name = "Пріоритетна підтримка",      Description = "24/7 підтримка з пріоритетом",                       IsAvailable = premiumSub.IsActive },
+                new() { Name = "Ексклюзивні знижки",          Description = "Доступ до спеціальних пропозицій та акцій",           IsAvailable = premiumSub.IsActive },
+                new() { Name = "Ранній доступ до новинок",    Description = "Першим дізнавайтесь про нові товари та оновлення",    IsAvailable = premiumSub.IsActive },
+                new() { Name = "Безпечна доставка",           Description = "Страхування при доставці",                           IsAvailable = premiumSub.IsActive }
             };
 
             var vm = new PremiumViewModel
@@ -410,17 +475,15 @@ namespace BazaR.Controllers
 
             return View(vm);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ActivatePremium()
         {
             var user = await GetCurrentUserAsync();
 
-            var premiumSub = await _db.PremiumSubscriptions
-                .FirstOrDefaultAsync(p => p.UserId == user.Id);
-
-            var wallet = await _db.Wallets
-                .FirstOrDefaultAsync(w => w.UserId == user.Id);
+            var premiumSub = await _db.PremiumSubscriptions.FirstOrDefaultAsync(p => p.UserId == user.Id);
+            var wallet = await _db.Wallets.FirstOrDefaultAsync(w => w.UserId == user.Id);
 
             if (premiumSub == null || wallet == null)
                 return RedirectToAction(nameof(Premium));
@@ -433,7 +496,6 @@ namespace BazaR.Controllers
 
             wallet.Balance -= premiumSub.MonthlyPrice;
             wallet.MonthlySpent += premiumSub.MonthlyPrice;
-
             premiumSub.IsActive = true;
             premiumSub.StartDate = DateTime.UtcNow;
             premiumSub.EndDate = DateTime.UtcNow.AddMonths(1);
@@ -444,6 +506,8 @@ namespace BazaR.Controllers
             TempData["PremiumSuccess"] = "Premium успішно активовано!";
             return RedirectToAction(nameof(Premium));
         }
+
+        // ─── Reviews ─────────────────────────────────────────────────────────────
 
         public async Task<IActionResult> Reviews()
         {
@@ -473,33 +537,34 @@ namespace BazaR.Controllers
             return View(vm);
         }
 
+        // ─── Messages ────────────────────────────────────────────────────────────
+
         public async Task<IActionResult> Messages()
         {
             ViewBag.ActiveMenu = "Messages";
             var (user, profile) = await GetUserAndProfileAsync();
 
             var messages = await _db.Messages
-                        .Include(m => m.User)
-                        .Where(m => m.UserId == user.Id.ToString())
-                        .OrderByDescending(m => m.DateTime)
-                        .Select(m => new MessageVm
-                        {
-                            Id = m.Id,
-                            Name = m.Name,
-                            Content = m.Content,
-                            SenderName = m.User != null ? m.User.Name : m.Name,
-                            DateTime = m.DateTime,
-                            IsRead = m.IsRead
-                        })
-                        .ToListAsync();
-
-            var newMessagesCount = messages.Count(m => !m.IsRead);
+                .Include(m => m.User)
+                .Where(m => m.UserId == user.Id)
+                .OrderByDescending(m => m.DateTime)
+                .Select(m => new MessageVm
+                {
+                    Id = m.Id,
+                    Name = m.Name,
+                    Content = m.Content,
+                    SenderName = m.SenderName,
+                    DateTime = m.DateTime,
+                    IsRead = m.IsRead,
+                    SenderId = m.SenderId
+                })
+                .ToListAsync();
 
             var vm = new AccountMessagesViewModel
             {
                 Profile = profile,
                 Messages = messages,
-                NewMessagesCount = newMessagesCount
+                NewMessagesCount = messages.Count(m => !m.IsRead)
             };
 
             return View(vm);
@@ -511,7 +576,7 @@ namespace BazaR.Controllers
             var user = await GetCurrentUserAsync();
 
             var message = await _db.Messages
-                .FirstOrDefaultAsync(m => m.Id == id && m.UserId == user.Id.ToString());
+                .FirstOrDefaultAsync(m => m.Id == id && m.UserId == user.Id);
 
             if (message != null && !message.IsRead)
             {
@@ -526,13 +591,13 @@ namespace BazaR.Controllers
         public async Task<IActionResult> GetNewMessagesCount()
         {
             var user = await GetCurrentUserAsync();
-
-            var newMessagesCount = await _db.Messages
-                .Where(m => m.UserId == user.Id.ToString() && !m.IsRead)
+            var count = await _db.Messages
+                .Where(m => m.UserId == user.Id && !m.IsRead)
                 .CountAsync();
-
-            return Json(new { count = newMessagesCount });
+            return Json(new { count });
         }
+
+        // ─── Personal Info API ───────────────────────────────────────────────────
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -543,39 +608,19 @@ namespace BazaR.Controllers
 
             switch (dto.Field)
             {
-                case "firstName":
-                    user.Name = dto.Value;
-                    await _userManager.UpdateAsync(user);
-                    break;
-                case "lastName":
-                    user.LastName = dto.Value;
-                    await _userManager.UpdateAsync(user);
-                    break;
-                case "middleName":
-                    user.MiddleName = dto.Value;
-                    await _userManager.UpdateAsync(user);
-                    break;
-                case "birthDate":
-                    user.BirthDate = DateOnly.TryParse(dto.Value, out var d) ? d : null;
-                    await _userManager.UpdateAsync(user);
-                    break;
-                case "gender":
-                    user.Gender = dto.Value;
-                    await _userManager.UpdateAsync(user);
-                    break;
-                case "phoneNumber":
-                    await _userManager.SetPhoneNumberAsync(user, dto.Value);
-                    break;
+                case "firstName": user.Name = dto.Value; await _userManager.UpdateAsync(user); break;
+                case "lastName": user.LastName = dto.Value; await _userManager.UpdateAsync(user); break;
+                case "middleName": user.MiddleName = dto.Value; await _userManager.UpdateAsync(user); break;
+                case "birthDate": user.BirthDate = DateOnly.TryParse(dto.Value, out var d) ? d : null; await _userManager.UpdateAsync(user); break;
+                case "gender": user.Gender = dto.Value; await _userManager.UpdateAsync(user); break;
+                case "phoneNumber": await _userManager.SetPhoneNumberAsync(user, dto.Value); break;
                 case "email":
-                    if (string.IsNullOrWhiteSpace(dto.Value))
-                        return BadRequest("Email не може бути порожнім");
-                    var setEmailResult = await _userManager.SetEmailAsync(user, dto.Value);
-                    if (!setEmailResult.Succeeded)
-                        return BadRequest(setEmailResult.Errors.FirstOrDefault()?.Description ?? "Помилка");
+                    if (string.IsNullOrWhiteSpace(dto.Value)) return BadRequest("Email не може бути порожнім");
+                    var result = await _userManager.SetEmailAsync(user, dto.Value);
+                    if (!result.Succeeded) return BadRequest(result.Errors.FirstOrDefault()?.Description ?? "Помилка");
                     await _userManager.SetUserNameAsync(user, dto.Value);
                     break;
-                default:
-                    return BadRequest("Невідоме поле");
+                default: return BadRequest("Невідоме поле");
             }
 
             return Ok(new { success = true, value = dto.Value });
@@ -586,8 +631,7 @@ namespace BazaR.Controllers
         public async Task<IActionResult> DeleteRecipient([FromBody] int id)
         {
             var user = await _userManager.GetUserAsync(User);
-            var rec = await _db.OrderRecipients
-                .FirstOrDefaultAsync(r => r.Id == id && r.UserId == user!.Id);
+            var rec = await _db.OrderRecipients.FirstOrDefaultAsync(r => r.Id == id && r.UserId == user!.Id);
             if (rec == null) return NotFound();
             _db.OrderRecipients.Remove(rec);
             await _db.SaveChangesAsync();
@@ -600,7 +644,6 @@ namespace BazaR.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
-
             var recipient = new OrderRecipient
             {
                 UserId = user.Id,
@@ -609,10 +652,8 @@ namespace BazaR.Controllers
                 MiddleName = dto.MiddleName,
                 Phone = dto.Phone
             };
-
             _db.OrderRecipients.Add(recipient);
             await _db.SaveChangesAsync();
-
             return Ok(new { success = true, id = recipient.Id });
         }
 
@@ -622,7 +663,6 @@ namespace BazaR.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
-
             var address = new DeliveryAddress
             {
                 UserId = user.Id,
@@ -632,10 +672,8 @@ namespace BazaR.Controllers
                 Apartment = dto.Apartment,
                 PostalCode = dto.PostalCode
             };
-
             _db.DeliveryAddresses.Add(address);
             await _db.SaveChangesAsync();
-
             return Ok(new { success = true, id = address.Id });
         }
 
@@ -645,18 +683,9 @@ namespace BazaR.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
-
-            var pet = new Pet
-            {
-                UserId = user.Id,
-                Name = dto.Name,
-                Type = dto.Type,
-                Breed = dto.Breed
-            };
-
+            var pet = new Pet { UserId = user.Id, Name = dto.Name, Type = dto.Type, Breed = dto.Breed };
             _db.Pets.Add(pet);
             await _db.SaveChangesAsync();
-
             return Ok(new { success = true, id = pet.Id });
         }
 
@@ -665,82 +694,36 @@ namespace BazaR.Controllers
         public async Task<IActionResult> DeletePet([FromBody] int id)
         {
             var user = await _userManager.GetUserAsync(User);
-            var pet = await _db.Pets
-                .FirstOrDefaultAsync(p => p.Id == id && p.UserId == user!.Id);
+            var pet = await _db.Pets.FirstOrDefaultAsync(p => p.Id == id && p.UserId == user!.Id);
             if (pet == null) return NotFound();
             _db.Pets.Remove(pet);
             await _db.SaveChangesAsync();
             return Ok();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveAdditionalInfo([FromBody] AdditionalInfo dto)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
-
-            var existing = await _db.AdditionalInfos
-                .FirstOrDefaultAsync(a => a.Id == dto.Id && a.UserId == user.Id);
-
-            if (existing == null)
-            {
-                dto.UserId = user.Id;
-                _db.AdditionalInfos.Add(dto);
-            }
-            else
-            {
-                existing.Key = dto.Key;
-                existing.Value = dto.Value;
-            }
-
+            var existing = await _db.AdditionalInfos.FirstOrDefaultAsync(a => a.Id == dto.Id && a.UserId == user.Id);
+            if (existing == null) { dto.UserId = user.Id; _db.AdditionalInfos.Add(dto); }
+            else { existing.Key = dto.Key; existing.Value = dto.Value; }
             await _db.SaveChangesAsync();
             return Ok();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAdditionalInfo([FromBody] int id)
         {
             var user = await _userManager.GetUserAsync(User);
-            var info = await _db.AdditionalInfos
-                .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user!.Id);
+            var info = await _db.AdditionalInfos.FirstOrDefaultAsync(a => a.Id == id && a.UserId == user!.Id);
             if (info == null) return NotFound();
             _db.AdditionalInfos.Remove(info);
             await _db.SaveChangesAsync();
             return Ok();
-        }
-
-        [HttpPost]
-        [Route("api/profile/lookedcard/{itemId}")]
-        public async Task<IActionResult> MarkAsLooked(int itemId)
-        {
-            var user = await GetCurrentUserAsync();
-            if (user == null)
-                return Unauthorized();
-
-            var lookedCard = await _db.LookedCards
-                .FirstOrDefaultAsync(lc => lc.UserId == user.Id && lc.ItemId == itemId);
-
-            if (lookedCard == null)
-            {
-                lookedCard = new LookedCard
-                {
-                    UserId = user.Id,
-                    ItemId = itemId,
-                    IsLooked = true,
-                    ViewCount = 1,
-                    LookedAt = DateTime.UtcNow
-                };
-                _db.LookedCards.Add(lookedCard);
-            }
-            else
-            {
-                lookedCard.IsLooked = true;
-                lookedCard.ViewCount++;
-                lookedCard.LookedAt = DateTime.UtcNow;
-            }
-
-            await _db.SaveChangesAsync();
-            return Json(new { success = true });
         }
     }
 }

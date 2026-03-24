@@ -4,12 +4,7 @@ namespace BazaR.Models
     public class Promotion
     {
         public int Id { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string CategoryName { get; set; }
-        public decimal DiscountPercent { get; set; }
-        public DateTime StartsAt { get; set; }
-        public DateTime? EndsAt { get; set; }
-        public bool IsActive { get; set; } = true;
+        public string Number { get; set; }
+        public decimal DiscountAmount { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 @model BazaR.ViewModels.PromotionsViewModel
 @{
-    ViewData["Title"] = "Акції";
+    ViewData["Title"] = "Промокоди";
 }
 
 <div class="profile-page">
@@ -8,8 +8,8 @@
         @await Html.PartialAsync("_ProfileSidebar", Model.Profile)
 
         <section class="profile-page__content">
-            <h1 class="profile-page__title">Акції</h1>
-            <p class="profile-page__subtitle">Підписуйтесь на акції та отримуйте знижки на категорії товарів.</p>
+            <h1 class="profile-page__title">Промокоди</h1>
+            <p class="profile-page__subtitle">Доступні промокоди та суми знижок.</p>
 
             @if (Model.Promotions.Any())
             {
@@ -19,38 +19,11 @@
                         <div class="settings-item">
                             <div class="settings-item__top">
                                 <div>
-                                    <h3 class="settings-item__title">@promo.Title</h3>
-                                    <p class="settings-item__text">
-                                        @promo.Description
-                                        @if (!string.IsNullOrEmpty(promo.CategoryName))
-                                        {
-                                            <span class="promo-category">@promo.CategoryName</span>
-                                        }
-                                    </p>
+                                    <h3 class="settings-item__title">@promo.Number</h3>
                                     <p class="settings-item__text promo-meta">
-                                        <span class="promo-discount">−@promo.DiscountPercent%</span>
-                                        <span class="promo-dates">
-                                            З @promo.StartsAt.ToString("dd.MM.yyyy")
-                                            @if (promo.EndsAt.HasValue)
-                                            {
-                                                <text>до @promo.EndsAt.Value.ToString("dd.MM.yyyy")</text>
-                                            }
-                                            else
-                                            {
-                                                <text>— безстроково</text>
-                                            }
-                                        </span>
+                                        <span class="promo-discount">−@promo.DiscountAmount ₴</span>
                                     </p>
                                 </div>
-                                <form method="post" action="@Url.Action("TogglePromotion", "Profile", new { id = promo.Id })">
-                                    @Html.AntiForgeryToken()
-                                    <label class="switch" title="@(promo.IsSubscribed ? "Відписатись" : "Підписатись")">
-                                        <input type="checkbox"
-                                               @(promo.IsSubscribed ? "checked" : "")
-                                               onchange="this.form.submit()" />
-                                        <span class="slider"></span>
-                                    </label>
-                                </form>
                             </div>
                         </div>
                     }
@@ -59,7 +32,7 @@
             else
             {
                 <div class="empty-state">
-                    <p>Наразі активних акцій немає.</p>
+                    <p>Наразі промокодів немає.</p>
                 </div>
             }
         </section>

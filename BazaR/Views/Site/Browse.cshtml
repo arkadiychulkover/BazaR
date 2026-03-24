@@ -1,0 +1,249 @@
+@using BazaR.Models
+@model List<BazaR.Models.Item>
+
+@{
+    ViewData["Title"] = "Каталог товарів";
+    
+    var query = ViewBag.Query as string ?? string.Empty;
+    var page = ViewBag.Page ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var totalItems = ViewBag.TotalItems ?? 0;
+    var currentSort = ViewBag.CurrentSort as string ?? "default";
+    var selectedCategoryIds = ViewBag.CategoryIds as List<int> ?? new List<int>();
+    var selectedBrandIds = ViewBag.BrandIds as List<int> ?? new List<int>();
+    var minPrice = ViewBag.MinPrice as decimal?;
+    var maxPrice = ViewBag.MaxPrice as decimal?;
+    var currentCategory = ViewBag.CurrentCategory as Category;
+    var categoryPath = ViewBag.CategoryPath as List<Category> ?? new List<Category>();
+    var selectedFilters = ViewBag.SelectedFilters as Dictionary<string, List<string>> ?? new Dictionary<string, List<string>>();
+}
+
+<div class="container mt-4">
+
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-controller="Site" asp-action="Index">
+                    <i class="bi bi-house"></i> Головна
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a asp-controller="Site" asp-action="Browse">Каталог</a>
+            </li>
+            @foreach (var cat in categoryPath)
+            {
+                if (cat == categoryPath.LastOrDefault())
+                {
+                    <li class="breadcrumb-item active">@cat.Name</li>
+                }
+                else
+                {
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Site"
+                           asp-action="Browse"
+                           asp-route-categoryIds="@cat.Id">
+                            @cat.Name
+                        </a>
+                    </li>
+                }
+            }
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- ЛЕВАЯ КОЛОНКА ФИЛЬТРОВ -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            @await Html.PartialAsync("_FilterSidebar")
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА ТОВАРОВ -->
+        <div class="col-lg-9 col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    @if (currentCategory != null)
+                    {
+                        @currentCategory.Name
+                        if (!string.IsNullOrEmpty(query))
+                        {
+                            <small class="text-muted fs-6">
+                                (пошук: "@query")
+                            </small>
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(query))
+                    {
+                        <span>Результати пошуку: "@query"</span>
+                    }
+                    else
+                    {
+                        @ViewData["Title"]
+                    }
+                </h1>
+                <div class="text-muted">
+                    <i class="bi bi-box"></i>
+                    Знайдено: <strong>@totalItems</strong> товарів
+                </div>
+            </div>
+
+            <!-- СОРТИРОВКА -->
+            <div class="card mb-4">
+                <div class="card-body py-3">
+                    <form method="get" action="@Url.Action("Browse","Site")" class="row align-items-center g-3" id="sortForm">
+                        <div class="col-auto">
+                            <label class="col-form-label">
+                                <i class="bi bi-arrow-up-short"></i>
+                                Сортувати:
+                            </label>
+                        </div>
+                        <div class="col-auto">
+                            <select name="sort"
+                                    class="form-select form-select-sm"
+                                    onchange="document.getElementById('sortForm').submit()">
+                                <option value="default" selected="@(currentSort == "default")">
+                                    За замовчуванням
+                                </option>
+                                <option value="price_asc" selected="@(currentSort == "price_asc")">
+                                    Ціна (від дешевих)
+                                </option>
+                                <option value="price_desc" selected="@(currentSort == "price_desc")">
+                                    Ціна (від дорогих)
+                                </option>
+                                <option value="name_asc" selected="@(currentSort == "name_asc")">
+                                    Назва (А-Я)
+                                </option>
+                                <option value="name_desc" selected="@(currentSort == "name_desc")">
+                                    Назва (Я-А)
+                                </option>
+                                <option value="rating_desc" selected="@(currentSort == "rating_desc")">
+                                    За рейтингом
+                                </option>
+                                <option value="newest" selected="@(currentSort == "newest")">
+                                    Спочатку нові
+                                </option>
+                            </select>
+                        </div>
+
+                        <input type="hidden" name="query" value="@query" />
+                        <input type="hidden" name="page" value="1" />
+                        <input type="hidden" name="minPrice" value="@minPrice" />
+                        <input type="hidden" name="maxPrice" value="@maxPrice" />
+
+                        @foreach (var catId in selectedCategoryIds)
+                        {
+                            <input type="hidden" name="categoryIds" value="@catId" />
+                        }
+
+                        @foreach (var brandId in selectedBrandIds)
+                        {
+                            <input type="hidden" name="brandIds" value="@brandId" />
+                        }
+
+                        @foreach (var filter in selectedFilters)
+                        {
+                            foreach (var value in filter.Value)
+                            {
+                                <input type="hidden" name="filter_@filter.Key" value="@value" />
+                            }
+                        }
+                    </form>
+                </div>
+            </div>
+
+            <!-- ТОВАРЫ -->
+            @if (Model.Any())
+            {
+                <div class="catalog-grid">
+                    @foreach (var item in Model)
+                    {
+                        <div>
+                            @await Html.PartialAsync("Card", item)
+                        </div>
+                    }
+                </div>
+
+                <!-- ПАГИНАЦИЯ -->
+                @if (totalPages > 1)
+                {
+                    <nav class="mt-5">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(page == 1 ? "disabled" : "")">
+                                <a class="page-link"
+                                   href="@Url.Action("Browse","Site", new {
+                                       page = page-1,
+                                       query,
+                                       categoryIds = selectedCategoryIds,
+                                       brandIds = selectedBrandIds,
+                                       sort = currentSort,
+                                       minPrice,
+                                       maxPrice
+                                   })@GetFilterQueryString(selectedFilters)">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(i==page?"active":"")">
+                                    <a class="page-link"
+                                       href="@Url.Action("Browse","Site", new {
+                                           page=i,
+                                           query,
+                                           categoryIds = selectedCategoryIds,
+                                           brandIds = selectedBrandIds,
+                                           sort = currentSort,
+                                           minPrice,
+                                           maxPrice
+                                       })@GetFilterQueryString(selectedFilters)">
+                                        @i
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="page-item @(page == totalPages ? "disabled":"")">
+                                <a class="page-link"
+                                   href="@Url.Action("Browse","Site", new {
+                                       page = page+1,
+                                       query,
+                                       categoryIds = selectedCategoryIds,
+                                       brandIds = selectedBrandIds,
+                                       sort = currentSort,
+                                       minPrice,
+                                       maxPrice
+                                   })@GetFilterQueryString(selectedFilters)">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="alert alert-info text-center py-5">
+                    <h3>Товари не знайдено</h3>
+                    <a asp-controller="Site" asp-action="Browse" class="btn btn-primary">
+                        Скинути фільтри
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetFilterQueryString(Dictionary<string, List<string>> filters)
+    {
+        if (filters == null || !filters.Any()) return "";
+        
+        var queryString = "";
+        foreach (var filter in filters)
+        {
+            foreach (var value in filter.Value)
+            {
+                queryString += $"&filter_{filter.Key}={value}";
+            }
+        }
+        return queryString;
+    }
+}

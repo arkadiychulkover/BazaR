@@ -12,7 +12,7 @@
         </div>
         <a asp-controller="Profile" asp-action="Profile">
             <div class="account-user-card__info">
-                <div class="account-user-card__name">@(Model?.FullName)</div>
+                <div class="account-user-card__name">@(Model?.FirstName) @(Model?.LastName)</div>
                 <div class="account-user-card__email">@(Model?.Email)</div>
             </div>
         </a>

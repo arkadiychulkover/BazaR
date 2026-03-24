@@ -15,7 +15,7 @@ namespace BazaR.Models
 
         public int MonthlySpent { get; set; } = 0;
 
-        public int AccrualRate { get; set; } = 1; // 1 бонус за 1 грн
+        public decimal AccrualRate { get; set; } = 0.1m;
 
         public DateTime? ExpirationDate { get; set; }
 

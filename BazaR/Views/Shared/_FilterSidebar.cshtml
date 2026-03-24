@@ -1,0 +1,562 @@
+﻿@using BazaR.Models.ViewModels
+@using BazaR.Models
+@model dynamic
+
+@{
+    var allCategories = ViewBag.AllCategories as List<Category> ?? new List<Category>();
+    var mainCategories = ViewBag.MainCategories as List<Category> ?? new List<Category>();
+    var selectedCategoryIds = ViewBag.CategoryIds as List<int> ?? new List<int>();
+    var selectedBrandIds = ViewBag.BrandIds as List<int> ?? new List<int>();
+    var currentCategory = ViewBag.CurrentCategory as Category;
+    var subCategories = ViewBag.SubCategories as List<Category> ?? new List<Category>();
+    var categoryBrands = ViewBag.CategoryBrands as List<Brand> ?? new List<Brand>();
+    var query = ViewBag.Query as string ?? "";
+    var minPrice = ViewBag.MinPrice as decimal?;
+    var maxPrice = ViewBag.MaxPrice as decimal?;
+    var currentSort = ViewBag.CurrentSort as string ?? "default";
+    var filterOptions = ViewBag.FilterOptions as Dictionary<string, List<string>> ?? new Dictionary<string, List<string>>();
+    var selectedFilters = ViewBag.SelectedFilters as Dictionary<string, List<string>> ?? new Dictionary<string, List<string>>();
+}
+
+<div class="filter-sidebar">
+    <!-- Категории -->
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-grid"></i> Категорії
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <ul class="list-group list-group-flush">
+                @foreach (var category in mainCategories)
+                {
+                    var isSelected = selectedCategoryIds.Contains(category.Id);
+                    var hasSubCategories = allCategories.Any(c => c.ParentCategoryId == category.Id);
+                    var icon = !string.IsNullOrEmpty(category.IconUrl) ? category.IconUrl : "bi-tag";
+                    
+                    <li class="list-group-item p-0">
+                        <div class="category-item @(isSelected ? "active" : "")">
+                            <a href="@Url.Action("Browse", "Site", new { 
+                                categoryIds = isSelected ? null : new List<int> { category.Id },
+                                query = query,
+                                sort = currentSort,
+                                minPrice = minPrice,
+                                maxPrice = maxPrice,
+                                brandIds = selectedBrandIds
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="category-link d-flex align-items-center p-3 text-decoration-none">
+                                <i class="bi @icon me-2"></i>
+                                <span class="flex-grow-1">@category.Name</span>
+                                @if (hasSubCategories)
+                                {
+                                    <i class="bi bi-chevron-right"></i>
+                                }
+                            </a>
+                            
+                            @if (hasSubCategories && (isSelected || subCategories.Any(s => s.ParentCategoryId == category.Id)))
+                            {
+                                <ul class="subcategory-list">
+                                    @foreach (var subCat in allCategories.Where(c => c.ParentCategoryId == category.Id).OrderBy(c => c.DisplayOrder))
+                                    {
+                                        var isSubSelected = selectedCategoryIds.Contains(subCat.Id);
+                                        <li class="subcategory-item @(isSubSelected ? "active" : "")">
+                                            <a href="@Url.Action("Browse", "Site", new { 
+                                                categoryIds = new List<int> { subCat.Id },
+                                                query = query,
+                                                sort = currentSort,
+                                                minPrice = minPrice,
+                                                maxPrice = maxPrice,
+                                                brandIds = selectedBrandIds
+                                            })@GetFilterQueryString(selectedFilters)" 
+                                               class="subcategory-link d-block p-2 ps-4 text-decoration-none">
+                                                @subCat.Name
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <!-- Фильтр по цене -->
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-cash"></i> Ціна
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" action="@Url.Action("Browse", "Site")" id="priceFilterForm">
+                <input type="hidden" name="query" value="@query" />
+                <input type="hidden" name="sort" value="@currentSort" />
+                <input type="hidden" name="page" value="1" />
+                
+                @foreach (var catId in selectedCategoryIds)
+                {
+                    <input type="hidden" name="categoryIds" value="@catId" />
+                }
+                
+                @foreach (var brandId in selectedBrandIds)
+                {
+                    <input type="hidden" name="brandIds" value="@brandId" />
+                }
+
+                @foreach (var filter in selectedFilters)
+                {
+                    foreach (var value in filter.Value)
+                    {
+                        <input type="hidden" name="filter_@filter.Key" value="@value" />
+                    }
+                }
+                
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label small">Від</label>
+                        <input type="number" 
+                               class="form-control form-control-sm" 
+                               name="minPrice" 
+                               value="@minPrice" 
+                               placeholder="0"
+                               min="0" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small">До</label>
+                        <input type="number" 
+                               class="form-control form-control-sm" 
+                               name="maxPrice" 
+                               value="@maxPrice" 
+                               placeholder="100000"
+                               min="0" />
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+                        <i class="bi bi-check-lg"></i> Застосувати
+                    </button>
+                    @if (minPrice.HasValue || maxPrice.HasValue)
+                    {
+                        <a href="@Url.Action("Browse", "Site", new { 
+                            query = query,
+                            categoryIds = selectedCategoryIds,
+                            sort = currentSort,
+                            brandIds = selectedBrandIds
+                        })@GetFilterQueryString(selectedFilters)" 
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Фильтр по брендам -->
+    @if (categoryBrands.Any() || selectedCategoryIds.Any())
+    {
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-tags"></i> Бренди
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="get" action="@Url.Action("Browse", "Site")" id="brandFilterForm">
+                    <input type="hidden" name="query" value="@query" />
+                    <input type="hidden" name="sort" value="@currentSort" />
+                    <input type="hidden" name="page" value="1" />
+                    <input type="hidden" name="minPrice" value="@minPrice" />
+                    <input type="hidden" name="maxPrice" value="@maxPrice" />
+                    
+                    @foreach (var catId in selectedCategoryIds)
+                    {
+                        <input type="hidden" name="categoryIds" value="@catId" />
+                    }
+
+                    @foreach (var filter in selectedFilters)
+                    {
+                        foreach (var value in filter.Value)
+                        {
+                            <input type="hidden" name="filter_@filter.Key" value="@value" />
+                        }
+                    }
+                    
+                    <div class="brand-list" style="max-height: 250px; overflow-y: auto;">
+                        @if (categoryBrands.Any())
+                        {
+                            @foreach (var brand in categoryBrands)
+                            {
+                                var isChecked = selectedBrandIds.Contains(brand.Id);
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input brand-checkbox" 
+                                           type="checkbox" 
+                                           name="brandIds" 
+                                           value="@brand.Id" 
+                                           id="brand_@brand.Id"
+                                           @(isChecked ? "checked" : "")
+                                           onchange="this.form.submit()">
+                                    <label class="form-check-label d-flex justify-content-between" for="brand_@brand.Id">
+                                        <span>@brand.Name</span>
+                                        @if (brand.Logo != null)
+                                        {
+                                            <img src="@brand.Logo" alt="@brand.Name" style="height: 16px;" />
+                                        }
+                                    </label>
+                                </div>
+                            }
+                        }
+                        else if (selectedCategoryIds.Any())
+                        {
+                            <p class="text-muted small mb-0">Немає брендів у цій категорії</p>
+                        }
+                        else
+                        {
+                            <p class="text-muted small mb-0">Виберіть категорію</p>
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
+    @if (currentCategory?.Filters != null && currentCategory.Filters.Any())
+    {
+        <form method="get" action="@Url.Action("Browse", "Site")" id="filterForm">
+
+            <input type="hidden" name="query" value="@query" />
+            <input type="hidden" name="sort" value="@currentSort" />
+            <input type="hidden" name="page" value="1" />
+            <input type="hidden" name="minPrice" value="@minPrice" />
+            <input type="hidden" name="maxPrice" value="@maxPrice" />
+
+            @foreach (var catId in selectedCategoryIds)
+            {
+                <input type="hidden" name="categoryIds" value="@catId" />
+            }
+
+            @foreach (var brandId in selectedBrandIds)
+            {
+                <input type="hidden" name="brandIds" value="@brandId" />
+            }
+
+            <div id="filterGroups">
+
+                @foreach (var filter in currentCategory.Filters.OrderBy(f => f.DisplayName))
+                {
+                    var values = filterOptions.ContainsKey(filter.Key) 
+                        ? filterOptions[filter.Key] 
+                        : new List<string>();
+
+                    if (values.Any())
+                    {
+                        var selectedValues = selectedFilters.ContainsKey(filter.Key) 
+                            ? selectedFilters[filter.Key] 
+                            : new List<string>();
+
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-sliders"></i> @filter.DisplayName
+                                </h6>
+                            </div>
+
+                            <div class="card-body">
+                                @await Html.PartialAsync("_FilterCheckboxGroup", new FilterCheckboxGroupViewModel
+                                {
+                                    Key = filter.Key,
+                                    DisplayName = filter.DisplayName,
+                                    Values = values,
+                                    SelectedValues = selectedValues
+                                })
+                            </div>
+                        </div>
+                    }
+                }
+
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">
+                <i class="bi bi-funnel"></i> Застосувати фільтри
+            </button>
+
+            @if (selectedFilters.Any())
+            {
+                <a href="@Url.Action("Browse", "Site", new { 
+                    query = query,
+                    categoryIds = selectedCategoryIds,
+                    brandIds = selectedBrandIds,
+                    sort = currentSort,
+                    minPrice = minPrice,
+                    maxPrice = maxPrice
+                })" class="btn btn-outline-danger btn-sm w-100 mt-2">
+                    <i class="bi bi-x-circle"></i> Скинути всі фільтри
+                </a>
+            }
+
+        </form>
+    }
+    <!-- Активные фильтры -->
+    @if (selectedCategoryIds.Any() || selectedBrandIds.Any() || minPrice.HasValue || maxPrice.HasValue || selectedFilters.Any())
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h6 class="card-title small fw-bold">Активні фільтри:</h6>
+                <div class="d-flex flex-wrap gap-1">
+                    @foreach (var catId in selectedCategoryIds)
+                    {
+                        var cat = allCategories.FirstOrDefault(c => c.Id == catId);
+                        if (cat != null)
+                        {
+                            <span class="badge bg-primary d-inline-flex align-items-center">
+                                @cat.Name
+                                <a href="@Url.Action("Browse", "Site", new { 
+                                    query = query,
+                                    categoryIds = selectedCategoryIds.Where(id => id != catId).ToList(),
+                                    brandIds = selectedBrandIds,
+                                    sort = currentSort,
+                                    minPrice = minPrice,
+                                    maxPrice = maxPrice
+                                })@GetFilterQueryString(selectedFilters)" 
+                                   class="text-white ms-1 text-decoration-none">
+                                    <i class="bi bi-x"></i>
+                                </a>
+                            </span>
+                        }
+                    }
+                    
+                    @foreach (var brandId in selectedBrandIds)
+                    {
+                        var brand = categoryBrands.FirstOrDefault(b => b.Id == brandId);
+                        if (brand != null)
+                        {
+                            <span class="badge bg-primary d-inline-flex align-items-center">
+                                @brand.Name
+                                <a href="@Url.Action("Browse", "Site", new { 
+                                    query = query,
+                                    categoryIds = selectedCategoryIds,
+                                    brandIds = selectedBrandIds.Where(id => id != brandId).ToList(),
+                                    sort = currentSort,
+                                    minPrice = minPrice,
+                                    maxPrice = maxPrice
+                                })@GetFilterQueryString(selectedFilters)" 
+                                   class="text-white ms-1 text-decoration-none">
+                                    <i class="bi bi-x"></i>
+                                </a>
+                            </span>
+                        }
+                    }
+                    
+                    @if (minPrice.HasValue)
+                    {
+                        <span class="badge bg-primary d-inline-flex align-items-center">
+                            від @minPrice
+                            <a href="@Url.Action("Browse", "Site", new { 
+                                query = query,
+                                categoryIds = selectedCategoryIds,
+                                brandIds = selectedBrandIds,
+                                sort = currentSort,
+                                maxPrice = maxPrice
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="text-white ms-1 text-decoration-none">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </span>
+                    }
+                    
+                    @if (maxPrice.HasValue)
+                    {
+                        <span class="badge bg-primary d-inline-flex align-items-center">
+                            до @maxPrice
+                            <a href="@Url.Action("Browse", "Site", new { 
+                                query = query,
+                                categoryIds = selectedCategoryIds,
+                                brandIds = selectedBrandIds,
+                                sort = currentSort,
+                                minPrice = minPrice
+                            })@GetFilterQueryString(selectedFilters)" 
+                               class="text-white ms-1 text-decoration-none">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </span>
+                    }
+
+                    @foreach (var filter in selectedFilters)
+                    {
+                        var categoryFilter = currentCategory?.Filters?.FirstOrDefault(f => f.Key == filter.Key);
+                        if (categoryFilter != null)
+                        {
+                            foreach (var value in filter.Value)
+                            {
+                                var newSelectedFilters = selectedFilters
+                                    .Where(f => f.Key != filter.Key || !f.Value.Contains(value))
+                                    .ToDictionary(f => f.Key, f => f.Value);
+                                
+                                <span class="badge bg-primary d-inline-flex align-items-center">
+                                    @categoryFilter.DisplayName: @value
+                                    <a href="@Url.Action("Browse", "Site", new { 
+                                        query = query,
+                                        categoryIds = selectedCategoryIds,
+                                        brandIds = selectedBrandIds,
+                                        sort = currentSort,
+                                        minPrice = minPrice,
+                                        maxPrice = maxPrice
+                                    })@GetFilterQueryString(newSelectedFilters)" 
+                                       class="text-white ms-1 text-decoration-none">
+                                        <i class="bi bi-x"></i>
+                                    </a>
+                                </span>
+                            }
+                        }
+                    }
+                </div>
+                
+                <a href="@Url.Action("Browse", "Site", new { query = query })" 
+                   class="btn btn-outline-danger btn-sm w-100 mt-3">
+                    <i class="bi bi-x-circle"></i> Скинути всі фільтри
+                </a>
+            </div>
+        </div>
+    }
+
+    <!-- Информация о количестве товаров -->
+    <div class="card">
+        <div class="card-body text-center">
+            <h3 class="h5 mb-2">Знайдено товарів:</h3>
+            <span class="display-6 fw-bold text-primary">@ViewBag.TotalItems</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    .filter-sidebar {
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+    }
+
+    .category-item.active {
+        background-color: #e7f1ff;
+    }
+
+    .category-link {
+        color: #333;
+        transition: all 0.2s;
+    }
+
+        .category-link:hover {
+            background-color: #f8f9fa;
+            padding-left: 20px !important;
+        }
+
+    .category-item.active .category-link {
+        color: #0d6efd;
+        font-weight: 500;
+    }
+
+    .subcategory-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        background-color: #f8f9fa;
+    }
+
+    .subcategory-item.active {
+        background-color: #e7f1ff;
+    }
+
+    .subcategory-link {
+        color: #666;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+        .subcategory-link:hover {
+            color: #0d6efd;
+            background-color: #fff;
+            padding-left: 25px !important;
+        }
+
+    .subcategory-item.active .subcategory-link {
+        color: #0d6efd;
+        font-weight: 500;
+    }
+
+    .brand-list {
+        scrollbar-width: thin;
+        scrollbar-color: #ccc #f1f1f1;
+    }
+
+        .brand-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .brand-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .brand-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+            .brand-list::-webkit-scrollbar-thumb:hover {
+                background: #999;
+            }
+
+    .filter-group {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+        .filter-group:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+    .badge a:hover {
+        opacity: 0.8;
+    }
+
+    .checkbox-list {
+        scrollbar-width: thin;
+        scrollbar-color: #ccc #f1f1f1;
+    }
+
+        .checkbox-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .checkbox-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .checkbox-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+            .checkbox-list::-webkit-scrollbar-thumb:hover {
+                background: #999;
+            }
+</style>
+
+@functions {
+    public string GetFilterQueryString(Dictionary<string, List<string>> filters)
+    {
+        if (filters == null || !filters.Any()) return "";
+        
+        var queryString = "";
+        foreach (var filter in filters)
+        {
+            foreach (var value in filter.Value)
+            {
+                queryString += $"&filter_{filter.Key}={value}";
+            }
+        }
+        return queryString;
+    }
+}

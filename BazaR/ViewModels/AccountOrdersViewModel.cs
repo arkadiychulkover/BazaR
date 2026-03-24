@@ -11,10 +11,11 @@
     public class OrderVm
     {
         public int Id { get; set; }
+        public string Number { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public string Status { get; set; } = string.Empty;
-        public int Total { get; set; }
-        public List<OrderItemVm> Items { get; set; } = new();
+        public decimal TotalAmount { get; set; }
+        public List<OrderItemVm> OrderItems { get; set; } = new();
     }
 
     public class AccountOrdersViewModel

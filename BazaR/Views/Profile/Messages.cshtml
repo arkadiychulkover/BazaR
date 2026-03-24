@@ -25,7 +25,7 @@
                     {
                         <div class="chat-item @(msg.IsRead ? "" : "chat-item--unread")" data-message-id="@msg.Id">
                             <div>
-                                <div class="chat-item__name">@msg.Name від @msg.SenderName</div>
+                                <div class="chat-item__name">@msg.Name від <span style="color: gray;">@msg.SenderName</span></div>
                                 <div class="chat-item__text">@msg.Content</div>
                             </div>
                             <div class="chat-item__date">

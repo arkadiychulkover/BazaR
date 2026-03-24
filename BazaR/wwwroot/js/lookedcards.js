@@ -1,9 +1,9 @@
-/**
+﻿/**
  * Looked Cards Functionality
  * Handles marking items as looked/viewed
  */
 
-(function() {
+(function () {
     'use strict';
 
     const LookedCards = {
@@ -13,7 +13,7 @@
 
         attachEventListeners() {
             const cards = document.querySelectorAll('.looked-card-item');
-            
+
             cards.forEach(card => {
                 // Mark as looked on item click
                 card.addEventListener('click', (e) => {
@@ -21,7 +21,7 @@
                     if (e.target.closest('.looked-card-item__link')) {
                         return;
                     }
-                    
+
                     e.preventDefault();
                     this.markAsLooked(card);
                 });
@@ -53,37 +53,35 @@
                 },
                 body: JSON.stringify({ itemId: itemId })
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Visual feedback
-                    cardElement.classList.add('is-viewed');
-                    
-                    // Add viewed badge if not already present
-                    if (!cardElement.querySelector('.looked-badge')) {
-                        this.addViewedBadge(cardElement);
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Visual feedback
+                        cardElement.classList.add('is-viewed');
 
-                    // Update view count
-                    this.updateViewCount(cardElement);
-                    
-                    // Optional: Show toast notification
-                    this.showNotification('Товар додано до переглянутих');
-                }
-            })
-            .catch(error => {
-                console.error('Error marking item as looked:', error);
-                // Show error notification
-                this.showNotification('Помилка при збереженні', 'error');
-            })
-            .finally(() => {
-                cardElement.classList.remove('marking');
-            });
+                        // Add viewed badge if not already present
+                        if (!cardElement.querySelector('.looked-badge')) {
+                            this.addViewedBadge(cardElement);
+                        }
+
+                        // Update view count
+                        this.updateViewCount(cardElement);
+
+                        // Optional: Show toast notification
+                        this.showNotification('Товар додано до переглянутих');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error marking item as looked:', error);
+                })
+                .finally(() => {
+                    cardElement.classList.remove('marking');
+                });
         },
 
         addViewedBadge(cardElement) {

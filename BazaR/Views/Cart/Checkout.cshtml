@@ -1,0 +1,61 @@
+@model List<BazaR.Models.Item>
+
+@{
+    ViewData["Title"] = "Оформление заказа";
+    var cart = ViewBag.CartItems as Dictionary<int, int> ?? new Dictionary<int, int>();
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Оформление заказа</h2>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form asp-action="CreateOrder" asp-controller="Cart" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label">Адрес доставки</label>
+                            <input type="text" name="address" class="form-control" required placeholder="Город, улица, дом" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Способ оплаты</label>
+                            <select name="paymentMethod" class="form-select" required>
+                                <option value="Card">Карта</option>
+                                <option value="Cash">Наличные</option>
+                                <option value="Online">Онлайн</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Способ доставки</label>
+                            <select name="deliveryMethod" class="form-select" required>
+                                <option value="Courier">Курьер</option>
+                                <option value="Post">Почта</option>
+                                <option value="Pickup">Самовывоз</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success">Создать заказ</button>
+                        <a href="@Url.Action("Index", "Cart")" class="btn btn-outline-secondary ms-2">Назад в корзину</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Товары</h5>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var item in Model)
+                        {
+                            var qty = cart.ContainsKey(item.Id) ? cart[item.Id] : 1;
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>@item.Name × @qty</span>
+                                <span>@(item.Price * qty) грн</span>
+                            </li>
+                        }
+                    </ul>
+                    <div class="fw-bold mt-2">Итого: @Model.Where(i => cart.ContainsKey(i.Id)).Sum(i => i.Price * cart[i.Id]) грн</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

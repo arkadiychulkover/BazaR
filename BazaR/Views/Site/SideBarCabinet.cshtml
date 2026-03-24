@@ -1,0 +1,28 @@
+@{
+    var current = (ViewContext.RouteData.Values["action"]?.ToString() ?? "").ToLowerInvariant();
+    string Active(string action) => current == action.ToLowerInvariant() ? "active" : "";
+}
+
+<div class="card mb-3">
+    <div class="card-header bg-light">
+        <strong>Личный кабинет</strong>
+    </div>
+    <div class="list-group list-group-flush">
+        <a class="list-group-item list-group-item-action @Active("profile")"
+           href="@Url.Action("Profile", "Profile")">
+            <i class="bi bi-person"></i> Профиль
+        </a>
+        <a class="list-group-item list-group-item-action @Active("orders")"
+           href="@Url.Action("Orders", "Profile")">
+            <i class="bi bi-receipt"></i> Заказы
+        </a>
+        <a class="list-group-item list-group-item-action @Active("wishlist")"
+           href="@Url.Action("Wishlist", "Profile")">
+            <i class="bi bi-heart"></i> Избранное
+        </a>
+        <a class="list-group-item list-group-item-action @Active("cart")"
+           href="@Url.Action("Index", "Cart")">
+            <i class="bi bi-cart"></i> Корзина
+        </a>
+    </div>
+</div>

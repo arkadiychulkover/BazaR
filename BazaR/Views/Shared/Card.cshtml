@@ -1,0 +1,168 @@
+@model BazaR.Models.Item
+
+@{
+    var img = Model.ImageUrl;
+    if (string.IsNullOrWhiteSpace(img))
+        img = Model.Colors?.FirstOrDefault()?.Color;
+    if (string.IsNullOrWhiteSpace(img))
+        img = WebPaths.DefaultItemImage;
+
+    var isSale = ViewData["IsSale"] as bool? ?? false;
+    var discount = ViewData["Discount"] as int? ?? 0;
+    var oldPrice = isSale && discount > 0 ? (int)Math.Ceiling(Model.Price / (1.0 - discount / 100.0)) : 0;
+
+    var isInCart = ViewBag.IsInCart != null && (bool)ViewBag.IsInCart;
+    var isInWishlist = ViewBag.IsInWishlist != null && (bool)ViewBag.IsInWishlist;
+    var user = ViewBag.User as BazaR.Models.User;
+}
+
+<div class="tovar-card" data-item-id="@Model.Id">
+    <div class="tovar-card__img">
+        <a href="@Url.Action("ItemDetails", "Site", new { id = Model.Id })" class="tovar-card__link">
+            <img src="@img" alt="@Model.Name"
+                 onerror="this.onerror=null; this.src='/images/items/default.jpg';" />
+        </a>
+
+        @if (user != null)
+        {
+            <div class="tovar-card__wish">
+                <button type="button"
+                        data-item-id="@Model.Id"
+                        onclick="addToWishlist(this)"
+                        title="Додати в обране">
+                    <i class="bi bi-heart @(isInWishlist ? "text-danger" : "")"></i>
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="tovar-card__wish">
+                <button type="button"
+                        data-open-login="true"
+                        title="Додати в обране">
+                    <i class="bi bi-heart"></i>
+                </button>
+            </div>
+        }
+
+        @if (!Model.IsAvailable)
+        {
+            <span class="tovar-card__badge tovar-card__badge--out">Немає в наявності</span>
+        }
+        @if (isSale && discount > 0)
+        {
+            <span class="tovar-card__badge tovar-card__badge--sale">-@discount%</span>
+        }
+    </div>
+
+    <div class="tovar-card__body">
+        <a href="@Url.Action("ItemDetails", "Site", new { id = Model.Id })" class="tovar-card__title tovar-card__link">
+            @Model.Name
+        </a>
+
+        <div class="tovar-card__footer">
+            <div>
+                @if (isSale && oldPrice > 0)
+                {
+                    <div class="tovar-card__old-price">@oldPrice.ToString("N0") ₴</div>
+                }
+                <div class="tovar-card__price @(isSale ? "tovar-card__price--sale" : "")">
+                    @Model.Price.ToString("N0") <span class="tovar-card__currency">₴</span>
+                </div>
+            </div>
+
+            @if (Model.IsAvailable)
+            {
+                <button type="button"
+                        class="tovar-card__cart-btn @(isInCart ? "tovar-card__cart-btn--in-cart" : "")"
+                        data-item-id="@Model.Id"
+                        onclick="addToCart(this, @Model.Id)"
+                        @(isInCart ? "disabled" : "")
+                        title="Додати в кошик">
+                    <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart3")"></i>
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function addToCart(button, itemId) {
+        var originalHtml = button.innerHTML;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        button.disabled = true;
+
+        var token = $('input[name="__RequestVerificationToken"]').first().val();
+
+        $.ajax({
+            url: '@Url.Action("AddToCart", "Site")',
+            type: 'POST',
+            data: { itemId: itemId, __RequestVerificationToken: token },
+            success: function (response) {
+                if (response.success) {
+                    button.innerHTML = '<i class="bi bi-check-lg"></i>';
+                    button.classList.add('tovar-card__cart-btn--in-cart');
+                    button.disabled = true;
+                    if (typeof updateCartBadge === 'function') {
+                        updateCartBadge(response.cartCount);
+                    } else {
+                        var badge = $('#cartBadge');
+                        if (badge.length) { badge.text(response.cartCount); badge.show(); }
+                    }
+                    showNotification('Товар додано до кошика', 'success');
+                } else if (response.requireLogin) {
+                    $('#loginModal').modal('show');
+                    button.innerHTML = originalHtml;
+                    button.disabled = false;
+                } else {
+                    button.innerHTML = originalHtml;
+                    button.disabled = false;
+                    showNotification(response.message || 'Помилка', 'danger');
+                }
+            },
+            error: function () {
+                button.innerHTML = originalHtml;
+                button.disabled = false;
+                showNotification('Помилка при додаванні до кошика', 'danger');
+            }
+        });
+    }
+
+    function addToWishlist(element) {
+        var itemId = $(element).data('item-id');
+        var icon = $(element).find('i');
+        var token = $('input[name="__RequestVerificationToken"]').first().val();
+
+        $.ajax({
+            url: '@Url.Action("Add", "Wishlist")',
+            type: 'POST',
+            data: { id: itemId, __RequestVerificationToken: token },
+            success: function (response) {
+                if (response.success) {
+                    icon.toggleClass('text-danger');
+                    var cnt = $('#wishlistCount');
+                    if (cnt.length) { cnt.text(response.wishlistCount); cnt.toggle(response.wishlistCount > 0); }
+                    showNotification('Товар додано до обраного', 'success');
+                } else if (response.requireLogin) {
+                    $('#loginModal').modal('show');
+                } else {
+                    showNotification(response.message || 'Помилка', 'danger');
+                }
+            },
+            error: function () {
+                showNotification('Помилка при додаванні до обраного', 'danger');
+            }
+        });
+    }
+
+    function showNotification(message, type) {
+        $('.custom-notification').remove();
+        var n = $('<div class="custom-notification position-fixed top-0 end-0 p-3" style="z-index:9999;">' +
+            '<div class="toast show align-items-center text-white bg-' + type + ' border-0"><div class="d-flex">' +
+            '<div class="toast-body">' + message + '</div>' +
+            '<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>' +
+            '</div></div></div>');
+        $('body').append(n);
+        setTimeout(function () { n.fadeOut(function () { $(this).remove(); }); }, 3000);
+    }
+</script>

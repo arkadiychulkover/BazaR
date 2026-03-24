@@ -1,0 +1,247 @@
+﻿@model List<BazaR.Models.Category>
+
+@{
+    var mainCategories = Model?
+        .Where(c => c.ParentCategoryId == null)
+        .OrderBy(c => c.DisplayOrder)
+        .ToList() ?? new List<BazaR.Models.Category>();
+}
+
+<div class="catalog-wrapper">
+
+    <div class="catalog-menu">
+
+        <!-- Левая колонка категорий -->
+        <ul class="catalog-categories">
+            @foreach (var category in mainCategories)
+            {
+                var subCategories = Model?
+                .Where(c => c.ParentCategoryId == category.Id)
+                .OrderBy(c => c.DisplayOrder)
+                .ToList();
+
+                <li class="catalog-item">
+
+                    <a asp-controller="Site"
+                       asp-action="CategoryPage"
+                       asp-route-category="@category.Id"
+                       class="catalog-link">
+
+                        @if (!string.IsNullOrEmpty(category.IconUrl))
+                        {
+                            <i class="bi @category.IconUrl"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-grid"></i>
+                        }
+
+                        <span>@category.Name</span>
+
+                        @if (subCategories.Any())
+                        {
+                            <i class="bi bi-chevron-right arrow"></i>
+                        }
+
+                    </a>
+
+                    @if (subCategories.Any())
+                    {
+                        <div class="catalog-mega">
+
+                            <div class="catalog-mega-content">
+
+                                @foreach (var subCategory in subCategories)
+                                {
+                                    var subSub = Model?
+                                    .Where(c => c.ParentCategoryId == subCategory.Id)
+                                    .OrderBy(c => c.DisplayOrder)
+                                    .ToList();
+
+                                    <div class="mega-col">
+
+                                        <h5>
+                                            <a asp-controller="Site"
+                                               asp-action="Browse"
+                                               asp-route-categoryIds="@subCategory.Id">
+                                                @subCategory.Name
+                                            </a>
+                                        </h5>
+
+                                        @if (subSub.Any())
+                                        {
+                                            <ul>
+                                                @foreach (var s in subSub)
+                                                {
+                                                    <li>
+                                                        <a asp-controller="Site"
+                                                           asp-action="Browse"
+                                                           asp-route-categoryIds="@s.Id">
+                                                            @s.Name
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+
+                                        @if (subCategory.CategoryBrands != null && subCategory.CategoryBrands.Any())
+                                        {
+                                            <div class="brands">
+
+                                                @foreach (var b in subCategory.CategoryBrands.Take(5))
+                                                {
+                                                    <a asp-controller="Site"
+                                                       asp-action="Browse"
+                                                       asp-route-categoryIds="@subCategory.Id"
+                                                       asp-route-brandId="@b.BrandId">
+
+                                                        @b.Brand?.Name
+
+                                                    </a>
+                                                }
+
+                                            </div>
+                                        }
+
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+                    }
+
+                </li>
+            }
+        </ul>
+
+    </div>
+
+</div>
+
+<style>
+
+    .catalog-wrapper {
+        position: relative;
+    }
+
+    .catalog-menu {
+        width: 280px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+    }
+
+    .catalog-categories {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .catalog-item {
+        position: relative;
+    }
+
+    .catalog-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        text-decoration: none;
+        color: #333;
+        border-bottom: 1px solid #eee;
+        font-weight: 500;
+    }
+
+        .catalog-link:hover {
+            background: #f8f9fa;
+        }
+
+        .catalog-link i {
+            width: 20px;
+        }
+
+        .catalog-link .arrow {
+            margin-left: auto;
+            font-size: 12px;
+        }
+
+    /* МЕГА МЕНЮ */
+
+    .catalog-mega {
+        position: absolute;
+        left: 100%;
+        top: 0;
+        width: 900px;
+        background: #fff;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        border-radius: 0 10px 10px 0;
+        opacity: 0;
+        visibility: hidden;
+        transition: 0.2s;
+        z-index: 1000;
+    }
+
+    .catalog-item:hover .catalog-mega {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .catalog-mega-content {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 25px;
+        padding: 25px;
+    }
+
+    .mega-col h5 {
+        font-size: 15px;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+        .mega-col h5 a {
+            color: #111;
+            text-decoration: none;
+        }
+
+    .mega-col ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .mega-col li {
+        margin-bottom: 6px;
+    }
+
+        .mega-col li a {
+            color: #666;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+            .mega-col li a:hover {
+                color: #0d6efd;
+            }
+
+    .brands {
+        margin-top: 10px;
+    }
+
+        .brands a {
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: #f0f0f0;
+            margin-right: 4px;
+            text-decoration: none;
+            color: #555;
+        }
+
+            .brands a:hover {
+                background: #0d6efd;
+                color: #fff;
+            }
+
+</style>

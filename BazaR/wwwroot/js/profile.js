@@ -109,6 +109,12 @@ function startEdit(field, type) {
 function showAddRecipientForm() {
     document.getElementById('add-recipient-form').style.display = 'block';
 }
+function openPromoModal() {
+    document.getElementById('add-promotion-form').style.display = 'block';
+}
+function closePromoModal() {
+    document.getElementById('add-promotion-form').style.display = 'none';
+}
 function showAddAddressForm() {
     document.getElementById('add-address-form').style.display = 'block';
 }

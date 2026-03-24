@@ -10,7 +10,7 @@ namespace BazaR.ViewModels
 
         public int MonthlySpent { get; set; }
 
-        public int AccrualRate { get; set; }
+        public decimal AccrualRate { get; set; }
 
         public DateTime? ExpirationDate { get; set; }
     }

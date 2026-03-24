@@ -1,0 +1,15 @@
+﻿@model string
+
+<form asp-action="Browse" method="get" class="d-flex w-100">
+    <div class="input-group w-100">
+        <input type="text"
+               name="query"
+               class="form-control"
+               placeholder="Поиск товаров..."
+               value="@Model"
+               aria-label="Поиск" />
+        <button class="btn btn-light" type="submit">
+            <i class="bi bi-search"></i>
+        </button>
+    </div>
+</form>

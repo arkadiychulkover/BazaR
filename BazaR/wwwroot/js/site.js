@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
     const body = document.body;
     const loginModal = document.getElementById('loginModal');
     const registerModal = document.getElementById('registerModal');
@@ -29,7 +29,6 @@
         const modal = getModal(name);
         if (!modal) return;
 
-        // Закрываем sidebar перед открытием модалки
         document.dispatchEvent(new CustomEvent('sidebar:close'));
 
         closeAllModals();

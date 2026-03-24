@@ -1,36 +1,370 @@
-﻿@model IEnumerable<ItemCardVm>
+@model List<BazaR.Models.Item>
 
 @{
-    ViewData["Title"] = "Shop - BazaR";
+    ViewData["Title"] = "Головна";
+    var user = ViewBag.User as BazaR.Models.User;
+    var categories = ViewBag.Categories as List<BazaR.Models.Category> ?? new List<BazaR.Models.Category>();
+    var featuredItems = ViewBag.FeaturedItems as List<BazaR.Models.Item> ?? new List<BazaR.Models.Item>();
+    var trendingItems = ViewBag.TrendingItems as List<BazaR.Models.Item> ?? new List<BazaR.Models.Item>();
+    var recommendedItems = ViewBag.RecommendedItems as List<BazaR.Models.Item> ?? new List<BazaR.Models.Item>();
+    var popularItems = ViewBag.PopularItems as List<BazaR.Models.Item> ?? new List<BazaR.Models.Item>();
 }
 
-<!-- Hero Section -->
-<section class="hero-section">
-    <div class="hero-section__content">
-        <h1 class="hero-section__title">Welcome to BazaR</h1>
-        <p class="hero-section__subtitle">Discover our premium collection of products</p>
-    </div>
-</section>
+<div class="container-fluid mt-3">
+    <div class="row align-items-start">
 
-<!-- Products Grid -->
-<section class="products-section">
-    <div class="container-fluid">
-        <h2 class="products-section__title">Featured Products</h2>
-        
-        @if (Model.Any())
-        {
-            <div class="products-grid">
-                @foreach (var item in Model)
-                {
-                    @await Html.PartialAsync("~/Views/Shared/_Card.cshtml", item)
-                }
+        <!-- Сайдбар -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            @await Html.PartialAsync("_SideBarOnIndex", categories)
+        </div>
+
+        <!-- Основной контент: баннер + все секции -->
+        <div class="col-lg-9 col-md-8">
+
+            <!-- Баннер -->
+            <div class="sale-banner d-flex align-items-center justify-content-center text-center mb-4" style="background-image: url('@Url.Content("~/images/items/banner-green.png")');">
+                <div class="sale-banner__content">
+                    <h1 class="sale-banner__title">ТОТАЛЬНИЙ РОЗПРОДАЖ</h1>
+                    <p class="sale-banner__sub">Знижки до -50% на тисячі товарів</p>
+                </div>
             </div>
-        }
-        else
-        {
-            <div class="empty-state">
-                <p>No products available at the moment.</p>
+
+            <!-- ===== Акційні пропозиції ===== -->
+            @if (featuredItems.Any())
+            {
+                <section class="home-section">
+                    <div class="home-section__head">
+                        <h2 class="home-section__title">Акційні пропозиції</h2>
+                        <a href="@Url.Action("Browse", "Site", new { sort = "price_desc" })" class="home-section__pill">
+                            Всі акції
+                        </a>
+                    </div>
+                    <div class="home-section__grid">
+                        @foreach (var item in featuredItems)
+                        {
+                            <div class="home-section__cell">
+                                @await Html.PartialAsync("Card", item, new ViewDataDictionary(ViewData) { { "IsSale", true }, { "Discount", 25 } })
+                            </div>
+                        }
+                    </div>
+                    <div class="home-section__more-wrap">
+                        <a href="@Url.Action("Browse", "Site", new { sort = "price_desc" })" class="home-section__show-more">Показати ще</a>
+                    </div>
+                </section>
+            }
+
+            <!-- ===== Зараз шукають ===== -->
+            @if (trendingItems.Any())
+            {
+                <section class="home-section">
+                    <div class="home-section__head">
+                        <h2 class="home-section__title">Зараз шукають</h2>
+                    </div>
+                    <div class="home-section__grid">
+                        @foreach (var item in trendingItems)
+                        {
+                            <div class="home-section__cell">
+                                @await Html.PartialAsync("Card", item)
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+
+            <!-- ===== Кращі подарунки ===== -->
+            <section class="home-section">
+                <div class="home-section__head">
+                    <h2 class="home-section__title">Кращі подарунки</h2>
+                </div>
+                <div class="gift-row">
+                    <a href="@Url.Action("Browse", "Site", new { query = "для неї" })" class="gift-banner gift-banner--her" style="background-image: url('@Url.Content("~/images/items/pink-gift-v2.png")');">
+                        <div class="gift-banner__body">
+                            <span class="gift-banner__label">Добірка подарунків у розділі</span>
+                            <span class="gift-banner__category">Товари для краси, здоров'я і догляду за тілом</span>
+                            <strong class="gift-banner__title">Для неї</strong>
+                            <span class="gift-banner__btn">Перейти</span>
+                        </div>
+                    </a>
+                    <a href="@Url.Action("Browse", "Site", new { query = "для нього" })" class="gift-banner gift-banner--him" style="background-image: url('@Url.Content("~/images/items/blue-gift-v2.png")');">
+                        <div class="gift-banner__body">
+                            <span class="gift-banner__label">Добірка подарунків у розділі</span>
+                            <span class="gift-banner__category">Побутова техніка</span>
+                            <strong class="gift-banner__title">Для нього</strong>
+                            <span class="gift-banner__btn">Перейти</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- ===== Рекомендації на основі ваших переглядів ===== -->
+            @if (recommendedItems.Any())
+            {
+                <section class="home-section">
+                    <div class="home-section__head">
+                        <h2 class="home-section__title">Рекомендації на основі ваших переглядів</h2>
+                    </div>
+                    <div class="home-section__grid">
+                        @foreach (var item in recommendedItems)
+                        {
+                            <div class="home-section__cell">
+                                @await Html.PartialAsync("Card", item)
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+
+            <!-- ===== Найбільш очікуванні товари ===== -->
+            @if (popularItems.Any())
+            {
+                <section class="home-section">
+                    <div class="home-section__head">
+                        <h2 class="home-section__title">Найбільш очікуванні товари</h2>
+                    </div>
+                    <div class="home-section__grid">
+                        @foreach (var item in popularItems)
+                        {
+                            <div class="home-section__cell">
+                                @await Html.PartialAsync("Card", item)
+                            </div>
+                        }
+                    </div>
+                </section>
+            }
+
+            <!-- ===== Показати ще (центр) ===== -->
+            <div class="text-center my-4">
+                <a href="@Url.Action("Browse", "Site")" class="home-section__show-more">Показати ще</a>
             </div>
+
+        </div><!-- /col-lg-9 -->
+
+    </div><!-- /row -->
+</div>
+
+@section Scripts {
+    <style>
+        .sale-banner {
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            position: relative;
+            overflow: hidden;
         }
-    </div>
-</section>
+
+        .sale-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 50%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .sale-banner__content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .sale-banner__title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+            letter-spacing: 0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .sale-banner__sub {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.95);
+            text-shadow: 0 1px 6px rgba(0,0,0,0.3);
+            margin: 0;
+        }
+
+        .home-section {
+            margin-bottom: 36px;
+        }
+
+        .home-section__head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .home-section__title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        .home-section__pill {
+            display: inline-block;
+            padding: 6px 16px;
+            border: 1px solid #ccc;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            text-decoration: none;
+            background: #fff;
+            white-space: nowrap;
+            transition: all 0.2s;
+            line-height: 1.4;
+        }
+
+        .home-section__pill:hover {
+            border-color: #888;
+            color: #111;
+            background: #fafafa;
+        }
+
+        .home-section__more-wrap {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 14px;
+        }
+
+        .home-section__show-more {
+            display: inline-block;
+            padding: 6px 16px;
+            border: 1px solid #ccc;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            text-decoration: none;
+            background: #fff;
+            white-space: nowrap;
+            transition: all 0.2s;
+            line-height: 1.4;
+        }
+
+        .home-section__show-more:hover {
+            border-color: #888;
+            color: #111;
+            background: #fafafa;
+        }
+
+        /* home-section__grid = catalog-grid (однаковий розмір карток) */
+        .home-section__grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+        }
+
+        @@media (max-width: 1200px) {
+            .home-section__grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        @@media (max-width: 992px) {
+            .home-section__grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @@media (max-width: 576px) {
+            .home-section__grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .gift-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .gift-banner {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 28px 32px;
+            border-radius: 20px;
+            text-decoration: none;
+            min-height: 160px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+
+        .gift-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0,0,0,0.5) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .gift-banner:hover {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .gift-banner--her,
+        .gift-banner--him {
+            background-size: contain;
+            background-position: right center;
+            background-repeat: no-repeat;
+        }
+
+        .gift-banner--her,
+        .gift-banner--him {
+            background-color: #1b1912;
+        }
+
+        .gift-banner__body {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 1;
+        }
+
+        .gift-banner__label {
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.9);
+            letter-spacing: 0.02em;
+        }
+
+        .gift-banner__category {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .gift-banner__title {
+            font-size: 34px;
+            font-weight: 900;
+            font-style: italic;
+            color: #fff;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.2);
+            line-height: 1;
+            margin: 0 0 14px;
+        }
+
+        .gift-banner__btn {
+            display: inline-block;
+            padding: 8px 24px;
+            background: #fff;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            width: fit-content;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .gift-banner:hover .gift-banner__btn {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        @@media (max-width: 576px) {
+            .gift-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}

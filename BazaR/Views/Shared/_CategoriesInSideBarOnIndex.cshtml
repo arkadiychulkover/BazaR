@@ -1,0 +1,60 @@
+﻿@model List<BazaR.Models.Category>
+
+@{
+    var mainCategories = Model?.Where(c => c.ParentCategoryId == null).OrderBy(c => c.DisplayOrder).ToList() ?? new List<BazaR.Models.Category>();
+}
+
+<div class="CategoriesSideBar">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Категорії</h5>
+        </div>
+        <div class="list-group list-group-flush">
+            @foreach (var category in mainCategories.Take(10))
+            {
+                <a href="@Url.Action("Browse", "Site", new { categoryIds = new List<int> { category.Id } })"
+                   class="list-group-item list-group-item-action d-flex align-items-center">
+                    @if (!string.IsNullOrEmpty(category.IconUrl))
+                    {
+                        <i class="bi @category.IconUrl me-2"></i>
+                    }
+                    @category.Name
+                </a>
+            }
+            <a href="@Url.Action("Browse", "Site")" class="list-group-item list-group-item-action text-primary text-center">
+                Всі категорії <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .CategoriesSideBar {
+        margin-top: 20px;
+    }
+
+        .CategoriesSideBar .card {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        .CategoriesSideBar .list-group-item {
+            border-left: none;
+            border-right: none;
+            transition: all 0.2s;
+        }
+
+            .CategoriesSideBar .list-group-item:hover {
+                background-color: #f8f9fa;
+                padding-left: 20px;
+            }
+
+            .CategoriesSideBar .list-group-item:first-child {
+                border-top: none;
+            }
+
+            .CategoriesSideBar .list-group-item:last-child {
+                border-bottom: none;
+            }
+</style>

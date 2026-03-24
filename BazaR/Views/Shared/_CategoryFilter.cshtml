@@ -1,0 +1,74 @@
+﻿@model BazaR.Models.CategoryFilter
+
+<div class="filter-block">
+
+    <div class="filter-header">
+        <span class="filter-title">@Model.DisplayName</span>
+    </div>
+
+    <div class="filter-body">
+
+        @switch (Model.ValueType)
+        {
+            case FilterValueType.String:
+
+                <label class="filter-option">
+                    <input type="checkbox" name="@Model.Key" value="value1" />
+                    <span>Value 1</span>
+                </label>
+
+                <label class="filter-option">
+                    <input type="checkbox" name="@Model.Key" value="value2" />
+                    <span>Value 2</span>
+                </label>
+
+                <label class="filter-option">
+                    <input type="checkbox" name="@Model.Key" value="value3" />
+                    <span>Value 3</span>
+                </label>
+
+                break;
+
+
+            case FilterValueType.Number:
+
+                <input type="number"
+                       name="@Model.Key"
+                       class="filter-number"
+                       placeholder="Enter number" />
+
+                break;
+
+
+            case FilterValueType.Boolean:
+
+                <label class="filter-option">
+                    <input type="checkbox" name="@Model.Key" value="true" />
+                    <span>@Model.DisplayName</span>
+                </label>
+
+                break;
+
+
+            case FilterValueType.Range:
+
+                <div class="filter-range">
+
+                    <input type="number"
+                           name="@Model.Key + " _min""
+                           placeholder="Min"
+                           class="filter-range-input" />
+
+                    <input type="number"
+                           name="@Model.Key + " _max""
+                           placeholder="Max"
+                           class="filter-range-input" />
+
+                </div>
+
+                break;
+        }
+
+    </div>
+
+</div>

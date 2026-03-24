@@ -1,0 +1,113 @@
+﻿@model List<BazaR.Models.Category>
+
+@{
+    ViewData["Title"] = "Категорія";
+    string name = ViewBag.CategotyName;
+}
+
+<div class="container mt-4">
+
+    <h3 class="mb-3">Категорії</h3>
+
+    <div class="row mb-4">
+
+        <div class="col-lg-8">
+
+            <div style="
+                height:220px;
+                border-radius:12px;
+                background:linear-gradient(90deg,#1e2a78,#2c3ed6);
+                color:white;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:28px;
+                font-weight:600;
+            ">
+                @name <br /> Знижки до -70%
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="row g-2">
+
+                @foreach (var cat in Model.Take(6))
+                {
+                    <div class="col-6">
+
+                        <a asp-controller="Site"
+                           asp-action="Browse"
+                           asp-route-categoryIds="@cat.Id"
+                           style="text-decoration:none;color:inherit;">
+
+                            <div style="
+                                        border:1px solid #e5e5e5;
+                                        border-radius:10px;
+                                        padding:10px;
+                                        height:85px;
+                                        display:flex;
+                                        flex-direction:column;
+                                        align-items:center;
+                                        justify-content:center;
+                                        background:white;
+                                    ">
+
+                                @if (!string.IsNullOrEmpty(cat.IconUrl))
+                                {
+                                    <img src="@cat.IconUrl" style="height:30px;margin-bottom:5px;" />
+                                }
+
+                                <span style="font-size:12px;text-align:center;">
+                                    @cat.Name
+                                </span>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="mb-4" style="
+        display:flex;
+        gap:40px;
+        justify-content:center;
+        align-items:center;
+        opacity:0.6;
+        font-weight:600;
+    ">
+
+        <span>APPLE</span>
+        <span>SAMSUNG</span>
+        <span>XIAOMI</span>
+        <span>LG</span>
+        <span>SONY</span>
+        <span>CANON</span>
+        <span>NOKIA</span>
+        <span>PHILIPS</span>
+        <span>HUAWEI</span>
+
+    </div>
+
+    <div class="row g-3">
+
+        @foreach (var category in Model)
+        {
+            <div class="col-lg-3 col-md-4 col-sm-6">
+
+                <partial name="_CategoryCard" model="category" />
+
+            </div>
+        }
+
+    </div>
+
+</div>
