@@ -295,7 +295,9 @@ namespace BazaR.Controllers
             order.Ttn = ord.Ttn;
             order.TotalAmount = ord.TotalAmount;
 
-            return RedirectToAction(nameof(UserStatistic), order.UserId);
+            await _appDbContext.SaveChangesAsync();
+
+            return RedirectToAction("UserStatistic", new { id = order.UserId });
         }
         #endregion
 
