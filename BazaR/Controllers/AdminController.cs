@@ -268,6 +268,35 @@ namespace BazaR.Controllers
 
             return View(order);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> EditOrder(int id) 
+        {
+            Order order = await _appDbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
+            return View(order);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditOrder(Order ord)
+        {
+            var order = await _appDbContext.Orders
+                .FirstOrDefaultAsync(o => o.Id == ord.Id);
+
+            if (order == null)
+                return NotFound();
+
+            order.CityId = ord.CityId;
+            order.Address = ord.Address;
+            order.Status = ord.Status;
+            order.PaymentMethod = ord.PaymentMethod;
+            order.PaymentStatus = ord.PaymentStatus;
+            order.DeliveryMethod = ord.DeliveryMethod;
+            order.Ttn = ord.Ttn;
+            order.TotalAmount = ord.TotalAmount;
+
+            return RedirectToAction(nameof(UserStatistic), order.UserId);
+        }
         #endregion
 
         [HttpGet]

@@ -339,6 +339,10 @@
                                                        class="btn btn-outline-primary" title="Просмотр">
                                                         <i class="bi bi-eye"></i>
                                                     </a>
+                                                    <a asp-action="EditOrder" asp-route-id="@order.Id"
+                                                       class="btn btn-outline-secondary" title="Редактировать">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
                                                     <form asp-action="DeleteOrder" asp-route-id="@order.Id"
                                                           method="post" style="display: inline;">
                                                         @Html.AntiForgeryToken()
