@@ -32,6 +32,7 @@ namespace BazaR.Data
         public DbSet<SearchItem> SearchItems { get; set; }
         public DbSet<UserUseStatistick> UserUseStatisticks { get; set; }
         public DbSet<CategoryStatistik> CategoryStatistiks { get; set; }
+        public DbSet<VisitingModel> VisitingModels { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -83,6 +84,14 @@ namespace BazaR.Data
                     .WithMany(c => c.Filters)
                     .HasForeignKey(cf => cf.CategoryId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<VisitingModel>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SearchFiltersJson)
+                    .HasColumnType("nvarchar(max)") // Для SQL Server
+                    .HasColumnName("SearchFilters");
             });
 
             // Настройка CategoryBrand (составной ключ)

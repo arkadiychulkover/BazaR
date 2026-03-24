@@ -36,9 +36,6 @@ namespace BazaR.Controllers
             _StatistickRepo = StatistickRepo;
         }
 
-        // =========================
-        // USERS
-        // =========================
         #region Users
 
         [HttpGet]
@@ -136,9 +133,6 @@ namespace BazaR.Controllers
 
         #endregion
 
-        // =========================
-        // USER STATISTIC
-        // =========================
         [HttpGet]
         public async Task<IActionResult> UserStatistic(int id)
         {
@@ -153,9 +147,6 @@ namespace BazaR.Controllers
             return View(us);
         }
 
-        // =========================
-        // ITEMS
-        // =========================
         #region Items
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -204,9 +195,6 @@ namespace BazaR.Controllers
         }
         #endregion
 
-        // =========================
-        // REVIEWS
-        // =========================
         #region Reviews
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -247,9 +235,6 @@ namespace BazaR.Controllers
         }
         #endregion
 
-        // =========================
-        // ORDERS
-        // =========================
         #region Orders
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -285,14 +270,41 @@ namespace BazaR.Controllers
         }
         #endregion
 
-        // =========================
-        // POPULAR CATEGORIES
-        // =========================
         [HttpGet]
         public async Task<IActionResult> PopularCategories()
         {
             var popularDict = await _StatistickRepo.GetPopularCategoryAsync();
             return View(popularDict);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetLog()
+        {
+            List<VisitingModel> log = _appDbContext.VisitingModels.ToList();
+            foreach (VisitingModel model in log) 
+            {
+                if(model.SearchFilters != null)
+                    Console.WriteLine(model.SearchFilters.Id);
+                Console.WriteLine("\n\nLOGS\n\n");
+            }
+            return View(log);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetLogByUserId(int id) 
+        {
+            List<VisitingModel> log = _appDbContext.VisitingModels.Where<VisitingModel>(v => v.UserId == id).ToList();
+            return View(log);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteLogs() 
+        {
+            _appDbContext.VisitingModels.RemoveRange(_appDbContext.VisitingModels);
+            await _appDbContext.SaveChangesAsync();
+
+            await _appDbContext.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('VisitingModels', RESEED, 0)");
+            return RedirectToAction("GetLog");
         }
     }
 }

@@ -19,7 +19,6 @@ builder.Services.AddControllersWithViews(o =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Настройка Identity с правильными клеймами для ролей
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
     options.Password.RequireDigit = false;
@@ -29,10 +28,9 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
     options.Password.RequiredLength = 6;
     options.User.RequireUniqueEmail = true;
 
-    // ВАЖНО: указываем правильные типы клеймов
     options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
     options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Name;
-    options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role; // Это ключевое для ролей!
+    options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role;
 
     options.Lockout.AllowedForNewUsers = true;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromDays(365);
@@ -72,12 +70,14 @@ builder.Services
 
 builder.Services.AddScoped<DbMaker>();
 builder.Services.AddScoped<UserContextFilter>();
+builder.Services.AddScoped<LoggerActionFilter>();
 builder.Services.AddScoped<BlockResourseFilter>();
 builder.Services.AddScoped<OnlineResourceFilter>();
 builder.Services.AddSingleton<ActiveUsersService>();
 builder.Services.AddScoped<IUserDb, UserRepository>();
+builder.Services.AddTransient<ILogDb, LogDbRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
-builder.Services.AddTransient<IUserStatistick ,UserStatistickRpeository>();
+builder.Services.AddTransient<IUserStatistick, UserStatistickRpeository>();
 
 var app = builder.Build();
 

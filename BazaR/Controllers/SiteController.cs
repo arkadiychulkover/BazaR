@@ -10,22 +10,25 @@ using System.Text.Json;
 namespace BazaR.Controllers
 {
     [ServiceFilter(typeof(BlockResourseFilter))]
+    [ServiceFilter(typeof(LoggerActionFilter))]
     [ServiceFilter(typeof(OnlineResourceFilter))]
     public class SiteController : Controller
     {
         private readonly IUserDb _usMan;
+        private readonly ILogDb _log;
         private readonly IItemRepository _itMan;
         private readonly AppDbContext _db;
         private readonly UserManager<User> _userManager;
 
         private const int PageSize = 12;
 
-        public SiteController(IUserDb usMan, IItemRepository itMan, AppDbContext db, UserManager<User> userManager)
+        public SiteController(IUserDb usMan, IItemRepository itMan, AppDbContext db, UserManager<User> userManager, ILogDb log)
         {
             _usMan = usMan;
             _itMan = itMan;
             _db = db;
             _userManager = userManager;
+            _log = log;
         }
 
         private User? CurrentUser => User.Identity?.IsAuthenticated == true
@@ -795,6 +798,7 @@ namespace BazaR.Controllers
             }
 
             var ok = _usMan.CreateOrder(userId, order);
+            await _log.LogPageVisitAsync(userId, UserAction.MakeOrder, "Site", "CreateOrder", null, order.Id, null);
             if (!ok)
             {
                 TempData["Error"] = "Не вдалося створити замовлення.";

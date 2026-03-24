@@ -4,6 +4,7 @@ using BazaR.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BazaR.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260323112729_Logging")]
+    partial class Logging
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,41 @@ namespace BazaR.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("BazaR.Models.BazaR.Models.SearchFilters", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.PrimitiveCollection<string>("BrandIds")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.PrimitiveCollection<string>("CategoryIds")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("MaxPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("MinPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Page")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Query")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Sort")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SearchFilters");
+                });
 
             modelBuilder.Entity("BazaR.Models.Brand", b =>
                 {
@@ -9704,9 +9742,8 @@ namespace BazaR.Migrations
                     b.Property<int?>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<string>("SearchFiltersJson")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("SearchFilters");
+                    b.Property<int?>("SearchFiltersId")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -9715,6 +9752,8 @@ namespace BazaR.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SearchFiltersId");
 
                     b.ToTable("VisitingModels");
                 });
@@ -10117,6 +10156,15 @@ namespace BazaR.Migrations
                         .IsRequired();
 
                     b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("BazaR.Models.VisitingModel", b =>
+                {
+                    b.HasOne("BazaR.Models.BazaR.Models.SearchFilters", "SearchFilters")
+                        .WithMany()
+                        .HasForeignKey("SearchFiltersId");
+
+                    b.Navigation("SearchFilters");
                 });
 
             modelBuilder.Entity("BazaR.Models.WishlistItem", b =>
