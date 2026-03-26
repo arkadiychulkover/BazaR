@@ -388,12 +388,12 @@
             {
                 var statusClass = order.Status switch
                 {
-                    "Нове"        => "os--new",
-                    "В обробці"   => "os--processing",
-                    "Відправлено" => "os--shipped",
-                    "Доставлено"  => "os--delivered",
-                    "Скасовано"   => "os--cancelled",
-                    _             => "os--new"
+                    BazaR.Models.OrderStatus.New        => "os--new",
+                    BazaR.Models.OrderStatus.Processing => "os--processing",
+                    BazaR.Models.OrderStatus.Shipped    => "os--shipped",
+                    BazaR.Models.OrderStatus.Delivered  => "os--delivered",
+                    BazaR.Models.OrderStatus.Cancelled  => "os--cancelled",
+                    _                                   => "os--new"
                 };
 
                 <div class="order-card">
@@ -402,7 +402,7 @@
                             <span class="order-card__number">№&nbsp;@order.Number</span>
                             <span class="order-card__date">@order.CreatedAt.ToString("dd.MM.yyyy")</span>
                         </div>
-                        <span class="order-status @statusClass">@order.Status</span>
+                        <span class="order-status @statusClass">@order.Status.DisplayStatus()</span>
                     </div>
 
                     @if (order.OrderItems?.Any() == true)
@@ -437,7 +437,7 @@
                                class="oc-btn oc-btn--details">
                                 Деталі
                             </a>
-                            @if (order.Status != "Скасовано" && order.Status != "Доставлено")
+                            @if (order.Status != BazaR.Models.OrderStatus.Cancelled && order.Status != BazaR.Models.OrderStatus.Delivered)
                             {
                                 <form asp-action="CancelOrder" asp-controller="Site"
                                       method="post" style="display:inline;">

@@ -9,12 +9,12 @@
 
     var statusClass = Model.Status switch
     {
-        "Нове"        => "os--new",
-        "В обробці"   => "os--processing",
-        "Відправлено" => "os--shipped",
-        "Доставлено"  => "os--delivered",
-        "Скасовано"   => "os--cancelled",
-        _             => "os--new"
+        BazaR.Models.OrderStatus.New        => "os--new",
+        BazaR.Models.OrderStatus.Processing => "os--processing",
+        BazaR.Models.OrderStatus.Shipped    => "os--shipped",
+        BazaR.Models.OrderStatus.Delivered  => "os--delivered",
+        BazaR.Models.OrderStatus.Cancelled  => "os--cancelled",
+        _                                   => "os--new"
     };
 }
 
@@ -144,14 +144,14 @@
                 <div class="od-info-card__row">
                     <b>Місто:</b> @(city?.Name ?? "—")<br/>
                     <b>Адреса:</b> @Model.Address<br/>
-                    <b>Спосіб:</b> @Model.DeliveryMethod
+                    <b>Спосіб:</b> @Model.DeliveryMethod.DisplayDeliveryMethod()
                 </div>
             </div>
             <div class="od-info-card">
                 <div class="od-info-card__title"><i class="bi bi-credit-card"></i> Оплата</div>
                 <div class="od-info-card__row">
-                    <b>Спосіб:</b> @Model.PaymentMethod<br/>
-                    <b>Статус:</b> @Model.PaymentStatus<br/>
+                    <b>Спосіб:</b> @Model.PaymentMethod.DisplayPaymentMethod()<br/>
+                    <b>Статус:</b> @Model.PaymentStatus.DisplayPaymentStatus()<br/>
                     <b>Сума:</b> <span style="font-weight:700;">@Model.TotalAmount.ToString("N0") ₴</span>
                 </div>
             </div>
@@ -194,7 +194,7 @@
             <a href="@Url.Action("Orders","Site")" class="od-btn od-btn--back">
                 <i class="bi bi-arrow-left me-1"></i> Всі замовлення
             </a>
-            @if (Model.Status != "Скасовано" && Model.Status != "Доставлено")
+            @if (Model.Status != BazaR.Models.OrderStatus.Cancelled && Model.Status != BazaR.Models.OrderStatus.Delivered)
             {
                 <form asp-action="CancelOrder" asp-controller="Site" method="post" style="display:inline;">
                     @Html.AntiForgeryToken()

@@ -1,0 +1,113 @@
+﻿@model AccountOrdersViewModel
+
+@{
+    ViewData["Title"] = "Мої замовлення";
+    var user = ViewBag.User as BazaR.Models.User;
+    var initial = !string.IsNullOrEmpty(user?.Name) ? user.Name[0].ToString().ToUpper() : "?";
+}
+
+<div class="profile-page">
+    <div class="profile-page__layout">
+        @await Html.PartialAsync("_ProfileSidebar", Model.Profile)
+        <main class="orders-panel">
+
+            <div class="orders-panel__head">
+                <h1 class="orders-panel__title">Мої замовлення</h1>
+                <ul class="orders-tabs">
+                    <li><a href="#" class="active">Всі замовлення</a></li>
+                    <li><a href="#">Гарантія на повернення</a></li>
+                </ul>
+            </div>
+
+            @if (Model.Orders == null || !Model.Orders.Any())
+            {
+                <div class="orders-empty">
+                    <img src="~/images/items/check-list.png"
+                         alt="Немає замовлень"
+                         class="orders-empty__img" />
+                    <div class="orders-empty__title">
+                        У вас поки що немає жодного замовлення :(
+                    </div>
+                    <a href="@Url.Action("Browse","Site")" class="orders-empty__btn">
+                        <i class="bi bi-arrow-left-circle"></i>
+                        Повернутись до каталогу
+                    </a>
+                </div>
+            }
+            else
+            {
+                foreach (var order in Model.Orders)
+                {
+                    var statusClass = order.Status switch
+                    {
+                        "Нове"        => "os--new",
+                        "В обробці"   => "os--processing",
+                        "Відправлено" => "os--shipped",
+                        "Доставлено"  => "os--delivered",
+                        "Скасовано"   => "os--cancelled",
+                        _             => "os--new"
+                    };
+
+                    <div class="order-card">
+                        <div class="order-card__top">
+                            <div class="order-card__meta">
+                                <span class="order-card__number">№&nbsp;@order.Number</span>
+                                <span class="order-card__date">@order.CreatedAt.ToString("dd.MM.yyyy")</span>
+                            </div>
+                            <span class="order-status @statusClass">@order.Status</span>
+                        </div>
+
+                        @if (order.OrderItems?.Any() == true)
+                        {
+                            <div class="order-card__thumbs">
+                                @foreach (var oi in order.OrderItems.Take(5))
+                                {
+                                    var img = !string.IsNullOrEmpty(oi.ImageUrl) 
+                                        ? oi.ImageUrl 
+                                        : "/images/items/default.jpg";
+    
+                                    <div class="order-card__thumb" title="@oi.Name">
+                                        <img src="@img" alt="@oi.Name"
+                                             onerror="this.src='/images/items/default.jpg'" />
+                                    </div>
+                                }
+                                @if (order.OrderItems.Count > 5)
+                                {
+                                    <div class="order-card__thumb order-card__thumb--more">
+                                        +@(order.OrderItems.Count - 5)
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        <div class="order-card__bottom">
+                            <div class="order-card__total">
+                                <small>Сума:</small>
+                                @order.TotalAmount.ToString("N0")&nbsp;₴
+                            </div>
+                            <div class="order-card__actions">
+                                <a href="@Url.Action("OrderDetails","Profile", new { id = order.Id })"
+                                   class="oc-btn oc-btn--details">
+                                    Деталі
+                                </a>
+                                @if (order.Status != "Скасовано" && order.Status != "Доставлено")
+                                {
+                                    <form asp-action="CancelOrder" asp-controller="Profile"
+                                          method="post" style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@order.Id" />
+                                        <button type="submit" class="oc-btn oc-btn--cancel"
+                                                onclick="return confirm('Скасувати замовлення №@order.Number?')">
+                                            Скасувати
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+        </main>
+    </div>
+</div>

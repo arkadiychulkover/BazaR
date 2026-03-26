@@ -21,6 +21,7 @@
 
     <!-- Site CSS -->
     <link href="~/css/site.css" rel="stylesheet" />
+    <link href="~/css/loginAndProfile.css" rel="stylesheet" />
 
     <style>
         html, body {
@@ -122,6 +123,10 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
             <div class="container-fluid">
+
+                <button class="btn btn-dark border-0 me-2 d-flex align-items-center" id="sidebarOpen" type="button" aria-label="Відкрити меню" style="font-size:1.35rem;padding:4px 8px;">
+                    <i class="bi bi-list"></i>
+                </button>
 
                 <a class="navbar-brand" asp-controller="Site" asp-action="Index">
                     <i class="bi bi-shop"></i> BazaR
@@ -295,6 +300,9 @@
             </div>
         </div>
     </footer>
+
+    <!-- Бічне меню (Ivan) -->
+    @await Html.PartialAsync("_Sidebar")
 
     <!-- Модальні вікна (Ivan) -->
     @await Html.PartialAsync("_Login")
@@ -618,10 +626,48 @@
                 { id: itemId, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val() },
                 function(response) {
                     if (response.success) {
-                        $(button).find('i').toggleClass('text-danger');
-                        var cnt = $('#wishlistCount');
-                        if (cnt.length) { cnt.text(response.wishlistCount); cnt.toggle(response.wishlistCount > 0); }
-                        if (typeof showNotification === 'function') showNotification('Додано в обране', 'success');
+                        var $btn = $(button);
+
+                        // --- Update the clicked button state ---
+                        if ($btn.hasClass('pdp-btn-icon--tool')) {
+                            // PDP tool button (heart icon)
+                            if (response.added) {
+                                $btn.addClass('pdp-btn-icon--tool-active');
+                                $btn.attr('aria-pressed', 'true');
+                                $btn.find('i').removeClass('bi-heart').addClass('bi-heart-fill');
+                            } else {
+                                $btn.removeClass('pdp-btn-icon--tool-active');
+                                $btn.attr('aria-pressed', 'false');
+                                $btn.find('i').removeClass('bi-heart-fill').addClass('bi-heart');
+                            }
+                        } else {
+                            // Card-style wishlist button (text-danger toggle)
+                            if (response.added) {
+                                $btn.find('i').addClass('text-danger');
+                            } else {
+                                $btn.find('i').removeClass('text-danger');
+                            }
+                        }
+
+                        // --- Update navbar wishlist badge ---
+                        var $cnt = $('#wishlistCount');
+                        if ($cnt.length) {
+                            $cnt.text(response.wishlistCount);
+                            $cnt.toggle(response.wishlistCount > 0);
+                        }
+
+                        // --- Update navbar heart icon fill ---
+                        var $navHeart = $('.navbar .nav-link .bi-heart, .navbar .nav-link .bi-heart-fill').first();
+                        if ($navHeart.length) {
+                            if (response.wishlistCount > 0) {
+                                $navHeart.removeClass('bi-heart').addClass('bi-heart-fill');
+                            } else {
+                                $navHeart.removeClass('bi-heart-fill').addClass('bi-heart');
+                            }
+                        }
+
+                        var msg = response.added ? 'Додано в обране' : 'Видалено з обраного';
+                        if (typeof showNotification === 'function') showNotification(msg, response.added ? 'success' : 'info');
                     } else if (response.requireLogin) {
                         var $login = $('[data-open-login="true"]').first();
                         if ($login.length) $login.trigger('click'); else $('#loginModal').modal('show');
@@ -630,28 +676,37 @@
             );
         }
 
-        // При кліку по картці товара на головній — додаємо в обране, потім переходимо на сторінку товару
-        $(document).on('click', '.tovar-card__link', function(e) {
-            var $card = $(this).closest('.tovar-card');
-            var id = $card.data('item-id');
-            var url = $(this).attr('href');
-            if (!id || !url) return;
-            e.preventDefault();
-            var token = $('input[name="__RequestVerificationToken"]').first().val();
-            $.post('@Url.Action("AddToWishlist", "Site")', { id: id, __RequestVerificationToken: token }, function(response) {
-                if (response.success) {
-                    var cnt = $('#wishlistCount');
-                    if (cnt.length) { cnt.text(response.wishlistCount); cnt.toggle(response.wishlistCount > 0); }
-                    if (typeof showNotification === 'function') showNotification('Додано в обране', 'success');
-                    window.location = url;
-                } else if (response.requireLogin) {
-                    var $login = $('[data-open-login="true"]').first();
-                    if ($login.length) $login.trigger('click'); else $('#loginModal').modal('show');
-                } else {
-                    window.location = url;
-                }
-            }).fail(function() { window.location = url; });
-        });
+    </script>
+
+    <script>
+        (function () {
+            var drawer = document.getElementById('sidebarDrawer');
+            var overlay = document.getElementById('sidebarOverlay');
+            var openBtn = document.getElementById('sidebarOpen');
+            var closeBtn = document.getElementById('sidebarClose');
+
+            function openSidebar() {
+                drawer.classList.add('is-open');
+                overlay.classList.add('is-open');
+                drawer.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                drawer.classList.remove('is-open');
+                overlay.classList.remove('is-open');
+                drawer.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            if (openBtn) openBtn.addEventListener('click', openSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            if (overlay) overlay.addEventListener('click', closeSidebar);
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeSidebar();
+            });
+        })();
     </script>
 
 </body>

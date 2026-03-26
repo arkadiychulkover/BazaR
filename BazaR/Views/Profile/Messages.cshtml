@@ -1,0 +1,97 @@
+@model BazaR.ViewModels.AccountMessagesViewModel
+
+@{
+    ViewData["Title"] = "Моє листування";
+}
+
+<div class="profile-page">
+    <div class="profile-page__layout">
+        @await Html.PartialAsync("_ProfileSidebar", Model.Profile)
+
+        <section class="profile-page__content">
+            <h1 class="profile-page__title">Моє листування</h1>
+            <p class="profile-page__subtitle">Ваші діалоги з продавцями, менеджерами та підтримкою.</p>
+
+            @if (!Model.Messages.Any())
+            {
+                <div class="empty-state">
+                    <p>У вас ще немає повідомлень.</p>
+                </div>
+            }
+            else
+            {
+                <div class="chat-list">
+                    @foreach (var msg in Model.Messages)
+                    {
+                        <div class="chat-item @(msg.IsRead ? "" : "chat-item--unread")" data-message-id="@msg.Id">
+                            <div>
+                                <div class="chat-item__name">@msg.Name від <span style="color: gray;">@msg.SenderName</span></div>
+                                <div class="chat-item__text">@msg.Content</div>
+                            </div>
+                            <div class="chat-item__date">
+                                @(msg.DateTime.Date == DateTime.Today
+                                                        ? "Сьогодні"
+                                                        : msg.DateTime.ToString("dd.MM.yyyy"))
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.chat-item').forEach(item => {
+            item.addEventListener('click', async function () {
+                const messageId = parseInt(this.getAttribute('data-message-id'));
+
+                if (!this.classList.contains('chat-item--unread')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch('@Url.Action("MarkMessageAsRead", "Profile")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(messageId)
+                    });
+
+                    if (response.ok) {
+                        this.classList.remove('chat-item--unread');
+
+                        const countResponse = await fetch('@Url.Action("GetNewMessagesCount", "Profile")');
+                        const data = await countResponse.json();
+                        updateMessageBadge(data.count);
+                    } else {
+                        console.error('Ошибка при отмечании сообщения как прочитанного. Статус:', response.status);
+                    }
+                } catch (error) {
+                    console.error('Ошибка при отмечании сообщения как прочитанного:', error);
+                }
+            });
+        });
+
+        function updateMessageBadge(count) {
+            const badge = document.querySelector('.account-menu__badge');
+            if (count > 0) {
+                if (!badge) {
+                    const messagesLink = document.querySelector('a[asp-action="Messages"]');
+                    if (messagesLink) {
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'account-menu__badge';
+                        newBadge.textContent = count;
+                        messagesLink.appendChild(newBadge);
+                    }
+                } else {
+                    badge.textContent = count;
+                }
+            } else if (badge) {
+                badge.remove();
+            }
+        }
+    </script>
+}

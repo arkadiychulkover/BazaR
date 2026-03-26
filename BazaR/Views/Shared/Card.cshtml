@@ -139,10 +139,42 @@
             data: { id: itemId, __RequestVerificationToken: token },
             success: function (response) {
                 if (response.success) {
-                    icon.toggleClass('text-danger');
-                    var cnt = $('#wishlistCount');
-                    if (cnt.length) { cnt.text(response.wishlistCount); cnt.toggle(response.wishlistCount > 0); }
-                    showNotification('Товар додано до обраного', 'success');
+                    var $el = $(element);
+
+                    if ($el.hasClass('pdp-btn-icon--tool')) {
+                        if (response.added) {
+                            $el.addClass('pdp-btn-icon--tool-active');
+                            $el.attr('aria-pressed', 'true');
+                            icon.removeClass('bi-heart').addClass('bi-heart-fill');
+                        } else {
+                            $el.removeClass('pdp-btn-icon--tool-active');
+                            $el.attr('aria-pressed', 'false');
+                            icon.removeClass('bi-heart-fill').addClass('bi-heart');
+                        }
+                    } else {
+                        if (response.added) {
+                            icon.addClass('text-danger');
+                        } else {
+                            icon.removeClass('text-danger');
+                        }
+                    }
+
+                    // Update navbar badge
+                    var $cnt = $('#wishlistCount');
+                    if ($cnt.length) { $cnt.text(response.wishlistCount); $cnt.toggle(response.wishlistCount > 0); }
+
+                    // Update navbar heart icon
+                    var $navHeart = $('.navbar .nav-link .bi-heart, .navbar .nav-link .bi-heart-fill').first();
+                    if ($navHeart.length) {
+                        if (response.wishlistCount > 0) {
+                            $navHeart.removeClass('bi-heart').addClass('bi-heart-fill');
+                        } else {
+                            $navHeart.removeClass('bi-heart-fill').addClass('bi-heart');
+                        }
+                    }
+
+                    var msg = response.added ? 'Додано в обране' : 'Видалено з обраного';
+                    showNotification(msg, response.added ? 'success' : 'info');
                 } else if (response.requireLogin) {
                     $('#loginModal').modal('show');
                 } else {

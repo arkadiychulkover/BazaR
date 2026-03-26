@@ -106,14 +106,14 @@ namespace BazaR.Controllers
             }
             var order = new Order
             {
-                Status = "Created",
+                Status = OrderStatus.New,
                 CreatedAt = DateTime.UtcNow,
                 OrderItems = new List<OrderItem>(),
                 TotalAmount = 0,
                 Address = address,
-                PaymentMethod = paymentMethod,
-                DeliveryMethod = deliveryMethod,
-                PaymentStatus = "Pending",
+                PaymentMethod = OrderPaymentMethod.PayNow,
+                DeliveryMethod = OrderDeliveryMethod.SelfPickup,
+                PaymentStatus = OrderPaymentStatus.Pending,
                 CityId = 1
             };
             foreach (var cartItem in cartItems)

@@ -19,10 +19,10 @@ namespace BazaR.Models
 
         public DateTime CreatedAt { get; set; }
 
-        public string Status { get; set; } = string.Empty;
-        public string PaymentMethod { get; set; } = string.Empty;
-        public string PaymentStatus { get; set; } = string.Empty;
-        public string DeliveryMethod { get; set; } = string.Empty;
+        public OrderStatus Status { get; set; } = OrderStatus.New;
+        public OrderPaymentMethod PaymentMethod { get; set; } = OrderPaymentMethod.PayNow;
+        public OrderPaymentStatus PaymentStatus { get; set; } = OrderPaymentStatus.Pending;
+        public OrderDeliveryMethod DeliveryMethod { get; set; } = OrderDeliveryMethod.SelfPickup;
 
         public string? Ttn { get; set; }
 

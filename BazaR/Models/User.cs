@@ -8,6 +8,9 @@ namespace BazaR.Models
         public string? Patronymic { get; set; }
         public string? LastName { get; set; }
         public string? FirstName { get; set; }
+        public string? MiddleName { get; set; }
+        public DateOnly? BirthDate { get; set; }
+        public string? Gender { get; set; }
 
         public bool IsAdmin { get; set; }
 
@@ -20,5 +23,10 @@ namespace BazaR.Models
         public List<Review> Reviews { get; set; } = new();
 
         public List<Item> SellingItems { get; set; } = new();
+
+        public List<OrderRecipient> OrderRecipients { get; set; } = new();
+        public List<DeliveryAddress> DeliveryAddresses { get; set; } = new();
+        public List<Pet> Pets { get; set; } = new();
+        public List<AdditionalInfo> AdditionalInfos { get; set; } = new();
     }
 }
