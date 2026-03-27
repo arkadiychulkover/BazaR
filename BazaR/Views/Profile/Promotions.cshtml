@@ -1,0 +1,40 @@
+@model BazaR.ViewModels.PromotionsViewModel
+@{
+    ViewData["Title"] = "Промокоди";
+}
+
+<div class="profile-page">
+    <div class="profile-page__layout">
+        @await Html.PartialAsync("_ProfileSidebar", Model.Profile)
+
+        <section class="profile-page__content">
+            <h1 class="profile-page__title">Промокоди</h1>
+            <p class="profile-page__subtitle">Доступні промокоди та суми знижок.</p>
+
+            @if (Model.Promotions.Any())
+            {
+                <div class="settings-list">
+                    @foreach (var promo in Model.Promotions)
+                    {
+                        <div class="settings-item">
+                            <div class="settings-item__top">
+                                <div>
+                                    <h3 class="settings-item__title">@promo.Number</h3>
+                                    <p class="settings-item__text promo-meta">
+                                        <span class="promo-discount">−@promo.DiscountAmount ₴</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <p>Наразі промокодів немає.</p>
+                </div>
+            }
+        </section>
+    </div>
+</div>

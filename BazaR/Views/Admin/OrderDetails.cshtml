@@ -1,4 +1,4 @@
-﻿@model BazaR.Models.Order
+@model BazaR.Models.Order
 
 @{
     ViewData["Title"] = $"Замовлення №{Model.Number}";
@@ -8,12 +8,12 @@
 
     var statusClass = Model.Status switch
     {
-        "Нове" => "os--new",
-        "В обробці" => "os--processing",
-        "Відправлено" => "os--shipped",
-        "Доставлено" => "os--delivered",
-        "Скасовано" => "os--cancelled",
-        _ => "os--new"
+        BazaR.Models.OrderStatus.New        => "os--new",
+        BazaR.Models.OrderStatus.Processing => "os--processing",
+        BazaR.Models.OrderStatus.Shipped    => "os--shipped",
+        BazaR.Models.OrderStatus.Delivered  => "os--delivered",
+        BazaR.Models.OrderStatus.Cancelled  => "os--cancelled",
+        _                                   => "os--new"
     };
 }
 
@@ -233,7 +233,7 @@
                     від @Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
                 </div>
             </div>
-            <span class="order-status @statusClass">@Model.Status</span>
+            <span class="order-status @statusClass">@Model.Status.DisplayStatus()</span>
         </div>
 
         <div class="od-info-grid">
@@ -242,7 +242,7 @@
                 <div class="od-info-card__row">
                     <b>Місто:</b> @(city?.Name ?? "—")<br />
                     <b>Адреса:</b> @Model.Address<br />
-                    <b>Спосіб:</b> @Model.DeliveryMethod
+                    <b>Спосіб:</b> @Model.DeliveryMethod.DisplayDeliveryMethod()
                     @if (!string.IsNullOrEmpty(Model.Ttn))
                     {
                         <br />
@@ -256,8 +256,8 @@
             <div class="od-info-card">
                 <div class="od-info-card__title">Оплата</div>
                 <div class="od-info-card__row">
-                    <b>Спосіб:</b> @Model.PaymentMethod<br />
-                    <b>Статус:</b> @Model.PaymentStatus<br />
+                    <b>Спосіб:</b> @Model.PaymentMethod.DisplayPaymentMethod()<br />
+                    <b>Статус:</b> @Model.PaymentStatus.DisplayPaymentStatus()<br />
                     <b>Сума:</b> @Model.TotalAmount.ToString("N0") ₴
                 </div>
             </div>
@@ -313,7 +313,11 @@
         </div>
     </main>
 
-    <div class="back-button">
+    <div class="back-button" style="display:flex;gap:10px;justify-content:center;">
+        <a asp-action="EditOrder" asp-route-id="@Model.Id"
+           style="background:#1e88e5;">
+            ✏️ Редагувати
+        </a>
         <a href="javascript:history.back()">← Повернутися назад</a>
     </div>
 </div>

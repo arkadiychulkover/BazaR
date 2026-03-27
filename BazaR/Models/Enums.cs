@@ -1,5 +1,37 @@
-﻿namespace BazaR.Models
+namespace BazaR.Models
 {
+    public enum OrderStatus
+    {
+        New = 0,          // Новий
+        Processing = 1,   // В обробці
+        Shipped = 2,      // Відправлено
+        Delivered = 3,    // Доставлено
+        Cancelled = 4     // Скасовано
+    }
+
+    public enum OrderPaymentMethod
+    {
+        PayNow = 0,       // Оплатити зараз
+        PayOnDelivery = 1,// Оплата при отриманні
+        PayByCard = 2     // Карткою у відділенні
+    }
+
+    public enum OrderPaymentStatus
+    {
+        Pending = 0,      // Очікує оплати
+        Paid = 1,         // Оплачено
+        Failed = 2,       // Помилка оплати
+        Refunded = 3      // Повернено
+    }
+
+    public enum OrderDeliveryMethod
+    {
+        SelfPickup = 0,        // Самовивіз BAZA-R
+        NovaPoshta = 1,        // Нова Пошта
+        UkrPoshta = 2,         // Укрпошта
+        CourierNovaPoshta = 3  // Кур'єр Нова Пошта
+    }
+
     public enum Cities
     {
         Kyiv = 1,

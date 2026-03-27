@@ -410,27 +410,91 @@ namespace BazaR.Controllers
             var item = _itMan.GetById(id);
             if (item == null) return NotFound();
 
-            ViewBag.Images = item.Colors?.Select(c => c.Color).ToList() ?? new List<string>();
-            ViewBag.Category = item.Category;
-            ViewBag.RelationItems = _itMan.GetByCategory(item.CategoryId)
+            var images = item.Colors?.Select(c => c.Color).ToList() ?? new List<string>();
+            if (!images.Any() && !string.IsNullOrWhiteSpace(item.ImageUrl))
+                images.Add(item.ImageUrl);
+
+            var sameCategoryItems = _itMan.GetByCategory(item.CategoryId)
                 .Where(i => i.Id != id)
-                .Take(4)
                 .ToList();
-            ViewBag.Seller = item.User;
+
+            const int recommendedTarget = 20;
+            const int sponsoredTarget = 20;
+            var parentCatId = item.Category?.ParentCategoryId;
+            var recommendedItems = parentCatId.HasValue
+                ? _itMan.GetByCategory(parentCatId.Value)
+                    .Where(i => i.Id != id && i.CategoryId != item.CategoryId)
+                    .Take(recommendedTarget)
+                    .ToList()
+                : new List<Item>();
+
+            if (recommendedItems.Count < recommendedTarget)
+            {
+                var needed = recommendedTarget - recommendedItems.Count;
+                var extraIds = recommendedItems.Select(r => r.Id).ToHashSet();
+                extraIds.Add(id);
+                var extra = sameCategoryItems.Where(i => !extraIds.Contains(i.Id)).Take(needed);
+                recommendedItems.AddRange(extra);
+            }
+
+            if (recommendedItems.Count < recommendedTarget)
+            {
+                var exclude = recommendedItems.Select(r => r.Id).ToHashSet();
+                exclude.Add(id);
+                var filler = _itMan.GetAll()
+                    .Where(i => !exclude.Contains(i.Id))
+                    .Take(recommendedTarget - recommendedItems.Count)
+                    .ToList();
+                recommendedItems.AddRange(filler);
+            }
+
+            var relatedItems = sameCategoryItems.Take(sponsoredTarget).ToList();
+            if (relatedItems.Count < sponsoredTarget)
+            {
+                var excludeRel = relatedItems.Select(i => i.Id).ToHashSet();
+                excludeRel.Add(id);
+                var fillerRel = _itMan.GetAll()
+                    .Where(i => !excludeRel.Contains(i.Id))
+                    .Take(sponsoredTarget - relatedItems.Count)
+                    .ToList();
+                relatedItems.AddRange(fillerRel);
+            }
+
+            var bundleItems = item.ComplectItems
+                .SelectMany(ci => ci.Complect.Items)
+                .Where(ci => ci.ItemId != id)
+                .Select(ci => ci.Item)
+                .Where(i => i != null)
+                .GroupBy(i => i.Id)
+                .Select(g => g.First())
+                .Take(1)
+                .ToList();
+
+            var demoBundleItems = !bundleItems.Any()
+                ? sameCategoryItems.Take(1).ToList()
+                : new List<Item>();
+
+            var vm = new ViewModels.ItemDetailsViewModel
+            {
+                Item = item,
+                Images = images,
+                Category = item.Category,
+                Seller = item.User,
+                RelatedItems = relatedItems,
+                RecommendedItems = recommendedItems,
+                BundleItems = bundleItems,
+                DemoBundleItems = demoBundleItems,
+                IsAuthenticated = IsAuthenticated
+            };
 
             if (IsAuthenticated)
             {
                 var userId = CurrentUser!.Id;
-                ViewBag.IsInCart = _usMan.GetCartItems(userId).Any(i => i.Id == id);
-                ViewBag.IsInWishlist = _usMan.GetWishList(userId).Any(i => i.Id == id);
-            }
-            else
-            {
-                ViewBag.IsInCart = false;
-                ViewBag.IsInWishlist = false;
+                vm.IsInCart = _usMan.GetCartItems(userId).Any(i => i.Id == id);
+                vm.IsInWishlist = _usMan.GetWishList(userId).Any(i => i.Id == id);
             }
 
-            return View(item);
+            return View(vm);
         }
 
         [HttpGet]
@@ -605,15 +669,27 @@ namespace BazaR.Controllers
 
             var userId = CurrentUser!.Id;
 
-            _usMan.AddToWishList(userId, id);
+            // Toggle: if already in wishlist — remove, otherwise add
+            var alreadyIn = _usMan.GetWishList(userId).Any(i => i.Id == id);
+            bool added;
+            if (alreadyIn)
+            {
+                _usMan.RemoveFromWishList(userId, id);
+                added = false;
+                TempData["Ok"] = "Видалено з обраного.";
+            }
+            else
+            {
+                _usMan.AddToWishList(userId, id);
+                added = true;
+                TempData["Ok"] = "Додано в обране.";
+            }
 
             var wishlistCount = _usMan.GetWishList(userId).Count();
 
-            TempData["Ok"] = "Добавлено в избранное.";
-
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                return Json(new { success = true, wishlistCount });
+                return Json(new { success = true, wishlistCount, added });
             }
 
             return RedirectToAction(nameof(Wishlist));
@@ -777,13 +853,29 @@ namespace BazaR.Controllers
             var recipLine = $"Отримувач: {recipientLastName!.Trim()} {recipientFirstName!.Trim()}{recipMiddle} · {recipientPhone!.Trim()}";
             var fullAddress = string.IsNullOrEmpty(addr) ? recipLine : addr + Environment.NewLine + recipLine;
 
+            // Mapping string form values → enums
+            var pmEnum = paymentMethod switch
+            {
+                "Оплатити зараз" => OrderPaymentMethod.PayNow,
+                "Оплата при отриманні" => OrderPaymentMethod.PayOnDelivery,
+                "Карткою у відділенні" => OrderPaymentMethod.PayByCard,
+                _ => OrderPaymentMethod.PayNow
+            };
+            var dmEnum = deliveryMethod switch
+            {
+                "Самовивіз BAZA-R" => OrderDeliveryMethod.SelfPickup,
+                "Відділення пошти" => OrderDeliveryMethod.NovaPoshta,
+                "Кур'єр" => OrderDeliveryMethod.CourierNovaPoshta,
+                _ => OrderDeliveryMethod.SelfPickup
+            };
+
             var order = new Order
             {
                 OrderItems = new List<OrderItem>(),
                 TotalAmount = finalTotal,
                 Address = fullAddress,
-                PaymentMethod = paymentMethod,
-                DeliveryMethod = deliveryMethod,
+                PaymentMethod = pmEnum,
+                DeliveryMethod = dmEnum,
                 CityId = 1
             };
 
@@ -808,7 +900,7 @@ namespace BazaR.Controllers
             _usMan.ClearCart(userId);
 
             // Redirect to payment page for online payment
-            if (paymentMethod == "Оплатити зараз")
+            if (pmEnum == OrderPaymentMethod.PayNow)
             {
                 return RedirectToAction("Payment", new { orderId = order.Id });
             }

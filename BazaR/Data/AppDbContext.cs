@@ -34,6 +34,19 @@ namespace BazaR.Data
         public DbSet<CategoryStatistik> CategoryStatistiks { get; set; }
         public DbSet<VisitingModel> VisitingModels { get; set; }
 
+        public DbSet<Pet> Pets { get; set; }
+        public DbSet<DeliveryAddress> DeliveryAddresses { get; set; }
+        public DbSet<OrderRecipient> OrderRecipients { get; set; }
+        public DbSet<AdditionalInfo> AdditionalInfos { get; set; }
+        public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<BonusAccount> BonusAccounts { get; set; }
+        public DbSet<Promotion> Promotions { get; set; }
+        public DbSet<PremiumSubscription> PremiumSubscriptions { get; set; }
+        public DbSet<LookedCard> LookedCards { get; set; }
+        public DbSet<MailingSetting> MailingSettings { get; set; }
+        public DbSet<WalletTransaction> WalletTransactions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -287,10 +300,10 @@ namespace BazaR.Data
                 entity.Property(e => e.Number).IsRequired().HasMaxLength(50);
                 entity.HasIndex(e => e.Number).IsUnique();
                 entity.Property(e => e.Address).IsRequired().HasMaxLength(500);
-                entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
-                entity.Property(e => e.PaymentMethod).HasMaxLength(50);
-                entity.Property(e => e.PaymentStatus).HasMaxLength(50);
-                entity.Property(e => e.DeliveryMethod).HasMaxLength(100);
+                entity.Property(e => e.Status).IsRequired();
+                entity.Property(e => e.PaymentMethod);
+                entity.Property(e => e.PaymentStatus);
+                entity.Property(e => e.DeliveryMethod);
                 entity.Property(e => e.Ttn).HasMaxLength(100);
                 entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
 

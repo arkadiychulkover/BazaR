@@ -1,0 +1,512 @@
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@model BazaR.ViewModels.AccountProfileViewModel
+
+@{
+    ViewData["Title"] = "Особисті данні";
+
+    var externalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+    var currentLogins = await UserManager.GetLoginsAsync(await UserManager.GetUserAsync(User));
+    var isGoogleLinked = currentLogins.Any(l => l.LoginProvider == "Google");
+}
+
+<div class="profile-page">
+    <div class="profile-page__layout">
+        @await Html.PartialAsync("_ProfileSidebar", Model)
+
+        <main class="profile-page__content">
+            <h1 class="profile-page__title">Особисті данні</h1>
+
+            @Html.AntiForgeryToken()
+
+            <div class="profile-accordion">
+
+                <!-- Особисті данні -->
+                <section class="profile-block is-open">
+                    <button class="profile-block__head" type="button" aria-expanded="true" aria-controls="personal-data">
+                        <div class="profile-block__left">
+                            <span class="profile-block__icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                            </span>
+                            <span class="profile-block__title">Особисті данні</span>
+                        </div>
+                        <span class="profile-block__arrow"></span>
+                    </button>
+
+                    <div class="profile-block__body" id="personal-data">
+                        <div class="profile-info-grid profile-info-grid--3">
+
+                            <!-- Ім'я -->
+                            <div class="profile-info-item">
+                                <div class="profile-info-item__label">Ім'я</div>
+                                <div class="profile-info-item__value" id="val-firstName">@(string.IsNullOrWhiteSpace(Model.FirstName) ? "Не вказано" : Model.FirstName)</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('firstName', 'text')">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
+                                        <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Редагувати</span>
+                                </button>
+                            </div>
+
+                            <!-- Призвіще -->
+                            <div class="profile-info-item">
+                                <div class="profile-info-item__label">Призвіще</div>
+                                <div class="profile-info-item__value" id="val-lastName">@(string.IsNullOrWhiteSpace(Model.LastName) ? "Не вказано" : Model.LastName)</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('lastName', 'text')">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
+                                        <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Редагувати</span>
+                                </button>
+                            </div>
+
+                            <!-- По батькові -->
+                            <div class="profile-info-item">
+                                <div class="profile-info-item__label">По батькові</div>
+                                <div class="profile-info-item__value" id="val-middleName">@(string.IsNullOrWhiteSpace(Model.MiddleName) ? "Не вказано" : Model.MiddleName)</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('middleName', 'text')">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
+                                        <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Редагувати</span>
+                                </button>
+                            </div>
+
+                            <!-- Дата народження -->
+                            <div class="profile-info-item">
+                                <div class="profile-info-item__label">Дата народження</div>
+                                <div class="profile-info-item__value" id="val-birthDate">@(Model.BirthDate.HasValue? Model.BirthDate.Value.ToString("dd.MM.yyyy") : "Не вказано")</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('birthDate', 'date')">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
+                                        <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Редагувати</span>
+                                </button>
+                            </div>
+
+                            <!-- Стать -->
+                            <div class="profile-info-item">
+                                <div class="profile-info-item__label">Стать</div>
+                                <div class="profile-info-item__value" id="val-gender">@(string.IsNullOrWhiteSpace(Model.Gender) ? "Не вказано" : Model.Gender)</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('gender', 'select')">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
+                                        <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Редагувати</span>
+                                </button>
+                            </div>
+
+                            <!-- Мова -->
+                            <div class="profile-info-item">
+                                <div class="profile-info-item__label">Мова спілкування з Baza-R</div>
+                                <div class="profile-info-item__value">Українська</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Мої отримувачі замовлень -->
+                <section class="profile-block">
+                    <button class="profile-block__head" type="button" aria-expanded="false" aria-controls="recipients-data">
+                        <div class="profile-block__left">
+                            <span class="profile-block__icon">
+                                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M27.2179 9.23999H3.42188V28.236H27.2179V9.23999Z" stroke="#1E1E1C" stroke-miterlimit="10" />
+                                    <path d="M27.3128 8.99999L22.2488 1.67999H8.88078L3.30078 9.01199" stroke="#1E1E1C" stroke-miterlimit="10" />
+                                    <path d="M17.7718 15.876L15.4678 13.836L13.1758 15.876V1.88397H17.7718V15.876Z" stroke="#1E1E1C" stroke-linejoin="round" />
+                                    <path d="M6.13281 21.552H11.4848" stroke="#1E1E1C" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M6.13281 24.156H9.39681" stroke="#1E1E1C" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span class="profile-block__title">Мої отримувачі замовлень</span>
+                        </div>
+                        <span class="profile-block__arrow"></span>
+                    </button>
+                    <div class="profile-block__body" id="recipients-data" hidden>
+                        @if (Model.OrderRecipients.Count == 0)
+                        {
+                            <div class="profile-empty">У вас ще немає доданих отримувачів.</div>
+                        }
+                        else
+                        {
+                            <div class="profile-info-grid profile-info-grid--3">
+                                @foreach (var r in Model.OrderRecipients)
+                                {
+                                    <div class="profile-info-item">
+                                        <div class="profile-info-item__label">@r.LastName @r.FirstName @r.MiddleName</div>
+                                        <div class="profile-info-item__value">@(r.Phone ?? "Не вказано")</div>
+                                        <button type="button" class="profile-edit-link profile-delete-btn border-0 bg-transparent"
+                                                onclick="deleteItem('recipient', @r.Id, this)">
+                                            <span>Видалити</span>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <button type="button" class="profile-add-btn border-0 bg-transparent" onclick="showAddRecipientForm()">
+                            + Додати отримувача
+                        </button>
+                        <div id="add-recipient-form" style="display:none; margin-top:12px;">
+                            <div class="profile-info-grid profile-info-grid--3">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Ім'я</div>
+                                    <input type="text" id="rec-firstName" class="profile-inline-input" placeholder="Ім'я" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Призвіще</div>
+                                    <input type="text" id="rec-lastName" class="profile-inline-input" placeholder="Призвіще" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">По батькові</div>
+                                    <input type="text" id="rec-middleName" class="profile-inline-input" placeholder="По батькові" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Телефон</div>
+                                    <input type="text" id="rec-phone" class="profile-inline-input" placeholder="+380..." />
+                                </div>
+                            </div>
+                            <button type="button" class="profile-save-btn" onclick="saveRecipient()">Зберегти</button>
+                            <button type="button" class="profile-cancel-btn" onclick="document.getElementById('add-recipient-form').style.display='none'">Скасувати</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Контакти -->
+                <section class="profile-block">
+                    <button class="profile-block__head" type="button" aria-expanded="false" aria-controls="contacts-data">
+                        <div class="profile-block__left">
+                            <span class="profile-block__icon">
+                                <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17.9984 18C19.9867 18 21.5984 16.3883 21.5984 14.4C21.5984 12.4118 19.9867 10.8 17.9984 10.8C16.0102 10.8 14.3984 12.4118 14.3984 14.4C14.3984 16.3883 16.0102 18 17.9984 18Z" stroke="#1E1E1C" stroke-width="0.79" stroke-miterlimit="10" />
+                                    <path d="M23.4 22.2784C23.2877 21.0675 22.7098 19.9467 21.7873 19.1505C20.8647 18.3542 19.669 17.9442 18.45 18.0061C17.2185 17.9453 16.0118 18.3661 15.0872 19.1788C14.1625 19.9915 13.593 21.1319 13.5 22.3569V24.3203C13.5 24.5536 13.593 24.7773 13.7586 24.9422C13.9241 25.1072 14.1487 25.1999 14.3828 25.1999H22.5014C22.7352 25.1999 22.9598 25.1072 23.1253 24.9422C23.2909 24.7773 23.4 24.5536 23.4 24.3203V22.2784Z" stroke="#1E1E1C" stroke-width="0.79" stroke-miterlimit="10" />
+                                    <path d="M26.6023 2.69995H9.3961C8.1828 2.69995 7.19922 3.6674 7.19922 4.86081V30.2391C7.19922 31.4325 8.1828 32.3999 9.3961 32.3999H26.6023C27.8156 32.3999 28.7992 31.4325 28.7992 30.2391V4.86081C28.7992 3.6674 27.8156 2.69995 26.6023 2.69995Z" stroke="#1E1E1C" stroke-miterlimit="10" />
+                                    <path d="M4.5 8.09998H9.9" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round" />
+                                    <path d="M4.5 18H9.9" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round" />
+                                    <path d="M4.5 27.9H9.9" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round" />
+                                </svg>
+                            </span>
+                            <span class="profile-block__title">Контакти</span>
+                        </div>
+                        <span class="profile-block__arrow"></span>
+                    </button>
+                    <div class="profile-block__body" id="contacts-data" hidden>
+                        <div class="profile-info-grid profile-info-grid--2">
+                            <div class="profile-login-item">
+                                <div class="profile-login-item__label">Мобільний телефон</div>
+                                <div class="profile-info-item__value" id="val-phoneNumber">@(string.IsNullOrWhiteSpace(Model.PhoneNumber) ? "Не вказано" : Model.PhoneNumber)</div>
+                                <button type="button" class="profile-edit-link border-0 bg-transparent" onclick="startEdit('phoneNumber', 'text')">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M3 13h10" stroke="#3E77AA" stroke-width="1" stroke-linecap="round" />
+                                        <path d="M2 14h12M11.5 2.5l2.5 2.5M2.5 11.5l7-7" stroke="#3E77AA" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Редагувати</span>
+                                </button>
+                            </div>
+                            <div class="profile-login-item">
+                                <div class="profile-login-item__label">Email</div>
+                                <div class="profile-info-item__value" id="val-email">@(string.IsNullOrWhiteSpace(Model.Email) ? "Не вказано" : Model.Email)</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Адреса доставки -->
+                <section class="profile-block">
+                    <button class="profile-block__head" type="button" aria-expanded="false" aria-controls="delivery-data">
+                        <div class="profile-block__left">
+                            <span class="profile-block__icon">
+                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14.1125 25H11V9H29V25H18.9048" stroke="#1E1E1C" stroke-miterlimit="10" />
+                                    <path d="M16.5 28C17.8807 28 19 26.8807 19 25.5C19 24.1193 17.8807 23 16.5 23C15.1193 23 14 24.1193 14 25.5C14 26.8807 15.1193 28 16.5 28Z" stroke="#1E1E1C" stroke-miterlimit="10" />
+                                    <path d="M32.5 28C33.8807 28 35 26.8807 35 25.5C35 24.1193 33.8807 23 32.5 23C31.1193 23 30 24.1193 30 25.5C30 26.8807 31.1193 28 32.5 28Z" stroke="#1E1E1C" stroke-miterlimit="10" />
+                                    <path d="M29 13.0001H34.4421C34.639 12.9971 34.8338 13.0454 35.0111 13.1413C35.1884 13.2372 35.3433 13.3781 35.4636 13.5528L37.7179 16.7501C37.9058 17.0052 38.0058 17.3273 37.9997 17.658V24.5066C37.9997 24.6374 37.9534 24.7629 37.8708 24.8555C37.7882 24.948 37.6762 25 37.5594 25H35.3755" stroke="#1E1E1C" stroke-miterlimit="10" />
+                                    <path d="M32 13V19H38" stroke="#1E1E1C" stroke-miterlimit="10" />
+                                    <path d="M9 9H1" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round" />
+                                    <path d="M9 13H3" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round" />
+                                    <path d="M9 16H4" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round" />
+                                    <path d="M9 20H6" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round" />
+                                </svg>
+                            </span>
+                            <span class="profile-block__title">Адреса доставки</span>
+                        </div>
+                        <span class="profile-block__arrow"></span>
+                    </button>
+                    <div class="profile-block__body" id="delivery-data" hidden>
+                        @if (Model.DeliveryAddresses.Count == 0)
+                        {
+                            <div class="profile-empty">Адреси доставки не додані.</div>
+                        }
+                        else
+                        {
+                            <div class="profile-info-grid profile-info-grid--3">
+                                @foreach (var a in Model.DeliveryAddresses)
+                                {
+                                    <div class="profile-info-item">
+                                        <div class="profile-info-item__label">@a.City, @a.Street</div>
+                                        <div class="profile-info-item__value">
+                                            @a.Building@(a.Apartment != null ? $", кв. {a.Apartment}" : "")
+                                            @(a.PostalCode != null ? $", {a.PostalCode}" : "")
+                                        </div>
+                                        <button type="button" class="profile-edit-link profile-delete-btn border-0 bg-transparent"
+                                                onclick="deleteItem('address', @a.Id, this)">
+                                            <span>Видалити</span>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <button type="button" class="profile-add-btn border-0 bg-transparent" onclick="showAddAddressForm()">
+                            + Додати адресу
+                        </button>
+                        <div id="add-address-form" style="display:none; margin-top:12px;">
+                            <div class="profile-info-grid profile-info-grid--3">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Місто</div>
+                                    <input type="text" id="addr-city" class="profile-inline-input" placeholder="Місто" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Вулиця</div>
+                                    <input type="text" id="addr-street" class="profile-inline-input" placeholder="Вулиця" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Будинок</div>
+                                    <input type="text" id="addr-building" class="profile-inline-input" placeholder="Будинок" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Квартира</div>
+                                    <input type="text" id="addr-apartment" class="profile-inline-input" placeholder="Квартира" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Поштовий індекс</div>
+                                    <input type="text" id="addr-postal" class="profile-inline-input" placeholder="00000" />
+                                </div>
+                            </div>
+                            <button type="button" class="profile-save-btn" onclick="saveAddress()">Зберегти</button>
+                            <button type="button" class="profile-cancel-btn" onclick="document.getElementById('add-address-form').style.display='none'">Скасувати</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Логін -->
+                <section class="profile-block is-open">
+                    <button class="profile-block__head" type="button" aria-expanded="true" aria-controls="login-data">
+                        <div class="profile-block__left">
+                            <span class="profile-block__icon">
+                                <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M27.7347 14.5946H8.26217C6.38501 14.5946 4.86328 16.2001 4.86328 18.1805V29.4952C4.86328 31.4756 6.38501 33.0811 8.26217 33.0811H27.7347C29.6118 33.0811 31.1336 31.4756 31.1336 29.4952V18.1805C31.1336 16.2001 29.6118 14.5946 27.7347 14.5946Z" stroke="#1E1E1C" stroke-miterlimit="10" />
+                                    <path d="M12.6484 14.5945V9.62794C12.6484 8.10664 13.2635 6.64765 14.3583 5.57192C15.4531 4.4962 16.938 3.89186 18.4863 3.89186V3.89186C19.2534 3.89002 20.0134 4.03713 20.7225 4.32474C21.4317 4.61235 22.076 5.0348 22.6184 5.56781C23.1609 6.10082 23.5908 6.73389 23.8835 7.43066C24.1763 8.12743 24.326 8.87415 24.3241 9.62794V14.5945" stroke="#1E1E1C" stroke-width="0.97" stroke-miterlimit="10" />
+                                    <path d="M18.0993 27.9072C19.2047 27.9072 20.1009 25.857 20.1009 23.328C20.1009 20.799 19.2047 18.7488 18.0993 18.7488C16.9938 18.7488 16.0977 20.799 16.0977 23.328C16.0977 25.857 16.9938 27.9072 18.0993 27.9072Z" fill="#1E1E1C" />
+                                </svg>
+                            </span>
+                            <span class="profile-block__title">Логін</span>
+                        </div>
+                        <span class="profile-block__arrow"></span>
+                    </button>
+                    <div class="profile-block__body" id="login-data">
+                        <div class="profile-info-grid profile-info-grid--2">
+                            <div class="profile-login-item">
+                                <div class="profile-login-item__label">Логін (ел.пошта)</div>
+                                <div class="profile-info-item__value" id="val-email">@(string.IsNullOrWhiteSpace(Model.Email) ? "Не вказано" : Model.Email)</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Домашні тварини -->
+                <section class="profile-block">
+                    <button class="profile-block__head" type="button" aria-expanded="false" aria-controls="pets-data">
+                        <div class="profile-block__left">
+                            <span class="profile-block__icon">
+                                <svg width="37" height="37" viewBox="0 0 37 37" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M30.6406 12.1406C29.9546 12.1406 29.2839 12.3441 28.7135 12.7252C28.1431 13.1064 27.6985 13.6481 27.4359 14.2819C27.1734 14.9158 27.1047 15.6132 27.2385 16.2861C27.3724 16.959 27.7027 17.577 28.1879 18.0621C28.673 18.5473 29.291 18.8776 29.9639 19.0115C30.6368 19.1453 31.3342 19.0766 31.9681 18.8141C32.6019 18.5515 33.1436 18.1069 33.5248 17.5365C33.9059 16.9661 34.1094 16.2954 34.1094 15.6094C34.1056 14.6906 33.7389 13.8105 33.0892 13.1608C32.4395 12.5111 31.5594 12.1444 30.6406 12.1406ZM30.6406 17.9219C30.1833 17.9219 29.7362 17.7862 29.3559 17.5321C28.9756 17.278 28.6792 16.9169 28.5042 16.4943C28.3291 16.0718 28.2833 15.6068 28.3726 15.1582C28.4618 14.7096 28.682 14.2976 29.0054 13.9742C29.3289 13.6508 29.7409 13.4305 30.1895 13.3413C30.6381 13.2521 31.103 13.2979 31.5256 13.4729C31.9481 13.6479 32.3093 13.9443 32.5634 14.3246C32.8175 14.7049 32.9531 15.152 32.9531 15.6094C32.9531 16.2227 32.7095 16.8109 32.2758 17.2446C31.8421 17.6782 31.2539 17.9219 30.6406 17.9219ZM9.82813 15.6094C9.82813 14.9233 9.62469 14.2527 9.24354 13.6822C8.86239 13.1118 8.32064 12.6672 7.68681 12.4047C7.05298 12.1421 6.35553 12.0734 5.68266 12.2073C5.00979 12.3411 4.39171 12.6715 3.9066 13.1566C3.42149 13.6417 3.09112 14.2598 2.95728 14.9327C2.82344 15.6055 2.89213 16.303 3.15467 16.9368C3.41721 17.5706 3.86181 18.1124 4.43224 18.4935C5.00268 18.8747 5.67332 19.0781 6.35938 19.0781C7.27818 19.0743 8.15826 18.7076 8.80795 18.0579C9.45764 17.4083 9.82432 16.5282 9.82813 15.6094ZM6.35938 17.9219C5.90201 17.9219 5.45491 17.7862 5.07462 17.5321C4.69433 17.278 4.39793 16.9169 4.22291 16.4943C4.04788 16.0718 4.00208 15.6068 4.09131 15.1582C4.18054 14.7096 4.40078 14.2976 4.72419 13.9742C5.0476 13.6508 5.45965 13.4305 5.90823 13.3413C6.35681 13.2521 6.82178 13.2979 7.24433 13.4729C7.66689 13.6479 8.02805 13.9443 8.28215 14.3246C8.53625 14.7049 8.67188 15.152 8.67188 15.6094C8.67188 16.2227 8.42824 16.8109 7.99456 17.2446C7.56088 17.6782 6.97269 17.9219 6.35938 17.9219ZM13.2969 12.1406C13.9829 12.1406 14.6536 11.9372 15.224 11.556C15.7944 11.1749 16.239 10.6331 16.5016 9.99931C16.7641 9.36548 16.8328 8.66803 16.699 7.99516C16.5651 7.32228 16.2348 6.70421 15.7497 6.2191C15.2645 5.73399 14.6465 5.40362 13.9736 5.26978C13.3007 5.13594 12.6033 5.20463 11.9694 5.46717C11.3356 5.72971 10.7939 6.17431 10.4127 6.74474C10.0316 7.31517 9.82813 7.98582 9.82813 8.67188C9.83193 9.59067 10.1986 10.4708 10.8483 11.1204C11.498 11.7701 12.3781 12.1368 13.2969 12.1406ZM13.2969 6.35938C13.7542 6.35938 14.2013 6.495 14.5816 6.7491C14.9619 7.0032 15.2583 7.36437 15.4334 7.78692C15.6084 8.20947 15.6542 8.67444 15.5649 9.12302C15.4757 9.5716 15.2555 9.98365 14.9321 10.3071C14.6087 10.6305 14.1966 10.8507 13.748 10.9399C13.2994 11.0292 12.8345 10.9834 12.4119 10.8083C11.9894 10.6333 11.6282 10.3369 11.3741 9.95663C11.12 9.57634 10.9844 9.12924 10.9844 8.67188C10.9844 8.05856 11.228 7.47037 11.6617 7.03669C12.0954 6.60301 12.6836 6.35938 13.2969 6.35938ZM23.7031 12.1406C24.3892 12.1406 25.0598 11.9372 25.6303 11.556C26.2007 11.1749 26.6453 10.6331 26.9078 9.99931C27.1704 9.36548 27.2391 8.66803 27.1052 7.99516C26.9714 7.32228 26.641 6.70421 26.1559 6.2191C25.6708 5.73399 25.0527 5.40362 24.3799 5.26978C23.707 5.13594 23.0095 5.20463 22.3757 5.46717C21.7419 5.72971 21.2001 6.17431 20.819 6.74474C20.4378 7.31517 20.2344 7.98582 20.2344 8.67188C20.2382 9.59067 20.6049 10.4708 21.2546 11.1204C21.9043 11.7701 22.7843 12.1368 23.7031 12.1406ZM23.7031 6.35938C24.1605 6.35938 24.6076 6.495 24.9879 6.7491C25.3682 7.0032 25.6646 7.36437 25.8396 7.78692C26.0146 8.20947 26.0604 8.67444 25.9712 9.12302C25.882 9.5716 25.6617 9.98365 25.3383 10.3071C25.0149 10.6305 24.6029 10.8507 24.1543 10.9399C23.7057 11.0292 23.2407 10.9834 22.8182 10.8083C22.3956 10.6333 22.0345 10.3369 21.7804 9.95663C21.5263 9.57634 21.3906 9.12924 21.3906 8.67188C21.3906 8.05856 21.6343 7.47037 22.0679 7.03669C22.5016 6.60301 23.0898 6.35938 23.7031 6.35938ZM26.7672 22.0121C26.1119 21.6542 25.5342 21.1696 25.0678 20.5865C24.6013 20.0034 24.2554 19.3335 24.05 18.6156C23.6998 17.4148 22.9695 16.3599 21.9688 15.6094C20.968 14.8588 19.7509 14.4531 18.5 14.4531C17.2491 14.4531 16.032 14.8588 15.0313 15.6094C14.0305 16.3599 13.3003 17.4148 12.95 18.6156C12.7463 19.3323 12.4026 20.0015 11.9387 20.5845C11.4748 21.1674 10.8999 21.6527 10.2473 22.0121C9.22657 22.5615 8.41855 23.436 7.95139 24.4968C7.48423 25.5576 7.38469 26.7441 7.66856 27.868C7.95243 28.9918 8.60345 29.9887 9.51834 30.7005C10.4332 31.4122 11.5596 31.7981 12.7188 31.7969C13.4132 31.7954 14.1006 31.6579 14.7422 31.3922C15.9335 30.8984 17.2104 30.6442 18.5 30.6442C19.7896 30.6442 21.0665 30.8984 22.2578 31.3922C22.8994 31.6579 23.5868 31.7954 24.2813 31.7969C25.4417 31.8013 26.5702 31.4178 27.4876 30.7072C28.405 29.9965 29.0585 28.9997 29.3442 27.875C29.6299 26.7503 29.5315 25.5624 29.0646 24.5001C28.5976 23.4378 27.789 22.5621 26.7672 22.0121ZM24.2813 30.6406C23.7352 30.6442 23.1941 30.536 22.6914 30.3227C21.3637 29.7682 19.9389 29.4832 18.5 29.4844C17.0566 29.4844 15.6273 29.7692 14.2941 30.3227C13.7969 30.5372 13.2603 30.6455 12.7188 30.6406C11.8199 30.6383 10.9474 30.3368 10.2389 29.7836C9.53042 29.2305 9.02624 28.4572 8.80589 27.5858C8.58555 26.7144 8.6616 25.7944 9.02203 24.971C9.38247 24.1476 10.0068 23.4676 10.7965 23.0383C12.3817 22.1585 13.5556 20.6886 14.0629 18.948C14.3447 17.9897 14.9293 17.1483 15.7291 16.5498C16.5289 15.9513 17.5011 15.6279 18.5 15.6279C19.499 15.6279 20.4711 15.9513 21.2709 16.5498C22.0707 17.1483 22.6553 17.9897 22.9371 18.948C23.4444 20.6886 24.6183 22.1585 26.2035 23.0383C26.9932 23.4676 27.6175 24.1476 27.978 24.971C28.3384 25.7944 28.4145 26.7144 28.1941 27.5858C27.9738 28.4572 27.4696 29.2305 26.7611 29.7836C26.0526 30.3368 25.1801 30.6383 24.2813 30.6406Z" fill="black" />
+                                </svg>
+                            </span>
+                            <span class="profile-block__title">Домашні тварини</span>
+                        </div>
+                        <span class="profile-block__arrow"></span>
+                    </button>
+                    <div class="profile-block__body" id="pets-data" hidden>
+                        @if (Model.Pets.Count == 0)
+                        {
+                            <div class="profile-empty">Інформація про домашніх тварин не додана.</div>
+                        }
+                        else
+                        {
+                            <div class="profile-info-grid profile-info-grid--3">
+                                @foreach (var p in Model.Pets)
+                                {
+                                    <div class="profile-info-item">
+                                        <div class="profile-info-item__label">@p.Name</div>
+                                        <div class="profile-info-item__value">@(p.Type ?? "Не вказано")@(p.Breed != null ? $", {p.Breed}" : "")</div>
+                                        <button type="button" class="profile-edit-link profile-delete-btn border-0 bg-transparent"
+                                                onclick="deleteItem('pet', @p.Id, this)">
+                                            <span>Видалити</span>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <button type="button" class="profile-add-btn border-0 bg-transparent" onclick="showAddPetForm()">
+                            + Додати тварину
+                        </button>
+                        <div id="add-pet-form" style="display:none; margin-top:12px;">
+                            <div class="profile-info-grid profile-info-grid--3">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Кличка</div>
+                                    <input type="text" id="pet-name" class="profile-inline-input" placeholder="Кличка" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Вид</div>
+                                    <input type="text" id="pet-type" class="profile-inline-input" placeholder="Кіт, Собака..." />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Порода</div>
+                                    <input type="text" id="pet-breed" class="profile-inline-input" placeholder="Порода" />
+                                </div>
+                            </div>
+                            <button type="button" class="profile-save-btn" onclick="savePet()">Зберегти</button>
+                            <button type="button" class="profile-cancel-btn" onclick="document.getElementById('add-pet-form').style.display='none'">Скасувати</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Додаткова інформація -->
+                <section class="profile-block">
+                    <button class="profile-block__head" type="button" aria-expanded="false" aria-controls="additional-data">
+                        <div class="profile-block__left">
+                            <span class="profile-block__icon">
+                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.56797 19.84C11.998 19.84 13.968 17.8701 13.968 15.44C13.968 13.01 11.998 11.04 9.56797 11.04C7.13792 11.04 5.16797 13.01 5.16797 15.44C5.16797 17.8701 7.13792 19.84 9.56797 19.84Z" stroke="#1E1E1C" stroke-miterlimit="10" />
+                                    <path d="M15.9032 25.312C15.7347 23.7737 14.9919 22.3555 13.8232 21.341C12.6545 20.3266 11.146 19.7905 9.59922 19.84C8.01669 19.7596 6.46478 20.297 5.27079 21.3387C4.0768 22.3805 3.33406 23.8452 3.19922 25.424V27.936C3.19922 28.5463 3.69922 29.072 4.33522 29.072H14.7672C15.4032 29.072 15.9032 28.5463 15.9032 27.936V25.312Z" stroke="#1E1E1C" stroke-miterlimit="10" />
+                                    <path d="M20 12.528H37.888" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round" />
+                                    <path d="M20 20H30.432" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round" />
+                                    <path d="M20.2227 27.472H35.1987" stroke="#1E1E1C" stroke-miterlimit="10" stroke-linecap="round" />
+                                </svg>
+                            </span>
+                            <span class="profile-block__title">Додаткова інформація</span>
+                        </div>
+                        <span class="profile-block__arrow"></span>
+                    </button>
+                    <div class="profile-block__body" id="additional-data" hidden>
+                        @if (Model.AdditionalInfos.Count == 0)
+                        {
+                            <div class="profile-empty">Додаткова інформація відсутня.</div>
+                        }
+                        else
+                        {
+                            <div class="profile-info-grid profile-info-grid--3">
+                                @foreach (var info in Model.AdditionalInfos)
+                                {
+                                    <div class="profile-info-item">
+                                        <div class="profile-info-item__label">@info.Key</div>
+                                        <div class="profile-info-item__value">@(string.IsNullOrWhiteSpace(info.Value) ? "Не вказано" : info.Value)</div>
+                                        <button type="button" class="profile-edit-link profile-delete-btn border-0 bg-transparent"
+                                                onclick="deleteItem('additionalinfo', @info.Id, this)">
+                                            <span>Видалити</span>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <button type="button" class="profile-add-btn border-0 bg-transparent" onclick="showAddInfoForm()">
+                            + Додати інформацію
+                        </button>
+                        <div id="add-info-form" style="display:none; margin-top:12px;">
+                            <div class="profile-info-grid profile-info-grid--2">
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Назва</div>
+                                    <input type="text" id="info-key" class="profile-inline-input" placeholder="Наприклад: Алергія" />
+                                </div>
+                                <div class="profile-info-item">
+                                    <div class="profile-info-item__label">Значення</div>
+                                    <input type="text" id="info-value" class="profile-inline-input" placeholder="Значення" />
+                                </div>
+                            </div>
+                            <button type="button" class="profile-save-btn" onclick="saveAdditionalInfo()">Зберегти</button>
+                            <button type="button" class="profile-cancel-btn" onclick="document.getElementById('add-info-form').style.display='none'">Скасувати</button>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <section class="profile-social">
+                <p class="profile-social__text">
+                    Зв'язуйте обліковий запис Розетки з обліковими записами соцмереж і заходьте на сайт, як користувач Facebook або Google
+                </p>
+                <div class="profile-social__list">
+                    @{
+                        if (externalLogins.Count == 0)
+                        {
+                            <div>No external logins configured</div>
+                        }
+                        else
+                        {
+                            <form method="post" asp-controller="Account" asp-action="LinkLogin" asp-route-returnUrl="@returnUrl" class="externalLogin-form-profile">
+                                <button class="social-connect-card social-connect-card__left">
+                                    <div class="social-connect-card__icon">
+                                        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+                                            <path d="M32.1235 34.0001C33.1597 34.0001 34 33.16 34 32.1236V1.87651C34 0.840039 33.1597 0 32.1235 0H1.87651C0.839906 0 0 0.840039 0 1.87651V32.1236C0 33.16 0.839906 34.0001 1.87651 34.0001H32.1235Z" fill="#395185" />
+                                            <path d="M23.4602 33.9997V20.8331H27.8798L28.5415 15.7019H23.4602V12.4256C23.4602 10.94 23.8728 9.92757 26.0033 9.92757L28.7205 9.92637V5.33704C28.2503 5.27448 26.6375 5.13477 24.7611 5.13477C20.8434 5.13477 18.1614 7.52605 18.1614 11.9176V15.7019H13.7305V20.8331H18.1614V33.9997H23.4602Z" fill="white" />
+                                        </svg>
+                                    </div>
+                                    <div class="social-connect-card__content">
+                                        <div class="social-connect-card__title">Facebook</div>
+                                        <div class="social-connect-card__link">Зв'язати з соц.мережею</div>
+                                    </div>
+                                </button>
+                                @foreach (var provider in externalLogins)
+                                {
+                                    if (provider.DisplayName == "Google")
+                                    {
+                                        <button class="social-connect-card">
+                                            <div class="social-connect-card__icon">
+                                                <svg width="38" height="38" viewBox="0 0 48 48" fill="none">
+                                                    <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12S17.4 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z" />
+                                                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.2 19 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34.1 6.1 29.3 4 24 4c-7.7 0-14.4 4.3-17.7 10.7z" />
+                                                    <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.5-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.5 5C9.6 39.5 16.3 44 24 44z" />
+                                                    <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3.1-3.3 5.1-6.2 6.4l6.2 5.2C38.5 37 44 31.2 44 24c0-1.3-.1-2.3-.4-3.5z" />
+                                                </svg>
+                                            </div>
+                                            <div class="social-connect-card__content">
+                                                <div class="social-connect-card__title">Google</div>
+                                                <div class="social-connect-card__link">Зв'язати з соц.мережею</div>
+                                            </div>
+                                        </button>
+                                    }
+                                }
+                            </form>
+                        }
+                    }
+                </div>
+            </section>
+
+            <div class="profile-bottom-links">
+                <div class="profile-bottom-links__left">
+                    <a asp-action="ForgotPassword" asp-controller="Account" class="profile-bottom-links__item">Змінити пароль</a>
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="profile-bottom-links__item" style="background:none;border:none;padding:0;cursor:pointer;">Вихід</button>
+                    </form>
+                </div>
+                <div class="profile-bottom-links__right">
+                    <form asp-action="DeleteAccount" asp-controller="Account" method="post">
+                        @Html.AntiForgeryToken()
+                        <button class="profile-bottom-links__item bg-transparent border-0">Видалити аккаунт</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="~/js/profile.js" asp-append-version="true"></script>

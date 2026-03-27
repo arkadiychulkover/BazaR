@@ -1,4 +1,4 @@
-﻿@model BazaR.Models.User
+@model BazaR.Models.User
 @{
     ViewData["Title"] = $"Статистика пользователя {Model.Email}";
 }
@@ -302,53 +302,57 @@
                                             <td>
                                                 @switch (order.Status)
                                                 {
-                                                    case "Нове":
-                                                        <span class="badge bg-info">Новый</span>
+                                                    case BazaR.Models.OrderStatus.New:
+                                                        <span class="badge bg-info">Новий</span>
                                                         break;
-                                                    case "В обробці":
-                                                        <span class="badge bg-primary">В обработке</span>
+                                                    case BazaR.Models.OrderStatus.Processing:
+                                                        <span class="badge bg-primary">В обробці</span>
                                                         break;
-                                                    case "Відправлено":
-                                                        <span class="badge bg-success">Отправлен</span>
+                                                    case BazaR.Models.OrderStatus.Shipped:
+                                                        <span class="badge bg-success">Відправлено</span>
                                                         break;
-                                                    case "Доставлено":
-                                                        <span class="badge bg-success">Доставлен</span>
+                                                    case BazaR.Models.OrderStatus.Delivered:
+                                                        <span class="badge bg-success">Доставлено</span>
                                                         break;
-                                                    case "Скасовано":
-                                                        <span class="badge bg-danger">Отменен</span>
+                                                    case BazaR.Models.OrderStatus.Cancelled:
+                                                        <span class="badge bg-danger">Скасовано</span>
                                                         break;
                                                     default:
-                                                        <span class="badge bg-secondary">@order.Status</span>
+                                                        <span class="badge bg-secondary">@order.Status.DisplayStatus()</span>
                                                         break;
                                                 }
                                             </td>
                                             <td>
-                                                @if (order.PaymentStatus?.ToLower() == "paid" || order.PaymentStatus == "Оплачено")
+                                                @if (order.PaymentStatus == BazaR.Models.OrderPaymentStatus.Paid)
                                                 {
-                                                    <span class="badge bg-success">Оплачен</span>
+                                                    <span class="badge bg-success">Оплачено</span>
+                                                }
+                                                else if (order.PaymentStatus == BazaR.Models.OrderPaymentStatus.Failed)
+                                                {
+                                                    <span class="badge bg-danger">Помилка</span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge bg-warning">Не оплачен</span>
+                                                    <span class="badge bg-warning text-dark">Очікує оплати</span>
                                                 }
                                             </td>
                                             <td>@order.Ttn</td>
                                             <td class="text-end">
                                                 <div class="btn-group btn-group-sm">
                                                     <a asp-action="OrderDetails" asp-route-id="@order.Id"
-                                                       class="btn btn-outline-primary" title="Просмотр">
+                                                       class="btn btn-outline-primary" title="Перегляд">
                                                         <i class="bi bi-eye"></i>
                                                     </a>
                                                     <a asp-action="EditOrder" asp-route-id="@order.Id"
-                                                       class="btn btn-outline-secondary" title="Редактировать">
+                                                       class="btn btn-outline-secondary" title="Редагувати">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
                                                     <form asp-action="DeleteOrder" asp-route-id="@order.Id"
                                                           method="post" style="display: inline;">
                                                         @Html.AntiForgeryToken()
                                                         <button type="submit" class="btn btn-outline-danger"
-                                                                title="Удалить"
-                                                                onclick="return confirm('Вы уверены, что хотите удалить заказ №@order.Number?');">
+                                                                title="Видалити"
+                                                                onclick="return confirm('Видалити замовлення №@order.Number?');">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </form>

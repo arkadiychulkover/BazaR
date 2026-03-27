@@ -1,4 +1,4 @@
-﻿using BazaR.Data;
+using BazaR.Data;
 using BazaR.Filters;
 using BazaR.Interfaces;
 using BazaR.Models;
@@ -270,34 +270,37 @@ namespace BazaR.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> EditOrder(int id) 
+        public async Task<IActionResult> EditOrder(int id)
         {
-            Order order = await _appDbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
+            Order order = await _appDbContext.Orders
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null) return RedirectToAction(nameof(Index));
             return View(order);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditOrder(Order ord)
+        public async Task<IActionResult> EditOrder(int id,
+            OrderStatus status,
+            OrderPaymentMethod paymentMethod,
+            OrderPaymentStatus paymentStatus,
+            OrderDeliveryMethod deliveryMethod,
+            string? ttn)
         {
-            var order = await _appDbContext.Orders
-                .FirstOrDefaultAsync(o => o.Id == ord.Id);
+            Order order = await _appDbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
+            if (order == null) return RedirectToAction(nameof(Index));
 
-            if (order == null)
-                return NotFound();
-
-            order.CityId = ord.CityId;
-            order.Address = ord.Address;
-            order.Status = ord.Status;
-            order.PaymentMethod = ord.PaymentMethod;
-            order.PaymentStatus = ord.PaymentStatus;
-            order.DeliveryMethod = ord.DeliveryMethod;
-            order.Ttn = ord.Ttn;
-            order.TotalAmount = ord.TotalAmount;
+            order.Status = status;
+            order.PaymentMethod = paymentMethod;
+            order.PaymentStatus = paymentStatus;
+            order.DeliveryMethod = deliveryMethod;
+            order.Ttn = ttn?.Trim();
 
             await _appDbContext.SaveChangesAsync();
-
-            return RedirectToAction("UserStatistic", new { id = order.UserId });
+            TempData["Ok"] = $"Замовлення №{order.Number} оновлено.";
+            return RedirectToAction(nameof(OrderDetails), new { id });
         }
         #endregion
 

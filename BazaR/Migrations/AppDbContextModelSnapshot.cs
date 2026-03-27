@@ -22,6 +22,70 @@ namespace BazaR.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("BazaR.Models.AdditionalInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AdditionalInfos");
+                });
+
+            modelBuilder.Entity("BazaR.Models.BonusAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AccrualRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MonthlyAccrued")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MonthlySpent")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalBalance")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BonusAccounts");
+                });
+
             modelBuilder.Entity("BazaR.Models.Brand", b =>
                 {
                     b.Property<int>("Id")
@@ -7171,28 +7235,6 @@ namespace BazaR.Migrations
                         });
                 });
 
-            modelBuilder.Entity("BazaR.Models.CategoryStatistik", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("VisitedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CategoryStatistiks");
-                });
-
             modelBuilder.Entity("BazaR.Models.City", b =>
                 {
                     b.Property<int>("Id")
@@ -7398,6 +7440,44 @@ namespace BazaR.Migrations
                     b.HasIndex("ItemId");
 
                     b.ToTable("Deliveries");
+                });
+
+            modelBuilder.Entity("BazaR.Models.DeliveryAddress", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Apartment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Building")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PostalCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Street")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DeliveryAddresses");
                 });
 
             modelBuilder.Entity("BazaR.Models.Item", b =>
@@ -9381,6 +9461,120 @@ namespace BazaR.Migrations
                     b.ToTable("ItemColors");
                 });
 
+            modelBuilder.Entity("BazaR.Models.LookedCard", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsLooked")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LookedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("LookedCards");
+                });
+
+            modelBuilder.Entity("BazaR.Models.MailingSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("NewsAndUpdates")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("PersonalRecommendations")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PreferredFrequency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("ProductAlerts")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("SpecialOffers")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("WeeklyDigest")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MailingSettings");
+                });
+
+            modelBuilder.Entity("BazaR.Models.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("BazaR.Models.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -9478,6 +9672,132 @@ namespace BazaR.Migrations
                     b.ToTable("OrderItems");
                 });
 
+            modelBuilder.Entity("BazaR.Models.OrderRecipient", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MiddleName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("OrderRecipients");
+                });
+
+            modelBuilder.Entity("BazaR.Models.Pet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Breed")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Pets");
+                });
+
+            modelBuilder.Entity("BazaR.Models.PremiumSubscription", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AutoRenewal")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("MonthlyPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PlanType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PremiumSubscriptions");
+                });
+
+            modelBuilder.Entity("BazaR.Models.Promotion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Promotions");
+                });
+
             modelBuilder.Entity("BazaR.Models.Review", b =>
                 {
                     b.Property<int>("Id")
@@ -9523,6 +9843,9 @@ namespace BazaR.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<DateOnly?>("BirthDate")
+                        .HasColumnType("date");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -9537,6 +9860,9 @@ namespace BazaR.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Gender")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("bit");
 
@@ -9548,6 +9874,9 @@ namespace BazaR.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("MiddleName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -9631,27 +9960,6 @@ namespace BazaR.Migrations
                         });
                 });
 
-            modelBuilder.Entity("BazaR.Models.UserUseStatistick", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("LastSeen")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserUseStatisticks");
-                });
-
             modelBuilder.Entity("BazaR.Models.Usluga", b =>
                 {
                     b.Property<int>("Id")
@@ -9684,6 +9992,8 @@ namespace BazaR.Migrations
                     b.ToTable("Uslugi");
                 });
 
+<<<<<<< Updated upstream
+=======
             modelBuilder.Entity("BazaR.Models.VisitingModel", b =>
                 {
                     b.Property<int>("Id")
@@ -9719,6 +10029,75 @@ namespace BazaR.Migrations
                     b.ToTable("VisitingModels");
                 });
 
+            modelBuilder.Entity("BazaR.Models.Wallet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastReplenishment")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("LastReplenishmentAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MonthlySpent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Wallets");
+                });
+
+            modelBuilder.Entity("BazaR.Models.WalletTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("WalletId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WalletId");
+
+                    b.ToTable("WalletTransactions");
+                });
+
+>>>>>>> Stashed changes
             modelBuilder.Entity("BazaR.Models.WishlistItem", b =>
                 {
                     b.Property<int>("Id")
@@ -9876,6 +10255,8 @@ namespace BazaR.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+<<<<<<< Updated upstream
+=======
             modelBuilder.Entity("SearchItem", b =>
                 {
                     b.Property<int>("Id")
@@ -9898,6 +10279,29 @@ namespace BazaR.Migrations
                     b.ToTable("SearchItems");
                 });
 
+            modelBuilder.Entity("BazaR.Models.AdditionalInfo", b =>
+                {
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany("AdditionalInfos")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BazaR.Models.BonusAccount", b =>
+                {
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+>>>>>>> Stashed changes
             modelBuilder.Entity("BazaR.Models.CartItem", b =>
                 {
                     b.HasOne("BazaR.Models.Item", "Item")
@@ -9991,6 +10395,17 @@ namespace BazaR.Migrations
                     b.Navigation("Item");
                 });
 
+            modelBuilder.Entity("BazaR.Models.DeliveryAddress", b =>
+                {
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany("DeliveryAddresses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BazaR.Models.Item", b =>
                 {
                     b.HasOne("BazaR.Models.Brand", "Brand")
@@ -10040,6 +10455,47 @@ namespace BazaR.Migrations
                     b.Navigation("Item");
                 });
 
+            modelBuilder.Entity("BazaR.Models.LookedCard", b =>
+                {
+                    b.HasOne("BazaR.Models.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BazaR.Models.MailingSetting", b =>
+                {
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BazaR.Models.Message", b =>
+                {
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BazaR.Models.Order", b =>
                 {
                     b.HasOne("BazaR.Models.City", "City")
@@ -10078,6 +10534,39 @@ namespace BazaR.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("BazaR.Models.OrderRecipient", b =>
+                {
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany("OrderRecipients")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BazaR.Models.Pet", b =>
+                {
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany("Pets")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BazaR.Models.PremiumSubscription", b =>
+                {
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BazaR.Models.Review", b =>
                 {
                     b.HasOne("BazaR.Models.Item", "Item")
@@ -10097,7 +10586,18 @@ namespace BazaR.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BazaR.Models.UserUseStatistick", b =>
+            modelBuilder.Entity("BazaR.Models.Usluga", b =>
+                {
+                    b.HasOne("BazaR.Models.Item", "Item")
+                        .WithMany("Uslugi")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("BazaR.Models.Wallet", b =>
                 {
                     b.HasOne("BazaR.Models.User", "User")
                         .WithMany()
@@ -10108,15 +10608,15 @@ namespace BazaR.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BazaR.Models.Usluga", b =>
+            modelBuilder.Entity("BazaR.Models.WalletTransaction", b =>
                 {
-                    b.HasOne("BazaR.Models.Item", "Item")
-                        .WithMany("Uslugi")
-                        .HasForeignKey("ItemId")
+                    b.HasOne("BazaR.Models.Wallet", "Wallet")
+                        .WithMany()
+                        .HasForeignKey("WalletId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Item");
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("BazaR.Models.WishlistItem", b =>
@@ -10189,15 +10689,6 @@ namespace BazaR.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SearchItem", b =>
-                {
-                    b.HasOne("BazaR.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("BazaR.Models.Brand", b =>
                 {
                     b.Navigation("CategoryBrands");
@@ -10249,9 +10740,17 @@ namespace BazaR.Migrations
 
             modelBuilder.Entity("BazaR.Models.User", b =>
                 {
+                    b.Navigation("AdditionalInfos");
+
                     b.Navigation("CartItems");
 
+                    b.Navigation("DeliveryAddresses");
+
+                    b.Navigation("OrderRecipients");
+
                     b.Navigation("Orders");
+
+                    b.Navigation("Pets");
 
                     b.Navigation("Reviews");
 
