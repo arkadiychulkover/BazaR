@@ -7235,6 +7235,28 @@ namespace BazaR.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BazaR.Models.CategoryStatistik", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("VisitedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CategoryStatistiks");
+                });
+
             modelBuilder.Entity("BazaR.Models.City", b =>
                 {
                     b.Property<int>("Id")
@@ -9594,30 +9616,22 @@ namespace BazaR.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("DeliveryMethod")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<int>("DeliveryMethod")
+                        .HasColumnType("int");
 
                     b.Property<string>("Number")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
 
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("TotalAmount")
                         .HasPrecision(18, 2)
@@ -9960,6 +9974,27 @@ namespace BazaR.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BazaR.Models.UserUseStatistick", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("LastSeen")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserUseStatisticks");
+                });
+
             modelBuilder.Entity("BazaR.Models.Usluga", b =>
                 {
                     b.Property<int>("Id")
@@ -9992,8 +10027,6 @@ namespace BazaR.Migrations
                     b.ToTable("Uslugi");
                 });
 
-<<<<<<< Updated upstream
-=======
             modelBuilder.Entity("BazaR.Models.VisitingModel", b =>
                 {
                     b.Property<int>("Id")
@@ -10097,7 +10130,6 @@ namespace BazaR.Migrations
                     b.ToTable("WalletTransactions");
                 });
 
->>>>>>> Stashed changes
             modelBuilder.Entity("BazaR.Models.WishlistItem", b =>
                 {
                     b.Property<int>("Id")
@@ -10255,8 +10287,6 @@ namespace BazaR.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-<<<<<<< Updated upstream
-=======
             modelBuilder.Entity("SearchItem", b =>
                 {
                     b.Property<int>("Id")
@@ -10301,7 +10331,6 @@ namespace BazaR.Migrations
                     b.Navigation("User");
                 });
 
->>>>>>> Stashed changes
             modelBuilder.Entity("BazaR.Models.CartItem", b =>
                 {
                     b.HasOne("BazaR.Models.Item", "Item")
@@ -10586,6 +10615,17 @@ namespace BazaR.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BazaR.Models.UserUseStatistick", b =>
+                {
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BazaR.Models.Usluga", b =>
                 {
                     b.HasOne("BazaR.Models.Item", "Item")
@@ -10687,6 +10727,15 @@ namespace BazaR.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SearchItem", b =>
+                {
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BazaR.Models.Brand", b =>
