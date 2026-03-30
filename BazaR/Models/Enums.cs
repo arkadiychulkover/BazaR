@@ -94,4 +94,13 @@ namespace BazaR.Models
         Boolean,
         Range
     }
+
+    public enum UserAction
+    {
+        VisitingPage = 1,
+        AddToCart = 2,
+        AddToWishList = 3,
+        MakeOrder = 4,
+        Browse = 5,
+    }
 }

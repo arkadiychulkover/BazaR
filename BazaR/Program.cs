@@ -3,8 +3,11 @@ using BazaR.Filters;
 using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.Repositories;
+using BazaR.Repository;
+using BazaR.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +27,14 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequiredLength = 6;
     options.User.RequireUniqueEmail = true;
+
+    options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
+    options.ClaimsIdentity.UserNameClaimType = ClaimTypes.Name;
+    options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role;
+
+    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromDays(365);
+    options.Lockout.MaxFailedAccessAttempts = 5;
 
     options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
 })
@@ -57,26 +68,23 @@ builder.Services
         options.SaveTokens = true;
     });
 
+builder.Services.AddScoped<DbMaker>();
 builder.Services.AddScoped<UserContextFilter>();
+builder.Services.AddScoped<LoggerActionFilter>();
+builder.Services.AddScoped<BlockResourseFilter>();
+builder.Services.AddScoped<OnlineResourceFilter>();
+builder.Services.AddSingleton<ActiveUsersService>();
 builder.Services.AddScoped<IUserDb, UserRepository>();
+builder.Services.AddTransient<ILogDb, LogDbRepository>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
+builder.Services.AddTransient<IUserStatistick, UserStatistickRpeository>();
 
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    if (await userManager.FindByEmailAsync("admin@bazar.ua") == null)
-    {
-        var admin = new User
-        {
-            Email = "admin@bazar.ua",
-            UserName = "admin@bazar.ua",
-            Name = "Admin User",
-            IsAdmin = true
-        };
-        await userManager.CreateAsync(admin, "admin123");
-    }
+    var dbMaker = scope.ServiceProvider.GetRequiredService<DbMaker>();
+    await dbMaker.MakeAsync();
 }
 
 if (!app.Environment.IsDevelopment())

@@ -1,0 +1,62 @@
+﻿@using BazaR.Data
+@model List<BazaR.Models.VisitingModel>
+@inject AppDbContext context
+
+@{
+    ViewData["Title"] = "Logs";
+}
+
+<h2>All Logs</h2>
+<form asp-action="DeleteLogs" method="post" class="d-inline">
+    <button type="submit" class="btn btn-outline-danger btn-sm ms-3">
+        <i class="bi bi-trash"></i> Очистить логи
+    </button>
+</form>
+<a asp-action="Index" class="btn btn-secondary mb-3">Главная</a>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>UserId</th>
+            <th>Action</th>
+            <th>Controller</th>
+            <th>Action Name</th>
+            <th>ItemId</th>
+            <th>OrderId</th>
+            <th>Search</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var log in Model)
+        {
+            <tr>
+                <td>@log.Id</td>
+                <td>
+                    <a asp-action="GetLogByUserId" asp-route-id="@log.UserId">
+                        @log.UserId
+                    </a>
+                </td>
+                <td>@log.userAction</td>
+                <td>@log.ControllerName</td>
+                <td>@log.ActionName</td>
+                <td>@log.ItemId</td>
+                <td>@log.OrderId</td>
+                <td>
+                    @if (log.SearchFilters != null)
+                    {
+                        <div>
+                            <b>Query:</b> @log.SearchFilters.Query <br />
+                            <b>Page:</b> @log.SearchFilters.Page <br />
+                            <b>Sort:</b> @log.SearchFilters.Sort <br />
+                            <b>Price:</b> @log.SearchFilters.MinPrice - @log.SearchFilters.MaxPrice
+                        </div>
+                    }
+                    else
+                    {
+                        <span>-</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

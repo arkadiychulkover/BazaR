@@ -608,7 +608,7 @@ namespace BazaR.Controllers
 
             switch (dto.Field)
             {
-                case "firstName": user.Name = dto.Value; await _userManager.UpdateAsync(user); break;
+                case "firstName": user.FirstName = dto.Value; await _userManager.UpdateAsync(user); break;
                 case "lastName": user.LastName = dto.Value; await _userManager.UpdateAsync(user); break;
                 case "middleName": user.MiddleName = dto.Value; await _userManager.UpdateAsync(user); break;
                 case "birthDate": user.BirthDate = DateOnly.TryParse(dto.Value, out var d) ? d : null; await _userManager.UpdateAsync(user); break;

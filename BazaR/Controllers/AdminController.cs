@@ -2,7 +2,6 @@ using BazaR.Data;
 using BazaR.Filters;
 using BazaR.Interfaces;
 using BazaR.Models;
-using BazaR.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +17,6 @@ namespace BazaR.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly AppDbContext _appDbContext;
         private readonly IUserDb _UserRepo;
-        private readonly IUserStatistick _StatistickRepo;
         private readonly string adminRoleName = "Admin";
 
         public AdminController(
@@ -26,26 +24,25 @@ namespace BazaR.Controllers
             RoleManager<IdentityRole<int>> roleManager,
             SignInManager<User> signInManager,
             AppDbContext appDbContext,
-            IUserDb userDb, IUserStatistick StatistickRepo)
+            IUserDb userDb)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
             _appDbContext = appDbContext;
             _UserRepo = userDb;
-            _StatistickRepo = StatistickRepo;
         }
 
         #region Users
 
         [HttpGet]
-        public IActionResult Index([FromServices] ActiveUsersService service)
+        public IActionResult Index()
         {
             IQueryable<User> users = _appDbContext.Users;
-            ViewBag.Active = service.GetOnlineUsersCount();
-            ViewBag.ForMonth = _StatistickRepo.GetUsersCountForMonthAsync();
-            ViewBag.ForWeek = _StatistickRepo.GetUsersCountForWeekAsync();
-            ViewBag.ForDay = _StatistickRepo.GetUsersCountForDayAsync();
+            ViewBag.Active = 0;
+            ViewBag.ForMonth = 0;
+            ViewBag.ForWeek = 0;
+            ViewBag.ForDay = 0;
             return View(users);
         }
 
@@ -307,27 +304,26 @@ namespace BazaR.Controllers
         [HttpGet]
         public async Task<IActionResult> PopularCategories()
         {
-            var popularDict = await _StatistickRepo.GetPopularCategoryAsync();
+            var popularDict = await _appDbContext.Categories
+                .OrderBy(c => c.Name)
+                .Take(20)
+                .ToDictionaryAsync(c => c.Name, c => 0);
             return View(popularDict);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetLog()
+        public IActionResult GetLog()
         {
-            List<VisitingModel> log = _appDbContext.VisitingModels.ToList();
-            foreach (VisitingModel model in log) 
-            {
-                if(model.SearchFilters != null)
-                    Console.WriteLine(model.SearchFilters.Id);
+            var log = _appDbContext.VisitingModels.ToList();
+            foreach (var _ in log)
                 Console.WriteLine("\n\nLOGS\n\n");
-            }
             return View(log);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetLogByUserId(int id) 
+        public IActionResult GetLogByUserId(int id)
         {
-            List<VisitingModel> log = _appDbContext.VisitingModels.Where<VisitingModel>(v => v.UserId == id).ToList();
+            var log = _appDbContext.VisitingModels.Where(v => v.UserId == id).ToList();
             return View(log);
         }
 

@@ -42,6 +42,9 @@ namespace BazaR.Data
         public DbSet<LookedCard> LookedCards { get; set; }
         public DbSet<MailingSetting> MailingSettings { get; set; }
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
+        public DbSet<VisitingModel> VisitingModels { get; set; }
+        public DbSet<UserUseStatistick> UserUseStatisticks { get; set; }
+        public DbSet<CategoryStatistik> CategoryStatistiks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -330,6 +333,14 @@ namespace BazaR.Data
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Name).IsUnique();
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<VisitingModel>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SearchFiltersJson)
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("SearchFilters");
             });
 
             // Заполнение начальными данными
