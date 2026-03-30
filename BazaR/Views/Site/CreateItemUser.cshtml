@@ -1,0 +1,124 @@
+﻿@model BazaR.Models.Item
+@using BazaR.Models
+
+@{
+    ViewData["Title"] = "Создание товара";
+}
+
+<div class="container mt-4" style="max-width: 900px;">
+
+    <h3 class="mb-4">Создание товара</h3>
+
+    <form asp-action="CreateItemUser" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <!-- Название -->
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Название</label>
+            <input asp-for="Name" class="form-control" />
+        </div>
+
+        <!-- Описание -->
+        <div class="mb-3">
+            <label asp-for="Desc" class="form-label">Описание</label>
+            <textarea asp-for="Desc" class="form-control" rows="4"></textarea>
+        </div>
+
+        <!-- Цена + гарантия -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="Price" class="form-label">Цена</label>
+                <input asp-for="Price" class="form-control" type="number" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Garantia" class="form-label">Гарантия</label>
+                <input asp-for="Garantia" class="form-control" type="number" />
+            </div>
+        </div>
+
+        <!-- Категория + бренд -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="CategoryId" class="form-label">Категория</label>
+                <select id="categorySelect"
+                        asp-for="CategoryId"
+                        class="form-select"
+                        asp-items="new SelectList(ViewBag.Categories, nameof(Category.Id), nameof(Category.Name))">
+                    <option value="">Выберите категорию</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="BrandId" class="form-label">Бренд</label>
+                <select id="brandSelect"
+                        asp-for="BrandId"
+                        class="form-select">
+                    <option value="">Сначала выберите категорию</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Изображение -->
+        <div class="mb-4">
+            <label class="form-label">Изображение</label>
+            <input type="file" name="imageFile" class="form-control" />
+        </div>
+
+        <!-- Чекбоксы -->
+        <div class="form-check mb-2">
+            <input asp-for="IsAvailable" class="form-check-input" />
+            <label asp-for="IsAvailable" class="form-check-label">В наличии</label>
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="IsReadyToSend" class="form-check-input" />
+            <label asp-for="IsReadyToSend" class="form-check-label">Готов к отправке</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Создать товар
+        </button>
+
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        const categorySelect = document.getElementById("categorySelect");
+        const brandSelect = document.getElementById("brandSelect");
+
+        categorySelect.addEventListener("change", function () {
+            const categoryId = this.value;
+
+            brandSelect.innerHTML = '<option>Загрузка...</option>';
+            brandSelect.disabled = true;
+
+            if (!categoryId) {
+                brandSelect.innerHTML = '<option>Сначала выберите категорию</option>';
+                return;
+            }
+
+            fetch(`/Site/GetBrandsByCategory?categoryId=${categoryId}`)
+                .then(res => res.json())
+                .then(data => {
+                    brandSelect.innerHTML = '<option value="">Выберите бренд</option>';
+
+                    data.forEach(b => {
+                        const option = document.createElement("option");
+                        option.value = b.id;
+                        option.textContent = b.name;
+                        brandSelect.appendChild(option);
+                    });
+
+                    brandSelect.disabled = false;
+                });
+        });
+    </script>
+}

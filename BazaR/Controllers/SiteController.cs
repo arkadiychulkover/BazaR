@@ -2,6 +2,7 @@ using BazaR.Data;
 using BazaR.Filters;
 using BazaR.Interfaces;
 using BazaR.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -1044,6 +1045,62 @@ namespace BazaR.Controllers
         public List<Item> FilterItems(int? categoryId, int? brandId, decimal? minPrice, decimal? maxPrice, bool? isAvailable)
             => _itMan.Filter(categoryId, brandId, minPrice, maxPrice, isAvailable);
 
+        [Authorize]
+        [HttpGet]
+        public IActionResult CreateItemUser() 
+        {
+            List<Category> catigories = _db.Categories.ToList();
+            List<Brand> brands = _db.Brands.ToList();
+
+            ViewBag.Categories = catigories;
+            ViewBag.Brands = brands;
+
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult GetBrandsByCategory(int categoryId) 
+        {
+            List<Brand> brands = _db.CategoryBrands
+                .Where(cb => cb.CategoryId == categoryId)
+                .Include(cb => cb.Brand)
+                .Select(cb => cb.Brand)
+                .Distinct()
+                .ToList();
+
+            return Json(brands);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreateItemUser(Item model, List<ItemCharacteristic> Characteristics, List<ItemColor> Colors, List<Usluga> SelectedUslugs, IFormFile imageFile)
+        {
+            if (model == null || Characteristics == null || Colors == null || SelectedUslugs == null || imageFile == null)
+                return RedirectToAction(nameof(CreateItemUser));
+
+            User us = await _userManager.GetUserAsync(User);
+
+            string filename = $"{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/items", filename);
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                imageFile.CopyTo(stream);
+            }
+
+            model.Characteristics = Characteristics;
+            model.Colors = Colors;
+            model.Uslugi = SelectedUslugs;
+            model.UserId = us.Id;
+            model.ImageUrl = path;
+
+            _db.Items.Add(model);
+            _db.SaveChanges();
+
+            return RedirectToAction(nameof(ItemDetails), new { id = model.Id });
+        }
+
+
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CreateItem(Item item)
@@ -1184,6 +1241,8 @@ namespace BazaR.Controllers
             _db.SaveChanges();
             return Content("OK");
         }
+
+        
     }
 
     public static class SessionExtensions
