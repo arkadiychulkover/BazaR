@@ -394,8 +394,8 @@ namespace BazaR.Repositories
                 order.UserId = userId;
                 order.Number = GenerateOrderNumber();
                 order.CreatedAt = DateTime.UtcNow;
-                order.Status = "Новий";
-                order.PaymentStatus = "Очікує оплати";
+                order.Status = OrderStatus.New;
+                order.PaymentStatus = OrderPaymentStatus.Pending;
 
                 _context.Orders.Add(order);
                 return _context.SaveChanges() > 0;
@@ -443,28 +443,7 @@ namespace BazaR.Repositories
                 var order = _context.Orders.Find(orderId);
                 if (order == null) return false;
 
-                if (order.Status == "Скасовано")
-                    return false;
-
-                var bonusAccount = _context.BonusAccounts
-                    .FirstOrDefault(x => x.UserId == order.UserId);
-
-                if (bonusAccount != null)
-                {
-                    var bonusAmount = (int)(order.TotalAmount * bonusAccount.AccrualRate);
-
-                    bonusAccount.TotalBalance -= bonusAmount;
-                    if (bonusAccount.TotalBalance < 0)
-                        bonusAccount.TotalBalance = 0;
-
-                    bonusAccount.MonthlyAccrued -= bonusAmount;
-                    if (bonusAccount.MonthlyAccrued < 0)
-                        bonusAccount.MonthlyAccrued = 0;
-
-                    bonusAccount.UpdatedAt = DateTime.UtcNow;
-                }
-
-                order.Status = "Скасовано";
+                order.Status = OrderStatus.Cancelled;
                 return _context.SaveChanges() > 0;
             }
             catch
@@ -478,7 +457,7 @@ namespace BazaR.Repositories
         public IQueryable<Item> GetItemsInDelivery(int userId)
         {
             return _context.Orders
-                .Where(o => o.UserId == userId && o.Status == "Відправлено")
+                .Where(o => o.UserId == userId && o.Status == OrderStatus.Shipped)
                 .SelectMany(o => o.OrderItems)
                 .Select(oi => oi.Item)
                 .Include(i => i.Brand)

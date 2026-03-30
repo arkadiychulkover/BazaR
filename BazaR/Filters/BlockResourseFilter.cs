@@ -21,7 +21,7 @@ namespace BazaR.Filters
             if (us != null && us.LockoutEnabled && us.LockoutEnd.HasValue && us.LockoutEnd.Value > DateTimeOffset.UtcNow)
             {
                 Console.WriteLine($"============================================{us.Id}, {us.LockoutEnabled}, {us.Name}");
-                context.Result = new RedirectToActionResult("Account", "Blocked", null);
+                context.Result = new RedirectToActionResult("AccessDenied", "Account", null);
                 return;
             }
             await next();

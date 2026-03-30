@@ -1,4 +1,4 @@
-﻿@model AccountOrderDetailViewModel
+@model AccountOrderDetailViewModel
 
 @{
     ViewData["Title"] = $"Замовлення №{Model.Order.Number}";
@@ -9,12 +9,12 @@
 
     var statusClass = Model.Order.Status switch
     {
-        "Нове"        => "os--new",
-        "В обробці"   => "os--processing",
-        "Відправлено" => "os--shipped",
-        "Доставлено"  => "os--delivered",
-        "Скасовано"   => "os--cancelled",
-        _             => "os--new"
+        BazaR.Models.OrderStatus.New        => "os--new",
+        BazaR.Models.OrderStatus.Processing => "os--processing",
+        BazaR.Models.OrderStatus.Shipped    => "os--shipped",
+        BazaR.Models.OrderStatus.Delivered  => "os--delivered",
+        BazaR.Models.OrderStatus.Cancelled  => "os--cancelled",
+        _                                   => "os--new"
     };
 }
 <style>
@@ -177,7 +177,7 @@
                 <a href="@Url.Action("Orders","Profile")" class="od-btn od-btn--back">
                     <i class="bi bi-arrow-left me-1"></i> Всі замовлення
                 </a>
-                @if (Model.Order.Status != "Скасовано" && Model.Order.Status != "Доставлено")
+                @if (Model.Order.Status != BazaR.Models.OrderStatus.Cancelled && Model.Order.Status != BazaR.Models.OrderStatus.Delivered)
                 {
                     <form asp-action="CancelOrder" asp-controller="Profile" method="post" style="display:inline;">
                         @Html.AntiForgeryToken()

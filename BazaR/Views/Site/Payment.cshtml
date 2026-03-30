@@ -579,7 +579,7 @@
         </a>
     </div>
 
-    <form asp-action="ProcessPayment" asp-controller="Site" method="post" id="payForm" autocomplete="off">
+    <form asp-action="ProcessPayment" method="post" id="payForm" autocomplete="off">
         @Html.AntiForgeryToken()
         <input type="hidden" name="orderId" value="@Model.Id" />
 

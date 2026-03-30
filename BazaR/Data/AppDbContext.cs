@@ -10,14 +10,8 @@ namespace BazaR.Data
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
-            //Database.EnsureCreated();
         }
-        public DbSet<Pet> Pets { get; set; }
-        public DbSet<DeliveryAddress> DeliveryAddresses { get; set; }
-        public DbSet<WalletTransaction> WalletTransactions { get; set; }
-        public DbSet<AdditionalInfo> AdditionalInfos { get; set; }
-        public DbSet<OrderRecipient> OrderRecipients { get; set; }
-        public DbSet<Message> Messages { get; set; }
+
         public DbSet<Category> Categories { get; set; }
         public DbSet<CategoryFilter> CategoryFilters { get; set; }
         public DbSet<CategoryBrand> CategoryBrands { get; set; }
@@ -38,12 +32,20 @@ namespace BazaR.Data
         public DbSet<SearchItem> SearchItems { get; set; }
         public DbSet<UserUseStatistick> UserUseStatisticks { get; set; }
         public DbSet<CategoryStatistik> CategoryStatistiks { get; set; }
+        public DbSet<VisitingModel> VisitingModels { get; set; }
+
+        public DbSet<Pet> Pets { get; set; }
+        public DbSet<DeliveryAddress> DeliveryAddresses { get; set; }
+        public DbSet<OrderRecipient> OrderRecipients { get; set; }
+        public DbSet<AdditionalInfo> AdditionalInfos { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<BonusAccount> BonusAccounts { get; set; }
         public DbSet<Promotion> Promotions { get; set; }
         public DbSet<PremiumSubscription> PremiumSubscriptions { get; set; }
-        public DbSet<MailingSetting> MailingSettings { get; set; }
-        public DbSet<BonusAccount> BonusAccounts { get; set; }
         public DbSet<LookedCard> LookedCards { get; set; }
+        public DbSet<MailingSetting> MailingSettings { get; set; }
+        public DbSet<WalletTransaction> WalletTransactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -95,6 +97,14 @@ namespace BazaR.Data
                     .WithMany(c => c.Filters)
                     .HasForeignKey(cf => cf.CategoryId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<VisitingModel>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SearchFiltersJson)
+                    .HasColumnType("nvarchar(max)") // Для SQL Server
+                    .HasColumnName("SearchFilters");
             });
 
             // Настройка CategoryBrand (составной ключ)
@@ -290,10 +300,10 @@ namespace BazaR.Data
                 entity.Property(e => e.Number).IsRequired().HasMaxLength(50);
                 entity.HasIndex(e => e.Number).IsUnique();
                 entity.Property(e => e.Address).IsRequired().HasMaxLength(500);
-                entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
-                entity.Property(e => e.PaymentMethod).HasMaxLength(50);
-                entity.Property(e => e.PaymentStatus).HasMaxLength(50);
-                entity.Property(e => e.DeliveryMethod).HasMaxLength(100);
+                entity.Property(e => e.Status).IsRequired();
+                entity.Property(e => e.PaymentMethod);
+                entity.Property(e => e.PaymentStatus);
+                entity.Property(e => e.DeliveryMethod);
                 entity.Property(e => e.Ttn).HasMaxLength(100);
                 entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
 

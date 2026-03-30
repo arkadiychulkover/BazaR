@@ -1,9 +1,9 @@
-﻿using BazaR.Data;
+using BazaR.Data;
 using BazaR.Filters;
 using BazaR.Interfaces;
 using BazaR.Models;
-using BazaR.Services;
 using BazaR.ViewModels;
+using BazaR.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -37,9 +37,6 @@ namespace BazaR.Controllers
             _StatistickRepo = StatistickRepo;
         }
 
-        // =========================
-        // USERS
-        // =========================
         #region Users
 
         [HttpGet]
@@ -137,9 +134,6 @@ namespace BazaR.Controllers
 
         #endregion
 
-        // =========================
-        // USER STATISTIC
-        // =========================
         [HttpGet]
         public async Task<IActionResult> UserStatistic(int id)
         {
@@ -154,9 +148,6 @@ namespace BazaR.Controllers
             return View(us);
         }
 
-        // =========================
-        // ITEMS
-        // =========================
         #region Items
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -205,9 +196,6 @@ namespace BazaR.Controllers
         }
         #endregion
 
-        // =========================
-        // REVIEWS
-        // =========================
         #region Reviews
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -248,9 +236,6 @@ namespace BazaR.Controllers
         }
         #endregion
 
-        // =========================
-        // ORDERS
-        // =========================
         #region Orders
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -284,23 +269,73 @@ namespace BazaR.Controllers
 
             return View(order);
         }
-        #endregion
 
-        // =========================
-        // POPULAR CATEGORIES
-        // =========================
         [HttpGet]
-        public async Task<IActionResult> PopularCategories()
+        public async Task<IActionResult> EditOrder(int id)
         {
-            var popularDict = await _StatistickRepo.GetPopularCategoryAsync();
-            return View(popularDict);
+            Order order = await _appDbContext.Orders
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null) return RedirectToAction(nameof(Index));
+            return View(order);
         }
 
-        // =========================
-        // Mails To Users
-        // =========================
-        #region Mails
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditOrder(int id,
+            OrderStatus status,
+            OrderPaymentMethod paymentMethod,
+            OrderPaymentStatus paymentStatus,
+            OrderDeliveryMethod deliveryMethod,
+            string? ttn)
+        {
+            Order order = await _appDbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
+            if (order == null) return RedirectToAction(nameof(Index));
 
+            order.Status = status;
+            order.PaymentMethod = paymentMethod;
+            order.PaymentStatus = paymentStatus;
+            order.DeliveryMethod = deliveryMethod;
+            order.Ttn = ttn?.Trim();
+
+            await _appDbContext.SaveChangesAsync();
+            TempData["Ok"] = $"Замовлення №{order.Number} оновлено.";
+            return RedirectToAction(nameof(OrderDetails), new { id });
+        }
+        #endregion
+
+        #region Promotions
+        [HttpGet]
+        public async Task<IActionResult> Promotions()
+        {
+            var promotions = await _appDbContext.Promotions.ToListAsync();
+            return View(promotions);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPromotion(Promotion prom)
+        {
+            _appDbContext.Promotions.Add(prom);
+            await _appDbContext.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePromotion(int id)
+        {
+            var promotion = await _appDbContext.Promotions.FindAsync(id);
+
+            if (promotion != null)
+            {
+                _appDbContext.Promotions.Remove(promotion);
+                await _appDbContext.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Promotions));
+        }
+        #endregion
+
+        #region Mails
         [HttpGet]
         public async Task<IActionResult> IndexMail(int id)
         {
@@ -379,34 +414,43 @@ namespace BazaR.Controllers
 
             return RedirectToAction(nameof(IndexMail), new { id = userId });
         }
-        #endregion
+#endregion
 
         [HttpGet]
-        public async Task<IActionResult> Promotions()
+        public async Task<IActionResult> PopularCategories()
         {
-            var promotions = await _appDbContext.Promotions.ToListAsync();
-            return View(promotions);
+            var popularDict = await _StatistickRepo.GetPopularCategoryAsync();
+            return View(popularDict);
         }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddPromotion(Promotion prom)
-        {
-            _appDbContext.Promotions.Add(prom);
-            await _appDbContext.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeletePromotion(int id)
-        {
-            var promotion = await _appDbContext.Promotions.FindAsync(id);
 
-            if (promotion != null)
+        [HttpGet]
+        public async Task<IActionResult> GetLog()
+        {
+            List<VisitingModel> log = _appDbContext.VisitingModels.ToList();
+            foreach (VisitingModel model in log) 
             {
-                _appDbContext.Promotions.Remove(promotion);
-                await _appDbContext.SaveChangesAsync();
+                if(model.SearchFilters != null)
+                    Console.WriteLine(model.SearchFilters.Id);
+                Console.WriteLine("\n\nLOGS\n\n");
             }
-            return RedirectToAction(nameof(Promotions));
+            return View(log);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetLogByUserId(int id) 
+        {
+            List<VisitingModel> log = _appDbContext.VisitingModels.Where<VisitingModel>(v => v.UserId == id).ToList();
+            return View(log);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteLogs() 
+        {
+            _appDbContext.VisitingModels.RemoveRange(_appDbContext.VisitingModels);
+            await _appDbContext.SaveChangesAsync();
+
+            await _appDbContext.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('VisitingModels', RESEED, 0)");
+            return RedirectToAction("GetLog");
         }
     }
 }

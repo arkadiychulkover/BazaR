@@ -1,4 +1,4 @@
-﻿using BazaR.Models;
+using BazaR.Models;
 
 namespace BazaR.ViewModels
 {

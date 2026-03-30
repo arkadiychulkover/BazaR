@@ -1,182 +1,771 @@
-@model BazaR.Models.Item
+@model BazaR.ViewModels.ItemDetailsViewModel
 
 @{
-    ViewData["Title"] = Model?.Name ?? "Товар";
-    var images = ViewBag.Images as List<string> ?? new List<string>();
-    var category = ViewBag.Category as BazaR.Models.Category;
-    var related = ViewBag.RelationItems as List<BazaR.Models.Item> ?? new List<BazaR.Models.Item>();
-    var seller = ViewBag.Seller as BazaR.Models.User;
-    var isInCart = ViewBag.IsInCart as bool? ?? false;
-    var isInWishlist = ViewBag.IsInWishlist as bool? ?? false;
+    ViewData["Title"] = Model.Item.Name ?? "Товар";
+    var item = Model.Item;
+    var images = Model.Images;
+    var category = Model.Category;
+    var related = Model.RelatedItems;
+    var recommended = Model.RecommendedItems;
+    var seller = Model.Seller;
+    var isInCart = Model.IsInCart;
+    var isInWishlist = Model.IsInWishlist;
+    var isAuthenticated = Model.IsAuthenticated;
+    var avgRating = Model.AverageRating;
+    var reviewCount = Model.ReviewCount;
+
+    var mainImage = images.FirstOrDefault() ?? WebPaths.DefaultItemImage;
+
+    string SellerLabel(BazaR.Models.SellerType t) => t switch
+    {
+        BazaR.Models.SellerType.bazar => "BazaR",
+        BazaR.Models.SellerType.otherSeller => "Інший продавець",
+        BazaR.Models.SellerType.otherSellerOnSklad => "Інший продавець (зі складу)",
+        _ => "Продавець"
+    };
+
+    string CharDisplayName(string key) => key?.ToLowerInvariant() switch
+    {
+        "processor" => "Процесор",
+        "ram" => "Об'єм оперативної пам'яті",
+        "storage" => "Накопичувач",
+        "screen_size" => "Діагональ екрану",
+        "color" => "Колір",
+        "memory" => "Пам'ять",
+        "graphics" => "Відеокарта",
+        _ => string.IsNullOrEmpty(key) ? "" : System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(key.Replace('_', ' '))
+    };
+
+    const int pdpCharsInitial = 5;
+    var charsOrdered = item.Characteristics.OrderBy(c => c.Id).ToList();
+    var charStorage = charsOrdered.FirstOrDefault(c => c.Key.Equals("storage", StringComparison.OrdinalIgnoreCase))?.Value;
+    var charRam = charsOrdered.FirstOrDefault(c => c.Key.Equals("ram", StringComparison.OrdinalIgnoreCase))?.Value;
+    var charProcessor = charsOrdered.FirstOrDefault(c => c.Key.Equals("processor", StringComparison.OrdinalIgnoreCase))?.Value;
+
+    var descTrimmed = item.Desc?.Trim() ?? "";
+    var hasDesc = descTrimmed.Length > 0;
+
+    var uk = new System.Globalization.CultureInfo("uk-UA");
+    var reviewsOrdered = item.Reviews.OrderByDescending(x => x.CreatedAt).ToList();
+    var useDemoReviews = !reviewsOrdered.Any();
+    // Лічильник завжди з БД; «три відгуки» без записів у БД — лише приклад верстки (див. блок нижче).
+    var displayReviewCount = reviewCount;
+
+    string[] demoPros = { "Корпус, додаткове місце під SSD", "Тиха робота в офісних задачах, гарна автономність", "Зручна клавіатура, приємне покриття корпусу" };
+    string[] demoCons = { "Слабкий екран, один слот пам'яті", "Кулер чутно під навантаженням", "Порти лише з одного боку" };
+    string[] demoBodies = {
+        "Купував для роботи та навчання. За два тижні — без нарікань: швидко завантажується, Wi‑Fi стабільний. Вентилятор інколи шумить під навантаженням, але для документів і браузера майже не чутно.",
+        "Добре зібраний ноутбук за свої гроші. Екран для фільмів підійде, для дизайну — беріть з кращою матрицею. Клавіатура приємна на дотик, тачпад точний.",
+        "Доставка швидка, упаковка ціла. Користуюся щодня: зум, таблиці, листування — все літає. Єдине — хотілося б яскравішого дисплея на сонці."
+    };
 }
 
-<div class="container mt-4">
-    <div class="row g-4">
-        <div class="col-md-5">
-            <div class="card">
-                <div class="card-body">
-                    @if (images.Any())
+@Html.AntiForgeryToken()
+
+<div class="pdp">
+
+    <!-- ===== BREADCRUMB ===== -->
+    <nav class="pdp-bc">
+        <a href="@Url.Action("Index", "Site")"><i class="bi bi-house-door"></i></a>
+        @if (category?.ParentCategory != null)
+        {
+            <span class="pdp-bc__sep">&rsaquo;</span>
+            <a href="@Url.Action("Browse", "Site", new { categoryId = category.ParentCategoryId })">@category.ParentCategory.Name</a>
+        }
+        @if (category != null)
+        {
+            <span class="pdp-bc__sep">&rsaquo;</span>
+            <a href="@Url.Action("Browse", "Site", new { categoryId = category.Id })">@category.Name</a>
+        }
+    </nav>
+
+    <!-- ===== TITLE + CODE + SELLER (як на макеті) ===== -->
+    <div class="pdp-hero">
+        <div class="pdp-hero__left">
+            <h1 class="pdp-h1">@item.Name</h1>
+            <div class="pdp-code">Код: @item.Id</div>
+        </div>
+        <div class="pdp-hero__right">
+            <div class="pdp-seller">
+                <span class="pdp-seller__lbl">Продавець:</span>
+                <a href="#" class="pdp-seller__name">@(SellerLabel(item.SellerType))</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TAB BAR ===== -->
+    <div class="pdp-tabs">
+        <div class="pdp-tabs__left">
+            <a href="#pdp-about" class="pdp-tabs__link pdp-tabs__link--active">Усе про товар</a>
+            <a href="#pdp-chars-section" class="pdp-tabs__link">Характеристики</a>
+            <a href="#pdp-reviews-section" class="pdp-tabs__link">Відгуки</a>
+        </div>
+    </div>
+
+    <!-- ===== TOP: GALLERY + SPECS (left) | BUY PANEL (right) ===== -->
+    <div class="pdp-top" id="pdp-about">
+
+        <div class="pdp-top__left">
+            <!-- Gallery -->
+            <div class="pdp-gallery-shell">
+            <div class="pdp-gallery">
+                <div class="pdp-gallery__thumbs">
+                    @for (int i = 0; i < images.Count; i++)
                     {
-                        <div id="itemCarousel" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-inner">
-                                @for (int i = 0; i < images.Count; i++)
+                        <button class="pdp-gallery__thumb @(i == 0 ? "pdp-gallery__thumb--act" : "")"
+                                onclick="pdpImg(this,'@images[i]')">
+                            <img src="@images[i]" alt="" onerror="this.onerror=null;this.src='@WebPaths.DefaultItemImage';" />
+                        </button>
+                    }
+                    @if (!images.Any())
+                    {
+                        <button class="pdp-gallery__thumb pdp-gallery__thumb--act">
+                            <img src="@WebPaths.DefaultItemImage" alt="" />
+                        </button>
+                    }
+                </div>
+                <div class="pdp-gallery__main">
+                    <img id="pdpMainImg" src="@mainImage" alt="@item.Name"
+                         onerror="this.onerror=null;this.src='@WebPaths.DefaultItemImage';" />
+                </div>
+            </div>
+            </div>
+
+            <!-- Характеристики — під галереєю, як на макеті -->
+            @if (charsOrdered.Any())
+            {
+                <div class="pdp-chars-card" id="pdp-chars-section">
+                    <div class="pdp-chars-card__inner">
+                        <div class="pdp-chars-list-wrap">
+                            <h2 class="pdp-chars-card__title">Основні характеристики:</h2>
+                            <div class="pdp-chars-list">
+                                @for (var ci = 0; ci < charsOrdered.Count; ci++)
                                 {
-                                    <div class="carousel-item @(i == 0 ? "active" : "")">
-                                        <img src="@images[i]" class="d-block w-100" style="object-fit: cover; height: 340px;" alt="@Model.Name" />
+                                    var ch = charsOrdered[ci];
+                                    var rowClass = ci >= pdpCharsInitial ? "pdp-char-row pdp-char-row--extra" : "pdp-char-row";
+                                    <div class="@rowClass" data-char-index="@ci">
+                                        <span class="pdp-char-row__k">@CharDisplayName(ch.Key)</span>
+                                        <span class="pdp-char-row__dots" aria-hidden="true"></span>
+                                        <span class="pdp-char-row__v">@ch.Value</span>
                                     </div>
                                 }
                             </div>
-                            @if (images.Count > 1)
+                            @if (charsOrdered.Count > pdpCharsInitial)
                             {
-                                <button class="carousel-control-prev" type="button" data-bs-target="#itemCarousel" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#itemCarousel" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
+                                <button type="button" class="pdp-chars-toggle" id="pdpCharsToggle" aria-expanded="false">
+                                    Показати ще
                                 </button>
                             }
+                            <button type="button"
+                                    class="pdp-chars-all-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#pdpCharsFullModal"
+                                    aria-haspopup="dialog">
+                                Всі характеристики
+                                <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
+                            </button>
                         </div>
-                    }
-                    else
+                        @{
+                            var hasBadges = !string.IsNullOrEmpty(charProcessor) || !string.IsNullOrEmpty(charRam) || !string.IsNullOrEmpty(charStorage);
+                        }
+                        @if (hasBadges)
+                        {
+                            <aside class="pdp-chars-badges" aria-label="Ключові особливості">
+                                @if (!string.IsNullOrEmpty(charProcessor))
+                                {
+                                    <div class="pdp-chars-badge">
+                                        <i class="bi bi-cpu-fill pdp-chars-badge__icon"></i>
+                                        <span class="pdp-chars-badge__label">@charProcessor</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(charRam))
+                                {
+                                    <div class="pdp-chars-badge">
+                                        <span class="pdp-chars-badge__num">8</span>
+                                        <span class="pdp-chars-badge__unit">ядер</span>
+                                        <span class="pdp-chars-badge__label">RAM @charRam</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(charStorage))
+                                {
+                                    <div class="pdp-chars-badge">
+                                        <span class="pdp-chars-badge__chip-text">SSD</span>
+                                        <span class="pdp-chars-badge__label">@charStorage</span>
+                                    </div>
+                                }
+                            </aside>
+                        }
+                    </div>
+                </div>
+
+                <div class="modal fade" id="pdpCharsFullModal" tabindex="-1" aria-labelledby="pdpCharsFullModalTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+                        <div class="modal-content pdp-chars-modal">
+                            <div class="modal-header pdp-chars-modal__header">
+                                <div>
+                                    <h2 class="modal-title h5 mb-1" id="pdpCharsFullModalTitle">@item.Name</h2>
+                                    <p class="text-muted small mb-0">Повний перелік характеристик</p>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрити"></button>
+                            </div>
+                            <div class="modal-body pdp-chars-modal__body">
+                                <section class="pdp-chars-modal__section">
+                                    <h3 class="pdp-chars-modal__h">Технічні характеристики</h3>
+                                    <div class="pdp-chars-modal__list">
+                                        @foreach (var ch in charsOrdered)
+                                        {
+                                            <div class="pdp-chars-modal__row">
+                                                <span class="pdp-chars-modal__k">@CharDisplayName(ch.Key)</span>
+                                                <span class="pdp-chars-modal__dots" aria-hidden="true"></span>
+                                                <span class="pdp-chars-modal__v">@ch.Value</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </section>
+                                @if (hasDesc)
+                                {
+                                    <section class="pdp-chars-modal__section">
+                                        <h3 class="pdp-chars-modal__h">Опис</h3>
+                                        <div class="pdp-chars-modal__desc">@descTrimmed</div>
+                                    </section>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- RIGHT — Info panel -->
+        <div class="pdp-right">
+
+            <!-- Price row -->
+            <div class="pdp-price-block">
+                @if (item.Colors != null && item.Colors.Any())
+                {
+                    <div class="pdp-swatches" aria-label="Кольори">
+                        @foreach (var c in item.Colors.Take(6))
+                        {
+                            var sw = c.Color?.Trim() ?? "";
+                            <button type="button" class="pdp-swatch" title="Варіант">
+                                @if (sw.StartsWith("http", StringComparison.OrdinalIgnoreCase) || sw.StartsWith("/", StringComparison.Ordinal) || sw.StartsWith("~", StringComparison.Ordinal))
+                                {
+                                    <span class="pdp-swatch__img" style="background-image:url('@sw')"></span>
+                                }
+                                else
+                                {
+                                    <span class="pdp-swatch__dot" style="background-color:@(sw.Length > 0 && sw.StartsWith("#") ? sw : "#ccc")"></span>
+                                }
+                            </button>
+                        }
+                    </div>
+                }
+                <div class="pdp-price-block__top">
+                    <span class="pdp-price">@item.Price.ToString("N0")<span class="pdp-price__cur">₴</span></span>
+                </div>
+
+                <div class="pdp-price-block__cta">
+                    <div class="pdp-price-block__cta-primary">
+                        <button type="button"
+                                class="pdp-btn pdp-btn--buy pdp-btn--buy-main @(!item.IsAvailable ? "pdp-btn--disabled" : "")"
+                                data-item-id="@item.Id"
+                                onclick="addToCart(this, @item.Id)"
+                                @(!item.IsAvailable ? "disabled" : "")>
+                            @(isInCart ? "У кошику" : "Купити")
+                        </button>
+                        <button type="button"
+                                class="pdp-btn pdp-btn--credit pdp-btn--credit-main @(!item.IsAvailable ? "pdp-btn--disabled" : "")">
+                            Купити в кредит
+                        </button>
+                    </div>
+                    <div class="pdp-price-block__cta-tools" role="group" aria-label="Дії з товаром">
+                        @if (isAuthenticated)
+                        {
+                            <button type="button"
+                                    class="pdp-btn-icon pdp-btn-icon--tool @(isInWishlist ? "pdp-btn-icon--tool-active" : "")"
+                                    data-item-id="@item.Id"
+                                    onclick="addToWishlist(this)"
+                                    title="В обране"
+                                    aria-pressed="@(isInWishlist ? "true" : "false")">
+                                <i class="bi @(isInWishlist ? "bi-heart-fill" : "bi-heart") pdp-icon-wish" aria-hidden="true"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button"
+                                    class="pdp-btn-icon pdp-btn-icon--tool"
+                                    data-open-login="true"
+                                    title="Увійдіть, щоб додати в обране"
+                                    aria-pressed="false">
+                                <i class="bi bi-heart pdp-icon-wish" aria-hidden="true"></i>
+                            </button>
+                        }
+                        <button type="button" class="pdp-btn-icon pdp-btn-icon--tool" title="Порівняти">
+                            <i class="bi bi-bar-chart-line pdp-icon-compare" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                @if (item.IsAvailable)
+                {
+                    <div class="pdp-stock pdp-stock--yes"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Є в наявності</div>
+                }
+                else
+                {
+                    <div class="pdp-stock pdp-stock--no"><i class="bi bi-x-circle-fill" aria-hidden="true"></i> Немає в наявності</div>
+                }
+
+                <div class="pdp-pay-badges" aria-label="Способи оплати та кредитування">
+                    @for (var creditIcon = 1; creditIcon <= 6; creditIcon++)
                     {
-                        <img src="@WebPaths.DefaultItemImage" class="img-fluid" alt="@Model.Name" />
+                        <span class="pdp-pay-badge pdp-pay-badge--img">
+                            <img src="@WebPaths.PaymentCreditIcon(creditIcon)"
+                                 alt=""
+                                 width="36"
+                                 height="36"
+                                 loading="lazy"
+                                 decoding="async" />
+                        </span>
                     }
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-7">
-            <h2 class="mb-2">@Model.Name</h2>
-            <div class="text-muted mb-3">
-                Категорія: @(category?.Name ?? "—")
-                @if (seller != null)
-                {
-                    <span class="ms-3">Продавець: <strong>@seller.Name</strong></span>
-                }
+            <!-- Services block (макет: група з чекбоксом + вкладені радіо) -->
+            <div class="pdp-card pdp-card--services">
+                <div class="pdp-svc-group" data-pdp-svc-group>
+                    <div class="pdp-svc-group__head">
+                        <label class="pdp-svc-group__head-label">
+                            <input type="checkbox" name="pdp_svc_warranty_group" id="pdpSvcWarrantyGroup" checked />
+                            <span class="pdp-svc-group__title">Сервіси подовження гарантії</span>
+                        </label>
+                        <button type="button" class="pdp-svc-info" title="Детальніше" aria-label="Інформація про сервіс"><i class="bi bi-info-circle"></i></button>
+                    </div>
+                    <div class="pdp-svc-group__subs">
+                        <label class="pdp-svc-radio">
+                            <input type="radio" name="pdp_warranty_years" value="1" />
+                            <span>Подовження гарантії на 1 рік</span>
+                        </label>
+                        <label class="pdp-svc-radio">
+                            <input type="radio" name="pdp_warranty_years" value="2" checked />
+                            <span>Подовження гарантії на 2 роки</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pdp-svc-group" data-pdp-svc-group>
+                    <div class="pdp-svc-group__head">
+                        <label class="pdp-svc-group__head-label">
+                            <input type="checkbox" name="pdp_svc_remote_group" id="pdpSvcRemoteGroup" />
+                            <span class="pdp-svc-group__title">Дистанційне налаштування ПК</span>
+                        </label>
+                        <button type="button" class="pdp-svc-info" title="Детальніше" aria-label="Інформація про сервіс"><i class="bi bi-info-circle"></i></button>
+                    </div>
+                    <div class="pdp-svc-group__subs">
+                        @if (item.Uslugi.Any())
+                        {
+                            @for (var ui = 0; ui < item.Uslugi.Count && ui < 4; ui++)
+                            {
+                                var u = item.Uslugi[ui];
+                                <label class="pdp-svc-radio">
+                                    @if (ui == 0)
+                                    {
+                                        <input type="radio" name="pdp_remote_setup" value="@u.Id" checked />
+                                    }
+                                    else
+                                    {
+                                        <input type="radio" name="pdp_remote_setup" value="@u.Id" />
+                                    }
+                                    <span>@u.Name — @u.Price.ToString("N0") ₴</span>
+                                </label>
+                            }
+                        }
+                        else
+                        {
+                            <label class="pdp-svc-radio">
+                                <input type="radio" name="pdp_remote_setup" value="demo" checked />
+                                <span>Дистанційне налаштування ПК для геймерів</span>
+                            </label>
+                        }
+                    </div>
+                </div>
             </div>
 
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <div class="fs-3 fw-bold">@Model.Price грн</div>
-                @if (!Model.IsAvailable)
-                {
-                    <span class="badge bg-secondary">Немає в наявності</span>
-                }
+            <!-- Delivery block -->
+            <div class="pdp-card">
+                <div class="pdp-card__head">
+                    <i class="bi bi-truck"></i> Доставка
+                </div>
+                <div class="pdp-card__row">
+                    <div class="pdp-card__row-icon"><i class="bi bi-box-seam"></i></div>
+                    <div class="pdp-card__row-body">
+                        <div>Самовивіз з відділень поштових операторів</div>
+                        <a href="#" class="pdp-card__link">Показати на карті</a>
+                    </div>
+                    <div class="pdp-card__row-meta">
+                        <div>Відправимо завтра</div>
+                        <div class="pdp-card__row-note">за тарифами перевізника</div>
+                    </div>
+                </div>
+                <div class="pdp-card__row">
+                    <div class="pdp-card__row-icon"><i class="bi bi-geo-alt"></i></div>
+                    <div class="pdp-card__row-body">Доставка кур'єром</div>
+                    <div class="pdp-card__row-meta">
+                        <div>Відправимо завтра</div>
+                        <div class="pdp-card__row-note">за тарифами перевізника</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="d-flex gap-2 mb-4">
-                <form asp-action="AddToCart" asp-controller="Site" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="itemId" value="@Model.Id" />
-                    <input type="hidden" name="quantity" value="1" />
-                    <button type="submit" class="btn btn-primary" @(Model.IsAvailable ? "" : "disabled")>
-                        <i class="bi bi-cart-plus"></i>
-                        @(isInCart ? "Додати ще" : "В кошик")
-                    </button>
-                </form>
-
-                <form asp-action="Add" asp-controller="Wishlist" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" value="@Model.Id" />
-                    <button type="submit" class="btn btn-outline-danger">
-                        <i class="bi bi-heart"></i>
-                        @(isInWishlist ? "В обраному" : "Додати в обране")
-                    </button>
-                </form>
+            <!-- Payment block -->
+            <div class="pdp-card">
+                <div class="pdp-card__head">
+                    <i class="bi bi-credit-card"></i> Оплата
+                </div>
+                <div class="pdp-card__text">
+                    Оплата під час отримання товару, Картою онлайн, Google&nbsp;Pay,
+                    -5% знижки від ПриватБанк та Mastercard від 500&nbsp;грн,
+                    Покупка частинами monobank, PrivatPay, Apple&nbsp;Pay,
+                    Кредит, Оплата частинами, Оплата карткою у відділенні
+                </div>
             </div>
 
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="mb-2">Опис</h5>
-                    <div class="text-muted" style="white-space: pre-wrap;">@Model.Desc</div>
+            <!-- Guarantee block -->
+            <div class="pdp-card">
+                <div class="pdp-card__head">
+                    <i class="bi bi-arrow-counterclockwise"></i> Гарантія
+                </div>
+                <div class="pdp-card__text">
+                    <strong>@item.Garantia місяців</strong> Обмін/повернення товару впродовж <strong>14 днів</strong>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4 mt-1">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="mb-3">Відгуки</h5>
-
-                    @if (Model.Reviews != null && Model.Reviews.Any())
+    <!-- ===== RECOMMENDED (Також вас може зацікавити) ===== -->
+    @if (recommended.Any())
+    {
+        <section class="pdp-section">
+            <h2 class="pdp-section-title">Також вас може зацікавити</h2>
+            <div class="pdp-cards-scroll-wrap">
+                <div class="pdp-cards-scroll">
+                    @foreach (var ri in recommended)
                     {
-                        <div class="list-group list-group-flush">
-                            @foreach (var r in Model.Reviews.OrderByDescending(x => x.Id).Take(20))
-                            {
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between">
-                                        <div class="fw-semibold">@r.User?.Name</div>
-                                        <div class="text-warning">
-                                            <i class="bi bi-star-fill"></i> @r.Rating
-                                        </div>
-                                    </div>
-                                    <div class="text-muted">@r.Comment</div>
-                                </div>
-                            }
+                        <div class="pdp-cards-scroll__cell">
+                            @await Html.PartialAsync("Card", ri)
                         </div>
+                    }
+                </div>
+            </div>
+        </section>
+    }
+
+    <!-- ===== BUNDLE (Разом дешевше) ===== -->
+    @{
+        var bundleItems = Model.BundleItems.Any() ? Model.BundleItems : Model.DemoBundleItems;
+    }
+    @if (bundleItems.Any())
+    {
+        var bundleTotal = item.Price + bundleItems.Sum(b => b.Price);
+        var complectCode = item.Id + "-" + string.Join("-", bundleItems.Select(b => b.Id));
+        <section class="pdp-section">
+            <div class="pdp-bundle">
+                <h2 class="pdp-bundle__title">Разом дешевше</h2>
+                <div class="pdp-bundle__items">
+                    <div class="pdp-bundle__item">
+                        <a href="@Url.Action("ItemDetails", "Site", new { id = item.Id })">
+                            <img src="@mainImage" alt="@item.Name"
+                                 onerror="this.onerror=null;this.src='@WebPaths.DefaultItemImage';" />
+                        </a>
+                        <div class="pdp-bundle__item-info">
+                            <div class="pdp-bundle__item-name">@item.Name</div>
+                            <div class="pdp-bundle__item-price">@item.Price.ToString("N0") ₴</div>
+                        </div>
+                    </div>
+                    @foreach (var bi in bundleItems)
+                    {
+                        var biImg = bi.Colors?.FirstOrDefault()?.Color ?? bi.ImageUrl ?? WebPaths.DefaultItemImage;
+                        <div class="pdp-bundle__plus">+</div>
+                        <div class="pdp-bundle__item">
+                            <a href="@Url.Action("ItemDetails", "Site", new { id = bi.Id })">
+                                <img src="@biImg" alt="@bi.Name"
+                                     onerror="this.onerror=null;this.src='@WebPaths.DefaultItemImage';" />
+                            </a>
+                            <div class="pdp-bundle__item-info">
+                                <div class="pdp-bundle__item-name">@bi.Name</div>
+                                <div class="pdp-bundle__item-price">@bi.Price.ToString("N0") ₴</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="pdp-bundle__footer">
+                    <div class="pdp-bundle__code">Код комплекту: @complectCode</div>
+                    <div class="pdp-bundle__total">
+                        <span class="pdp-bundle__total-price">@bundleTotal.ToString("N0") ₴</span>
+                        <button type="button" class="pdp-btn pdp-btn--lime pdp-bundle__buy-btn"
+                                onclick="addToCart(this, @item.Id)">
+                            Купити комплект
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
+
+    <!-- ===== SPONSORED (Спонсорські товари) ===== -->
+    @if (related.Any())
+    {
+        <section class="pdp-section">
+            <h2 class="pdp-section-title">Спонсорські товари</h2>
+            <div class="pdp-cards-scroll-wrap">
+                <div class="pdp-cards-scroll">
+                    @foreach (var ri in related)
+                    {
+                        <div class="pdp-cards-scroll__cell">
+                            @await Html.PartialAsync("Card", ri)
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+    }
+
+    <!-- ===== DESCRIPTION + REVIEWS — two-column (макет) ===== -->
+    <div class="pdp-bottom-cols pdp-bottom-cols--mock">
+        <!-- LEFT: Description -->
+        <div class="pdp-bottom-cols__left">
+            <div class="pdp-desc-block">
+                <h2 class="pdp-section-title pdp-section-title--plain">Опис</h2>
+                <div class="pdp-desc-card">
+                    <div class="pdp-desc-card__product">@(item.Name ?? "Товар")</div>
+                    @if (hasDesc)
+                    {
+                        <div class="pdp-desc-card__body pdp-desc-card__body--raw">@descTrimmed</div>
                     }
                     else
                     {
-                        <div class="text-muted">Поки немає відгуків.</div>
-                    }
-
-                    <hr />
-
-                    <form asp-action="AddReview" asp-controller="Site" method="post">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="itemId" value="@Model.Id" />
-
-                        <div class="row g-2 align-items-end">
-                            <div class="col-md-3">
-                                <label class="form-label">Оцінка</label>
-                                <select name="review.Rating" class="form-select" required>
-                                    <option value="5">5</option>
-                                    <option value="4">4</option>
-                                    <option value="3">3</option>
-                                    <option value="2">2</option>
-                                    <option value="1">1</option>
-                                </select>
-                            </div>
-                            <div class="col-md-7">
-                                <label class="form-label">Текст</label>
-                                <input name="review.Comment" class="form-control" required />
-                            </div>
-                            <div class="col-md-2">
-                                <button class="btn btn-outline-primary w-100" type="submit">Додати</button>
-                            </div>
+                        <div class="pdp-desc-sections">
+                            <section class="pdp-desc-section">
+                                <h3 class="pdp-desc-section__title">Дисплей стандарту Full HD</h3>
+                                <p class="pdp-desc-section__text">Яскравий екран діагоналлю 15,6" з роздільною здатністю 1920×1080 і матовим покриттям зручний для роботи в офісі та перегляду контенту без зайвих відблисків.</p>
+                            </section>
+                            <section class="pdp-desc-section">
+                                <h3 class="pdp-desc-section__title">Продуктивність</h3>
+                                <p class="pdp-desc-section__text">Сучасний процесор і достатній обсяг оперативної пам’яті забезпечують плавну роботу в браузері з багатьма вкладками, офісних пакетах і відеодзвінках.</p>
+                            </section>
+                            <section class="pdp-desc-section">
+                                <h3 class="pdp-desc-section__title">Підтримка графіки з високою роздільною здатністю</h3>
+                                <p class="pdp-desc-section__text">Роз’єм HDMI дозволяє підключити зовнішній монітор або телевізор для презентацій та роботи на двох екранах.</p>
+                            </section>
+                            <section class="pdp-desc-section">
+                                <h3 class="pdp-desc-section__title">Висока швидкість передавання даних</h3>
+                                <p class="pdp-desc-section__text">Порти USB 3.x прискорюють копіювання файлів на флешки та зовнішні диски — зручно для резервних копій і обміну документами.</p>
+                            </section>
+                            <section class="pdp-desc-section">
+                                <h3 class="pdp-desc-section__title">Вбудована веб-камера</h3>
+                                <p class="pdp-desc-section__text">Камера та мікрофон вже в корпусі — можна одразу підключатися до відеоконференцій без додаткових пристроїв.</p>
+                            </section>
                         </div>
-                    </form>
+                    }
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="mb-3">Схожі товари</h5>
-                    @if (related.Any())
+        <!-- RIGHT: Reviews -->
+        <div class="pdp-bottom-cols__right" id="pdp-reviews-section">
+            <div class="pdp-reviews-block">
+                <div class="pdp-reviews-header">
+                    <h2 class="pdp-section-title pdp-section-title--plain">Відгуки покупців <span class="pdp-reviews-count">@displayReviewCount</span></h2>
+                    <button type="button" class="pdp-btn pdp-btn--lime pdp-rv-write-btn" onclick="document.getElementById('pdpRvForm').scrollIntoView({behavior:'smooth'})">
+                        Написати відгук
+                    </button>
+                </div>
+
+                <div class="pdp-reviews-list">
+                    @if (useDemoReviews)
                     {
-                        <div class="d-flex flex-column gap-3">
-                            @foreach (var it in related)
-                            {
-                                <div>
-                                    <a class="text-decoration-none" href="@Url.Action("ItemDetails", "Site", new { id = it.Id })">
-                                        <div class="fw-semibold">@it.Name</div>
-                                    </a>
-                                    <div class="text-muted small">@it.Price грн</div>
+                        <p class="text-muted small mb-3" role="note">Нижче — лише приклад оформлення блоку. Реальних відгуків ще немає; після першого справжнього відгуку тут з’являться лише записи з бази.</p>
+                        var demoNames = new[] { "Олег Сидоров", "Марія Коваленко", "Андрій Мельник" };
+                        var demoDates = new[]
+                        {
+                            new DateTime(2022, 1, 9),
+                            new DateTime(2022, 2, 14),
+                            new DateTime(2022, 3, 3)
+                        };
+                        for (var di = 0; di < 3; di++)
+                        {
+                            <div class="pdp-rv">
+                                <div class="pdp-rv__head">
+                                    <div class="pdp-rv__head-main">
+                                        <div class="pdp-rv__ava"><i class="bi bi-person-circle"></i></div>
+                                        <div class="pdp-rv__name">@demoNames[di]</div>
+                                    </div>
+                                    <div class="pdp-rv__date-col">
+                                        <div class="pdp-rv__date">@demoDates[di].ToString("dd MMMM yyyy", uk)</div>
+                                        <div class="pdp-rv__actions-top">
+                                            <i class="bi bi-share" title="Поділитися"></i>
+                                            <i class="bi bi-chat-dots" title="Коментар"></i>
+                                        </div>
+                                    </div>
                                 </div>
-                            }
-                        </div>
+                                <div class="pdp-rv__seller-badge">Продавець: <strong>BAZA-R</strong></div>
+                                <div class="pdp-rv__body">
+                                    <div class="pdp-rv__text">@demoBodies[di]</div>
+                                    @if (di == 1)
+                                    {
+                                        <div class="pdp-rv__thumb-wrap">
+                                            <img class="pdp-rv__thumb" src="@mainImage" alt="" onerror="this.onerror=null;this.src='@WebPaths.DefaultItemImage';" />
+                                        </div>
+                                    }
+                                    <div class="pdp-rv__pros-cons">
+                                        <p class="pdp-rv__pc-line"><span class="pdp-rv__pc-label">Переваги:</span> @demoPros[di]</p>
+                                        <p class="pdp-rv__pc-line"><span class="pdp-rv__pc-label">Недоліки:</span> @demoCons[di]</p>
+                                    </div>
+                                </div>
+                                <div class="pdp-rv__footer">
+                                    <a href="#" class="pdp-rv__reply-link"><i class="bi bi-reply"></i> Відповісти</a>
+                                    <div class="pdp-rv__votes">
+                                        <button type="button" class="pdp-rv__vote" title="Корисний відгук"><i class="bi bi-hand-thumbs-up"></i> <span>@(di == 0 ? 1 : 4 - di)</span></button>
+                                        <button type="button" class="pdp-rv__vote" title="Не корисний"><i class="bi bi-hand-thumbs-down"></i> <span>@(di == 2 ? 1 : 0)</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     }
                     else
                     {
-                        <div class="text-muted">Немає рекомендацій.</div>
+                        var idx = 0;
+                        foreach (var r in reviewsOrdered.Take(5))
+                        {
+                            var commentText = string.IsNullOrWhiteSpace(r.Comment)
+                                ? demoBodies[idx % demoBodies.Length]
+                                : r.Comment;
+                            <div class="pdp-rv">
+                                <div class="pdp-rv__head">
+                                    <div class="pdp-rv__head-main">
+                                        <div class="pdp-rv__ava"><i class="bi bi-person-circle"></i></div>
+                                        <div class="pdp-rv__name">@(r.User?.Name ?? "Користувач")</div>
+                                    </div>
+                                    <div class="pdp-rv__date-col">
+                                        <div class="pdp-rv__date">@r.CreatedAt.ToString("dd MMMM yyyy", uk)</div>
+                                        <div class="pdp-rv__actions-top">
+                                            <i class="bi bi-share" title="Поділитися"></i>
+                                            <i class="bi bi-chat-dots" title="Коментар"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pdp-rv__seller-badge">Продавець: <strong>BAZA-R</strong></div>
+                                <div class="pdp-rv__body">
+                                    <div class="pdp-rv__text">@commentText</div>
+                                </div>
+                                <div class="pdp-rv__footer">
+                                    <a href="#" class="pdp-rv__reply-link"><i class="bi bi-reply"></i> Відповісти</a>
+                                    <div class="pdp-rv__votes">
+                                        <button type="button" class="pdp-rv__vote" title="Корисний відгук"><i class="bi bi-hand-thumbs-up"></i> <span>0</span></button>
+                                        <button type="button" class="pdp-rv__vote" title="Не корисний"><i class="bi bi-hand-thumbs-down"></i> <span>0</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                            idx++;
+                        }
                     }
+                </div>
+
+                @if (reviewCount > 5)
+                {
+                    <a href="#" class="pdp-rv-show-all">Дивитися всі відгуки <span class="pdp-rv-show-all__arr" aria-hidden="true">→</span></a>
+                }
+
+                <div class="pdp-rv-form" id="pdpRvForm">
+                    <h3 class="pdp-rv-form__title">Залишити відгук</h3>
+                    <form asp-action="AddReview" asp-controller="Site" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="itemId" value="@item.Id" />
+                        <div class="pdp-rv-form__row">
+                            <label>Оцінка:</label>
+                            <div class="pdp-star-pick" id="starPicker">
+                                @for (int s = 1; s <= 5; s++)
+                                {
+                                    <i class="bi bi-star pdp-star-pick__s" data-value="@s"></i>
+                                }
+                            </div>
+                            <input type="hidden" name="review.Rating" id="reviewRating" value="5" required />
+                        </div>
+                        <textarea name="review.Comment" class="form-control pdp-rv-form__ta" rows="3" placeholder="Ваш відгук..." required></textarea>
+                        <button type="submit" class="pdp-btn pdp-btn--lime" style="width:auto;padding:10px 28px;font-size:14px;">Надіслати</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    function pdpImg(thumb, src) {
+        document.getElementById('pdpMainImg').src = src;
+        document.querySelectorAll('.pdp-gallery__thumb').forEach(function (t) {
+            t.classList.remove('pdp-gallery__thumb--act');
+        });
+        thumb.classList.add('pdp-gallery__thumb--act');
+    }
+
+    (function () {
+        var picker = document.getElementById('starPicker');
+        if (!picker) return;
+        var stars = picker.querySelectorAll('.pdp-star-pick__s');
+        var input = document.getElementById('reviewRating');
+        function set(val) {
+            stars.forEach(function (s) {
+                var v = +s.getAttribute('data-value');
+                s.classList.toggle('bi-star-fill', v <= val);
+                s.classList.toggle('bi-star', v > val);
+            });
+            input.value = val;
+        }
+        stars.forEach(function (s) {
+            s.addEventListener('click', function () { set(+this.getAttribute('data-value')); });
+            s.addEventListener('mouseenter', function () {
+                var v = +this.getAttribute('data-value');
+                stars.forEach(function (st) {
+                    st.classList.toggle('bi-star-fill', +st.getAttribute('data-value') <= v);
+                    st.classList.toggle('bi-star', +st.getAttribute('data-value') > v);
+                });
+            });
+        });
+        picker.addEventListener('mouseleave', function () { set(+input.value); });
+        set(5);
+
+        document.querySelectorAll('.pdp-tabs__link').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                document.querySelectorAll('.pdp-tabs__link').forEach(function (l) { l.classList.remove('pdp-tabs__link--active'); });
+                this.classList.add('pdp-tabs__link--active');
+            });
+        });
+
+        var toggle = document.getElementById('pdpCharsToggle');
+        var charsCard = document.querySelector('.pdp-chars-card');
+        if (toggle && charsCard) {
+            toggle.addEventListener('click', function () {
+                var open = charsCard.classList.toggle('pdp-chars-card--expanded');
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                toggle.textContent = open ? 'Сховати' : 'Показати ще';
+            });
+        }
+    })();
+
+    (function () {
+        document.querySelectorAll('[data-pdp-svc-group]').forEach(function (g) {
+            var cb = g.querySelector('.pdp-svc-group__head-label input[type="checkbox"]');
+            var subs = g.querySelector('.pdp-svc-group__subs');
+            if (!cb || !subs) return;
+            function sync() {
+                var on = cb.checked;
+                subs.classList.toggle('is-disabled', !on);
+                subs.querySelectorAll('input').forEach(function (inp) { inp.disabled = !on; });
+            }
+            cb.addEventListener('change', sync);
+            sync();
+        });
+    })();
+</script>
+}

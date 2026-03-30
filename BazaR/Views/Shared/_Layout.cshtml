@@ -171,7 +171,7 @@
                                 <i class="bi bi-person"></i>
                                 @if (ViewBag.User != null)
                                 {
-                                    <span>@ViewBag.User.Name</span>
+                                    <span>@ViewBag.User.FirstName @ViewBag.User.LastName</span>
                                 }
                                 else
                                 {
@@ -561,14 +561,52 @@
 
         function addToWishlist(button) {
             var itemId = $(button).data('item-id');
-            $.post('@Url.Action("Add", "Wishlist")',
+            $.post('@Url.Action("AddToWishlist", "Site")',
                 { id: itemId, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val() },
                 function(response) {
                     if (response.success) {
-                        $(button).find('i').toggleClass('text-danger');
-                        var cnt = $('#wishlistCount');
-                        if (cnt.length) { cnt.text(response.wishlistCount); cnt.toggle(response.wishlistCount > 0); }
-                        if (typeof showNotification === 'function') showNotification('Додано в обране', 'success');
+                        var $btn = $(button);
+
+                        // --- Update the clicked button state ---
+                        if ($btn.hasClass('pdp-btn-icon--tool')) {
+                            // PDP tool button (heart icon)
+                            if (response.added) {
+                                $btn.addClass('pdp-btn-icon--tool-active');
+                                $btn.attr('aria-pressed', 'true');
+                                $btn.find('i').removeClass('bi-heart').addClass('bi-heart-fill');
+                            } else {
+                                $btn.removeClass('pdp-btn-icon--tool-active');
+                                $btn.attr('aria-pressed', 'false');
+                                $btn.find('i').removeClass('bi-heart-fill').addClass('bi-heart');
+                            }
+                        } else {
+                            // Card-style wishlist button (text-danger toggle)
+                            if (response.added) {
+                                $btn.find('i').addClass('text-danger');
+                            } else {
+                                $btn.find('i').removeClass('text-danger');
+                            }
+                        }
+
+                        // --- Update navbar wishlist badge ---
+                        var $cnt = $('#wishlistCount');
+                        if ($cnt.length) {
+                            $cnt.text(response.wishlistCount);
+                            $cnt.toggle(response.wishlistCount > 0);
+                        }
+
+                        // --- Update navbar heart icon fill ---
+                        var $navHeart = $('.navbar .nav-link .bi-heart, .navbar .nav-link .bi-heart-fill').first();
+                        if ($navHeart.length) {
+                            if (response.wishlistCount > 0) {
+                                $navHeart.removeClass('bi-heart').addClass('bi-heart-fill');
+                            } else {
+                                $navHeart.removeClass('bi-heart-fill').addClass('bi-heart');
+                            }
+                        }
+
+                        var msg = response.added ? 'Додано в обране' : 'Видалено з обраного';
+                        if (typeof showNotification === 'function') showNotification(msg, response.added ? 'success' : 'info');
                     } else if (response.requireLogin) {
                         var $login = $('[data-open-login="true"]').first();
                         if ($login.length) $login.trigger('click'); else $('#loginModal').modal('show');
@@ -577,7 +615,37 @@
             );
         }
 
-        
+    </script>
+
+    <script>
+        (function () {
+            var drawer = document.getElementById('sidebarDrawer');
+            var overlay = document.getElementById('sidebarOverlay');
+            var openBtn = document.getElementById('sidebarOpen');
+            var closeBtn = document.getElementById('sidebarClose');
+
+            function openSidebar() {
+                drawer.classList.add('is-open');
+                overlay.classList.add('is-open');
+                drawer.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                drawer.classList.remove('is-open');
+                overlay.classList.remove('is-open');
+                drawer.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            if (openBtn) openBtn.addEventListener('click', openSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            if (overlay) overlay.addEventListener('click', closeSidebar);
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeSidebar();
+            });
+        })();
     </script>
 
 </body>

@@ -9,10 +9,13 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0">Управление пользователями</h1>
         <div class="d-flex">
-            <span class="badge bg-primary" style="margin-right: 10px;">Всего пользователей: @Model.Count()</span>
+            <span class="badge bg-primary me-md-3">Всего пользователей: @Model.Count()</span>
             <span class="badge bg-primary">Онлайн сейчас: @act</span>
             <a asp-action="PopularCategories" class="btn btn-outline-info btn-sm ms-3">
                 <i class="bi bi-bar-chart-line"></i> Популярные категории
+            </a>
+            <a asp-action="GetLog" class="btn btn-outline-info btn-sm ms-3">
+                <i class="bi bi-bar-chart-line"></i> Логи пользователей
             </a>
             <div>
                 <button onclick="openPromoModal()" class="btn btn-outline-success btn-sm ms-3">
@@ -28,7 +31,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Розмір знижки (₴)</label>
-                            <input name="DiscountAmount" type="number" min="1" max="750" 
+                            <input name="DiscountAmount" type="number" min="1" max="750"
                                    class="form-control" placeholder="Наприклад: 100₴" required />
                         </div>
                         <div class="d-flex gap-2 justify-content-between">
@@ -128,12 +131,12 @@
                                            class="btn btn-outline-primary" title="Статистика">
                                             <i class="bi bi-bar-chart"></i>
                                         </a>
-                                        <a asp-action="EditUser" asp-route-id="@user.Id"
-                                           class="btn btn-outline-secondary" title="Редактировать">
-                                            <i class="bi bi-pencil"></i>
+                                        <a asp-action="GetLogByUserId" asp-route-id="@user.Id"
+                                           class="btn btn-outline-secondary" title="Логи">
+                                            <i class="bi bi-eye"></i>
                                         </a>
                                         <a asp-action="IndexMail" asp-route-id="@user.Id"
-                                            class="btn btn-outline-secondary" title="Відправити повідомлення">
+                                               class="btn btn-outline-secondary" title="Відправити повідомлення">
                                             <i class="bi bi-envelope"></i>
                                         </a>
                                         <button type="button" class="btn btn-outline-danger"

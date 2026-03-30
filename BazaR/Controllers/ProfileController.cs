@@ -1,4 +1,4 @@
-﻿using BazaR.Data;
+using BazaR.Data;
 using BazaR.DTOs;
 using BazaR.Interfaces;
 using BazaR.Models;
@@ -90,7 +90,7 @@ namespace BazaR.Controllers
                     Id = o.Id,
                     Number = o.Number,
                     CreatedAt = o.CreatedAt,
-                    Status = o.Status,
+                    Status = o.Status.DisplayStatus(),
                     TotalAmount = o.TotalAmount,
                     OrderItems = o.OrderItems.Select(oi => new OrderItemVm
                     {
@@ -608,7 +608,7 @@ namespace BazaR.Controllers
 
             switch (dto.Field)
             {
-                case "firstName": user.Name = dto.Value; await _userManager.UpdateAsync(user); break;
+                case "firstName": user.FirstName = dto.Value; await _userManager.UpdateAsync(user); break;
                 case "lastName": user.LastName = dto.Value; await _userManager.UpdateAsync(user); break;
                 case "middleName": user.MiddleName = dto.Value; await _userManager.UpdateAsync(user); break;
                 case "birthDate": user.BirthDate = DateOnly.TryParse(dto.Value, out var d) ? d : null; await _userManager.UpdateAsync(user); break;

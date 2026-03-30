@@ -1,0 +1,53 @@
+﻿@model List<BazaR.Models.VisitingModel>
+
+@{
+    ViewData["Title"] = "User Logs";
+    var userId = Model.FirstOrDefault()?.UserId;
+}
+
+<h2>Logs for User: @userId</h2>
+
+<a asp-action="GetLog" class="btn btn-secondary mb-3">Общие логи</a>
+<a asp-action="Index" class="btn btn-secondary mb-3">Главная</a>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Action</th>
+            <th>Controller</th>
+            <th>Action Name</th>
+            <th>ItemId</th>
+            <th>OrderId</th>
+            <th>Search</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var log in Model)
+        {
+            <tr>
+                <td>@log.Id</td>
+                <td>@log.userAction</td>
+                <td>@log.ControllerName</td>
+                <td>@log.ActionName</td>
+                <td>@log.ItemId</td>
+                <td>@log.OrderId</td>
+                <td>
+                    @if (log.SearchFilters != null)
+                    {
+                        <div>
+                            <b>Query:</b> @log.SearchFilters.Query <br />
+                            <b>Page:</b> @log.SearchFilters.Page <br />
+                            <b>Sort:</b> @log.SearchFilters.Sort <br />
+                            <b>Price:</b> @log.SearchFilters.MinPrice - @log.SearchFilters.MaxPrice
+                        </div>
+                    }
+                    else
+                    {
+                        <span>-</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
