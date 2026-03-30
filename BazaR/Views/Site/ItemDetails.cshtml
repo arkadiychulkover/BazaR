@@ -14,7 +14,7 @@
     var avgRating = Model.AverageRating;
     var reviewCount = Model.ReviewCount;
 
-    var mainImage = images.FirstOrDefault() ?? WebPaths.DefaultItemImage;
+    var mainImage = images[0];// ?? WebPaths.DefaultItemImage;
 
     string SellerLabel(BazaR.Models.SellerType t) => t switch
     {
@@ -114,7 +114,7 @@
                     {
                         <button class="pdp-gallery__thumb @(i == 0 ? "pdp-gallery__thumb--act" : "")"
                                 onclick="pdpImg(this,'@images[i]')">
-                            <img src="@images[i]" alt="" onerror="this.onerror=null;this.src='@WebPaths.DefaultItemImage';" />
+                            <img src="@images[i]" alt="" onerror="this.onerror=null;this.src='@images[i]';" />
                         </button>
                     }
                     @if (!images.Any())
@@ -126,7 +126,7 @@
                 </div>
                 <div class="pdp-gallery__main">
                     <img id="pdpMainImg" src="@mainImage" alt="@item.Name"
-                         onerror="this.onerror=null;this.src='@WebPaths.DefaultItemImage';" />
+                         onerror="this.onerror=null;this.src='@images[0];" />
                 </div>
             </div>
             </div>

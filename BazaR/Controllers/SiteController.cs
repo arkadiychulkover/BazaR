@@ -413,7 +413,11 @@ namespace BazaR.Controllers
 
             var images = item.Colors?.Select(c => c.Color).ToList() ?? new List<string>();
             if (!images.Any() && !string.IsNullOrWhiteSpace(item.ImageUrl))
-                images.Add(item.ImageUrl);
+            {
+                int wwwrootIndex = item.ImageUrl.IndexOf("wwwroot", StringComparison.OrdinalIgnoreCase);
+                string rightUrl = item.ImageUrl.Substring(wwwrootIndex + "wwwroot".Length).Replace("\\", "/");
+                images.Add(rightUrl);
+            }
 
             var sameCategoryItems = _itMan.GetByCategory(item.CategoryId)
                 .Where(i => i.Id != id)
@@ -1081,7 +1085,7 @@ namespace BazaR.Controllers
             User us = await _userManager.GetUserAsync(User);
 
             string filename = $"{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/items", filename);
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\items", filename);
             using (var stream = new FileStream(path, FileMode.Create))
             {
                 imageFile.CopyTo(stream);
