@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BazaR.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260327123944_levsmerdge")]
-    partial class levsmerdge
+    [Migration("20260330164536_ini")]
+    partial class ini
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

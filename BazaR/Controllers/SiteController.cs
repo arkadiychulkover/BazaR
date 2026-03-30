@@ -411,12 +411,16 @@ namespace BazaR.Controllers
             var item = _itMan.GetById(id);
             if (item == null) return NotFound();
 
-            var images = item.Colors?.Select(c => c.Color).ToList() ?? new List<string>();
-            if (!images.Any() && !string.IsNullOrWhiteSpace(item.ImageUrl))
+            var images = new List<string>();
+            if (!string.IsNullOrWhiteSpace(item.ImageUrl))
             {
-                int wwwrootIndex = item.ImageUrl.IndexOf("wwwroot", StringComparison.OrdinalIgnoreCase);
-                string rightUrl = item.ImageUrl.Substring(wwwrootIndex + "wwwroot".Length).Replace("\\", "/");
-                images.Add(rightUrl);
+                string rightUrl = null;
+                if (!item.ImageUrl.StartsWith("/images")) 
+                {
+                    int wwwrootIndex = item.ImageUrl.IndexOf("wwwroot", StringComparison.OrdinalIgnoreCase);
+                    rightUrl = item.ImageUrl.Substring(wwwrootIndex + "wwwroot".Length).Replace("\\", "/");
+                }
+                images.Add(rightUrl == null ? item.ImageUrl : rightUrl);
             }
 
             var sameCategoryItems = _itMan.GetByCategory(item.CategoryId)
@@ -1051,13 +1055,13 @@ namespace BazaR.Controllers
 
         [Authorize]
         [HttpGet]
-        public IActionResult CreateItemUser() 
+        public async Task<IActionResult> CreateItemUser()
         {
-            List<Category> catigories = _db.Categories.ToList();
-            List<Brand> brands = _db.Brands.ToList();
+            User us = await _userManager.GetUserAsync(User);
 
-            ViewBag.Categories = catigories;
-            ViewBag.Brands = brands;
+            ViewBag.Categories = _db.Categories.ToList();
+            ViewBag.Brands = _db.Brands.ToList();
+            ViewBag.UserItems = _db.Items.Where(i => i.UserId == us.Id).ToList();
 
             return View();
         }
@@ -1077,28 +1081,104 @@ namespace BazaR.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreateItemUser(Item model, List<ItemCharacteristic> Characteristics, List<ItemColor> Colors, List<Usluga> SelectedUslugs, IFormFile imageFile)
+        public async Task<IActionResult> CreateItemUser(
+    Item model,
+    List<ItemCharacteristic> Characteristics,
+    List<ItemColor> Colors,
+    List<Usluga> SelectedUslugs,
+    IFormFile imageFile,
+    string ComplectName,
+    List<int> SelectedItemIds
+)
         {
-            if (model == null || Characteristics == null || Colors == null || SelectedUslugs == null || imageFile == null)
+            if (model == null || imageFile == null)
                 return RedirectToAction(nameof(CreateItemUser));
 
             User us = await _userManager.GetUserAsync(User);
 
             string filename = $"{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\items", filename);
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/items", filename);
+
             using (var stream = new FileStream(path, FileMode.Create))
             {
-                imageFile.CopyTo(stream);
+                await imageFile.CopyToAsync(stream);
             }
 
-            model.Characteristics = Characteristics;
-            model.Colors = Colors;
-            model.Uslugi = SelectedUslugs;
+            model.Characteristics = null;
+            model.Colors = null;
+            model.Uslugi = null;
             model.UserId = us.Id;
-            model.ImageUrl = path;
+            model.ImageUrl = "/images/items/" + filename;
 
             _db.Items.Add(model);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
+
+            if (Characteristics != null && Characteristics.Any())
+            {
+                foreach (var charac in Characteristics.Where(c => !string.IsNullOrEmpty(c.Key)))
+                {
+                    _db.ItemCharacteristics.Add(new ItemCharacteristic
+                    {
+                        Key = charac.Key,
+                        Value = charac.Value,
+                        ItemId = model.Id
+                    });
+                }
+            }
+
+            if (Colors != null && Colors.Any())
+            {
+                foreach (var color in Colors.Where(c => !string.IsNullOrEmpty(c.Color)))
+                {
+                    _db.ItemColors.Add(new ItemColor
+                    {
+                        Color = color.Color,
+                        ItemId = model.Id
+                    });
+                }
+            }
+
+            if (SelectedUslugs != null && SelectedUslugs.Any())
+            {
+                foreach (var usl in SelectedUslugs.Where(u => !string.IsNullOrEmpty(u.Name)))
+                {
+                    _db.Uslugi.Add(new Usluga
+                    {
+                        Name = usl.Name,
+                        Price = usl.Price,
+                        Description = usl.Description ?? $"Услуга для товара {model.Name}",
+                        ItemId = model.Id
+                    });
+                }
+            }
+
+            if (!string.IsNullOrEmpty(ComplectName) && SelectedItemIds != null && SelectedItemIds.Any())
+            {
+                var complect = new Complect
+                {
+                    Name = ComplectName
+                };
+
+                _db.Complects.Add(complect);
+                await _db.SaveChangesAsync();
+
+                foreach (var itemId in SelectedItemIds)
+                {
+                    _db.ComplectItems.Add(new ComplectItem
+                    {
+                        ComplectId = complect.Id,
+                        ItemId = itemId
+                    });
+                }
+
+                _db.ComplectItems.Add(new ComplectItem
+                {
+                    ComplectId = complect.Id,
+                    ItemId = model.Id
+                });
+            }
+
+            await _db.SaveChangesAsync();
 
             return RedirectToAction(nameof(ItemDetails), new { id = model.Id });
         }

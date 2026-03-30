@@ -77,10 +77,67 @@
             border-color: #00a046;
             background: #f9fff9;
         }
+
+    .dynamic-section {
+        background: #fafafa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .dynamic-item {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+        position: relative;
+    }
+
+    .remove-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 4px 12px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .remove-btn:hover {
+            background: #c82333;
+        }
+
+    .add-btn {
+        background: #00a046;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 16px;
+        font-size: 14px;
+        margin-top: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .add-btn:hover {
+            background: #008a3c;
+        }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 20px 0 15px 0;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #00a046;
+    }
 </style>
 
 <div class="container mt-4" style="max-width: 900px;">
-
     <div class="rz-card">
 
         <div class="rz-title">Создание товара</div>
@@ -90,73 +147,190 @@
 
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            <!-- Название -->
             <div class="mb-3">
-                <label asp-for="Name" class="form-label">Название</label>
-                <input asp-for="Name" class="form-control" placeholder="Введите название товара" />
+                <label asp-for="Name" class="form-label">Название *</label>
+                <input asp-for="Name" class="form-control" placeholder="Введите название товара" required />
+                <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
-            <!-- Описание -->
             <div class="mb-3">
-                <label asp-for="Desc" class="form-label">Описание</label>
-                <textarea asp-for="Desc" class="form-control" rows="4" placeholder="Описание товара"></textarea>
+                <label asp-for="Desc" class="form-label">Описание *</label>
+                <textarea asp-for="Desc" class="form-control" rows="4" placeholder="Описание товара" required></textarea>
+                <span asp-validation-for="Desc" class="text-danger"></span>
             </div>
 
-            <!-- Цена + гарантия -->
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label asp-for="Price" class="form-label">Цена</label>
-                    <input asp-for="Price" class="form-control" type="number" placeholder="₴" />
+                    <label asp-for="Price" class="form-label">Цена *</label>
+                    <input asp-for="Price" class="form-control" type="number" step="1" placeholder="₴" required />
+                    <span asp-validation-for="Price" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6">
                     <label asp-for="Garantia" class="form-label">Гарантия (мес.)</label>
-                    <input asp-for="Garantia" class="form-control" type="number" />
+                    <input asp-for="Garantia" class="form-control" type="number" min="0" value="0" />
+                    <span asp-validation-for="Garantia" class="text-danger"></span>
                 </div>
             </div>
 
-            <!-- Категория + бренд -->
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label asp-for="CategoryId" class="form-label">Категория</label>
+                    <label asp-for="CategoryId" class="form-label">Категория *</label>
                     <select id="categorySelect"
                             asp-for="CategoryId"
                             class="form-select"
-                            asp-items="new SelectList(ViewBag.Categories, nameof(Category.Id), nameof(Category.Name))">
+                            asp-items="new SelectList(ViewBag.Categories, nameof(Category.Id), nameof(Category.Name))"
+                            required>
                         <option value="">Выберите категорию</option>
                     </select>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="BrandId" class="form-label">Бренд</label>
+                    <label asp-for="BrandId" class="form-label">Бренд *</label>
                     <select id="brandSelect"
                             asp-for="BrandId"
-                            class="form-select">
+                            class="form-select"
+                            required>
                         <option value="">Сначала выберите категорию</option>
                     </select>
+                    <span asp-validation-for="BrandId" class="text-danger"></span>
                 </div>
             </div>
 
-            <!-- Изображение -->
-            <div class="mb-4">
-                <label class="form-label">Изображение</label>
-                <div class="rz-upload">
-                    <input type="file" name="imageFile" class="form-control border-0" />
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="SellerType" class="form-label">Тип продавца</label>
+                    <select asp-for="SellerType" class="form-select" asp-items="Html.GetEnumSelectList<SellerType>()">
+                        <option value="">Выберите тип продавца</option>
+                    </select>
+                    <span asp-validation-for="SellerType" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Country" class="form-label">Страна производства</label>
+                    <select asp-for="Country" class="form-select" asp-items="Html.GetEnumSelectList<ProductionCountry>()">
+                        <option value="">Выберите страну</option>
+                    </select>
+                    <span asp-validation-for="Country" class="text-danger"></span>
                 </div>
             </div>
 
-            <!-- Чекбоксы -->
             <div class="rz-checkbox form-check mb-2">
                 <input asp-for="IsAvailable" class="form-check-input" />
                 <label asp-for="IsAvailable" class="form-check-label">В наличии</label>
             </div>
 
-            <div class="rz-checkbox form-check mb-3">
+            <div class="rz-checkbox form-check mb-2">
                 <input asp-for="IsReadyToSend" class="form-check-input" />
                 <label asp-for="IsReadyToSend" class="form-check-label">Готов к отправке</label>
             </div>
 
-            <button type="submit" class="btn rz-btn">
+            <div class="rz-checkbox form-check mb-3">
+                <input asp-for="IsNoPercentCredit" class="form-check-input" />
+                <label asp-for="IsNoPercentCredit" class="form-check-label">Доступна рассрочка 0%</label>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Изображение *</label>
+                <div class="rz-upload">
+                    <input type="file" name="imageFile" class="form-control border-0" accept="image/*" required />
+                    <small class="text-muted">Поддерживаемые форматы: JPG, PNG, GIF. Максимальный размер: 5MB</small>
+                </div>
+            </div>
+
+            <div class="section-title">Характеристики товара</div>
+            <div id="characteristics-container">
+                <div class="dynamic-item" data-index="0">
+                    <button type="button" class="remove-btn" onclick="removeItem(this)">✖ Удалить</button>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label small">Название характеристики</label>
+                            <input type="text" name="Characteristics[0].Key" class="form-control" placeholder="Например: Процессор" />
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label small">Значение</label>
+                            <input type="text" name="Characteristics[0].Value" class="form-control" placeholder="Например: Intel Core i7" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="add-btn" onclick="addCharacteristic()">+ Добавить характеристику</button>
+
+            <div class="section-title">Цвета товара</div>
+            <div id="colors-container">
+                <div class="dynamic-item" data-index="0">
+                    <button type="button" class="remove-btn" onclick="removeItem(this)">✖ Удалить</button>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="form-label small">Название цвета</label>
+                            <input type="text" name="Colors[0].Color" class="form-control" placeholder="Например: Черный, Белый, Красный" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="add-btn" onclick="addColor()">+ Добавить цвет</button>
+
+            <div class="section-title">Услуги</div>
+            <div id="services-container">
+                <div class="dynamic-item" data-index="0">
+                    <button type="button" class="remove-btn" onclick="removeItem(this)">✖ Удалить</button>
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Название услуги *</label>
+                            <input type="text" name="SelectedUslugs[0].Name" class="form-control" placeholder="Например: Установка" />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Цена услуги (грн)</label>
+                            <input type="number" name="SelectedUslugs[0].Price" class="form-control" placeholder="0" step="1" value="0" />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Описание услуги</label>
+                            <input type="text" name="SelectedUslugs[0].Description" class="form-control" placeholder="Краткое описание услуги" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="add-btn" onclick="addService()">+ Добавить услугу</button>
+
+            <hr class="mt-4" />
+            <div class="section-title">Создание комплекта (необязательно)</div>
+
+            <div class="mb-3">
+                <label class="form-label">Название комплекта</label>
+                <input type="text" name="ComplectName" class="form-control" placeholder="Например: Игровой набор" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Выберите товары для комплекта</label>
+                <div class="dynamic-section">
+                    @if (ViewBag.UserItems != null && ((List<Item>)ViewBag.UserItems).Any())
+                    {
+                        foreach (var item in ViewBag.UserItems)
+                        {
+                            <div class="form-check mb-2">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="SelectedItemIds"
+                                       value="@item.Id"
+                                       id="item_@item.Id" />
+                                <label class="form-check-label" for="item_@item.Id">
+                                    <strong>@item.Name</strong> - @item.Price ₴
+                                </label>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">У вас пока нет других товаров для создания комплекта</p>
+                    }
+                    <small class="text-muted d-block mt-2">
+                        Текущий товар будет автоматически добавлен в комплект
+                    </small>
+                </div>
+            </div>
+
+            <button type="submit" class="btn rz-btn mt-3">
                 Создать товар
             </button>
 
@@ -170,34 +344,147 @@
     }
 
     <script>
+        let charIndex = 1;
+        let colorIndex = 1;
+        let serviceIndex = 1;
+
+        function addCharacteristic() {
+            const container = document.getElementById('characteristics-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'dynamic-item';
+            newItem.setAttribute('data-index', charIndex);
+            newItem.innerHTML = `
+                <button type="button" class="remove-btn" onclick="removeItem(this)">✖ Удалить</button>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label small">Название характеристики</label>
+                        <input type="text" name="Characteristics[${charIndex}].Key" class="form-control" placeholder="Например: Процессор" />
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label small">Значение</label>
+                        <input type="text" name="Characteristics[${charIndex}].Value" class="form-control" placeholder="Например: Intel Core i7" />
+                    </div>
+                </div>
+            `;
+            container.appendChild(newItem);
+            charIndex++;
+        }
+
+        function addColor() {
+            const container = document.getElementById('colors-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'dynamic-item';
+            newItem.setAttribute('data-index', colorIndex);
+            newItem.innerHTML = `
+                <button type="button" class="remove-btn" onclick="removeItem(this)">✖ Удалить</button>
+                <div class="row">
+                    <div class="col-md-12">
+                        <label class="form-label small">Название цвета</label>
+                        <input type="text" name="Colors[${colorIndex}].Color" class="form-control" placeholder="Например: Черный, Белый, Красный" />
+                    </div>
+                </div>
+            `;
+            container.appendChild(newItem);
+            colorIndex++;
+        }
+
+        function addService() {
+            const container = document.getElementById('services-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'dynamic-item';
+            newItem.setAttribute('data-index', serviceIndex);
+            newItem.innerHTML = `
+                <button type="button" class="remove-btn" onclick="removeItem(this)">✖ Удалить</button>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label small">Название услуги *</label>
+                        <input type="text" name="SelectedUslugs[${serviceIndex}].Name" class="form-control" placeholder="Например: Установка" />
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label small">Цена услуги (грн)</label>
+                        <input type="number" name="SelectedUslugs[${serviceIndex}].Price" class="form-control" placeholder="0" step="1" value="0" />
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label small">Описание услуги</label>
+                        <input type="text" name="SelectedUslugs[${serviceIndex}].Description" class="form-control" placeholder="Краткое описание услуги" />
+                    </div>
+                </div>
+            `;
+            container.appendChild(newItem);
+            serviceIndex++;
+        }
+
+        function removeItem(button) {
+            const item = button.closest('.dynamic-item');
+            if (item) {
+                item.remove();
+            }
+        }
+
         const categorySelect = document.getElementById("categorySelect");
         const brandSelect = document.getElementById("brandSelect");
 
-        categorySelect.addEventListener("change", function () {
-            const categoryId = this.value;
+        if (categorySelect) {
+            categorySelect.addEventListener("change", function () {
+                const categoryId = this.value;
 
-            brandSelect.innerHTML = '<option>Загрузка...</option>';
-            brandSelect.disabled = true;
+                if (!categoryId) {
+                    brandSelect.innerHTML = '<option value="">Сначала выберите категорию</option>';
+                    brandSelect.disabled = true;
+                    brandSelect.required = true;
+                    return;
+                }
 
-            if (!categoryId) {
-                brandSelect.innerHTML = '<option>Сначала выберите категорию</option>';
-                return;
+                brandSelect.innerHTML = '<option>Загрузка...</option>';
+                brandSelect.disabled = true;
+
+                fetch(`/Site/GetBrandsByCategory?categoryId=${categoryId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        brandSelect.innerHTML = '<option value="">Выберите бренд</option>';
+
+                        if (data && data.length > 0) {
+                            data.forEach(b => {
+                                const option = document.createElement("option");
+                                option.value = b.id;
+                                option.textContent = b.name;
+                                brandSelect.appendChild(option);
+                            });
+                            brandSelect.disabled = false;
+                        } else {
+                            brandSelect.innerHTML = '<option value="">Нет доступных брендов</option>';
+                            brandSelect.disabled = true;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка загрузки брендов:', error);
+                        brandSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+                        brandSelect.disabled = true;
+                    });
+            });
+        }
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const name = document.querySelector('[name="Name"]').value;
+            const desc = document.querySelector('[name="Desc"]').value;
+            const price = document.querySelector('[name="Price"]').value;
+            const category = document.querySelector('[name="CategoryId"]').value;
+            const brand = document.querySelector('[name="BrandId"]').value;
+            const imageFile = document.querySelector('[name="imageFile"]').files;
+
+            if (!name || !desc || !price || !category || !brand) {
+                e.preventDefault();
+                alert('Пожалуйста, заполните все обязательные поля (Название, Описание, Цена, Категория, Бренд)');
+                return false;
             }
 
-            fetch(`/Site/GetBrandsByCategory?categoryId=${categoryId}`)
-                .then(res => res.json())
-                .then(data => {
-                    brandSelect.innerHTML = '<option value="">Выберите бренд</option>';
+            if (!imageFile.length) {
+                e.preventDefault();
+                alert('Пожалуйста, выберите изображение для товара');
+                return false;
+            }
 
-                    data.forEach(b => {
-                        const option = document.createElement("option");
-                        option.value = b.id;
-                        option.textContent = b.name;
-                        brandSelect.appendChild(option);
-                    });
-
-                    brandSelect.disabled = false;
-                });
+            return true;
         });
     </script>
 }
