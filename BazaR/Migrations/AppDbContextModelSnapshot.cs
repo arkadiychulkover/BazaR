@@ -114,121 +114,121 @@ namespace BazaR.Migrations
                         new
                         {
                             Id = 1,
-                            Logo = "/images/brands/apple.png",
+                            Logo = "/AssetsIconImg/images/brands/apple.png",
                             Name = "Apple"
                         },
                         new
                         {
                             Id = 2,
-                            Logo = "/images/brands/samsung.png",
+                            Logo = "/AssetsIconImg/images/brands/samsung.png",
                             Name = "Samsung"
                         },
                         new
                         {
                             Id = 3,
-                            Logo = "/images/brands/xiaomi.png",
+                            Logo = "/AssetsIconImg/images/brands/xiaomi.png",
                             Name = "Xiaomi"
                         },
                         new
                         {
                             Id = 4,
-                            Logo = "/images/brands/sony.png",
+                            Logo = "/AssetsIconImg/images/brands/sony.png",
                             Name = "Sony"
                         },
                         new
                         {
                             Id = 5,
-                            Logo = "/images/brands/lg.png",
+                            Logo = "/AssetsIconImg/images/brands/lg.png",
                             Name = "LG"
                         },
                         new
                         {
                             Id = 6,
-                            Logo = "/images/brands/bosch.png",
+                            Logo = "/AssetsIconImg/images/brands/bosch.png",
                             Name = "Bosch"
                         },
                         new
                         {
                             Id = 7,
-                            Logo = "/images/brands/nike.png",
+                            Logo = "/AssetsIconImg/images/brands/nike.png",
                             Name = "Nike"
                         },
                         new
                         {
                             Id = 8,
-                            Logo = "/images/brands/adidas.png",
+                            Logo = "/AssetsIconImg/images/brands/adidas.png",
                             Name = "Adidas"
                         },
                         new
                         {
                             Id = 9,
-                            Logo = "/images/brands/puma.png",
+                            Logo = "/AssetsIconImg/images/brands/puma.png",
                             Name = "Puma"
                         },
                         new
                         {
                             Id = 10,
-                            Logo = "/images/brands/zara.png",
+                            Logo = "/AssetsIconImg/images/brands/zara.png",
                             Name = "Zara"
                         },
                         new
                         {
                             Id = 11,
-                            Logo = "/images/brands/hm.png",
+                            Logo = "/AssetsIconImg/images/brands/hm.png",
                             Name = "H&M"
                         },
                         new
                         {
                             Id = 12,
-                            Logo = "/images/brands/dell.png",
+                            Logo = "/AssetsIconImg/images/brands/dell.png",
                             Name = "Dell"
                         },
                         new
                         {
                             Id = 13,
-                            Logo = "/images/brands/hp.png",
+                            Logo = "/AssetsIconImg/images/brands/hp.png",
                             Name = "HP"
                         },
                         new
                         {
                             Id = 14,
-                            Logo = "/images/brands/lenovo.png",
+                            Logo = "/AssetsIconImg/images/brands/lenovo.png",
                             Name = "Lenovo"
                         },
                         new
                         {
                             Id = 15,
-                            Logo = "/images/brands/asus.png",
+                            Logo = "/AssetsIconImg/images/brands/asus.png",
                             Name = "Asus"
                         },
                         new
                         {
                             Id = 16,
-                            Logo = "/images/brands/acer.png",
+                            Logo = "/AssetsIconImg/images/brands/acer.png",
                             Name = "Acer"
                         },
                         new
                         {
                             Id = 17,
-                            Logo = "/images/brands/microsoft.png",
+                            Logo = "/AssetsIconImg/images/brands/microsoft.png",
                             Name = "Microsoft"
                         },
                         new
                         {
                             Id = 18,
-                            Logo = "/images/brands/canon.png",
+                            Logo = "/AssetsIconImg/images/brands/canon.png",
                             Name = "Canon"
                         },
                         new
                         {
                             Id = 19,
-                            Logo = "/images/brands/nikon.png",
+                            Logo = "/AssetsIconImg/images/brands/nikon.png",
                             Name = "Nikon"
                         },
                         new
                         {
                             Id = 20,
-                            Logo = "/images/brands/panasonic.png",
+                            Logo = "/AssetsIconImg/images/brands/panasonic.png",
                             Name = "Panasonic"
                         });
                 });
@@ -298,160 +298,160 @@ namespace BazaR.Migrations
                         {
                             Id = 1,
                             DisplayOrder = 1,
-                            IconUrl = "icon-laptops-and-computers.svg",
-                            ImgUrl = "categoryImg-laptops-and-computers.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-laptops-and-computers.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-laptops-and-computers.svg",
                             Name = "Ноутбуки та комп'ютери"
                         },
                         new
                         {
                             Id = 2,
                             DisplayOrder = 2,
-                            IconUrl = "icon-smartphones-tv-electronics.svg",
-                            ImgUrl = "categoryImg-smartphones-tv-electronics.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-smartphones-tv-electronics.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-smartphones-tv-electronics.svg",
                             Name = "Смартфони, ТВ та електроніка"
                         },
                         new
                         {
                             Id = 3,
                             DisplayOrder = 3,
-                            IconUrl = "icon-gaming.svg",
-                            ImgUrl = "categoryImg-gaming.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-gaming.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-gaming.svg",
                             Name = "Товари для геймерів"
                         },
                         new
                         {
                             Id = 4,
                             DisplayOrder = 4,
-                            IconUrl = "icon-home-appliances.svg",
-                            ImgUrl = "categoryImg-home-appliances.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-home-appliances.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-home-appliances.svg",
                             Name = "Побутова техніка"
                         },
                         new
                         {
                             Id = 5,
                             DisplayOrder = 5,
-                            IconUrl = "icon-home-goods.svg",
-                            ImgUrl = "categoryImg-home-goods.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-home-goods.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-home-goods.svg",
                             Name = "Товари для дому"
                         },
                         new
                         {
                             Id = 6,
                             DisplayOrder = 6,
-                            IconUrl = "icon-tools-auto.svg",
-                            ImgUrl = "categoryImg-tools-auto.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-tools-auto.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-tools-auto.svg",
                             Name = "Інструменти та автотовари"
                         },
                         new
                         {
                             Id = 7,
                             DisplayOrder = 7,
-                            IconUrl = "icon-plumbing-renovation.svg",
-                            ImgUrl = "categoryImg-plumbing-renovation.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-plumbing-renovation.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-plumbing-renovation.svg",
                             Name = "Сантехніка та ремонт"
                         },
                         new
                         {
                             Id = 8,
                             DisplayOrder = 8,
-                            IconUrl = "icon-garden.svg",
-                            ImgUrl = "categoryImg-garden.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-garden.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-garden.svg",
                             Name = "Дача, сад та город"
                         },
                         new
                         {
                             Id = 9,
                             DisplayOrder = 9,
-                            IconUrl = "icon-sports-hobbies.svg",
-                            ImgUrl = "categoryImg-sports-hobbies.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-sports-hobbies.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-sports-hobbies.svg",
                             Name = "Спорт та захоплення"
                         },
                         new
                         {
                             Id = 10,
                             DisplayOrder = 10,
-                            IconUrl = "icon-clothing-footwear-jewelry.svg",
-                            ImgUrl = "categoryImg-clothing-footwear-jewelry.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-clothing-footwear-jewelry.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-clothing-footwear-jewelry.svg",
                             Name = "Одяг, взуття та прикраси"
                         },
                         new
                         {
                             Id = 11,
                             DisplayOrder = 11,
-                            IconUrl = "icon-beauty-health.svg",
-                            ImgUrl = "categoryImg-beauty-health.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-beauty-health.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-beauty-health.svg",
                             Name = "Краса і здоров'я"
                         },
                         new
                         {
                             Id = 12,
                             DisplayOrder = 12,
-                            IconUrl = "icon-baby-products.svg",
-                            ImgUrl = "categoryImg-baby-products.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-baby-products.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-baby-products.svg",
                             Name = "Дитячі товари"
                         },
                         new
                         {
                             Id = 13,
                             DisplayOrder = 13,
-                            IconUrl = "icon-pet-supplies.svg",
-                            ImgUrl = "categoryImg-pet-supplies.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-pet-supplies.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-pet-supplies.svg",
                             Name = "Зоотовари"
                         },
                         new
                         {
                             Id = 14,
                             DisplayOrder = 14,
-                            IconUrl = "icon-stationery-books.svg",
-                            ImgUrl = "categoryImg-stationery-books.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-stationery-books.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-stationery-books.svg",
                             Name = "Канцтовари та книги"
                         },
                         new
                         {
                             Id = 15,
                             DisplayOrder = 15,
-                            IconUrl = "icon-alcohol-food.svg",
-                            ImgUrl = "categoryImg-alcohol-food.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-alcohol-food.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-alcohol-food.svg",
                             Name = "Алкогольні напої та продукти"
                         },
                         new
                         {
                             Id = 16,
                             DisplayOrder = 16,
-                            IconUrl = "icon-business-services.svg",
-                            ImgUrl = "categoryImg-business-services.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-business-services.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-business-services.svg",
                             Name = "Товари для бізнесу та послуги"
                         },
                         new
                         {
                             Id = 17,
                             DisplayOrder = 17,
-                            IconUrl = "icon-tourism-outdoor.svg",
-                            ImgUrl = "categoryImg-tourism-outdoor.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg",
                             Name = "Туризм та відпочинок"
                         },
                         new
                         {
                             Id = 18,
                             DisplayOrder = 18,
-                            IconUrl = "icon-promotions.svg",
-                            ImgUrl = "categoryImg-promotions.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-promotions.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-promotions.svg",
                             Name = "Акції"
                         },
                         new
                         {
                             Id = 19,
                             DisplayOrder = 19,
-                            IconUrl = "icon-total-sale.svg",
-                            ImgUrl = "categoryImg-total-sale.svg",
+                            IconUrl = "/AssetsIconImg/TopLevelCategory/icon-total-sale.svg",
+                            ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-total-sale.svg",
                             Name = "Тотальний розпродаж"
                         },
                         new
                         {
                             Id = 101,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-Notebooks.svg",
-                            ImgUrl = "categoryImg-Notebooks.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Notebooks.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Notebooks.svg",
                             Name = "Ноутбуки",
                             ParentCategoryId = 1
                         },
@@ -459,8 +459,8 @@ namespace BazaR.Migrations
                         {
                             Id = 102,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-GamingNotebooks.svg",
-                            ImgUrl = "categoryImg-GamingNotebooks.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-GamingNotebooks.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-GamingNotebooks.svg",
                             Name = "Ігрові ноутбуки",
                             ParentCategoryId = 1
                         },
@@ -468,8 +468,8 @@ namespace BazaR.Migrations
                         {
                             Id = 103,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-Ultrabooks.svg",
-                            ImgUrl = "categoryImg-Ultrabooks.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Ultrabooks.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Ultrabooks.svg",
                             Name = "Ультрабуки",
                             ParentCategoryId = 1
                         },
@@ -477,8 +477,8 @@ namespace BazaR.Migrations
                         {
                             Id = 104,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-ForStudy.svg",
-                            ImgUrl = "categoryImg-ForStudy.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-ForStudy.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-ForStudy.svg",
                             Name = "Для навчання",
                             ParentCategoryId = 1
                         },
@@ -486,8 +486,8 @@ namespace BazaR.Migrations
                         {
                             Id = 105,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-ForWork.svg",
-                            ImgUrl = "categoryImg-ForWork.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-ForWork.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-ForWork.svg",
                             Name = "Для роботи",
                             ParentCategoryId = 1
                         },
@@ -495,8 +495,8 @@ namespace BazaR.Migrations
                         {
                             Id = 106,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-Chromebook.svg",
-                            ImgUrl = "categoryImg-Chromebook.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Chromebook.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Chromebook.svg",
                             Name = "Chromebook",
                             ParentCategoryId = 1
                         },
@@ -504,8 +504,8 @@ namespace BazaR.Migrations
                         {
                             Id = 107,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-Computers.svg",
-                            ImgUrl = "categoryImg-Computers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Computers.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Computers.svg",
                             Name = "Комп'ютери",
                             ParentCategoryId = 1
                         },
@@ -513,8 +513,8 @@ namespace BazaR.Migrations
                         {
                             Id = 108,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-DesktopPC.svg",
-                            ImgUrl = "categoryImg-DesktopPC.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-DesktopPC.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-DesktopPC.webp",
                             Name = "Настільні ПК",
                             ParentCategoryId = 1
                         },
@@ -522,8 +522,8 @@ namespace BazaR.Migrations
                         {
                             Id = 109,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-GamingPC.svg",
-                            ImgUrl = "categoryImg-GamingPC.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-GamingPC.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-GamingPC.webp",
                             Name = "Ігрові ПК",
                             ParentCategoryId = 1
                         },
@@ -531,8 +531,8 @@ namespace BazaR.Migrations
                         {
                             Id = 110,
                             DisplayOrder = 10,
-                            IconUrl = "categoryIcon-MiniPC.svg",
-                            ImgUrl = "categoryImg-MiniPC.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-MiniPC.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-MiniPC.jpg",
                             Name = "Міні-ПК",
                             ParentCategoryId = 1
                         },
@@ -540,8 +540,8 @@ namespace BazaR.Migrations
                         {
                             Id = 111,
                             DisplayOrder = 11,
-                            IconUrl = "categoryIcon-Monoblocks.svg",
-                            ImgUrl = "categoryImg-Monoblocks.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Monoblocks.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Monoblocks.webp",
                             Name = "Моноблоки",
                             ParentCategoryId = 1
                         },
@@ -549,8 +549,8 @@ namespace BazaR.Migrations
                         {
                             Id = 112,
                             DisplayOrder = 12,
-                            IconUrl = "categoryIcon-Workstations.svg",
-                            ImgUrl = "categoryImg-Workstations.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Workstations.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Workstations.jpg",
                             Name = "Робочі станції",
                             ParentCategoryId = 1
                         },
@@ -558,8 +558,8 @@ namespace BazaR.Migrations
                         {
                             Id = 113,
                             DisplayOrder = 13,
-                            IconUrl = "categoryIcon-Components.svg",
-                            ImgUrl = "categoryImg-Components.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Components.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Components.svg",
                             Name = "Комплектуючі",
                             ParentCategoryId = 1
                         },
@@ -567,8 +567,8 @@ namespace BazaR.Migrations
                         {
                             Id = 114,
                             DisplayOrder = 14,
-                            IconUrl = "categoryIcon-Processors.svg",
-                            ImgUrl = "categoryImg-Processors.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Processors.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Processors.webp",
                             Name = "Процесори",
                             ParentCategoryId = 1
                         },
@@ -576,8 +576,8 @@ namespace BazaR.Migrations
                         {
                             Id = 115,
                             DisplayOrder = 15,
-                            IconUrl = "categoryIcon-VideoCards.svg",
-                            ImgUrl = "categoryImg-VideoCards.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-VideoCards.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-VideoCards.webp",
                             Name = "Відеокарти",
                             ParentCategoryId = 1
                         },
@@ -585,8 +585,8 @@ namespace BazaR.Migrations
                         {
                             Id = 116,
                             DisplayOrder = 16,
-                            IconUrl = "categoryIcon-Motherboards.svg",
-                            ImgUrl = "categoryImg-Motherboards.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Motherboards.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Motherboards.webp",
                             Name = "Материнські плати",
                             ParentCategoryId = 1
                         },
@@ -594,8 +594,8 @@ namespace BazaR.Migrations
                         {
                             Id = 117,
                             DisplayOrder = 17,
-                            IconUrl = "categoryIcon-RAM.svg",
-                            ImgUrl = "categoryImg-RAM.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-RAM.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-RAM.webp",
                             Name = "Оперативна пам'ять",
                             ParentCategoryId = 1
                         },
@@ -603,8 +603,8 @@ namespace BazaR.Migrations
                         {
                             Id = 118,
                             DisplayOrder = 18,
-                            IconUrl = "categoryIcon-PowerSupplies.svg",
-                            ImgUrl = "categoryImg-PowerSupplies.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-PowerSupplies.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-PowerSupplies.webp",
                             Name = "Блоки живлення",
                             ParentCategoryId = 1
                         },
@@ -612,8 +612,8 @@ namespace BazaR.Migrations
                         {
                             Id = 119,
                             DisplayOrder = 19,
-                            IconUrl = "categoryIcon-Cases.svg",
-                            ImgUrl = "categoryImg-Cases.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Cases.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Cases.webp",
                             Name = "Корпуси",
                             ParentCategoryId = 1
                         },
@@ -621,8 +621,8 @@ namespace BazaR.Migrations
                         {
                             Id = 120,
                             DisplayOrder = 20,
-                            IconUrl = "categoryIcon-Storage.svg",
-                            ImgUrl = "categoryImg-Storage.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Storage.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Storage.webp",
                             Name = "Накопичувачі",
                             ParentCategoryId = 1
                         },
@@ -630,8 +630,8 @@ namespace BazaR.Migrations
                         {
                             Id = 121,
                             DisplayOrder = 21,
-                            IconUrl = "categoryIcon-SSD.svg",
-                            ImgUrl = "categoryImg-SSD.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-SSD.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-SSD.webp",
                             Name = "SSD",
                             ParentCategoryId = 1
                         },
@@ -639,8 +639,8 @@ namespace BazaR.Migrations
                         {
                             Id = 122,
                             DisplayOrder = 22,
-                            IconUrl = "categoryIcon-HDD.svg",
-                            ImgUrl = "categoryImg-HDD.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-HDD.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-HDD.webp",
                             Name = "HDD",
                             ParentCategoryId = 1
                         },
@@ -648,8 +648,8 @@ namespace BazaR.Migrations
                         {
                             Id = 123,
                             DisplayOrder = 23,
-                            IconUrl = "categoryIcon-ExternalDrives.svg",
-                            ImgUrl = "categoryImg-ExternalDrives.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-ExternalDrives.jfif",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-ExternalDrives.jfif",
                             Name = "Зовнішні диски",
                             ParentCategoryId = 1
                         },
@@ -657,8 +657,8 @@ namespace BazaR.Migrations
                         {
                             Id = 124,
                             DisplayOrder = 24,
-                            IconUrl = "categoryIcon-NAS.svg",
-                            ImgUrl = "categoryImg-NAS.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-NAS.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-NAS.webp",
                             Name = "NAS",
                             ParentCategoryId = 1
                         },
@@ -666,8 +666,8 @@ namespace BazaR.Migrations
                         {
                             Id = 125,
                             DisplayOrder = 25,
-                            IconUrl = "categoryIcon-Peripherals.svg",
-                            ImgUrl = "categoryImg-Peripherals.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Peripherals.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Peripherals.svg",
                             Name = "Периферія",
                             ParentCategoryId = 1
                         },
@@ -675,8 +675,8 @@ namespace BazaR.Migrations
                         {
                             Id = 126,
                             DisplayOrder = 26,
-                            IconUrl = "categoryIcon-Keyboards.svg",
-                            ImgUrl = "categoryImg-Keyboards.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Keyboards.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Keyboards.svg",
                             Name = "Клавіатури",
                             ParentCategoryId = 1
                         },
@@ -684,8 +684,8 @@ namespace BazaR.Migrations
                         {
                             Id = 127,
                             DisplayOrder = 27,
-                            IconUrl = "categoryIcon-Mice.svg",
-                            ImgUrl = "categoryImg-Mice.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Mice.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Mice.webp",
                             Name = "Миші",
                             ParentCategoryId = 1
                         },
@@ -693,8 +693,8 @@ namespace BazaR.Migrations
                         {
                             Id = 128,
                             DisplayOrder = 28,
-                            IconUrl = "categoryIcon-MousePads.svg",
-                            ImgUrl = "categoryImg-MousePads.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-MousePads.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-MousePads.webp",
                             Name = "Килимки",
                             ParentCategoryId = 1
                         },
@@ -702,8 +702,8 @@ namespace BazaR.Migrations
                         {
                             Id = 129,
                             DisplayOrder = 29,
-                            IconUrl = "categoryIcon-Webcams.svg",
-                            ImgUrl = "categoryImg-Webcams.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Webcams.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/LaptopsAndComputers/categoryIcon-Webcams.webp",
                             Name = "Вебкамери",
                             ParentCategoryId = 1
                         },
@@ -711,8 +711,8 @@ namespace BazaR.Migrations
                         {
                             Id = 201,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-Smartphones.svg",
-                            ImgUrl = "categoryImg-Smartphones.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Smartphones.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Smartphones.svg",
                             Name = "Смартфони",
                             ParentCategoryId = 2
                         },
@@ -720,8 +720,8 @@ namespace BazaR.Migrations
                         {
                             Id = 202,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-Android.svg",
-                            ImgUrl = "categoryImg-Android.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Android.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Android.svg",
                             Name = "Android",
                             ParentCategoryId = 2
                         },
@@ -729,8 +729,8 @@ namespace BazaR.Migrations
                         {
                             Id = 203,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-iPhone.svg",
-                            ImgUrl = "categoryImg-iPhone.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-iPhone.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-iPhone.svg",
                             Name = "iPhone",
                             ParentCategoryId = 2
                         },
@@ -738,8 +738,8 @@ namespace BazaR.Migrations
                         {
                             Id = 204,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-Budget.svg",
-                            ImgUrl = "categoryImg-Budget.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Budget.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Budget.webp",
                             Name = "Бюджетні",
                             ParentCategoryId = 2
                         },
@@ -747,8 +747,8 @@ namespace BazaR.Migrations
                         {
                             Id = 205,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-Flagship.svg",
-                            ImgUrl = "categoryImg-Flagship.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Flagship.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Flagship.webp",
                             Name = "Флагмани",
                             ParentCategoryId = 2
                         },
@@ -756,8 +756,8 @@ namespace BazaR.Migrations
                         {
                             Id = 206,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-TVs.svg",
-                            ImgUrl = "categoryImg-TVs.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-TVs.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-TVs.jpg",
                             Name = "Телевізори",
                             ParentCategoryId = 2
                         },
@@ -765,8 +765,8 @@ namespace BazaR.Migrations
                         {
                             Id = 207,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-SmartTV.svg",
-                            ImgUrl = "categoryImg-SmartTV.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-SmartTV.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-SmartTV.webp",
                             Name = "Smart TV",
                             ParentCategoryId = 2
                         },
@@ -774,8 +774,8 @@ namespace BazaR.Migrations
                         {
                             Id = 208,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-LED.svg",
-                            ImgUrl = "categoryImg-LED.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-LED.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-LED.webp",
                             Name = "LED",
                             ParentCategoryId = 2
                         },
@@ -783,8 +783,8 @@ namespace BazaR.Migrations
                         {
                             Id = 209,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-OLED.svg",
-                            ImgUrl = "categoryImg-OLED.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-OLED.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-OLED.webp",
                             Name = "OLED",
                             ParentCategoryId = 2
                         },
@@ -792,8 +792,8 @@ namespace BazaR.Migrations
                         {
                             Id = 210,
                             DisplayOrder = 10,
-                            IconUrl = "categoryIcon-QLED.svg",
-                            ImgUrl = "categoryImg-QLED.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-QLED.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-QLED.webp",
                             Name = "QLED",
                             ParentCategoryId = 2
                         },
@@ -801,8 +801,8 @@ namespace BazaR.Migrations
                         {
                             Id = 211,
                             DisplayOrder = 11,
-                            IconUrl = "categoryIcon-Audio.svg",
-                            ImgUrl = "categoryImg-Audio.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Audio.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Audio.jpg",
                             Name = "Аудіо",
                             ParentCategoryId = 2
                         },
@@ -810,8 +810,8 @@ namespace BazaR.Migrations
                         {
                             Id = 212,
                             DisplayOrder = 12,
-                            IconUrl = "categoryIcon-Headphones.svg",
-                            ImgUrl = "categoryImg-Headphones.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Headphones.png",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Headphones.png",
                             Name = "Навушники",
                             ParentCategoryId = 2
                         },
@@ -819,8 +819,8 @@ namespace BazaR.Migrations
                         {
                             Id = 213,
                             DisplayOrder = 13,
-                            IconUrl = "categoryIcon-Soundbars.svg",
-                            ImgUrl = "categoryImg-Soundbars.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Soundbars.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Soundbars.webp",
                             Name = "Саундбари",
                             ParentCategoryId = 2
                         },
@@ -828,8 +828,8 @@ namespace BazaR.Migrations
                         {
                             Id = 214,
                             DisplayOrder = 14,
-                            IconUrl = "categoryIcon-Speakers.svg",
-                            ImgUrl = "categoryImg-Speakers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Speakers.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Speakers.webp",
                             Name = "Колонки",
                             ParentCategoryId = 2
                         },
@@ -837,8 +837,8 @@ namespace BazaR.Migrations
                         {
                             Id = 215,
                             DisplayOrder = 15,
-                            IconUrl = "categoryIcon-HomeTheaters.svg",
-                            ImgUrl = "categoryImg-HomeTheaters.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-HomeTheaters.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-HomeTheaters.jpg",
                             Name = "Домашні кінотеатри",
                             ParentCategoryId = 2
                         },
@@ -846,8 +846,8 @@ namespace BazaR.Migrations
                         {
                             Id = 216,
                             DisplayOrder = 16,
-                            IconUrl = "categoryIcon-Tablets.svg",
-                            ImgUrl = "categoryImg-Tablets.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Tablets.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Tablets.webp",
                             Name = "Планшети",
                             ParentCategoryId = 2
                         },
@@ -855,8 +855,8 @@ namespace BazaR.Migrations
                         {
                             Id = 217,
                             DisplayOrder = 17,
-                            IconUrl = "categoryIcon-iPad.svg",
-                            ImgUrl = "categoryImg-iPad.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-iPad.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-iPad.webp",
                             Name = "iPad",
                             ParentCategoryId = 2
                         },
@@ -864,8 +864,8 @@ namespace BazaR.Migrations
                         {
                             Id = 218,
                             DisplayOrder = 18,
-                            IconUrl = "categoryIcon-AndroidTablets.svg",
-                            ImgUrl = "categoryImg-AndroidTablets.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-AndroidTablets.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-AndroidTablets.webp",
                             Name = "Android планшети",
                             ParentCategoryId = 2
                         },
@@ -873,8 +873,8 @@ namespace BazaR.Migrations
                         {
                             Id = 219,
                             DisplayOrder = 19,
-                            IconUrl = "categoryIcon-Gadgets.svg",
-                            ImgUrl = "categoryImg-Gadgets.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Gadgets.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-Gadgets.webp",
                             Name = "Гаджети",
                             ParentCategoryId = 2
                         },
@@ -882,8 +882,8 @@ namespace BazaR.Migrations
                         {
                             Id = 220,
                             DisplayOrder = 20,
-                            IconUrl = "categoryIcon-SmartWatches.svg",
-                            ImgUrl = "categoryImg-SmartWatches.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-SmartWatches.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-SmartWatches.webp",
                             Name = "Смарт-годинники",
                             ParentCategoryId = 2
                         },
@@ -891,8 +891,8 @@ namespace BazaR.Migrations
                         {
                             Id = 221,
                             DisplayOrder = 21,
-                            IconUrl = "categoryIcon-FitnessBands.svg",
-                            ImgUrl = "categoryImg-FitnessBands.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-FitnessBands.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SmartphonesTvElectronics/categoryIcon-FitnessBands.webp",
                             Name = "Фітнес-браслети",
                             ParentCategoryId = 2
                         },
@@ -900,8 +900,8 @@ namespace BazaR.Migrations
                         {
                             Id = 301,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-Consoles.svg",
-                            ImgUrl = "categoryImg-Consoles.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-Consoles.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-Consoles.jpg",
                             Name = "Консолі",
                             ParentCategoryId = 3
                         },
@@ -909,8 +909,8 @@ namespace BazaR.Migrations
                         {
                             Id = 302,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-PlayStation.svg",
-                            ImgUrl = "categoryImg-PlayStation.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-PlayStation.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-PlayStation.webp",
                             Name = "PlayStation",
                             ParentCategoryId = 3
                         },
@@ -918,8 +918,8 @@ namespace BazaR.Migrations
                         {
                             Id = 303,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-Xbox.svg",
-                            ImgUrl = "categoryImg-Xbox.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-Xbox.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-Xbox.webp",
                             Name = "Xbox",
                             ParentCategoryId = 3
                         },
@@ -927,8 +927,8 @@ namespace BazaR.Migrations
                         {
                             Id = 304,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-Nintendo.svg",
-                            ImgUrl = "categoryImg-Nintendo.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-Nintendo.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-Nintendo.webp",
                             Name = "Nintendo",
                             ParentCategoryId = 3
                         },
@@ -936,8 +936,8 @@ namespace BazaR.Migrations
                         {
                             Id = 305,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-Games.svg",
-                            ImgUrl = "categoryImg-Games.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-Games.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-Games.webp",
                             Name = "Ігри",
                             ParentCategoryId = 3
                         },
@@ -945,8 +945,8 @@ namespace BazaR.Migrations
                         {
                             Id = 306,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-PlayStationGames.svg",
-                            ImgUrl = "categoryImg-PlayStationGames.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-PlayStationGames.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-PlayStationGames.webp",
                             Name = "PlayStation ігри",
                             ParentCategoryId = 3
                         },
@@ -954,8 +954,8 @@ namespace BazaR.Migrations
                         {
                             Id = 307,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-XboxGames.svg",
-                            ImgUrl = "categoryImg-XboxGames.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-XboxGames.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-XboxGames.webp",
                             Name = "Xbox ігри",
                             ParentCategoryId = 3
                         },
@@ -963,8 +963,8 @@ namespace BazaR.Migrations
                         {
                             Id = 308,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-PCGames.svg",
-                            ImgUrl = "categoryImg-PCGames.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-PCGames.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-PCGames.webp",
                             Name = "PC ігри",
                             ParentCategoryId = 3
                         },
@@ -972,8 +972,8 @@ namespace BazaR.Migrations
                         {
                             Id = 309,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-GamingPeripherals.svg",
-                            ImgUrl = "categoryImg-GamingPeripherals.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-GamingPeripherals.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-GamingPeripherals.jpg",
                             Name = "Геймерська периферія",
                             ParentCategoryId = 3
                         },
@@ -981,8 +981,8 @@ namespace BazaR.Migrations
                         {
                             Id = 310,
                             DisplayOrder = 10,
-                            IconUrl = "categoryIcon-GamingMice.svg",
-                            ImgUrl = "categoryImg-GamingMice.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-GamingMice.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-GamingMice.webp",
                             Name = "Ігрові миші",
                             ParentCategoryId = 3
                         },
@@ -990,8 +990,8 @@ namespace BazaR.Migrations
                         {
                             Id = 311,
                             DisplayOrder = 11,
-                            IconUrl = "categoryIcon-GamingKeyboards.svg",
-                            ImgUrl = "categoryImg-GamingKeyboards.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-GamingKeyboards.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-GamingKeyboards.webp",
                             Name = "Ігрові клавіатури",
                             ParentCategoryId = 3
                         },
@@ -999,8 +999,8 @@ namespace BazaR.Migrations
                         {
                             Id = 312,
                             DisplayOrder = 12,
-                            IconUrl = "categoryIcon-GamingHeadphones.svg",
-                            ImgUrl = "categoryImg-GamingHeadphones.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-GamingHeadphones.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-GamingHeadphones.webp",
                             Name = "Геймерські навушники",
                             ParentCategoryId = 3
                         },
@@ -1008,8 +1008,8 @@ namespace BazaR.Migrations
                         {
                             Id = 313,
                             DisplayOrder = 13,
-                            IconUrl = "categoryIcon-VR.svg",
-                            ImgUrl = "categoryImg-VR.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-VR.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-VR.jpg",
                             Name = "VR",
                             ParentCategoryId = 3
                         },
@@ -1017,8 +1017,8 @@ namespace BazaR.Migrations
                         {
                             Id = 314,
                             DisplayOrder = 14,
-                            IconUrl = "categoryIcon-VRHeadsets.svg",
-                            ImgUrl = "categoryImg-VRHeadsets.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-VRHeadsets.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-VRHeadsets.webp",
                             Name = "VR шоломи",
                             ParentCategoryId = 3
                         },
@@ -1026,8 +1026,8 @@ namespace BazaR.Migrations
                         {
                             Id = 315,
                             DisplayOrder = 15,
-                            IconUrl = "categoryIcon-VRAccessories.svg",
-                            ImgUrl = "categoryImg-VRAccessories.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-VRAccessories.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Gaming/categoryIcon-VRAccessories.webp",
                             Name = "VR аксесуари",
                             ParentCategoryId = 3
                         },
@@ -1035,8 +1035,8 @@ namespace BazaR.Migrations
                         {
                             Id = 401,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-LargeAppliances.svg",
-                            ImgUrl = "categoryImg-LargeAppliances.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-LargeAppliances.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-LargeAppliances.webp",
                             Name = "Велика техніка",
                             ParentCategoryId = 4
                         },
@@ -1044,8 +1044,8 @@ namespace BazaR.Migrations
                         {
                             Id = 402,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-Refrigerators.svg",
-                            ImgUrl = "categoryImg-Refrigerators.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Refrigerators.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Refrigerators.webp",
                             Name = "Холодильники",
                             ParentCategoryId = 4
                         },
@@ -1053,8 +1053,8 @@ namespace BazaR.Migrations
                         {
                             Id = 403,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-WashingMachines.svg",
-                            ImgUrl = "categoryImg-WashingMachines.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-WashingMachines.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-WashingMachines.webp",
                             Name = "Пральні машини",
                             ParentCategoryId = 4
                         },
@@ -1062,8 +1062,8 @@ namespace BazaR.Migrations
                         {
                             Id = 404,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-Dishwashers.svg",
-                            ImgUrl = "categoryImg-Dishwashers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Dishwashers.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Dishwashers.webp",
                             Name = "Посудомийні машини",
                             ParentCategoryId = 4
                         },
@@ -1071,8 +1071,8 @@ namespace BazaR.Migrations
                         {
                             Id = 405,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-KitchenAppliances.svg",
-                            ImgUrl = "categoryImg-KitchenAppliances.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-KitchenAppliances.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-KitchenAppliances.webp",
                             Name = "Кухонна техніка",
                             ParentCategoryId = 4
                         },
@@ -1080,8 +1080,8 @@ namespace BazaR.Migrations
                         {
                             Id = 406,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-Microwaves.svg",
-                            ImgUrl = "categoryImg-Microwaves.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Microwaves.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Microwaves.webp",
                             Name = "Мікрохвильові печі",
                             ParentCategoryId = 4
                         },
@@ -1089,8 +1089,8 @@ namespace BazaR.Migrations
                         {
                             Id = 407,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-Blenders.svg",
-                            ImgUrl = "categoryImg-Blenders.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Blenders.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Blenders.webp",
                             Name = "Блендери",
                             ParentCategoryId = 4
                         },
@@ -1098,8 +1098,8 @@ namespace BazaR.Migrations
                         {
                             Id = 408,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-Mixers.svg",
-                            ImgUrl = "categoryImg-Mixers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Mixers.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Mixers.webp",
                             Name = "Міксери",
                             ParentCategoryId = 4
                         },
@@ -1107,8 +1107,8 @@ namespace BazaR.Migrations
                         {
                             Id = 409,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-Multicookers.svg",
-                            ImgUrl = "categoryImg-Multicookers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Multicookers.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Multicookers.webp",
                             Name = "Мультиварки",
                             ParentCategoryId = 4
                         },
@@ -1116,8 +1116,8 @@ namespace BazaR.Migrations
                         {
                             Id = 410,
                             DisplayOrder = 10,
-                            IconUrl = "categoryIcon-ClimateControl.svg",
-                            ImgUrl = "categoryImg-ClimateControl.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-ClimateControl.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-ClimateControl.webp",
                             Name = "Кліматична техніка",
                             ParentCategoryId = 4
                         },
@@ -1125,8 +1125,8 @@ namespace BazaR.Migrations
                         {
                             Id = 411,
                             DisplayOrder = 11,
-                            IconUrl = "categoryIcon-AirConditioners.svg",
-                            ImgUrl = "categoryImg-AirConditioners.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-AirConditioners.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-AirConditioners.webp",
                             Name = "Кондиціонери",
                             ParentCategoryId = 4
                         },
@@ -1134,8 +1134,8 @@ namespace BazaR.Migrations
                         {
                             Id = 412,
                             DisplayOrder = 12,
-                            IconUrl = "categoryIcon-Heaters.svg",
-                            ImgUrl = "categoryImg-Heaters.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Heaters.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Heaters.webp",
                             Name = "Обігрівачі",
                             ParentCategoryId = 4
                         },
@@ -1143,8 +1143,8 @@ namespace BazaR.Migrations
                         {
                             Id = 413,
                             DisplayOrder = 13,
-                            IconUrl = "categoryIcon-Fans.svg",
-                            ImgUrl = "categoryImg-Fans.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Fans.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Fans.webp",
                             Name = "Вентилятори",
                             ParentCategoryId = 4
                         },
@@ -1152,8 +1152,8 @@ namespace BazaR.Migrations
                         {
                             Id = 414,
                             DisplayOrder = 14,
-                            IconUrl = "categoryIcon-Cleaning.svg",
-                            ImgUrl = "categoryImg-Cleaning.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Cleaning.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-Cleaning.webp",
                             Name = "Прибирання",
                             ParentCategoryId = 4
                         },
@@ -1161,8 +1161,8 @@ namespace BazaR.Migrations
                         {
                             Id = 415,
                             DisplayOrder = 15,
-                            IconUrl = "categoryIcon-VacuumCleaners.svg",
-                            ImgUrl = "categoryImg-VacuumCleaners.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-VacuumCleaners.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-VacuumCleaners.webp",
                             Name = "Пилососи",
                             ParentCategoryId = 4
                         },
@@ -1170,8 +1170,8 @@ namespace BazaR.Migrations
                         {
                             Id = 416,
                             DisplayOrder = 16,
-                            IconUrl = "categoryIcon-RobotVacuums.svg",
-                            ImgUrl = "categoryImg-RobotVacuums.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-RobotVacuums.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeAppliances/categoryIcon-RobotVacuums.webp",
                             Name = "Роботи-пилососи",
                             ParentCategoryId = 4
                         },
@@ -1179,8 +1179,8 @@ namespace BazaR.Migrations
                         {
                             Id = 501,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-Furniture.svg",
-                            ImgUrl = "categoryImg-Furniture.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Furniture.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Furniture.jpg",
                             Name = "Меблі",
                             ParentCategoryId = 5
                         },
@@ -1188,8 +1188,8 @@ namespace BazaR.Migrations
                         {
                             Id = 502,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-Sofas.svg",
-                            ImgUrl = "categoryImg-Sofas.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Sofas.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Sofas.webp",
                             Name = "Дивани",
                             ParentCategoryId = 5
                         },
@@ -1197,8 +1197,8 @@ namespace BazaR.Migrations
                         {
                             Id = 503,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-Beds.svg",
-                            ImgUrl = "categoryImg-Beds.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Beds.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Beds.webp",
                             Name = "Ліжка",
                             ParentCategoryId = 5
                         },
@@ -1206,8 +1206,8 @@ namespace BazaR.Migrations
                         {
                             Id = 504,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-Wardrobes.svg",
-                            ImgUrl = "categoryImg-Wardrobes.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Wardrobes.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Wardrobes.webp",
                             Name = "Шафи",
                             ParentCategoryId = 5
                         },
@@ -1215,8 +1215,8 @@ namespace BazaR.Migrations
                         {
                             Id = 505,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-Lighting.svg",
-                            ImgUrl = "categoryImg-Lighting.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Lighting.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Lighting.jpg",
                             Name = "Освітлення",
                             ParentCategoryId = 5
                         },
@@ -1224,8 +1224,8 @@ namespace BazaR.Migrations
                         {
                             Id = 506,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-Lamps.svg",
-                            ImgUrl = "categoryImg-Lamps.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Lamps.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Lamps.webp",
                             Name = "Лампи",
                             ParentCategoryId = 5
                         },
@@ -1233,8 +1233,8 @@ namespace BazaR.Migrations
                         {
                             Id = 507,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-Chandeliers.svg",
-                            ImgUrl = "categoryImg-Chandeliers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Chandeliers.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Chandeliers.webp",
                             Name = "Люстри",
                             ParentCategoryId = 5
                         },
@@ -1242,8 +1242,8 @@ namespace BazaR.Migrations
                         {
                             Id = 508,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-LEDLighting.svg",
-                            ImgUrl = "categoryImg-LEDLighting.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-LEDLighting.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-LEDLighting.webp",
                             Name = "LED освітлення",
                             ParentCategoryId = 5
                         },
@@ -1251,8 +1251,8 @@ namespace BazaR.Migrations
                         {
                             Id = 509,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-Decor.svg",
-                            ImgUrl = "categoryImg-Decor.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Decor.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Decor.jpg",
                             Name = "Декор",
                             ParentCategoryId = 5
                         },
@@ -1260,8 +1260,8 @@ namespace BazaR.Migrations
                         {
                             Id = 510,
                             DisplayOrder = 10,
-                            IconUrl = "categoryIcon-Paintings.svg",
-                            ImgUrl = "categoryImg-Paintings.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Paintings.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Paintings.webp",
                             Name = "Картини",
                             ParentCategoryId = 5
                         },
@@ -1269,8 +1269,8 @@ namespace BazaR.Migrations
                         {
                             Id = 511,
                             DisplayOrder = 11,
-                            IconUrl = "categoryIcon-Mirrors.svg",
-                            ImgUrl = "categoryImg-Mirrors.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Mirrors.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Mirrors.webp",
                             Name = "Дзеркала",
                             ParentCategoryId = 5
                         },
@@ -1278,8 +1278,8 @@ namespace BazaR.Migrations
                         {
                             Id = 512,
                             DisplayOrder = 12,
-                            IconUrl = "categoryIcon-Clocks.svg",
-                            ImgUrl = "categoryImg-Clocks.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Clocks.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/HomeGoods/categoryIcon-Clocks.webp",
                             Name = "Годинники",
                             ParentCategoryId = 5
                         },
@@ -1287,8 +1287,8 @@ namespace BazaR.Migrations
                         {
                             Id = 601,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-PowerTools.svg",
-                            ImgUrl = "categoryImg-PowerTools.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-PowerTools.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-PowerTools.jpg",
                             Name = "Електроінструменти",
                             ParentCategoryId = 6
                         },
@@ -1296,8 +1296,8 @@ namespace BazaR.Migrations
                         {
                             Id = 602,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-Drills.svg",
-                            ImgUrl = "categoryImg-Drills.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-Drills.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-Drills.webp",
                             Name = "Дрилі",
                             ParentCategoryId = 6
                         },
@@ -1305,8 +1305,8 @@ namespace BazaR.Migrations
                         {
                             Id = 603,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-Screwdrivers.svg",
-                            ImgUrl = "categoryImg-Screwdrivers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-Screwdrivers.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-Screwdrivers.webp",
                             Name = "Шуруповерти",
                             ParentCategoryId = 6
                         },
@@ -1314,8 +1314,8 @@ namespace BazaR.Migrations
                         {
                             Id = 604,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-AngleGrinders.svg",
-                            ImgUrl = "categoryImg-AngleGrinders.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-AngleGrinders.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-AngleGrinders.webp",
                             Name = "Болгарки",
                             ParentCategoryId = 6
                         },
@@ -1323,8 +1323,8 @@ namespace BazaR.Migrations
                         {
                             Id = 605,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-CarElectronics.svg",
-                            ImgUrl = "categoryImg-CarElectronics.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-CarElectronics.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-CarElectronics.webp",
                             Name = "Автоелектроніка",
                             ParentCategoryId = 6
                         },
@@ -1332,8 +1332,8 @@ namespace BazaR.Migrations
                         {
                             Id = 606,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-DashCams.svg",
-                            ImgUrl = "categoryImg-DashCams.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-DashCams.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-DashCams.webp",
                             Name = "Відеореєстратори",
                             ParentCategoryId = 6
                         },
@@ -1341,8 +1341,8 @@ namespace BazaR.Migrations
                         {
                             Id = 607,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-GPS.svg",
-                            ImgUrl = "categoryImg-GPS.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-GPS.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-GPS.webp",
                             Name = "GPS навігатори",
                             ParentCategoryId = 6
                         },
@@ -1350,8 +1350,8 @@ namespace BazaR.Migrations
                         {
                             Id = 608,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-CarAccessories.svg",
-                            ImgUrl = "categoryImg-CarAccessories.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-CarAccessories.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-CarAccessories.jpg",
                             Name = "Автоаксесуари",
                             ParentCategoryId = 6
                         },
@@ -1359,8 +1359,8 @@ namespace BazaR.Migrations
                         {
                             Id = 609,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-PhoneHolders.svg",
-                            ImgUrl = "categoryImg-PhoneHolders.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-PhoneHolders.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-PhoneHolders.webp",
                             Name = "Тримачі телефону",
                             ParentCategoryId = 6
                         },
@@ -1368,8 +1368,8 @@ namespace BazaR.Migrations
                         {
                             Id = 610,
                             DisplayOrder = 10,
-                            IconUrl = "categoryIcon-CarChargers.svg",
-                            ImgUrl = "categoryImg-CarChargers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-CarChargers.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ToolsAndAuto/categoryIcon-CarChargers.webp",
                             Name = "Зарядні пристрої",
                             ParentCategoryId = 6
                         },
@@ -1377,8 +1377,8 @@ namespace BazaR.Migrations
                         {
                             Id = 701,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-Bathroom.svg",
-                            ImgUrl = "categoryImg-Bathroom.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Bathroom.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Bathroom.webp",
                             Name = "Ванна кімната",
                             ParentCategoryId = 7
                         },
@@ -1386,8 +1386,8 @@ namespace BazaR.Migrations
                         {
                             Id = 702,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-ShowerCubicles.svg",
-                            ImgUrl = "categoryImg-ShowerCubicles.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-ShowerCubicles.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-ShowerCubicles.webp",
                             Name = "Душові кабіни",
                             ParentCategoryId = 7
                         },
@@ -1395,8 +1395,8 @@ namespace BazaR.Migrations
                         {
                             Id = 703,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-Toilets.svg",
-                            ImgUrl = "categoryImg-Toilets.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Toilets.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Toilets.webp",
                             Name = "Унітази",
                             ParentCategoryId = 7
                         },
@@ -1404,8 +1404,8 @@ namespace BazaR.Migrations
                         {
                             Id = 704,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-Sinks.svg",
-                            ImgUrl = "categoryImg-Sinks.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Sinks.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Sinks.webp",
                             Name = "Раковини",
                             ParentCategoryId = 7
                         },
@@ -1413,8 +1413,8 @@ namespace BazaR.Migrations
                         {
                             Id = 705,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-Tools.svg",
-                            ImgUrl = "categoryImg-Tools.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Tools.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Tools.webp",
                             Name = "Інструменти",
                             ParentCategoryId = 7
                         },
@@ -1422,8 +1422,8 @@ namespace BazaR.Migrations
                         {
                             Id = 706,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-HandTools.svg",
-                            ImgUrl = "categoryImg-HandTools.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-HandTools.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-HandTools.jpg",
                             Name = "Ручний інструмент",
                             ParentCategoryId = 7
                         },
@@ -1431,8 +1431,8 @@ namespace BazaR.Migrations
                         {
                             Id = 707,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-MeasuringTools.svg",
-                            ImgUrl = "categoryImg-MeasuringTools.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-MeasuringTools.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-MeasuringTools.jpg",
                             Name = "Вимірювальні прилади",
                             ParentCategoryId = 7
                         },
@@ -1440,8 +1440,8 @@ namespace BazaR.Migrations
                         {
                             Id = 708,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-Materials.svg",
-                            ImgUrl = "categoryImg-Materials.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Materials.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Materials.webp",
                             Name = "Матеріали",
                             ParentCategoryId = 7
                         },
@@ -1449,8 +1449,8 @@ namespace BazaR.Migrations
                         {
                             Id = 709,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-Paint.svg",
-                            ImgUrl = "categoryImg-Paint.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Paint.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Paint.webp",
                             Name = "Фарба",
                             ParentCategoryId = 7
                         },
@@ -1458,8 +1458,8 @@ namespace BazaR.Migrations
                         {
                             Id = 710,
                             DisplayOrder = 10,
-                            IconUrl = "categoryIcon-Tiles.svg",
-                            ImgUrl = "categoryImg-Tiles.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Tiles.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Tiles.webp",
                             Name = "Плитка",
                             ParentCategoryId = 7
                         },
@@ -1467,8 +1467,8 @@ namespace BazaR.Migrations
                         {
                             Id = 711,
                             DisplayOrder = 11,
-                            IconUrl = "categoryIcon-Laminate.svg",
-                            ImgUrl = "categoryImg-Laminate.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Laminate.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PlumbingRenovation/categoryIcon-Laminate.webp",
                             Name = "Ламінат",
                             ParentCategoryId = 7
                         },
@@ -1476,8 +1476,8 @@ namespace BazaR.Migrations
                         {
                             Id = 801,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-GardenTools.svg",
-                            ImgUrl = "categoryImg-GardenTools.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-GardenTools.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-GardenTools.jpg",
                             Name = "Садова техніка",
                             ParentCategoryId = 8
                         },
@@ -1485,8 +1485,8 @@ namespace BazaR.Migrations
                         {
                             Id = 802,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-LawnMowers.svg",
-                            ImgUrl = "categoryImg-LawnMowers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-LawnMowers.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-LawnMowers.webp",
                             Name = "Газонокосарки",
                             ParentCategoryId = 8
                         },
@@ -1494,8 +1494,8 @@ namespace BazaR.Migrations
                         {
                             Id = 803,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-Trimmers.svg",
-                            ImgUrl = "categoryImg-Trimmers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-Trimmers.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-Trimmers.webp",
                             Name = "Тримери",
                             ParentCategoryId = 8
                         },
@@ -1503,8 +1503,8 @@ namespace BazaR.Migrations
                         {
                             Id = 804,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-GardenImplements.svg",
-                            ImgUrl = "categoryImg-GardenImplements.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-GardenImplements.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-GardenImplements.webp",
                             Name = "Садові інструменти",
                             ParentCategoryId = 8
                         },
@@ -1512,8 +1512,8 @@ namespace BazaR.Migrations
                         {
                             Id = 805,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-Shovels.svg",
-                            ImgUrl = "categoryImg-Shovels.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-Shovels.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-Shovels.webp",
                             Name = "Лопати",
                             ParentCategoryId = 8
                         },
@@ -1521,8 +1521,8 @@ namespace BazaR.Migrations
                         {
                             Id = 806,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-Pruners.svg",
-                            ImgUrl = "categoryImg-Pruners.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-Pruners.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-Pruners.webp",
                             Name = "Секатори",
                             ParentCategoryId = 8
                         },
@@ -1530,8 +1530,8 @@ namespace BazaR.Migrations
                         {
                             Id = 807,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-GardenFurniture.svg",
-                            ImgUrl = "categoryImg-GardenFurniture.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-GardenFurniture.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-GardenFurniture.jpg",
                             Name = "Меблі для саду",
                             ParentCategoryId = 8
                         },
@@ -1539,8 +1539,8 @@ namespace BazaR.Migrations
                         {
                             Id = 808,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-GardenTables.svg",
-                            ImgUrl = "categoryImg-GardenTables.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-GardenTables.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-GardenTables.webp",
                             Name = "Садові столи",
                             ParentCategoryId = 8
                         },
@@ -1548,8 +1548,8 @@ namespace BazaR.Migrations
                         {
                             Id = 809,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-GardenChairs.svg",
-                            ImgUrl = "categoryImg-GardenChairs.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-GardenChairs.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Garden/categoryIcon-GardenChairs.webp",
                             Name = "Крісла",
                             ParentCategoryId = 8
                         },
@@ -1557,8 +1557,8 @@ namespace BazaR.Migrations
                         {
                             Id = 901,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-Fitness.svg",
-                            ImgUrl = "categoryImg-Fitness.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-Fitness.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-Fitness.webp",
                             Name = "Фітнес",
                             ParentCategoryId = 9
                         },
@@ -1566,8 +1566,8 @@ namespace BazaR.Migrations
                         {
                             Id = 902,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-Dumbbells.svg",
-                            ImgUrl = "categoryImg-Dumbbells.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-Dumbbells.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-Dumbbells.webp",
                             Name = "Гантелі",
                             ParentCategoryId = 9
                         },
@@ -1575,8 +1575,8 @@ namespace BazaR.Migrations
                         {
                             Id = 903,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-Treadmills.svg",
-                            ImgUrl = "categoryImg-Treadmills.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-Treadmills.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-Treadmills.webp",
                             Name = "Бігові доріжки",
                             ParentCategoryId = 9
                         },
@@ -1584,8 +1584,8 @@ namespace BazaR.Migrations
                         {
                             Id = 904,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-Cycling.svg",
-                            ImgUrl = "categoryImg-Cycling.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-Cycling.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-Cycling.webp",
                             Name = "Велоспорт",
                             ParentCategoryId = 9
                         },
@@ -1593,8 +1593,8 @@ namespace BazaR.Migrations
                         {
                             Id = 905,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-Bicycles.svg",
-                            ImgUrl = "categoryImg-Bicycles.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-Bicycles.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-Bicycles.webp",
                             Name = "Велосипеди",
                             ParentCategoryId = 9
                         },
@@ -1602,8 +1602,8 @@ namespace BazaR.Migrations
                         {
                             Id = 906,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-CyclingAccessories.svg",
-                            ImgUrl = "categoryImg-CyclingAccessories.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-CyclingAccessories.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-CyclingAccessories.webp",
                             Name = "Аксесуари",
                             ParentCategoryId = 9
                         },
@@ -1611,8 +1611,8 @@ namespace BazaR.Migrations
                         {
                             Id = 907,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-OutdoorRecreation.svg",
-                            ImgUrl = "categoryImg-OutdoorRecreation.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-OutdoorRecreation.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-OutdoorRecreation.webp",
                             Name = "Активний відпочинок",
                             ParentCategoryId = 9
                         },
@@ -1620,8 +1620,8 @@ namespace BazaR.Migrations
                         {
                             Id = 908,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-KickScooters.svg",
-                            ImgUrl = "categoryImg-KickScooters.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-KickScooters.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-KickScooters.webp",
                             Name = "Самокати",
                             ParentCategoryId = 9
                         },
@@ -1629,8 +1629,8 @@ namespace BazaR.Migrations
                         {
                             Id = 909,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-ElectricScooters.svg",
-                            ImgUrl = "categoryImg-ElectricScooters.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-ElectricScooters.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/SportsHobbies/categoryIcon-ElectricScooters.webp",
                             Name = "Електросамокати",
                             ParentCategoryId = 9
                         },
@@ -1638,8 +1638,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1001,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-MensClothing.svg",
-                            ImgUrl = "categoryImg-MensClothing.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-MensClothing.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-MensClothing.jpg",
                             Name = "Чоловічий одяг",
                             ParentCategoryId = 10
                         },
@@ -1647,8 +1647,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1002,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-TShirts.svg",
-                            ImgUrl = "categoryImg-TShirts.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-TShirts.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-TShirts.jpg",
                             Name = "Футболки",
                             ParentCategoryId = 10
                         },
@@ -1656,8 +1656,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1003,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-Jeans.svg",
-                            ImgUrl = "categoryImg-Jeans.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Jeans.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Jeans.webp",
                             Name = "Джинси",
                             ParentCategoryId = 10
                         },
@@ -1665,8 +1665,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1004,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-Jackets.svg",
-                            ImgUrl = "categoryImg-Jackets.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Jackets.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Jackets.webp",
                             Name = "Куртки",
                             ParentCategoryId = 10
                         },
@@ -1674,8 +1674,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1005,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-WomensClothing.svg",
-                            ImgUrl = "categoryImg-WomensClothing.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-WomensClothing.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-WomensClothing.jpg",
                             Name = "Жіночий одяг",
                             ParentCategoryId = 10
                         },
@@ -1683,8 +1683,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1006,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-Dresses.svg",
-                            ImgUrl = "categoryImg-Dresses.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Dresses.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Dresses.webp",
                             Name = "Сукні",
                             ParentCategoryId = 10
                         },
@@ -1692,8 +1692,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1007,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-Skirts.svg",
-                            ImgUrl = "categoryImg-Skirts.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Skirts.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Skirts.webp",
                             Name = "Спідниці",
                             ParentCategoryId = 10
                         },
@@ -1701,8 +1701,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1008,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-Footwear.svg",
-                            ImgUrl = "categoryImg-Footwear.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Footwear.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Footwear.jpg",
                             Name = "Взуття",
                             ParentCategoryId = 10
                         },
@@ -1710,8 +1710,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1009,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-Sneakers.svg",
-                            ImgUrl = "categoryImg-Sneakers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Sneakers.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Sneakers.webp",
                             Name = "Кросівки",
                             ParentCategoryId = 10
                         },
@@ -1719,8 +1719,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1010,
                             DisplayOrder = 10,
-                            IconUrl = "categoryIcon-Boots.svg",
-                            ImgUrl = "categoryImg-Boots.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Boots.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Boots.webp",
                             Name = "Черевики",
                             ParentCategoryId = 10
                         },
@@ -1728,8 +1728,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1011,
                             DisplayOrder = 11,
-                            IconUrl = "categoryIcon-Accessories.svg",
-                            ImgUrl = "categoryImg-Accessories.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Accessories.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Accessories.webp",
                             Name = "Аксесуари",
                             ParentCategoryId = 10
                         },
@@ -1737,8 +1737,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1012,
                             DisplayOrder = 12,
-                            IconUrl = "categoryIcon-Bags.svg",
-                            ImgUrl = "categoryImg-Bags.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Bags.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Bags.webp",
                             Name = "Сумки",
                             ParentCategoryId = 10
                         },
@@ -1746,8 +1746,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1013,
                             DisplayOrder = 13,
-                            IconUrl = "categoryIcon-Belts.svg",
-                            ImgUrl = "categoryImg-Belts.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Belts.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/ClothingFootwearJewelry/categoryIcon-Belts.webp",
                             Name = "Ремені",
                             ParentCategoryId = 10
                         },
@@ -1755,8 +1755,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1101,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-FaceCare.svg",
-                            ImgUrl = "categoryImg-FaceCare.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-FaceCare.png",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-FaceCare.png",
                             Name = "Догляд за обличчям",
                             ParentCategoryId = 11
                         },
@@ -1764,8 +1764,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1102,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-Creams.svg",
-                            ImgUrl = "categoryImg-Creams.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-Creams.png",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-Creams.png",
                             Name = "Креми",
                             ParentCategoryId = 11
                         },
@@ -1773,8 +1773,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1103,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-Serums.svg",
-                            ImgUrl = "categoryImg-Serums.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-Serums.png",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-Serums.png",
                             Name = "Сироватки",
                             ParentCategoryId = 11
                         },
@@ -1782,8 +1782,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1104,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-HairCare.svg",
-                            ImgUrl = "categoryImg-HairCare.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-HairCare.png",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-HairCare.png",
                             Name = "Догляд за волоссям",
                             ParentCategoryId = 11
                         },
@@ -1791,8 +1791,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1105,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-Shampoos.svg",
-                            ImgUrl = "categoryImg-Shampoos.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-Shampoos.png",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-Shampoos.png",
                             Name = "Шампуні",
                             ParentCategoryId = 11
                         },
@@ -1800,8 +1800,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1106,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-HairMasks.svg",
-                            ImgUrl = "categoryImg-HairMasks.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-HairMasks.png",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-HairMasks.png",
                             Name = "Маски",
                             ParentCategoryId = 11
                         },
@@ -1809,8 +1809,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1107,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-BeautyTech.svg",
-                            ImgUrl = "categoryImg-BeautyTech.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-BeautyTech.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-BeautyTech.jpg",
                             Name = "Техніка",
                             ParentCategoryId = 11
                         },
@@ -1818,8 +1818,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1108,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-HairDryers.svg",
-                            ImgUrl = "categoryImg-HairDryers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-HairDryers.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-HairDryers.jpg",
                             Name = "Фени",
                             ParentCategoryId = 11
                         },
@@ -1827,8 +1827,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1109,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-Razors.svg",
-                            ImgUrl = "categoryImg-Razors.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-Razors.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BeautyHealth/categoryIcon-Razors.jpg",
                             Name = "Бритви",
                             ParentCategoryId = 11
                         },
@@ -1836,8 +1836,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1201,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-Toys.svg",
-                            ImgUrl = "categoryImg-Toys.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-Toys.png",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-Toys.png",
                             Name = "Іграшки",
                             ParentCategoryId = 12
                         },
@@ -1845,8 +1845,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1202,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-ConstructionToys.svg",
-                            ImgUrl = "categoryImg-ConstructionToys.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-ConstructionToys.png",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-ConstructionToys.png",
                             Name = "Конструктори",
                             ParentCategoryId = 12
                         },
@@ -1854,8 +1854,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1203,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-Dolls.svg",
-                            ImgUrl = "categoryImg-Dolls.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-Dolls.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-Dolls.jpg",
                             Name = "Ляльки",
                             ParentCategoryId = 12
                         },
@@ -1863,8 +1863,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1204,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-Cars.svg",
-                            ImgUrl = "categoryImg-Cars.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-Cars.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-Cars.jpg",
                             Name = "Машинки",
                             ParentCategoryId = 12
                         },
@@ -1872,8 +1872,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1205,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-Baby.svg",
-                            ImgUrl = "categoryImg-Baby.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-Baby.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-Baby.jpg",
                             Name = "Для немовлят",
                             ParentCategoryId = 12
                         },
@@ -1881,8 +1881,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1206,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-Diapers.svg",
-                            ImgUrl = "categoryImg-Diapers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-Diapers.png",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-Diapers.png",
                             Name = "Підгузки",
                             ParentCategoryId = 12
                         },
@@ -1890,8 +1890,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1207,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-BabyBottles.svg",
-                            ImgUrl = "categoryImg-BabyBottles.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-BabyBottles.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-BabyBottles.webp",
                             Name = "Пляшечки",
                             ParentCategoryId = 12
                         },
@@ -1899,8 +1899,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1208,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-KidsVehicles.svg",
-                            ImgUrl = "categoryImg-KidsVehicles.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-KidsVehicles.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-KidsVehicles.jpg",
                             Name = "Дитячий транспорт",
                             ParentCategoryId = 12
                         },
@@ -1908,8 +1908,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1209,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-Strollers.svg",
-                            ImgUrl = "categoryImg-Strollers.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-Strollers.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-Strollers.webp",
                             Name = "Коляски",
                             ParentCategoryId = 12
                         },
@@ -1917,8 +1917,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1210,
                             DisplayOrder = 10,
-                            IconUrl = "categoryIcon-KidsScooters.svg",
-                            ImgUrl = "categoryImg-KidsScooters.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-KidsScooters.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BabyProducts/categoryIcon-KidsScooters.webp",
                             Name = "Самокати",
                             ParentCategoryId = 12
                         },
@@ -1926,8 +1926,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1301,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-Dogs.svg",
-                            ImgUrl = "categoryImg-Dogs.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-Dogs.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-Dogs.webp",
                             Name = "Для собак",
                             ParentCategoryId = 13
                         },
@@ -1935,8 +1935,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1302,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-DogFood.svg",
-                            ImgUrl = "categoryImg-DogFood.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-DogFood.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-DogFood.webp",
                             Name = "Корм",
                             ParentCategoryId = 13
                         },
@@ -1944,8 +1944,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1303,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-DogToys.svg",
-                            ImgUrl = "categoryImg-DogToys.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-DogToys.png",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-DogToys.png",
                             Name = "Іграшки",
                             ParentCategoryId = 13
                         },
@@ -1953,8 +1953,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1304,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-Cats.svg",
-                            ImgUrl = "categoryImg-Cats.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-Cats.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-Cats.webp",
                             Name = "Для котів",
                             ParentCategoryId = 13
                         },
@@ -1962,8 +1962,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1305,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-CatFood.svg",
-                            ImgUrl = "categoryImg-CatFood.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-CatFood.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-CatFood.webp",
                             Name = "Корм",
                             ParentCategoryId = 13
                         },
@@ -1971,8 +1971,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1306,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-CatLitter.svg",
-                            ImgUrl = "categoryImg-CatLitter.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-CatLitter.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-CatLitter.webp",
                             Name = "Наповнювачі",
                             ParentCategoryId = 13
                         },
@@ -1980,8 +1980,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1307,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-Rodents.svg",
-                            ImgUrl = "categoryImg-Rodents.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-Rodents.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-Rodents.webp",
                             Name = "Для гризунів",
                             ParentCategoryId = 13
                         },
@@ -1989,8 +1989,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1308,
                             DisplayOrder = 8,
-                            IconUrl = "categoryIcon-Cages.svg",
-                            ImgUrl = "categoryImg-Cages.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-Cages.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-Cages.jpg",
                             Name = "Клітки",
                             ParentCategoryId = 13
                         },
@@ -1998,8 +1998,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1309,
                             DisplayOrder = 9,
-                            IconUrl = "categoryIcon-RodentFood.svg",
-                            ImgUrl = "categoryImg-RodentFood.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-RodentFood.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/PetSupplies/categoryIcon-RodentFood.jpg",
                             Name = "Корм",
                             ParentCategoryId = 13
                         },
@@ -2007,8 +2007,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1401,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-Stationery.svg",
-                            ImgUrl = "categoryImg-Stationery.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Stationery.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Stationery.jpg",
                             Name = "Канцтовари",
                             ParentCategoryId = 14
                         },
@@ -2016,8 +2016,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1402,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-Pens.svg",
-                            ImgUrl = "categoryImg-Pens.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Pens.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Pens.jpg",
                             Name = "Ручки",
                             ParentCategoryId = 14
                         },
@@ -2025,8 +2025,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1403,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-Notebooks.svg",
-                            ImgUrl = "categoryImg-Notebooks.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Notebooks.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Notebooks.jpg",
                             Name = "Зошити",
                             ParentCategoryId = 14
                         },
@@ -2034,8 +2034,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1404,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-Paper.svg",
-                            ImgUrl = "categoryImg-Paper.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Paper.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Paper.jpg",
                             Name = "Папір",
                             ParentCategoryId = 14
                         },
@@ -2043,8 +2043,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1405,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-Books.svg",
-                            ImgUrl = "categoryImg-Books.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Books.jpeg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Books.jpeg",
                             Name = "Книги",
                             ParentCategoryId = 14
                         },
@@ -2052,8 +2052,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1406,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-Fiction.svg",
-                            ImgUrl = "categoryImg-Fiction.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Fiction.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Fiction.jpg",
                             Name = "Художні",
                             ParentCategoryId = 14
                         },
@@ -2061,8 +2061,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1407,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-Educational.svg",
-                            ImgUrl = "categoryImg-Educational.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Educational.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/StationeryBooks/categoryIcon-Educational.jpg",
                             Name = "Навчальні",
                             ParentCategoryId = 14
                         },
@@ -2070,8 +2070,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1501,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-Alcohol.svg",
-                            ImgUrl = "categoryImg-Alcohol.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Alcohol.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Alcohol.webp",
                             Name = "Алкоголь",
                             ParentCategoryId = 15
                         },
@@ -2079,8 +2079,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1502,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-Wine.svg",
-                            ImgUrl = "categoryImg-Wine.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Wine.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Wine.webp",
                             Name = "Вино",
                             ParentCategoryId = 15
                         },
@@ -2088,8 +2088,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1503,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-Beer.svg",
-                            ImgUrl = "categoryImg-Beer.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Beer.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Beer.webp",
                             Name = "Пиво",
                             ParentCategoryId = 15
                         },
@@ -2097,8 +2097,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1504,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-Whiskey.svg",
-                            ImgUrl = "categoryImg-Whiskey.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Whiskey.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Whiskey.webp",
                             Name = "Віскі",
                             ParentCategoryId = 15
                         },
@@ -2106,8 +2106,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1505,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-Food.svg",
-                            ImgUrl = "categoryImg-Food.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Food.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Food.webp",
                             Name = "Продукти",
                             ParentCategoryId = 15
                         },
@@ -2115,8 +2115,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1506,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-Sweets.svg",
-                            ImgUrl = "categoryImg-Sweets.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Sweets.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Sweets.webp",
                             Name = "Солодощі",
                             ParentCategoryId = 15
                         },
@@ -2124,8 +2124,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1507,
                             DisplayOrder = 7,
-                            IconUrl = "categoryIcon-Snacks.svg",
-                            ImgUrl = "categoryImg-Snacks.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Snacks.jpg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/AlcoholFood/categoryIcon-Snacks.jpg",
                             Name = "Снеки",
                             ParentCategoryId = 15
                         },
@@ -2133,8 +2133,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1601,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-Office.svg",
-                            ImgUrl = "categoryImg-Office.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BusinessService/categoryIcon-Office.jpeg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BusinessService/categoryIcon-Office.jpeg",
                             Name = "Офіс",
                             ParentCategoryId = 16
                         },
@@ -2142,8 +2142,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1602,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-OfficeEquipment.svg",
-                            ImgUrl = "categoryImg-OfficeEquipment.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BusinessService/categoryIcon-OfficeEquipment.png",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BusinessService/categoryIcon-OfficeEquipment.png",
                             Name = "Офісна техніка",
                             ParentCategoryId = 16
                         },
@@ -2151,8 +2151,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1603,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-OfficeFurniture.svg",
-                            ImgUrl = "categoryImg-OfficeFurniture.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BusinessService/categoryIcon-OfficeFurniture.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BusinessService/categoryIcon-OfficeFurniture.webp",
                             Name = "Меблі",
                             ParentCategoryId = 16
                         },
@@ -2160,8 +2160,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1604,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-BusinessEquipment.svg",
-                            ImgUrl = "categoryImg-BusinessEquipment.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BusinessService/categoryIcon-BusinessEquipment.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BusinessService/categoryIcon-BusinessEquipment.webp",
                             Name = "Бізнес обладнання",
                             ParentCategoryId = 16
                         },
@@ -2169,8 +2169,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1605,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-POS.svg",
-                            ImgUrl = "categoryImg-POS.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BusinessService/categoryIcon-POS.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BusinessService/categoryIcon-POS.webp",
                             Name = "POS системи",
                             ParentCategoryId = 16
                         },
@@ -2178,8 +2178,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1606,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-CashRegisters.svg",
-                            ImgUrl = "categoryImg-CashRegisters.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/BusinessService/categoryIcon-CashRegisters.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/BusinessService/categoryIcon-CashRegisters.webp",
                             Name = "Касові апарати",
                             ParentCategoryId = 16
                         },
@@ -2187,8 +2187,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1701,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-TourismGear.svg",
-                            ImgUrl = "categoryImg-TourismGear.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/TourismOutdoor/categoryIcon-TourismGear.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/TourismOutdoor/categoryIcon-TourismGear.webp",
                             Name = "Туристичне спорядження",
                             ParentCategoryId = 17
                         },
@@ -2196,8 +2196,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1702,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-Tents.svg",
-                            ImgUrl = "categoryImg-Tents.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/TourismOutdoor/categoryIcon-Tents.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/TourismOutdoor/categoryIcon-Tents.webp",
                             Name = "Намет",
                             ParentCategoryId = 17
                         },
@@ -2205,8 +2205,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1703,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-SleepingBags.svg",
-                            ImgUrl = "categoryImg-SleepingBags.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/TourismOutdoor/categoryIcon-SleepingBags.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/TourismOutdoor/categoryIcon-SleepingBags.webp",
                             Name = "Спальні мішки",
                             ParentCategoryId = 17
                         },
@@ -2214,8 +2214,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1704,
                             DisplayOrder = 4,
-                            IconUrl = "categoryIcon-Travel.svg",
-                            ImgUrl = "categoryImg-Travel.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/TourismOutdoor/categoryIcon-Travel.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/TourismOutdoor/categoryIcon-Travel.webp",
                             Name = "Подорожі",
                             ParentCategoryId = 17
                         },
@@ -2223,8 +2223,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1705,
                             DisplayOrder = 5,
-                            IconUrl = "categoryIcon-Suitcases.svg",
-                            ImgUrl = "categoryImg-Suitcases.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/TourismOutdoor/categoryIcon-Suitcases.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/TourismOutdoor/categoryIcon-Suitcases.webp",
                             Name = "Валізи",
                             ParentCategoryId = 17
                         },
@@ -2232,8 +2232,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1706,
                             DisplayOrder = 6,
-                            IconUrl = "categoryIcon-Backpacks.svg",
-                            ImgUrl = "categoryImg-Backpacks.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/TourismOutdoor/categoryIcon-Backpacks.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/TourismOutdoor/categoryIcon-Backpacks.webp",
                             Name = "Рюкзаки",
                             ParentCategoryId = 17
                         },
@@ -2241,8 +2241,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1801,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-Discounted.svg",
-                            ImgUrl = "categoryImg-Discounted.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Promotions/categoryIcon-Discounted.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Promotions/categoryIcon-Discounted.webp",
                             Name = "Товари зі знижками",
                             ParentCategoryId = 18
                         },
@@ -2250,8 +2250,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1802,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-SeasonalSales.svg",
-                            ImgUrl = "categoryImg-SeasonalSales.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/Promotions/categoryIcon-SeasonalSales.webp",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/Promotions/categoryIcon-SeasonalSales.webp",
                             Name = "Сезонні розпродажі",
                             ParentCategoryId = 18
                         },
@@ -2259,8 +2259,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1901,
                             DisplayOrder = 1,
-                            IconUrl = "categoryIcon-UpTo50.svg",
-                            ImgUrl = "categoryImg-UpTo50.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/TotalSale/categoryIcon-UpTo50.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/TotalSale/categoryIcon-UpTo50.svg",
                             Name = "До −50%",
                             ParentCategoryId = 19
                         },
@@ -2268,8 +2268,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1902,
                             DisplayOrder = 2,
-                            IconUrl = "categoryIcon-UpTo70.svg",
-                            ImgUrl = "categoryImg-UpTo70.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/TotalSale/categoryIcon-UpTo70.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/TotalSale/categoryIcon-UpTo70.svg",
                             Name = "До −70%",
                             ParentCategoryId = 19
                         },
@@ -2277,8 +2277,8 @@ namespace BazaR.Migrations
                         {
                             Id = 1903,
                             DisplayOrder = 3,
-                            IconUrl = "categoryIcon-LastItems.svg",
-                            ImgUrl = "categoryImg-LastItems.svg",
+                            IconUrl = "/AssetsIconImg/SecondLevelCategories/TotalSale/categoryIcon-LastItems.svg",
+                            ImgUrl = "/AssetsIconImg/SecondLevelCategories/TotalSale/categoryIcon-LastItems.svg",
                             Name = "Останні екземпляри",
                             ParentCategoryId = 19
                         });
