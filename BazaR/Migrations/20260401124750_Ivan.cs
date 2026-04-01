@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BazaR.Migrations
 {
     /// <inheritdoc />
-    public partial class ini : Migration
+    public partial class Ivan : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -152,6 +152,19 @@ namespace BazaR.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Promotions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SearchItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SearchItems", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -364,6 +377,7 @@ namespace BazaR.Migrations
                     ProductAlerts = table.Column<bool>(type: "bit", nullable: false),
                     WeeklyDigest = table.Column<bool>(type: "bit", nullable: false),
                     PreferredFrequency = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastMailingSentAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -474,25 +488,6 @@ namespace BazaR.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SearchItems",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SearchItems", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SearchItems_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -2285,11 +2280,6 @@ namespace BazaR.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_UserId",
                 table: "Reviews",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SearchItems_UserId",
-                table: "SearchItems",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BazaR.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260331185121_asetsFixАшч")]
-    partial class asetsFixАшч
+    [Migration("20260401125619_IvaDbFix")]
+    partial class IvaDbFix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -9529,6 +9529,9 @@ namespace BazaR.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("LastMailingSentAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("NewsAndUpdates")
                         .HasColumnType("bit");
 
@@ -9847,6 +9850,23 @@ namespace BazaR.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Reviews");
+                });
+
+            modelBuilder.Entity("BazaR.Models.SearchItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SearchItems");
                 });
 
             modelBuilder.Entity("BazaR.Models.User", b =>
@@ -10290,28 +10310,6 @@ namespace BazaR.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("SearchItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SearchItems");
-                });
-
             modelBuilder.Entity("BazaR.Models.AdditionalInfo", b =>
                 {
                     b.HasOne("BazaR.Models.User", "User")
@@ -10730,15 +10728,6 @@ namespace BazaR.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("SearchItem", b =>
-                {
-                    b.HasOne("BazaR.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BazaR.Models.Brand", b =>
