@@ -1,4 +1,4 @@
-﻿@model Dictionary<BazaR.Models.Category, int>
+@model Dictionary<BazaR.Models.Category, int>
 @{
     ViewData["Title"] = "Популярные категории";
 }
@@ -23,13 +23,17 @@
                 <div class="col-md-3 mb-4">
                     <div class="card shadow-sm h-100">
                         <div class="card-body text-center">
-                            @if (!string.IsNullOrEmpty(category.IconUrl))
+                            @if (CategoryDisplayHelper.IsWebImagePath(category.IconUrl))
                             {
-                                <i class="@category.IconUrl fs-1 mb-2"></i>
+                                <img src="@category.IconUrl" class="img-fluid mb-2" style="max-height: 60px;object-fit:contain;" alt="" />
+                            }
+                            else if (!string.IsNullOrEmpty(category.IconUrl))
+                            {
+                                <i class="bi @category.IconUrl fs-1 mb-2"></i>
                             }
                             else if (!string.IsNullOrEmpty(category.ImgUrl))
                             {
-                                <img src="@category.ImgUrl" class="img-fluid mb-2" style="max-height: 60px;" />
+                                <img src="@category.ImgUrl" class="img-fluid mb-2" style="max-height: 60px;" alt="" />
                             }
                             <h5 class="card-title">@category.Name</h5>
                             <p class="text-muted mb-2">Просмотров: @visits</p>

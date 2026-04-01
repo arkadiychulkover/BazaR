@@ -1,4 +1,4 @@
-﻿@using BazaR.Models.ViewModels
+@using BazaR.Models.ViewModels
 @using BazaR.Models
 @model dynamic
 
@@ -32,7 +32,7 @@
                 {
                     var isSelected = selectedCategoryIds.Contains(category.Id);
                     var hasSubCategories = allCategories.Any(c => c.ParentCategoryId == category.Id);
-                    var icon = !string.IsNullOrEmpty(category.IconUrl) ? category.IconUrl : "bi-tag";
+                    var iconUrl = category.IconUrl;
                     
                     <li class="list-group-item p-0">
                         <div class="category-item @(isSelected ? "active" : "")">
@@ -45,7 +45,14 @@
                                 brandIds = selectedBrandIds
                             })@GetFilterQueryString(selectedFilters)" 
                                class="category-link d-flex align-items-center p-3 text-decoration-none">
-                                <i class="bi @icon me-2"></i>
+                                @if (CategoryDisplayHelper.IsWebImagePath(iconUrl))
+                                {
+                                    <img src="@iconUrl" alt="" class="me-2" width="20" height="20" style="object-fit:contain;" />
+                                }
+                                else
+                                {
+                                    <i class="bi @(string.IsNullOrEmpty(iconUrl) ? "bi-tag" : iconUrl) me-2"></i>
+                                }
                                 <span class="flex-grow-1">@category.Name</span>
                                 @if (hasSubCategories)
                                 {

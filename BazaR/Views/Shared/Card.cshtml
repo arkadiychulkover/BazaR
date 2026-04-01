@@ -2,6 +2,14 @@
 
 @{
     var img = Model.ImageUrl;
+    var isDefaultPhoto = string.IsNullOrWhiteSpace(img)
+        || img.Contains("default.jpg", StringComparison.OrdinalIgnoreCase);
+    if (isDefaultPhoto)
+    {
+        var catVisual = Model.Category?.ImgUrl ?? Model.Category?.IconUrl;
+        if (!string.IsNullOrWhiteSpace(catVisual))
+            img = catVisual;
+    }
     if (string.IsNullOrWhiteSpace(img))
         img = Model.Colors?.FirstOrDefault()?.Color;
     if (string.IsNullOrWhiteSpace(img))

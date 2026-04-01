@@ -25,7 +25,14 @@
                            class="text-decoration-none text-dark d-flex align-items-center">
                             @if (!string.IsNullOrEmpty(category.IconUrl))
                             {
-                                <i class="bi @category.IconUrl me-2 text-primary"></i>
+                                if (CategoryDisplayHelper.IsWebImagePath(category.IconUrl))
+                                {
+                                    <img src="@category.IconUrl" alt="" class="me-2 flex-shrink-0" width="28" height="28" style="object-fit:contain;" />
+                                }
+                                else
+                                {
+                                    <i class="bi @category.IconUrl me-2 text-primary"></i>
+                                }
                             }
                             else
                             {
@@ -111,14 +118,37 @@
             </h5>
         </div>
         <div class="card-body">
-            <div class="d-flex flex-wrap gap-2">
-                <a href="@Url.Action("Browse", "Site", new { brandId = 1 })" class="btn btn-outline-secondary btn-sm">Samsung</a>
-                <a href="@Url.Action("Browse", "Site", new { brandId = 2 })" class="btn btn-outline-secondary btn-sm">Apple</a>
-                <a href="@Url.Action("Browse", "Site", new { brandId = 3 })" class="btn btn-outline-secondary btn-sm">Xiaomi</a>
-                <a href="@Url.Action("Browse", "Site", new { brandId = 7 })" class="btn btn-outline-secondary btn-sm">Adidas</a>
-                <a href="@Url.Action("Browse", "Site", new { brandId = 8 })" class="btn btn-outline-secondary btn-sm">Nike</a>
-                <a href="@Url.Action("Browse", "Site", new { brandId = 12 })" class="btn btn-outline-secondary btn-sm">Asus</a>
-            </div>
+            @{
+                var sidebarBrands = ViewBag.SidebarPopularBrands as List<BazaR.Models.Brand>;
+            }
+            @if (sidebarBrands != null && sidebarBrands.Any())
+            {
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    @foreach (var b in sidebarBrands)
+                    {
+                        <a href="@Url.Action("Browse", "Site", new { brandId = b.Id })"
+                           class="sidebar-brand-pill d-inline-flex align-items-center gap-1 text-decoration-none btn btn-outline-secondary btn-sm py-1 px-2"
+                           title="@b.Name">
+                            @if (!string.IsNullOrWhiteSpace(b.Logo) && (b.Logo.StartsWith('/') || b.Logo.StartsWith("http", StringComparison.OrdinalIgnoreCase)))
+                            {
+                                <img src="@b.Logo" alt="" width="22" height="22" style="object-fit:contain;" />
+                            }
+                            <span>@b.Name</span>
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="@Url.Action("Browse", "Site", new { brandId = 1 })" class="btn btn-outline-secondary btn-sm">Samsung</a>
+                    <a href="@Url.Action("Browse", "Site", new { brandId = 2 })" class="btn btn-outline-secondary btn-sm">Apple</a>
+                    <a href="@Url.Action("Browse", "Site", new { brandId = 3 })" class="btn btn-outline-secondary btn-sm">Xiaomi</a>
+                    <a href="@Url.Action("Browse", "Site", new { brandId = 7 })" class="btn btn-outline-secondary btn-sm">Adidas</a>
+                    <a href="@Url.Action("Browse", "Site", new { brandId = 8 })" class="btn btn-outline-secondary btn-sm">Nike</a>
+                    <a href="@Url.Action("Browse", "Site", new { brandId = 12 })" class="btn btn-outline-secondary btn-sm">Asus</a>
+                </div>
+            }
         </div>
     </div>
 
