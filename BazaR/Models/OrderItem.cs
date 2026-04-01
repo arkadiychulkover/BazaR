@@ -1,4 +1,4 @@
-﻿// OrderItem.cs
+// OrderItem.cs
 namespace BazaR.Models
 {
     public class OrderItem

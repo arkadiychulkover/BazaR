@@ -411,9 +411,20 @@ namespace BazaR.Controllers
             var item = _itMan.GetById(id);
             if (item == null) return NotFound();
 
-            var images = item.Colors?.Select(c => c.Color).ToList() ?? new List<string>();
-            if (!images.Any() && !string.IsNullOrWhiteSpace(item.ImageUrl))
-                images.Add(item.ImageUrl);
+            var images = new List<string>();
+            if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+            {
+                string rightUrl = null;
+                if (!item.ImageUrl.StartsWith("/images"))
+                {
+                    int wwwrootIndex = item.ImageUrl.IndexOf("wwwroot", StringComparison.OrdinalIgnoreCase);
+                    if (wwwrootIndex >= 0)
+                        rightUrl = item.ImageUrl.Substring(wwwrootIndex + "wwwroot".Length).Replace("\\", "/");
+                }
+                images.Add(rightUrl == null ? item.ImageUrl : rightUrl);
+            }
+            if (!images.Any() && item.Colors != null)
+                images.AddRange(item.Colors.Select(c => c.Color).Where(c => !string.IsNullOrWhiteSpace(c)));
 
             var sameCategoryItems = _itMan.GetByCategory(item.CategoryId)
                 .Where(i => i.Id != id)

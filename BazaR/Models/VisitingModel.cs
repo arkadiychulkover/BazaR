@@ -1,4 +1,4 @@
-﻿using BazaR.Models.BazaR.Models;
+using BazaR.Models.BazaR.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 
@@ -16,7 +16,6 @@ namespace BazaR.Models
         public int? ItemId { get; set; }
         public int? OrderId { get; set; }
 
-        // Это поле будет храниться как JSON в БД
         public string? SearchFiltersJson { get; set; }
 
         [NotMapped]

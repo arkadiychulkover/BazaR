@@ -83,37 +83,47 @@
         margin-bottom: 22px;
     }
 
-    /* 3D Card — без max-height, пропорції ISO ~1.586 + мін. висота */
-    .card-scene { perspective: 1600px; width: 100%; margin-bottom: 0; }
+    /* 3D Card — контейнер з фіксованою висотою, щоб flip не зсував нічого */
+    .card-scene {
+        width: 100%;
+        margin: 0 0 24px;
+        position: relative;
+        /* aspect-ratio банківської картки + запас під тінь */
+        aspect-ratio: 85.6 / 53.98;
+        overflow: visible;
+    }
 
     .card-3d {
-        width: 100%;
-        aspect-ratio: 85.6 / 53.98;
-        min-height: 268px;
-        position: relative;
-        transform-style: preserve-3d;
-        -webkit-transform-style: preserve-3d;
-        transition: transform .7s cubic-bezier(.4, 0, .2, 1);
-        /* НЕ використовувати filter тут — ламає preserve-3d і backface-visibility (дзеркальний «переворот») */
+        position: absolute;
+        inset: 0;
     }
-    .card-3d.flipped { transform: rotateY(180deg); }
 
     .card-face {
-        position: absolute; inset: 0;
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
         border-radius: 22px;
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
         overflow: hidden;
-        /* Розводимо грані в 3D — коректне ховання лицьової сторони */
-        transform-style: preserve-3d;
-        -webkit-transform-style: preserve-3d;
+        transition: opacity .4s ease;
+    }
+    .card-front {
+        opacity: 1;
+    }
+    .card-back {
+        opacity: 0;
+        pointer-events: none;
+    }
+    .card-3d.flipped .card-front {
+        opacity: 0;
+        pointer-events: none;
+    }
+    .card-3d.flipped .card-back {
+        opacity: 1;
+        pointer-events: auto;
     }
 
     /* Темна картка — aurora mesh: #ffae00 · #d800a6 · #b3002d · #00c8c3 + зерно */
-    .card-front {
-        transform: rotateY(0deg) translateZ(2px);
-        -webkit-transform: rotateY(0deg) translateZ(2px);
-        position: relative;
+    .card-face.card-front {
         isolation: isolate;
         background-color: #050008;
         background-image:
@@ -154,9 +164,9 @@
         mix-blend-mode: soft-light;
         border-radius: inherit;
     }
-    .card-front .cf-top,
-    .card-front .cf-field-num,
-    .card-front .cf-bottom-row {
+    .card-face.card-front .cf-top,
+    .card-face.card-front .cf-field-num,
+    .card-face.card-front .cf-bottom-row {
         position: relative;
         z-index: 2;
     }
@@ -320,10 +330,7 @@
     .cf-expiry-hint.cf-expiry-hint--muted { color: rgba(55, 35, 85, 0.55); }
 
     /* Зворіт — той самий aurora mesh (дзеркально) */
-    .card-back {
-        transform: rotateY(180deg) translateZ(2px);
-        -webkit-transform: rotateY(180deg) translateZ(2px);
-        position: relative;
+    .card-face.card-back {
         isolation: isolate;
         background-color: #050008;
         background-image:
@@ -473,11 +480,14 @@
 
     /* Button under card (only when flipped) */
     .card-under-actions {
-        display: none;
-        margin-top: 18px;
+        height: 0;
+        overflow: hidden;
         text-align: center;
+        transition: height .3s ease;
     }
-    .card-under-actions.visible { display: block; }
+    .card-under-actions.visible { 
+        height: 62px;
+    }
     .btn-flip-front {
         display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         width: 100%; max-width: 100%;
@@ -574,12 +584,12 @@
 
 <div class="pay-page">
     <div style="max-width:980px;margin:0 auto;">
-        <a href="@Url.Action("Orders", "Profile")" class="pay-back">
+        <a href="@Url.Action("Orders", "Site")" class="pay-back">
             <i class="bi bi-arrow-left"></i> Назад до замовлень
         </a>
     </div>
 
-    <form asp-action="ProcessPayment" method="post" id="payForm" autocomplete="off">
+    <form asp-action="ProcessPayment" asp-controller="Site" method="post" id="payForm" autocomplete="off">
         @Html.AntiForgeryToken()
         <input type="hidden" name="orderId" value="@Model.Id" />
 
@@ -656,17 +666,20 @@
                     </div>
                 </div>
 
-                <div class="card-under-actions" id="cardUnderActionsBack">
-                    <button type="button" class="btn-flip-front" id="btnFlipFront">
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                        Повернутись до лицьової сторони
-                    </button>
-                </div>
-                <div class="card-under-actions" id="cardUnderActionsCvv">
-                    <button type="button" class="btn-flip-front btn-flip-front--accent" id="btnGoCvv">
-                        <i class="bi bi-credit-card-2-back"></i>
-                        Ввести CVV
-                    </button>
+                <!-- Один контейнер для обох кнопок з фіксованою висотою -->
+                <div style="height: 80px; margin-top: 18px; position: relative;">
+                    <div class="card-under-actions" id="cardUnderActionsBack" style="position: absolute; top: 0; left: 0; right: 0; margin-top: 0;">
+                        <button type="button" class="btn-flip-front" id="btnFlipFront">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                            Повернутись до лицьової сторони
+                        </button>
+                    </div>
+                    <div class="card-under-actions" id="cardUnderActionsCvv" style="position: absolute; top: 0; left: 0; right: 0; margin-top: 0;">
+                        <button type="button" class="btn-flip-front btn-flip-front--accent" id="btnGoCvv">
+                            <i class="bi bi-credit-card-2-back"></i>
+                            Ввести CVV
+                        </button>
+                    </div>
                 </div>
 
                 <div class="pay-email-wrap">
@@ -776,7 +789,8 @@
     function isFrontComplete() {
         var raw = document.getElementById('fld_pan').value.replace(/\D/g, '');
         var holder = document.getElementById('fld_holder').value.trim();
-        return raw.length === 16 && holder.length >= 2 && isExpiryValid();
+        // Власник картки необов'язковий для автопереворота
+        return raw.length === 16 && isExpiryValid();
     }
 
     function isFlipped() {
@@ -790,12 +804,18 @@
         cvvBtn.classList.toggle('visible', !isFlipped() && manualStayOnFront && isFrontComplete());
     }
 
+    function focusWithoutScroll(el) {
+        if (!el) return;
+        try { el.focus({ preventScroll: true }); }
+        catch (_) { el.focus(); }
+    }
+
     function showBackAndFocusCvv() {
         document.getElementById('card3d').classList.add('flipped');
         manualStayOnFront = false;
         updateUnderCardButtons();
         setTimeout(function () {
-            document.getElementById('fld_sec').focus();
+            focusWithoutScroll(document.getElementById('fld_sec'));
         }, 450);
     }
 
@@ -817,7 +837,7 @@
         document.getElementById('card3d').classList.remove('flipped');
         manualStayOnFront = true;
         updateUnderCardButtons();
-        document.getElementById('fld_pan').focus();
+        focusWithoutScroll(document.getElementById('fld_pan'));
     });
 
     document.getElementById('btnGoCvv').addEventListener('click', function () {

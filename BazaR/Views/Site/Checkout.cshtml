@@ -1,4 +1,4 @@
-﻿@model List<BazaR.Models.Item>
+@model List<BazaR.Models.Item>
 
 @{
     ViewData["Title"] = "Оформлення замовлення";
@@ -989,16 +989,13 @@
                 lbl.onclick = null;
             }
         });
+        // Суми на сторінці — цілі гривні. Не використовувати comma→dot (інакше «2,500₴» → 2.5 → «3₴»).
         function parsePrice(text) {
             if (!text) return 0;
-
-            return parseFloat(
-                text
-                    .replace(/₴/g, "")
-                    .replace(/\s/g, "")
-                    .replace(",", ".")
-                    .replace(/[^\d.-]/g, "")
-            ) || 0;
+            var s = String(text).replace(/₴/g, "").trim();
+            var digits = s.replace(/[^\d]/g, "");
+            if (!digits) return 0;
+            return parseInt(digits, 10) || 0;
         }
 
         function formatPrice(value) {

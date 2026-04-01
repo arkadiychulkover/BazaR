@@ -29,10 +29,6 @@ namespace BazaR.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<City> Cities { get; set; }
-        public DbSet<SearchItem> SearchItems { get; set; }
-        public DbSet<UserUseStatistick> UserUseStatisticks { get; set; }
-        public DbSet<CategoryStatistik> CategoryStatistiks { get; set; }
-        public DbSet<VisitingModel> VisitingModels { get; set; }
 
         public DbSet<Pet> Pets { get; set; }
         public DbSet<DeliveryAddress> DeliveryAddresses { get; set; }
@@ -46,6 +42,10 @@ namespace BazaR.Data
         public DbSet<LookedCard> LookedCards { get; set; }
         public DbSet<MailingSetting> MailingSettings { get; set; }
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
+        public DbSet<SearchItem> SearchItems { get; set; }
+        public DbSet<VisitingModel> VisitingModels { get; set; }
+        public DbSet<UserUseStatistick> UserUseStatisticks { get; set; }
+        public DbSet<CategoryStatistik> CategoryStatistiks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -97,14 +97,6 @@ namespace BazaR.Data
                     .WithMany(c => c.Filters)
                     .HasForeignKey(cf => cf.CategoryId)
                     .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            modelBuilder.Entity<VisitingModel>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.SearchFiltersJson)
-                    .HasColumnType("nvarchar(max)") // Для SQL Server
-                    .HasColumnName("SearchFilters");
             });
 
             // Настройка CategoryBrand (составной ключ)
@@ -342,6 +334,14 @@ namespace BazaR.Data
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Name).IsUnique();
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<VisitingModel>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SearchFiltersJson)
+                    .HasColumnType("nvarchar(max)")
+                    .HasColumnName("SearchFilters");
             });
 
             // Заполнение начальными данными

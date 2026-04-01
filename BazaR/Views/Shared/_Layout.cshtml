@@ -1,4 +1,5 @@
 @inject BazaR.Interfaces.IItemRepository ItemRepository
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 
 @{
     var title = ViewData["Title"] ?? "BazaR";
@@ -10,6 +11,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="@Xsrf.GetAndStoreTokens(Context).RequestToken" />
     <title>@title - BazaR</title>
 
     <!-- Bootstrap CSS -->
@@ -126,6 +128,10 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
             <div class="container-fluid">
 
+                <button class="btn btn-dark border-0 me-2 d-flex align-items-center" id="sidebarOpen" data-sidebar-open type="button" aria-label="Відкрити меню" style="font-size:1.35rem;padding:4px 8px;">
+                    <i class="bi bi-list"></i>
+                </button>
+
                 <a class="navbar-brand" asp-controller="Site" asp-action="Index">
                     <i class="bi bi-shop"></i> BazaR
                 </a>
@@ -149,6 +155,7 @@
                                 <i class="bi bi-grid"></i> Каталог
                             </a>
                         </li>
+
                         <li class="nav-item">
                             <a class="nav-link position-relative" href="#" onclick="openCartModal(); return false;">
                                 <i class="bi bi-cart"></i> Кошик
@@ -169,14 +176,14 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person"></i>
-                                @if (ViewBag.User != null)
-                                {
-                                    <span>@ViewBag.User.FirstName @ViewBag.User.LastName</span>
+                                @{
+                                    var _displayName = ViewBag.User != null
+                                        ? ((string.IsNullOrWhiteSpace((string?)ViewBag.User.FirstName) && string.IsNullOrWhiteSpace((string?)ViewBag.User.LastName))
+                                            ? (string.IsNullOrWhiteSpace((string?)ViewBag.User.Name) ? "Профіль" : (string)ViewBag.User.Name)
+                                            : $"{ViewBag.User.FirstName} {ViewBag.User.LastName}".Trim())
+                                        : "Профіль";
                                 }
-                                else
-                                {
-                                    <span>Профіль</span>
-                                }
+                                <span>@_displayName</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 @if (ViewBag.User != null)
@@ -244,6 +251,9 @@
 
     <!-- FOOTER -->
     @await Html.PartialAsync("_Footer")
+
+    <!-- Бічне меню -->
+    @await Html.PartialAsync("_Sidebar")
 
     <!-- Bootstrap JS -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -608,8 +618,8 @@
                         var msg = response.added ? 'Додано в обране' : 'Видалено з обраного';
                         if (typeof showNotification === 'function') showNotification(msg, response.added ? 'success' : 'info');
                     } else if (response.requireLogin) {
-                        var $login = $('[data-open-login="true"]').first();
-                        if ($login.length) $login.trigger('click'); else $('#loginModal').modal('show');
+                        var $login = $('[data-auth-open="login"]').first();
+                        if ($login.length) $login.trigger('click'); else window.authModals && window.authModals.openModal('loginModal');
                     }
                 }
             );
@@ -617,36 +627,6 @@
 
     </script>
 
-    <script>
-        (function () {
-            var drawer = document.getElementById('sidebarDrawer');
-            var overlay = document.getElementById('sidebarOverlay');
-            var openBtn = document.getElementById('sidebarOpen');
-            var closeBtn = document.getElementById('sidebarClose');
-
-            function openSidebar() {
-                drawer.classList.add('is-open');
-                overlay.classList.add('is-open');
-                drawer.setAttribute('aria-hidden', 'false');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeSidebar() {
-                drawer.classList.remove('is-open');
-                overlay.classList.remove('is-open');
-                drawer.setAttribute('aria-hidden', 'true');
-                document.body.style.overflow = '';
-            }
-
-            if (openBtn) openBtn.addEventListener('click', openSidebar);
-            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-            if (overlay) overlay.addEventListener('click', closeSidebar);
-
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeSidebar();
-            });
-        })();
-    </script>
 
 </body>
 </html>

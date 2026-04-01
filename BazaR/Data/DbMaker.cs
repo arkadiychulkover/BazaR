@@ -1,4 +1,4 @@
-﻿using BazaR.Models;
+using BazaR.Models;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Threading.Tasks;
@@ -20,7 +20,6 @@ namespace BazaR.Data
 
         public async Task MakeAsync()
         {
-            // Создаём роли
             await EnsureRoleAsync("Admin");
             await EnsureRoleAsync("User");
 
@@ -34,6 +33,8 @@ namespace BazaR.Data
                     Email = adminEmail,
                     UserName = adminEmail,
                     Name = "Admin User",
+                    FirstName = "Admin",
+                    LastName = "BazaR",
                     IsAdmin = true
                 };
 
@@ -44,25 +45,22 @@ namespace BazaR.Data
                 }
             }
 
-            // Проверяем и добавляем роль Admin, если её нет
             if (!await _userManager.IsInRoleAsync(admin, "Admin"))
             {
                 await _userManager.AddToRoleAsync(admin, "Admin");
             }
 
-            // Добавляем роль User, если её нет
             if (!await _userManager.IsInRoleAsync(admin, "User"))
             {
                 await _userManager.AddToRoleAsync(admin, "User");
             }
 
-            // Синхронизируем IsAdmin с реальной ролью
             var isInAdminRole = await _userManager.IsInRoleAsync(admin, "Admin");
-            if (admin.IsAdmin != isInAdminRole)
-            {
-                admin.IsAdmin = isInAdminRole;
-                await _userManager.UpdateAsync(admin);
-            }
+            bool needUpdate = false;
+            if (admin.IsAdmin != isInAdminRole) { admin.IsAdmin = isInAdminRole; needUpdate = true; }
+            if (string.IsNullOrWhiteSpace(admin.FirstName)) { admin.FirstName = "Admin"; needUpdate = true; }
+            if (string.IsNullOrWhiteSpace(admin.LastName)) { admin.LastName = "BazaR"; needUpdate = true; }
+            if (needUpdate) await _userManager.UpdateAsync(admin);
         }
 
         private async Task EnsureRoleAsync(string roleName)

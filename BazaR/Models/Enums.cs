@@ -95,7 +95,7 @@ namespace BazaR.Models
         Range
     }
 
-    public enum UserAction 
+    public enum UserAction
     {
         VisitingPage = 1,
         AddToCart = 2,
