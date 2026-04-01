@@ -7235,6 +7235,28 @@ namespace BazaR.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BazaR.Models.CategoryStatistik", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("VisitedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CategoryStatistiks");
+                });
+
             modelBuilder.Entity("BazaR.Models.City", b =>
                 {
                     b.Property<int>("Id")
@@ -9824,6 +9846,23 @@ namespace BazaR.Migrations
                     b.ToTable("Reviews");
                 });
 
+            modelBuilder.Entity("BazaR.Models.SearchItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SearchItems");
+                });
+
             modelBuilder.Entity("BazaR.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -9952,6 +9991,27 @@ namespace BazaR.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BazaR.Models.UserUseStatistick", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("LastSeen")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserUseStatisticks");
+                });
+
             modelBuilder.Entity("BazaR.Models.Usluga", b =>
                 {
                     b.Property<int>("Id")
@@ -10008,11 +10068,10 @@ namespace BazaR.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("SearchFilters");
 
-                    b.Property<int>("UserAction")
-                        .HasColumnType("int")
-                        .HasColumnName("userAction");
-
                     b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("userAction")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -10547,6 +10606,17 @@ namespace BazaR.Migrations
                         .IsRequired();
 
                     b.Navigation("Item");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BazaR.Models.UserUseStatistick", b =>
+                {
+                    b.HasOne("BazaR.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });

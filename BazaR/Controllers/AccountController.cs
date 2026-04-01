@@ -1,3 +1,4 @@
+using BazaR.Data;
 using BazaR.Helper;
 using BazaR.Models;
 using BazaR.ViewModels;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
@@ -14,11 +16,13 @@ namespace BazaR.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly AppDbContext _context;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, AppDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = context;
         }
 
         [HttpGet]
@@ -33,6 +37,12 @@ namespace BazaR.Controllers
             };
 
             return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied(string ReturnUrl)
+        {
+            return View("AccessDenied");
         }
 
         [HttpPost]
@@ -114,7 +124,7 @@ namespace BazaR.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
-                return RedirectToAction("_Login", "Account");
+                return RedirectToAction("Login", "Account");
 
             var info = await _signInManager.GetExternalLoginInfoAsync(user.Id.ToString());
             if (info == null)
@@ -200,6 +210,8 @@ namespace BazaR.Controllers
                 Email = email,
                 UserName = email,
                 Name = (firstName + " " + lastName).Trim(),
+                FirstName = firstName,
+                LastName = lastName,
                 PhoneNumber = phoneNumber,
                 IsAdmin = false
             };
@@ -225,6 +237,9 @@ namespace BazaR.Controllers
 
                 return Redirect(returnUrl);
             }
+
+            // Добавляем роль User по умолчанию
+            await _userManager.AddToRoleAsync(user, "User");
 
             await _signInManager.SignInAsync(user, new AuthenticationProperties
             {
@@ -315,6 +330,8 @@ namespace BazaR.Controllers
                     Email = email,
                     UserName = email,
                     Name = $"{firstNameClaim} {lastNameClaim}".Trim(),
+                    FirstName = firstNameClaim,
+                    LastName = lastNameClaim,
                     IsAdmin = false
                 };
 
@@ -327,6 +344,9 @@ namespace BazaR.Controllers
                     TempData["LoginEmailError"] = createResult.Errors.FirstOrDefault()?.Description ?? "Не вдалося створити користувача.";
                     return Redirect(returnUrl);
                 }
+
+                // Добавляем роль User
+                await _userManager.AddToRoleAsync(user, "User");
             }
 
             var addLoginResult = await _userManager.AddLoginAsync(user, info);
@@ -359,6 +379,28 @@ namespace BazaR.Controllers
             if (user == null)
                 return RedirectToAction("Index", "Site");
 
+            var userId = user.Id;
+
+            var wishlistItems = _context.WishlistItems.Where(x => x.UserId == userId);
+            _context.WishlistItems.RemoveRange(wishlistItems);
+
+            var cartItems = _context.CartItems.Where(x => x.UserId == userId);
+            _context.CartItems.RemoveRange(cartItems);
+
+            var reviews = _context.Reviews.Where(x => x.UserId == userId);
+            _context.Reviews.RemoveRange(reviews);
+
+            var orders = _context.Orders.Where(x => x.UserId == userId);
+            _context.Orders.RemoveRange(orders);
+
+            var recipients = _context.OrderRecipients.Where(x => x.UserId == userId);
+            _context.OrderRecipients.RemoveRange(recipients);
+
+            var addresses = _context.DeliveryAddresses.Where(x => x.UserId == userId);
+            _context.DeliveryAddresses.RemoveRange(addresses);
+
+            await _context.SaveChangesAsync();
+
             await _signInManager.SignOutAsync();
 
             var result = await _userManager.DeleteAsync(user);
@@ -371,6 +413,19 @@ namespace BazaR.Controllers
             }
 
             TempData["Ok"] = "Акаунт успішно видалено.";
+            return RedirectToAction("Index", "Site");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> RefreshRoles()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+                TempData["Ok"] = "Ролі оновлено";
+            }
             return RedirectToAction("Index", "Site");
         }
 

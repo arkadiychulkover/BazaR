@@ -3775,105 +3775,219 @@ body {
 
 /* ---- Services / warranty card (макет) ---- */
 .pdp-card--services {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
     border-radius: 20px;
-    padding: 20px 22px 22px;
+    padding: 24px 24px 20px;
+    background: #fff;
+    border: 1px solid #ececec;
+    box-shadow: 0 2px 14px rgba(0,0,0,.04);
 }
+/* ---- Service group ---- */
 .pdp-svc-group {
-    padding: 4px 0 8px;
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
 }
-.pdp-svc-group + .pdp-svc-group {
-    margin-top: 18px;
-    padding-top: 20px;
-    border-top: 1px solid #f0f0f0;
-}
+.pdp-svc-group:last-of-type { border-bottom: none; }
 .pdp-svc-group__head {
     display: flex;
     align-items: center;
-    gap: 4px;
-    margin: 0;
+    gap: 8px;
 }
-.pdp-svc-group__head-label {
+/* Custom group-level checkbox */
+.pdp-svc-group__toggle {
     display: flex;
     align-items: center;
     gap: 12px;
+    cursor: pointer;
+    user-select: none;
     flex: 1;
     min-width: 0;
     margin: 0;
-    cursor: pointer;
-    font-weight: inherit;
+    font-weight: normal;
+    position: relative;
 }
-.pdp-svc-group__head-label input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
+.pdp-svc-group__toggle input.pdp-svc-group__cb {
+    appearance: none;
+    -webkit-appearance: none;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
     margin: 0;
-    flex-shrink: 0;
-    accent-color: #8bc53f;
-    cursor: pointer;
-    border-radius: 4px;
+    padding: 0;
+    border: none;
+    pointer-events: none;
 }
-.pdp-svc-group__title {
-    flex: 1;
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-    line-height: 1.35;
-}
-.pdp-svc-info {
+.pdp-svc-group__cb-box {
     flex-shrink: 0;
-    display: inline-flex;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #d0d0d0;
+    border-radius: 6px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    margin: 0;
-    border: none;
-    border-radius: 50%;
-    background: transparent;
-    color: #c0c0c0;
-    font-size: 17px;
-    cursor: pointer;
-    transition: color .15s, background .15s;
+    transition: border-color .18s, background .18s;
+    font-size: 14px;
+    color: transparent;
+    background: #fff;
 }
-.pdp-svc-info:hover {
+.pdp-svc-group__cb:checked ~ .pdp-svc-group__cb-box {
+    border-color: #8bc53f;
+    background: #8bc53f;
+    color: #fff;
+}
+.pdp-svc-group__toggle:hover .pdp-svc-group__cb-box {
+    border-color: #8bc53f;
+}
+.pdp-svc-group__title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.3;
+}
+.pdp-svc-group__price {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 600;
     color: #8bc53f;
-    background: rgba(139, 197, 63, 0.1);
+    white-space: nowrap;
+    margin-left: auto;
 }
+/* Info icon button */
+.pdp-svc-info {
+    background: none;
+    border: none;
+    color: #bbb;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 17px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+.pdp-svc-info:hover { color: #8bc53f; }
+/* ---- Sub-options inside group ---- */
 .pdp-svc-group__subs {
-    margin-top: 14px;
-    margin-left: 32px;
-    padding-left: 0;
+    margin-top: 8px;
+    padding-left: 36px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 6px;
     transition: opacity .2s;
 }
 .pdp-svc-group__subs.is-disabled {
-    opacity: 0.45;
+    opacity: .35;
+    pointer-events: none;
 }
-.pdp-svc-group__subs.is-disabled .pdp-svc-radio {
-    cursor: default;
-}
-.pdp-svc-radio {
+/* Sub-items (radio or checkbox inside a group) */
+.pdp-svc-sub {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 10px;
+    padding: 6px 2px;
+    cursor: pointer;
     margin: 0;
-    font-size: 13px;
-    font-weight: 400;
-    color: #444;
-    line-height: 1.45;
-    cursor: pointer;
+    font-weight: normal;
+    position: relative;
+    background: none;
+    border: none;
+    border-radius: 0;
 }
-.pdp-svc-radio input[type="radio"] {
-    width: 18px;
-    height: 18px;
-    min-width: 18px;
-    margin: 2px 0 0;
+.pdp-svc-sub:hover .pdp-svc-sub__dot,
+.pdp-svc-sub:hover .pdp-svc-sub__box {
+    border-color: #8bc53f;
+}
+/* Hide native input */
+.pdp-svc-sub__inp {
+    appearance: none;
+    -webkit-appearance: none;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    pointer-events: none;
+}
+/* Radio dot */
+.pdp-svc-sub__dot {
     flex-shrink: 0;
-    accent-color: #8bc53f;
-    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #c5c5c5;
+    border-radius: 50%;
+    position: relative;
+    transition: border-color .18s;
+    background: #fff;
+}
+.pdp-svc-sub__dot::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background .18s;
+}
+.pdp-svc-sub__inp:checked ~ .pdp-svc-sub__dot {
+    border-color: #8bc53f;
+}
+.pdp-svc-sub__inp:checked ~ .pdp-svc-sub__dot::after {
+    background: #8bc53f;
+}
+/* Checkbox box (for dynamic uslugi) */
+.pdp-svc-sub__box {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #c5c5c5;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .18s, background .18s;
+    font-size: 12px;
+    color: transparent;
+    background: #fff;
+}
+.pdp-svc-sub__inp:checked ~ .pdp-svc-sub__box {
+    border-color: #8bc53f;
+    background: #8bc53f;
+    color: #fff;
+}
+.pdp-svc-sub__text {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.3;
+}
+/* Hide native checkbox for dynamic service items */
+.pdp-svc-item__cb {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+/* Total row */
+.pdp-svc-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+}
+.pdp-svc-total__label {
+    font-size: 13px;
+    color: #666;
+}
+.pdp-svc-total__val {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
 }
 
 /* ---- Characteristics card (under gallery, mockup) ---- */
@@ -3974,30 +4088,46 @@ body {
     background: #f4f8fc;
     color: #2563eb;
 }
-.pdp-chars-all-btn i {
-    font-size: 14px;
+.pdp-chars-all-btn__chev {
+    font-size: 15px;
     opacity: 0.85;
+    transition: transform 0.22s ease;
+}
+.pdp-chars-card--full-open .pdp-chars-all-btn__chev {
+    transform: rotate(180deg);
 }
 
-/* Повноекранні характеристики */
-.pdp-chars-modal {
-    border: none;
-    border-radius: 0;
-    background: #f6f7f9;
+/* Розгортання «Всі характеристики» вниз у картці */
+.pdp-chars-full-panel {
+    margin-top: 4px;
+    padding-top: 18px;
+    border-top: 1px solid #ececec;
 }
-.pdp-chars-modal__header {
-    flex-wrap: wrap;
-    gap: 12px;
-    border-bottom: 1px solid #e2e7ee;
-    background: #fff;
-    padding: 1rem 1.25rem;
+.pdp-chars-full-panel[hidden] {
+    display: none !important;
 }
-.pdp-chars-modal__body {
-    padding: 1.25rem 1.25rem 2rem;
-    max-width: 920px;
-    margin: 0 auto;
-    width: 100%;
+.pdp-chars-full-panel__head {
+    margin-bottom: 14px;
 }
+.pdp-chars-full-panel__title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 4px;
+    line-height: 1.3;
+}
+.pdp-chars-full-panel__sub {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 0;
+}
+.pdp-chars-full-panel__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Блоки повного списку в розгорнутій панелі */
 .pdp-chars-modal__section {
     background: #fff;
     border: 1px solid #e8ecf0;

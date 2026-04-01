@@ -158,11 +158,11 @@
                             }
                             <button type="button"
                                     class="pdp-chars-all-btn"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#pdpCharsFullModal"
-                                    aria-haspopup="dialog">
-                                Всі характеристики
-                                <i class="bi bi-arrows-fullscreen" aria-hidden="true"></i>
+                                    id="pdpCharsFullToggle"
+                                    aria-expanded="false"
+                                    aria-controls="pdpCharsFullPanel">
+                                <span class="pdp-chars-all-btn__text">Всі характеристики</span>
+                                <i class="bi bi-chevron-down pdp-chars-all-btn__chev" aria-hidden="true"></i>
                             </button>
                         </div>
                         @{
@@ -196,40 +196,33 @@
                             </aside>
                         }
                     </div>
-                </div>
 
-                <div class="modal fade" id="pdpCharsFullModal" tabindex="-1" aria-labelledby="pdpCharsFullModalTitle" aria-hidden="true">
-                    <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
-                        <div class="modal-content pdp-chars-modal">
-                            <div class="modal-header pdp-chars-modal__header">
-                                <div>
-                                    <h2 class="modal-title h5 mb-1" id="pdpCharsFullModalTitle">@item.Name</h2>
-                                    <p class="text-muted small mb-0">Повний перелік характеристик</p>
+                    <div class="pdp-chars-full-panel" id="pdpCharsFullPanel" hidden>
+                        <div class="pdp-chars-full-panel__head">
+                            <h3 class="pdp-chars-full-panel__title">@item.Name</h3>
+                            <p class="pdp-chars-full-panel__sub">Повний перелік характеристик</p>
+                        </div>
+                        <div class="pdp-chars-full-panel__body">
+                            <section class="pdp-chars-modal__section">
+                                <h3 class="pdp-chars-modal__h">Технічні характеристики</h3>
+                                <div class="pdp-chars-modal__list">
+                                    @foreach (var ch in charsOrdered)
+                                    {
+                                        <div class="pdp-chars-modal__row">
+                                            <span class="pdp-chars-modal__k">@CharDisplayName(ch.Key)</span>
+                                            <span class="pdp-chars-modal__dots" aria-hidden="true"></span>
+                                            <span class="pdp-chars-modal__v">@ch.Value</span>
+                                        </div>
+                                    }
                                 </div>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрити"></button>
-                            </div>
-                            <div class="modal-body pdp-chars-modal__body">
+                            </section>
+                            @if (hasDesc)
+                            {
                                 <section class="pdp-chars-modal__section">
-                                    <h3 class="pdp-chars-modal__h">Технічні характеристики</h3>
-                                    <div class="pdp-chars-modal__list">
-                                        @foreach (var ch in charsOrdered)
-                                        {
-                                            <div class="pdp-chars-modal__row">
-                                                <span class="pdp-chars-modal__k">@CharDisplayName(ch.Key)</span>
-                                                <span class="pdp-chars-modal__dots" aria-hidden="true"></span>
-                                                <span class="pdp-chars-modal__v">@ch.Value</span>
-                                            </div>
-                                        }
-                                    </div>
+                                    <h3 class="pdp-chars-modal__h">Опис</h3>
+                                    <div class="pdp-chars-modal__desc">@descTrimmed</div>
                                 </section>
-                                @if (hasDesc)
-                                {
-                                    <section class="pdp-chars-modal__section">
-                                        <h3 class="pdp-chars-modal__h">Опис</h3>
-                                        <div class="pdp-chars-modal__desc">@descTrimmed</div>
-                                    </section>
-                                }
-                            </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -330,63 +323,86 @@
                 </div>
             </div>
 
-            <!-- Services block (макет: група з чекбоксом + вкладені радіо) -->
+            <!-- Services block (макет) -->
             <div class="pdp-card pdp-card--services">
+                <!-- Група 1: Гарантія -->
                 <div class="pdp-svc-group" data-pdp-svc-group>
                     <div class="pdp-svc-group__head">
-                        <label class="pdp-svc-group__head-label">
-                            <input type="checkbox" name="pdp_svc_warranty_group" id="pdpSvcWarrantyGroup" checked />
+                        <label class="pdp-svc-group__toggle">
+                            <input type="checkbox" class="pdp-svc-group__cb" name="pdp_svc_warranty_group" checked />
+                            <span class="pdp-svc-group__cb-box"><i class="bi bi-check-lg"></i></span>
                             <span class="pdp-svc-group__title">Сервіси подовження гарантії</span>
                         </label>
                         <button type="button" class="pdp-svc-info" title="Детальніше" aria-label="Інформація про сервіс"><i class="bi bi-info-circle"></i></button>
                     </div>
                     <div class="pdp-svc-group__subs">
-                        <label class="pdp-svc-radio">
-                            <input type="radio" name="pdp_warranty_years" value="1" />
-                            <span>Подовження гарантії на 1 рік</span>
+                        <label class="pdp-svc-sub">
+                            <input type="radio" class="pdp-svc-sub__inp" name="pdp_warranty" value="1year" />
+                            <span class="pdp-svc-sub__dot"></span>
+                            <span class="pdp-svc-sub__text">Подовження гарантії на 1 рік</span>
                         </label>
-                        <label class="pdp-svc-radio">
-                            <input type="radio" name="pdp_warranty_years" value="2" checked />
-                            <span>Подовження гарантії на 2 роки</span>
+                        <label class="pdp-svc-sub">
+                            <input type="radio" class="pdp-svc-sub__inp" name="pdp_warranty" value="2years" />
+                            <span class="pdp-svc-sub__dot"></span>
+                            <span class="pdp-svc-sub__text">Подовження гарантії на 2 роки</span>
                         </label>
                     </div>
                 </div>
 
+                <!-- Група 2: Дистанційне налаштування ПК -->
                 <div class="pdp-svc-group" data-pdp-svc-group>
                     <div class="pdp-svc-group__head">
-                        <label class="pdp-svc-group__head-label">
-                            <input type="checkbox" name="pdp_svc_remote_group" id="pdpSvcRemoteGroup" />
+                        <label class="pdp-svc-group__toggle">
+                            <input type="checkbox" class="pdp-svc-group__cb" name="pdp_svc_remote_group" />
+                            <span class="pdp-svc-group__cb-box"><i class="bi bi-check-lg"></i></span>
                             <span class="pdp-svc-group__title">Дистанційне налаштування ПК</span>
                         </label>
                         <button type="button" class="pdp-svc-info" title="Детальніше" aria-label="Інформація про сервіс"><i class="bi bi-info-circle"></i></button>
                     </div>
                     <div class="pdp-svc-group__subs">
-                        @if (item.Uslugi.Any())
-                        {
-                            @for (var ui = 0; ui < item.Uslugi.Count && ui < 4; ui++)
-                            {
-                                var u = item.Uslugi[ui];
-                                <label class="pdp-svc-radio">
-                                    @if (ui == 0)
-                                    {
-                                        <input type="radio" name="pdp_remote_setup" value="@u.Id" checked />
-                                    }
-                                    else
-                                    {
-                                        <input type="radio" name="pdp_remote_setup" value="@u.Id" />
-                                    }
-                                    <span>@u.Name — @u.Price.ToString("N0") ₴</span>
-                                </label>
-                            }
-                        }
-                        else
-                        {
-                            <label class="pdp-svc-radio">
-                                <input type="radio" name="pdp_remote_setup" value="demo" checked />
-                                <span>Дистанційне налаштування ПК для геймерів</span>
-                            </label>
-                        }
+                        <label class="pdp-svc-sub">
+                            <input type="checkbox" class="pdp-svc-sub__inp" name="pdp_remote" value="gamers" />
+                            <span class="pdp-svc-sub__box"><i class="bi bi-check-lg"></i></span>
+                            <span class="pdp-svc-sub__text">Дистанційне налаштування ПК для геймерів</span>
+                        </label>
+                        <label class="pdp-svc-sub">
+                            <input type="checkbox" class="pdp-svc-sub__inp" name="pdp_remote" value="office" />
+                            <span class="pdp-svc-sub__box"><i class="bi bi-check-lg"></i></span>
+                            <span class="pdp-svc-sub__text">Дистанційне налаштування ПК для офісу та роботи</span>
+                        </label>
+                        <label class="pdp-svc-sub">
+                            <input type="checkbox" class="pdp-svc-sub__inp" name="pdp_remote" value="home" />
+                            <span class="pdp-svc-sub__box"><i class="bi bi-check-lg"></i></span>
+                            <span class="pdp-svc-sub__text">Дистанційне налаштування домашнього ПК</span>
+                        </label>
                     </div>
+                </div>
+
+                <!-- Група 3: Динамічні послуги продавця -->
+                @if (item.Uslugi != null && item.Uslugi.Any())
+                {
+                    foreach (var u in item.Uslugi)
+                    {
+                        <div class="pdp-svc-group" data-pdp-svc-group>
+                            <div class="pdp-svc-group__head">
+                                <label class="pdp-svc-group__toggle">
+                                    <input type="checkbox" class="pdp-svc-group__cb pdp-svc-item__cb" name="uslugi" value="@u.Id" data-price="@u.Price" />
+                                    <span class="pdp-svc-group__cb-box"><i class="bi bi-check-lg"></i></span>
+                                    <span class="pdp-svc-group__title">@u.Name</span>
+                                </label>
+                                @if (!string.IsNullOrWhiteSpace(u.Description))
+                                {
+                                    <button type="button" class="pdp-svc-info" title="@u.Description" aria-label="@u.Description"><i class="bi bi-info-circle"></i></button>
+                                }
+                                <span class="pdp-svc-group__price">+@u.Price.ToString("N0")&nbsp;₴</span>
+                            </div>
+                        </div>
+                    }
+                }
+
+                <div class="pdp-svc-total" id="pdpSvcTotal" style="display:none">
+                    <span class="pdp-svc-total__label">Послуги:</span>
+                    <span class="pdp-svc-total__val" id="pdpSvcTotalVal">0 ₴</span>
                 </div>
             </div>
 
@@ -751,20 +767,58 @@
                 toggle.textContent = open ? 'Сховати' : 'Показати ще';
             });
         }
+
+        var fullToggle = document.getElementById('pdpCharsFullToggle');
+        var fullPanel = document.getElementById('pdpCharsFullPanel');
+        if (fullToggle && fullPanel && charsCard) {
+            fullToggle.addEventListener('click', function () {
+                var open = fullPanel.hasAttribute('hidden');
+                if (open) {
+                    fullPanel.removeAttribute('hidden');
+                } else {
+                    fullPanel.setAttribute('hidden', '');
+                }
+                charsCard.classList.toggle('pdp-chars-card--full-open', open);
+                fullToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                var txt = fullToggle.querySelector('.pdp-chars-all-btn__text');
+                if (txt) {
+                    txt.textContent = open ? 'Згорнути' : 'Всі характеристики';
+                }
+            });
+        }
     })();
 
     (function () {
         document.querySelectorAll('[data-pdp-svc-group]').forEach(function (g) {
-            var cb = g.querySelector('.pdp-svc-group__head-label input[type="checkbox"]');
+            var headCb = g.querySelector('.pdp-svc-group__cb');
             var subs = g.querySelector('.pdp-svc-group__subs');
-            if (!cb || !subs) return;
-            function sync() {
-                var on = cb.checked;
+            if (!headCb || !subs) return;
+            function syncGroup() {
+                var on = headCb.checked;
                 subs.classList.toggle('is-disabled', !on);
-                subs.querySelectorAll('input').forEach(function (inp) { inp.disabled = !on; });
+                subs.querySelectorAll('input').forEach(function (inp) {
+                    inp.disabled = !on;
+                    if (!on) inp.checked = false;
+                });
+                updateTotal();
             }
-            cb.addEventListener('change', sync);
-            sync();
+            headCb.addEventListener('change', syncGroup);
+            syncGroup();
+        });
+
+        function updateTotal() {
+            var sum = 0;
+            document.querySelectorAll('.pdp-svc-item__cb').forEach(function (cb) {
+                if (cb.checked) sum += parseFloat(cb.getAttribute('data-price')) || 0;
+            });
+            var totalWrap = document.getElementById('pdpSvcTotal');
+            var totalVal = document.getElementById('pdpSvcTotalVal');
+            if (totalWrap) totalWrap.style.display = sum > 0 ? 'flex' : 'none';
+            if (totalVal) totalVal.textContent = sum.toLocaleString('uk-UA') + ' ₴';
+        }
+
+        document.querySelectorAll('.pdp-svc-item__cb').forEach(function (cb) {
+            cb.addEventListener('change', updateTotal);
         });
     })();
 </script>

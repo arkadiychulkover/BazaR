@@ -545,291 +545,348 @@
     </div>
 </div>
 
-@if (ViewContext.HttpContext.Request.Method != "GET")
-{
+<form id="walletAntiForgeryForm" style="display:none;">
     @Html.AntiForgeryToken()
-}
-else
-{
-    <form style="display:none;">
-        @Html.AntiForgeryToken()
-    </form>
-}
+</form>
 
 <script>
-(function () {
-    const modal = document.getElementById('paymentModal');
-    const openBtn = document.getElementById('openPaymentModal');
-    const closeBtn = document.getElementById('closePaymentModal');
-    const scrollBtn = document.getElementById('scrollToHistory');
+    (function () {
+        const modal = document.getElementById('paymentModal');
+        const openBtn = document.getElementById('openPaymentModal');
+        const closeBtn = document.getElementById('closePaymentModal');
 
-    const paymentAmount = document.getElementById('paymentAmount');
-    const cardNumber = document.getElementById('cardNumber');
-    const cardExpiry = document.getElementById('cardExpiry');
-    const cardCvv = document.getElementById('cardCvv');
-    const cardHolder = document.getElementById('cardHolder');
+        const paymentAmount = document.getElementById('paymentAmount');
+        const cardNumber = document.getElementById('cardNumber');
+        const cardExpiry = document.getElementById('cardExpiry');
+        const cardCvv = document.getElementById('cardCvv');
+        const cardHolder = document.getElementById('cardHolder');
 
-    const summaryAmount = document.getElementById('summaryAmount');
-    const startPaymentBtn = document.getElementById('startPaymentBtn');
-    const fillTestCardBtn = document.getElementById('fillTestCardBtn');
+        const summaryAmount = document.getElementById('summaryAmount');
+        const startPaymentBtn = document.getElementById('startPaymentBtn');
 
-    const paymentFormBlock = document.getElementById('paymentFormBlock');
-    const paymentProcessing = document.getElementById('paymentProcessing');
-    const paymentStatus = document.getElementById('paymentStatus');
+        const paymentFormBlock = document.getElementById('paymentFormBlock');
+        const paymentProcessing = document.getElementById('paymentProcessing');
+        const paymentStatus = document.getElementById('paymentStatus');
 
-    const walletBalance = document.getElementById('walletBalance');
-    const walletOperationsCount = document.getElementById('walletOperationsCount');
-    const historyCount = document.getElementById('historyCount');
-    const historyList = document.getElementById('historyList');
-    const walletLastTopup = document.getElementById('walletLastTopup');
-    const walletEmptyHistory = document.getElementById('walletEmptyHistory');
+        const walletBalance = document.getElementById('walletBalance');
+        const walletOperationsCount = document.getElementById('walletOperationsCount');
+        const historyCount = document.getElementById('historyCount');
+        const historyList = document.getElementById('historyList');
+        const walletLastTopup = document.getElementById('walletLastTopup');
 
-    const step1 = document.getElementById('step1');
-    const step2 = document.getElementById('step2');
-    const step3 = document.getElementById('step3');
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
 
-    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
 
-    let currentBalance = parseFloat('@Model.Balance'.replace(',', '.'));
+        let currentBalance = parseFloat('@Model.Balance'.toString().replace(',', '.')) || 0;
+        let operationsCount = parseInt('@Model.Transactions.Count') || 0;
+        let isSubmitting = false;
 
-    openBtn.addEventListener('click', openModal);
-    closeBtn.addEventListener('click', closeModal);
+        // ================= EVENTS =================
 
-    modal.addEventListener('click', function (e) {
-        if (e.target === modal) closeModal();
-    });
-
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeModal();
-    });
-
-    scrollBtn.addEventListener('click', function () {
-        document.getElementById('walletHistory').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-
-    paymentAmount.addEventListener('input', function () {
-        summaryAmount.textContent = formatMoney(this.value || 0) + ' ₴';
-    });
-
-    cardNumber.addEventListener('input', function () {
-        let value = this.value.replace(/\D/g, '').substring(0, 16);
-        this.value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
-    });
-
-    cardExpiry.addEventListener('input', function () {
-        let value = this.value.replace(/\D/g, '').substring(0, 4);
-        if (value.length >= 3) {
-            value = value.substring(0, 2) + '/' + value.substring(2);
-        }
-        this.value = value;
-    });
-
-    cardCvv.addEventListener('input', function () {
-        this.value = this.value.replace(/\D/g, '').substring(0, 3);
-    });
-
-    startPaymentBtn.addEventListener('click', async function () {
-        hideStatus();
-
-        const amount = parseFloat(paymentAmount.value);
-        const number = cardNumber.value.replace(/\s/g, '');
-        const expiry = cardExpiry.value.trim();
-        const cvv = cardCvv.value.trim();
-        const holder = cardHolder.value.trim();
-
-        const validationError = validatePayment(amount, number, expiry, cvv, holder);
-        if (validationError) {
-            showStatus(validationError, 'error');
-            return;
+        if (openBtn) {
+            openBtn.addEventListener('click', openModal);
         }
 
-        setStep(2);
-        paymentFormBlock.style.display = 'none';
-        paymentProcessing.classList.add('show');
-
-        await wait(1400);
-
-        const isDeclined = number === '4000000000000002' || amount > 50000;
-
-        paymentProcessing.classList.remove('show');
-        setStep(3);
-
-        if (isDeclined) {
-            showStatus('Оплата не пройшла. Банк повернув відмову. Спробуйте іншу картку або суму.', 'error');
-            paymentFormBlock.style.display = '';
-            setStep(1);
-            return;
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
         }
 
-        try {
-            const resp = await fetch('/Profile/TopUpWallet', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': token
-                },
-                body: JSON.stringify({
-                    amount: amount,
-                    method: 'card',
-                    cardLast4: number.slice(-4),
-                    holder: holder
-                })
+        if (modal) {
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
             });
+        }
 
-            let data = null;
-            try {
-                data = await resp.json();
-            } catch {
-                data = null;
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('show')) {
+                closeModal();
             }
+        });
 
-            if (!resp.ok) {
-                showStatus((data && data.error) ? data.error : 'Сервер повернув помилку при поповненні.', 'error');
-                paymentFormBlock.style.display = '';
-                setStep(1);
+        if (paymentAmount) {
+            paymentAmount.addEventListener('input', function () {
+                const amount = parseFloat(this.value);
+                updateSummary(amount);
+            });
+        }
+
+        if (cardNumber) {
+            cardNumber.addEventListener('input', function () {
+                let value = this.value.replace(/\D/g, '').substring(0, 16);
+                this.value = value.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+            });
+        }
+
+        if (cardExpiry) {
+            cardExpiry.addEventListener('input', function () {
+                let value = this.value.replace(/\D/g, '').substring(0, 4);
+                if (value.length > 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2);
+                }
+                this.value = value;
+            });
+        }
+
+        if (cardCvv) {
+            cardCvv.addEventListener('input', function () {
+                this.value = this.value.replace(/\D/g, '').substring(0, 3);
+            });
+        }
+
+        if (startPaymentBtn) {
+            startPaymentBtn.addEventListener('click', submitPayment);
+        }
+
+        // ================= MAIN =================
+
+        async function submitPayment() {
+            if (isSubmitting) return;
+
+            clearStatus();
+
+            const amount = parseFloat(paymentAmount.value);
+            const validationError = validateForm(amount);
+
+            if (validationError) {
+                showStatus(validationError, 'error');
                 return;
             }
 
-            const newBalance = data?.newBalance ?? (currentBalance + amount);
-            const tx = data?.transaction ?? {
-                description: 'Поповнення рахунку (картка **** ' + number.slice(-4) + ')',
-                createdAt: formatDate(new Date()),
-                amount: amount,
-                type: 'replenishment'
-            };
+            isSubmitting = true;
+            startPaymentBtn.disabled = true;
 
-            updateWallet(newBalance, tx, amount);
-            showStatus('Оплата успішно виконана. Баланс оновлено, операцію додано в історію.', 'success');
+            setStepState(2);
 
-            setTimeout(() => {
-                closeModal();
-            }, 1800);
+            paymentFormBlock.style.display = 'none';
+            paymentProcessing.classList.add('show');
 
-        } catch (e) {
-            showStatus('Помилка мережі при виконанні платежу.', 'error');
+            try {
+                const resp = await fetch('/Profile/TopUpWallet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ amount: amount })
+                });
+
+                const rawText = await resp.text();
+                let data = null;
+
+                try {
+                    data = rawText ? JSON.parse(rawText) : null;
+                } catch {
+                    data = null;
+                }
+
+                paymentProcessing.classList.remove('show');
+
+                if (!resp.ok) {
+                    paymentFormBlock.style.display = '';
+                    setStepState(1);
+                    showStatus(
+                        data?.error || data?.message || 'Не вдалося виконати поповнення.',
+                        'error'
+                    );
+                    return;
+                }
+
+                currentBalance = parseFloat(data?.newBalance ?? (currentBalance + amount));
+                walletBalance.textContent = formatMoney(currentBalance);
+
+                operationsCount += 1;
+                if (walletOperationsCount) {
+                    walletOperationsCount.textContent = operationsCount;
+                }
+                if (historyCount) {
+                    historyCount.textContent = operationsCount + ' операцій';
+                }
+
+                updateLastTopup(amount);
+                prependHistoryItem({
+                    description: data?.description || 'Поповнення рахунку',
+                    amount: amount,
+                    createdAt: data?.createdAt || new Date().toISOString(),
+                    type: 'replenishment'
+                });
+
+                setStepState(3);
+                showStatus('Платіж успішно проведено.', 'success');
+
+                setTimeout(() => {
+                    closeModal();
+                }, 1400);
+
+            } catch (error) {
+                paymentProcessing.classList.remove('show');
+                paymentFormBlock.style.display = '';
+                setStepState(1);
+                showStatus('Помилка мережі або сервера. Спробуйте ще раз.', 'error');
+            } finally {
+                isSubmitting = false;
+                startPaymentBtn.disabled = false;
+            }
+        }
+
+        // ================= UI HELPERS =================
+
+        function openModal() {
+            resetModalState();
+            modal.classList.add('show');
+            if (paymentAmount) paymentAmount.focus();
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+            resetModalState();
+            clearForm();
+        }
+
+        function resetModalState() {
             paymentFormBlock.style.display = '';
-            setStep(1);
-        }
-    });
-
-    function openModal() {
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-        resetModal();
-    }
-
-    function closeModal() {
-        modal.classList.remove('show');
-        document.body.style.overflow = '';
-    }
-
-    function resetModal() {
-        paymentFormBlock.style.display = '';
-        paymentProcessing.classList.remove('show');
-        hideStatus();
-        setStep(1);
-
-        paymentAmount.value = '';
-        cardNumber.value = '';
-        cardExpiry.value = '';
-        cardCvv.value = '';
-        cardHolder.value = '';
-        summaryAmount.textContent = '0.00 ₴';
-    }
-
-    function setStep(step) {
-        [step1, step2, step3].forEach(x => {
-            x.classList.remove('active', 'done');
-        });
-
-        if (step === 1) {
-            step1.classList.add('active');
+            paymentProcessing.classList.remove('show');
+            clearStatus();
+            setStepState(1);
         }
 
-        if (step === 2) {
-            step1.classList.add('done');
-            step2.classList.add('active');
+        function clearForm() {
+            paymentAmount.value = '';
+            cardNumber.value = '';
+            cardExpiry.value = '';
+            cardCvv.value = '';
+            cardHolder.value = '';
+            updateSummary(0);
         }
 
-        if (step === 3) {
-            step1.classList.add('done');
-            step2.classList.add('done');
-            step3.classList.add('active');
+        function updateSummary(amount) {
+            if (!summaryAmount) return;
+            summaryAmount.textContent = formatMoney(amount && amount > 0 ? amount : 0);
         }
-    }
 
-    function validatePayment(amount, number, expiry, cvv, holder) {
-        if (!amount || amount <= 0) return 'Вкажіть коректну суму поповнення.';
-        if (amount < 1) return 'Мінімальна сума поповнення — 1 ₴.';
-        if (amount > 100000) return 'Максимальна сума поповнення — 100 000 ₴.';
-        if (number.length !== 16) return 'Вкажіть коректний номер картки.';
-        if (!/^\d{2}\/\d{2}$/.test(expiry)) return 'Вкажіть термін дії у форматі MM/YY.';
-        if (!/^\d{3}$/.test(cvv)) return 'Вкажіть коректний CVV.';
-        if (!holder || holder.length < 3) return 'Вкажіть ім’я власника картки.';
-        return '';
-    }
+        function setStepState(stepNumber) {
+            [step1, step2, step3].forEach(step => {
+                if (!step) return;
+                step.classList.remove('active', 'done');
+            });
 
-    function updateWallet(newBalance, tx, amount) {
-        currentBalance = parseFloat(newBalance);
+            if (stepNumber === 1) {
+                step1.classList.add('active');
+            }
+            else if (stepNumber === 2) {
+                step1.classList.add('done');
+                step2.classList.add('active');
+            }
+            else if (stepNumber === 3) {
+                step1.classList.add('done');
+                step2.classList.add('done');
+                step3.classList.add('active');
+            }
+        }
 
-        walletBalance.textContent = formatMoney(newBalance) + ' ₴';
+        function showStatus(text, type) {
+            paymentStatus.textContent = text;
+            paymentStatus.classList.remove('success', 'error', 'show');
+            paymentStatus.classList.add(type, 'show');
+        }
 
-        const currentCount = parseInt(walletOperationsCount.textContent || '0', 10) + 1;
-        walletOperationsCount.textContent = currentCount;
-        historyCount.textContent = currentCount + ' операцій';
-        walletLastTopup.textContent = formatMoney(amount) + ' ₴ · ' + formatDate(new Date());
+        function clearStatus() {
+            paymentStatus.textContent = '';
+            paymentStatus.classList.remove('success', 'error', 'show');
+        }
 
-        const empty = document.getElementById('walletEmptyHistory');
-        if (empty) empty.remove();
+        function validateForm(amount) {
+            if (!amount || amount <= 0) {
+                return 'Вкажіть коректну суму поповнення.';
+            }
 
-        const item = document.createElement('div');
-        item.className = 'wallet-history__item';
-        item.innerHTML = `
-            <div class="wallet-history__left">
-                <div class="wallet-history__name">${escapeHtml(tx.description || 'Поповнення рахунку')}</div>
-                <div class="wallet-history__date">${escapeHtml(tx.createdAt || formatDate(new Date()))}</div>
-            </div>
-            <div class="wallet-history__amount in">+${formatMoney(tx.amount || amount)} ₴</div>
-        `;
+            if (amount < 1) {
+                return 'Мінімальна сума поповнення — 1 ₴.';
+            }
 
-        historyList.prepend(item);
-    }
+            const cleanedCard = cardNumber.value.replace(/\s/g, '');
+            if (cleanedCard.length !== 16) {
+                return 'Вкажіть коректний номер картки.';
+            }
 
-    function showStatus(message, type) {
-        paymentStatus.className = 'wallet-status show ' + type;
-        paymentStatus.textContent = message;
-    }
+            if (!/^\d{2}\/\d{2}$/.test(cardExpiry.value)) {
+                return 'Вкажіть термін дії картки у форматі MM/YY.';
+            }
 
-    function hideStatus() {
-        paymentStatus.className = 'wallet-status';
-        paymentStatus.textContent = '';
-    }
+            if (!/^\d{3}$/.test(cardCvv.value)) {
+                return 'Вкажіть коректний CVV.';
+            }
 
-    function formatMoney(value) {
-        return parseFloat(value || 0).toLocaleString('uk-UA', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-    }
+            if (!cardHolder.value.trim()) {
+                return "Вкажіть ім'я власника картки.";
+            }
 
-    function formatDate(date) {
-        const d = new Date(date);
-        const dd = String(d.getDate()).padStart(2, '0');
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const yyyy = d.getFullYear();
-        const hh = String(d.getHours()).padStart(2, '0');
-        const mi = String(d.getMinutes()).padStart(2, '0');
-        return `${dd}.${mm}.${yyyy} ${hh}:${mi}`;
-    }
+            return null;
+        }
 
-    function wait(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
+        function prependHistoryItem(tx) {
+            const emptyBlock = document.getElementById('walletEmptyHistory');
+            if (emptyBlock) {
+                emptyBlock.remove();
+            }
 
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
-})();
+            const isIn = tx.type === 'replenishment';
+            const item = document.createElement('div');
+            item.className = 'wallet-history__item';
+
+            item.innerHTML = `
+                <div class="wallet-history__left">
+                    <div class="wallet-history__name">${escapeHtml(tx.description || 'Операція')}</div>
+                    <div class="wallet-history__date">${formatDate(tx.createdAt)}</div>
+                </div>
+                <div class="wallet-history__amount ${isIn ? 'in' : 'out'}">
+                    ${isIn ? '+' : '-'}${formatMoneyValue(tx.amount)} ₴
+                </div>
+            `;
+
+            historyList.prepend(item);
+        }
+
+        function updateLastTopup(amount) {
+            if (!walletLastTopup) return;
+            walletLastTopup.textContent = `${formatMoneyValue(amount)} ₴ · ${formatDate(new Date())}`;
+        }
+
+        function formatMoney(value) {
+            return `${formatMoneyValue(value)} ₴`;
+        }
+
+        function formatMoneyValue(value) {
+            const num = parseFloat(value || 0);
+            return num.toFixed(2);
+        }
+
+        function formatDate(dateValue) {
+            const date = new Date(dateValue);
+
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${day}.${month}.${year} ${hours}:${minutes}`;
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        updateSummary(0);
+    })();
 </script>

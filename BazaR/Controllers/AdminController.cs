@@ -2,6 +2,8 @@ using BazaR.Data;
 using BazaR.Filters;
 using BazaR.Interfaces;
 using BazaR.Models;
+using BazaR.ViewModels;
+using BazaR.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +19,7 @@ namespace BazaR.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly AppDbContext _appDbContext;
         private readonly IUserDb _UserRepo;
+        private readonly IUserStatistick _StatistickRepo;
         private readonly string adminRoleName = "Admin";
 
         public AdminController(
@@ -24,25 +27,26 @@ namespace BazaR.Controllers
             RoleManager<IdentityRole<int>> roleManager,
             SignInManager<User> signInManager,
             AppDbContext appDbContext,
-            IUserDb userDb)
+            IUserDb userDb, IUserStatistick StatistickRepo)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
             _appDbContext = appDbContext;
             _UserRepo = userDb;
+            _StatistickRepo = StatistickRepo;
         }
 
         #region Users
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index([FromServices] ActiveUsersService service)
         {
             IQueryable<User> users = _appDbContext.Users;
-            ViewBag.Active = 0;
-            ViewBag.ForMonth = 0;
-            ViewBag.ForWeek = 0;
-            ViewBag.ForDay = 0;
+            ViewBag.Active = service.GetOnlineUsersCount();
+            ViewBag.ForMonth = _StatistickRepo.GetUsersCountForMonthAsync();
+            ViewBag.ForWeek = _StatistickRepo.GetUsersCountForWeekAsync();
+            ViewBag.ForDay = _StatistickRepo.GetUsersCountForDayAsync();
             return View(users);
         }
 
@@ -301,29 +305,141 @@ namespace BazaR.Controllers
         }
         #endregion
 
+        #region Promotions
+        [HttpGet]
+        public async Task<IActionResult> Promotions()
+        {
+            var promotions = await _appDbContext.Promotions.ToListAsync();
+            return View(promotions);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPromotion(Promotion prom)
+        {
+            _appDbContext.Promotions.Add(prom);
+            await _appDbContext.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePromotion(int id)
+        {
+            var promotion = await _appDbContext.Promotions.FindAsync(id);
+
+            if (promotion != null)
+            {
+                _appDbContext.Promotions.Remove(promotion);
+                await _appDbContext.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Promotions));
+        }
+        #endregion
+
+        #region Mails
+        [HttpGet]
+        public async Task<IActionResult> IndexMail(int id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null)
+                return NotFound();
+
+            var messages = await _appDbContext.Messages
+                .Where(m => m.UserId == id)
+                .OrderByDescending(m => m.DateTime)
+                .ToListAsync();
+
+            var model = new AdminMessageViewModel
+            {
+                UserId = id,
+                UserName = user.Name ?? user.Email ?? "—",
+                Messages = messages
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendMessage(SendMessageViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                var user = await _userManager.FindByIdAsync(vm.UserId.ToString());
+
+                var messages = await _appDbContext.Messages
+                    .Where(m => m.UserId == vm.UserId)
+                    .OrderByDescending(m => m.DateTime)
+                    .ToListAsync();
+
+                var model = new AdminMessageViewModel
+                {
+                    UserId = vm.UserId,
+                    UserName = user?.Name ?? user?.Email ?? "—",
+                    Messages = messages,
+                    NewMessage = vm
+                };
+
+                return View("IndexMail", model);
+            }
+            var sender = await _userManager.GetUserAsync(User);
+            var message = new Message
+            {
+                UserId = vm.UserId,
+                Name = vm.Name.Trim(),
+                Content = vm.Content.Trim(),
+                DateTime = DateTime.UtcNow,
+                IsRead = false,
+                SenderId = sender.Id,
+                SenderName = sender?.Name ?? sender?.Email
+            };
+
+            _appDbContext.Messages.Add(message);
+            await _appDbContext.SaveChangesAsync();
+
+            TempData["Success"] = "Сообщение успешно отправлено.";
+            return RedirectToAction(nameof(IndexMail), new { id = vm.UserId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteMessage(int id, int userId)
+        {
+            var message = await _appDbContext.Messages.FindAsync(id);
+
+            if (message != null && message.UserId == userId)
+            {
+                _appDbContext.Messages.Remove(message);
+                await _appDbContext.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(IndexMail), new { id = userId });
+        }
+#endregion
+
         [HttpGet]
         public async Task<IActionResult> PopularCategories()
         {
-            var popularDict = await _appDbContext.Categories
-                .OrderBy(c => c.Name)
-                .Take(20)
-                .ToDictionaryAsync(c => c.Name, c => 0);
+            var popularDict = await _StatistickRepo.GetPopularCategoryAsync();
             return View(popularDict);
         }
 
         [HttpGet]
-        public IActionResult GetLog()
+        public async Task<IActionResult> GetLog()
         {
-            var log = _appDbContext.VisitingModels.ToList();
-            foreach (var _ in log)
+            List<VisitingModel> log = _appDbContext.VisitingModels.ToList();
+            foreach (VisitingModel model in log) 
+            {
+                if(model.SearchFilters != null)
+                    Console.WriteLine(model.SearchFilters.Id);
                 Console.WriteLine("\n\nLOGS\n\n");
+            }
             return View(log);
         }
 
         [HttpGet]
-        public IActionResult GetLogByUserId(int id)
+        public async Task<IActionResult> GetLogByUserId(int id) 
         {
-            var log = _appDbContext.VisitingModels.Where(v => v.UserId == id).ToList();
+            List<VisitingModel> log = _appDbContext.VisitingModels.Where<VisitingModel>(v => v.UserId == id).ToList();
             return View(log);
         }
 

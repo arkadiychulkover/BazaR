@@ -42,6 +42,7 @@ namespace BazaR.Data
         public DbSet<LookedCard> LookedCards { get; set; }
         public DbSet<MailingSetting> MailingSettings { get; set; }
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
+        public DbSet<SearchItem> SearchItems { get; set; }
         public DbSet<VisitingModel> VisitingModels { get; set; }
         public DbSet<UserUseStatistick> UserUseStatisticks { get; set; }
         public DbSet<CategoryStatistik> CategoryStatistiks { get; set; }
