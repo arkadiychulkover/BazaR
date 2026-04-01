@@ -1,5 +1,4 @@
-﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@model List<BazaR.Models.Category>
+﻿@model List<BazaR.Models.Category>
 
 @{
     ViewData["Title"] = "Категорія";
@@ -44,23 +43,20 @@
                            style="text-decoration:none;color:inherit;">
 
                             <div style="
-                                            border:1px solid #e5e5e5;
-                                            border-radius:10px;
-                                            padding:10px;
-                                            height:85px;
-                                            display:flex;
-                                            flex-direction:column;
-                                            align-items:center;
-                                            justify-content:center;
-                                            background:white;
-                                        ">
+                                        border:1px solid #e5e5e5;
+                                        border-radius:10px;
+                                        padding:10px;
+                                        height:85px;
+                                        display:flex;
+                                        flex-direction:column;
+                                        align-items:center;
+                                        justify-content:center;
+                                        background:white;
+                                    ">
 
                                 @if (!string.IsNullOrEmpty(cat.IconUrl))
                                 {
-                                    <img src="@Url.Content(cat.IconUrl)"
-                                         style="height:30px;margin-bottom:5px;"
-                                         alt="@cat.Name"
-                                         onerror="this.onerror=null; this.src='/AssetsIconImg/images/icon-default.svg'; console.error('Failed to load: @cat.IconUrl')" />
+                                    <img src="@cat.IconUrl" style="height:30px;margin-bottom:5px;" />
                                 }
 
                                 <span style="font-size:12px;text-align:center;">

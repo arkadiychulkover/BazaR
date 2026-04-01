@@ -1,4 +1,4 @@
-﻿namespace BazaR.Models
+namespace BazaR.Models
 {
     public class CartItem
     {

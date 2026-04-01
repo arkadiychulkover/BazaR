@@ -2,7 +2,7 @@ using BazaR.Data;
 using BazaR.Filters;
 using BazaR.Interfaces;
 using BazaR.Models;
-using Microsoft.AspNetCore.Authorization;
+using BazaR.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -415,13 +415,16 @@ namespace BazaR.Controllers
             if (!string.IsNullOrWhiteSpace(item.ImageUrl))
             {
                 string rightUrl = null;
-                if (!item.ImageUrl.StartsWith("/images")) 
+                if (!item.ImageUrl.StartsWith("/images"))
                 {
                     int wwwrootIndex = item.ImageUrl.IndexOf("wwwroot", StringComparison.OrdinalIgnoreCase);
-                    rightUrl = item.ImageUrl.Substring(wwwrootIndex + "wwwroot".Length).Replace("\\", "/");
+                    if (wwwrootIndex >= 0)
+                        rightUrl = item.ImageUrl.Substring(wwwrootIndex + "wwwroot".Length).Replace("\\", "/");
                 }
                 images.Add(rightUrl == null ? item.ImageUrl : rightUrl);
             }
+            if (!images.Any() && item.Colors != null)
+                images.AddRange(item.Colors.Select(c => c.Color).Where(c => !string.IsNullOrWhiteSpace(c)));
 
             var sameCategoryItems = _itMan.GetByCategory(item.CategoryId)
                 .Where(i => i.Id != id)
@@ -734,6 +737,9 @@ namespace BazaR.Controllers
             SetLayoutData();
 
             var userId = CurrentUser!.Id;
+            var bonus = _db.BonusAccounts.FirstOrDefault(x => x.UserId == userId);
+
+            ViewBag.BonusBalance = bonus?.TotalBalance ?? 0;
             var cartItems = _usMan.GetCartItemsWithQuantity(userId);
 
             if (!cartItems.Any())
@@ -756,7 +762,7 @@ namespace BazaR.Controllers
             string? lastName, string? firstName, string? patronymic, string? phone,
             string? recipientLastName, string? recipientFirstName, string? recipientPatronymic, string? recipientPhone,
             string? bazarPickupPointId, string? postPickupPointId,
-            bool saveContacts = false)
+            bool saveContacts = false, int bonusToUse = 0)
         {
             if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Checkout)));
 
@@ -796,6 +802,7 @@ namespace BazaR.Controllers
                     TempData["Error"] = "Оберіть місто та точку самовивозу BAZA-R.";
                     return RedirectToAction(nameof(Checkout));
                 }
+
                 if (string.IsNullOrWhiteSpace(address) || address.Trim().Length < 10)
                 {
                     TempData["Error"] = "Підтвердіть точку самовивозу BAZA-R (натисніть «Підтвердити» у вікні вибору).";
@@ -809,6 +816,7 @@ namespace BazaR.Controllers
                     TempData["Error"] = "Оберіть місто та відділення пошти.";
                     return RedirectToAction(nameof(Checkout));
                 }
+
                 if (string.IsNullOrWhiteSpace(address) || address.Trim().Length < 10)
                 {
                     TempData["Error"] = "Підтвердіть відділення пошти (натисніть «Підтвердити» у вікні вибору).";
@@ -829,7 +837,6 @@ namespace BazaR.Controllers
                 return RedirectToAction(nameof(Checkout));
             }
 
-            // Save contact data if requested
             if (saveContacts)
             {
                 var user = await _userManager.GetUserAsync(User);
@@ -839,13 +846,14 @@ namespace BazaR.Controllers
                     user.FirstName = firstName;
                     user.Patronymic = patronymic;
                     user.PhoneNumber = phone;
+
                     if (!string.IsNullOrWhiteSpace(firstName) || !string.IsNullOrWhiteSpace(lastName))
                         user.Name = $"{firstName} {lastName}".Trim();
+
                     await _userManager.UpdateAsync(user);
                 }
             }
 
-            // Calculate promo discount
             decimal discount = 0;
             if (!string.IsNullOrWhiteSpace(promoCode))
             {
@@ -853,7 +861,21 @@ namespace BazaR.Controllers
             }
 
             decimal rawTotal = cartItems.Sum(ci => ci.Item.Price * ci.Quantity);
-            decimal finalTotal = rawTotal - discount;
+
+            var bonusAccount = await _db.BonusAccounts
+                .FirstOrDefaultAsync(x => x.UserId == userId);
+
+            int availableBonus = bonusAccount?.TotalBalance ?? 0;
+
+            if (bonusToUse < 0)
+                bonusToUse = 0;
+
+            if (bonusToUse > availableBonus)
+                bonusToUse = availableBonus;
+
+            decimal bonusDiscount = bonusToUse / 10m;
+
+            decimal finalTotal = rawTotal - discount - bonusDiscount;
             if (finalTotal < 0) finalTotal = 0;
 
             var addr = (address ?? "").Trim();
@@ -862,7 +884,6 @@ namespace BazaR.Controllers
             var recipLine = $"Отримувач: {recipientLastName!.Trim()} {recipientFirstName!.Trim()}{recipMiddle} · {recipientPhone!.Trim()}";
             var fullAddress = string.IsNullOrEmpty(addr) ? recipLine : addr + Environment.NewLine + recipLine;
 
-            // Mapping string form values → enums
             var pmEnum = paymentMethod switch
             {
                 "Оплатити зараз" => OrderPaymentMethod.PayNow,
@@ -870,6 +891,7 @@ namespace BazaR.Controllers
                 "Карткою у відділенні" => OrderPaymentMethod.PayByCard,
                 _ => OrderPaymentMethod.PayNow
             };
+
             var dmEnum = deliveryMethod switch
             {
                 "Самовивіз BAZA-R" => OrderDeliveryMethod.SelfPickup,
@@ -899,36 +921,91 @@ namespace BazaR.Controllers
             }
 
             var ok = _usMan.CreateOrder(userId, order);
-            await _log.LogPageVisitAsync(userId, UserAction.MakeOrder, "Site", "CreateOrder", null, order.Id, null);
             if (!ok)
             {
                 TempData["Error"] = "Не вдалося створити замовлення.";
                 return RedirectToAction(nameof(Checkout));
             }
 
+            if (bonusToUse > 0)
+            {
+                if (bonusAccount == null)
+                {
+                    bonusAccount = new BonusAccount
+                    {
+                        UserId = userId,
+                        TotalBalance = 0,
+                        MonthlyAccrued = 0,
+                        MonthlySpent = bonusToUse,
+                        AccrualRate = 0.10m,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    _db.BonusAccounts.Add(bonusAccount);
+                }
+                else
+                {
+                    bonusAccount.TotalBalance -= bonusToUse;
+                    bonusAccount.MonthlySpent += bonusToUse;
+                    bonusAccount.UpdatedAt = DateTime.UtcNow;
+                }
+
+                if (bonusAccount.TotalBalance < 0)
+                    bonusAccount.TotalBalance = 0;
+            }
+
+            int bonusToAdd = (int)Math.Floor(finalTotal * 0.10m);
+
+            if (bonusToAdd > 0)
+            {
+                if (bonusAccount == null)
+                {
+                    bonusAccount = new BonusAccount
+                    {
+                        UserId = userId,
+                        TotalBalance = bonusToAdd,
+                        MonthlyAccrued = bonusToAdd,
+                        MonthlySpent = 0,
+                        AccrualRate = 0.10m,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    _db.BonusAccounts.Add(bonusAccount);
+                }
+                else
+                {
+                    bonusAccount.TotalBalance += bonusToAdd;
+                    bonusAccount.MonthlyAccrued += bonusToAdd;
+                    bonusAccount.UpdatedAt = DateTime.UtcNow;
+                }
+            }
+
+            await _db.SaveChangesAsync();
+
             _usMan.ClearCart(userId);
 
-            // Redirect to payment page for online payment
             if (pmEnum == OrderPaymentMethod.PayNow)
             {
                 return RedirectToAction("Payment", new { orderId = order.Id });
             }
 
-            TempData["Ok"] = "Замовлення успішно оформлено!";
-            return RedirectToAction(nameof(Orders));
+            TempData["Ok"] = $"Замовлення успішно оформлено! Використано бонусів: {bonusToUse}. Нараховано бонусів: {bonusToAdd}.";
+            return RedirectToAction("Orders", "Profile");
         }
 
         private decimal GetPromoDiscount(string code)
         {
-            // Promo codes: code -> discount amount (₴)
-            var promoCodes = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "BAZAR10", 100 },
-                { "SAVE200", 200 },
-                { "WELCOME", 50 },
-                { "BAZAR15", 150 },
-            };
-            return promoCodes.TryGetValue(code.Trim(), out var d) ? d : 0;
+            if (string.IsNullOrWhiteSpace(code))
+                return 0;
+
+            code = code.Trim();
+
+            var promo = _db.Promotions
+                .FirstOrDefault(x => x.Number.ToLower() == code.ToLower());
+
+            return promo?.DiscountAmount ?? 0;
         }
 
         [HttpPost]
@@ -964,64 +1041,43 @@ namespace BazaR.Controllers
             // In real app: integrate with payment gateway here
             // For now: simulate success
             TempData["Ok"] = $"Оплата замовлення №{order.Number} успішно прийнята!";
-            return RedirectToAction(nameof(Orders));
+            return RedirectToAction("Orders", "Profile");
         }
-
         [HttpGet]
-        public IActionResult Orders()
+        public async Task<IActionResult> CalculateBonusDiscount(int bonusToUse)
         {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Orders)));
-
-            SetLayoutData();
+            if (!IsAuthenticated)
+            {
+                return Json(new
+                {
+                    ok = false,
+                    message = "Користувач не авторизований."
+                });
+            }
 
             var userId = CurrentUser!.Id;
-            var orders = _usMan.GetUserOrders(userId)
-                .OrderByDescending(o => o.Id)
-                .ToList();
 
-            ViewBag.OrdersCount = orders.Count;
+            var bonusAccount = await _db.BonusAccounts
+                .FirstOrDefaultAsync(x => x.UserId == userId);
 
-            return View(orders);
+            var availableBonus = bonusAccount?.TotalBalance ?? 0;
+
+            if (bonusToUse < 0)
+                bonusToUse = 0;
+
+            if (bonusToUse > availableBonus)
+                bonusToUse = availableBonus;
+
+            decimal discount = bonusToUse / 10m;
+
+            return Json(new
+            {
+                ok = true,
+                bonusUsed = bonusToUse,
+                discount,
+                discountText = $"{discount:0.##}₴"
+            });
         }
-
-        [HttpGet]
-        public IActionResult OrderDetails(int id)
-        {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(OrderDetails), new { id }));
-
-            SetLayoutData();
-
-            var order = _usMan.GetOrderById(id);
-            if (order == null) return NotFound();
-
-            if (order.UserId != CurrentUser!.Id)
-                return RedirectToAction(nameof(AccessDenied));
-
-            ViewBag.Items = order.OrderItems;
-            ViewBag.City = order.City ?? new City { Name = "Киев", Id = 1 };
-            ViewBag.eUser = order.User;
-            ViewBag.User = order.User;
-
-            return View(order);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult CancelOrder(int id)
-        {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Orders)));
-
-            var order = _usMan.GetOrderById(id);
-            if (order == null) return NotFound();
-
-            if (!IsAdmin && order.UserId != CurrentUser!.Id)
-                return RedirectToAction(nameof(AccessDenied));
-
-            var ok = _usMan.CancelOrder(id);
-            TempData[ok ? "Ok" : "Error"] = ok ? "Замовлення скасовано." : "Не вдалося скасувати замовлення.";
-            return RedirectToAction(nameof(Orders));
-        }
-
         [HttpGet]
         public IActionResult AccessDenied()
         {
@@ -1053,138 +1109,6 @@ namespace BazaR.Controllers
         public List<Item> FilterItems(int? categoryId, int? brandId, decimal? minPrice, decimal? maxPrice, bool? isAvailable)
             => _itMan.Filter(categoryId, brandId, minPrice, maxPrice, isAvailable);
 
-        [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> CreateItemUser()
-        {
-            User us = await _userManager.GetUserAsync(User);
-
-            ViewBag.Categories = _db.Categories.ToList();
-            ViewBag.Brands = _db.Brands.ToList();
-            ViewBag.UserItems = _db.Items.Where(i => i.UserId == us.Id).ToList();
-
-            return View();
-        }
-
-        [HttpGet]
-        public IActionResult GetBrandsByCategory(int categoryId) 
-        {
-            List<Brand> brands = _db.CategoryBrands
-                .Where(cb => cb.CategoryId == categoryId)
-                .Include(cb => cb.Brand)
-                .Select(cb => cb.Brand)
-                .Distinct()
-                .ToList();
-
-            return Json(brands);
-        }
-
-        [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> CreateItemUser(
-    Item model,
-    List<ItemCharacteristic> Characteristics,
-    List<ItemColor> Colors,
-    List<Usluga> SelectedUslugs,
-    IFormFile imageFile,
-    string ComplectName,
-    List<int> SelectedItemIds
-)
-        {
-            if (model == null || imageFile == null)
-                return RedirectToAction(nameof(CreateItemUser));
-
-            User us = await _userManager.GetUserAsync(User);
-
-            string filename = $"{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/items", filename);
-
-            using (var stream = new FileStream(path, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-
-            model.Characteristics = null;
-            model.Colors = null;
-            model.Uslugi = null;
-            model.UserId = us.Id;
-            model.ImageUrl = "/images/items/" + filename;
-
-            _db.Items.Add(model);
-            await _db.SaveChangesAsync();
-
-            if (Characteristics != null && Characteristics.Any())
-            {
-                foreach (var charac in Characteristics.Where(c => !string.IsNullOrEmpty(c.Key)))
-                {
-                    _db.ItemCharacteristics.Add(new ItemCharacteristic
-                    {
-                        Key = charac.Key,
-                        Value = charac.Value,
-                        ItemId = model.Id
-                    });
-                }
-            }
-
-            if (Colors != null && Colors.Any())
-            {
-                foreach (var color in Colors.Where(c => !string.IsNullOrEmpty(c.Color)))
-                {
-                    _db.ItemColors.Add(new ItemColor
-                    {
-                        Color = color.Color,
-                        ItemId = model.Id
-                    });
-                }
-            }
-
-            if (SelectedUslugs != null && SelectedUslugs.Any())
-            {
-                foreach (var usl in SelectedUslugs.Where(u => !string.IsNullOrEmpty(u.Name)))
-                {
-                    _db.Uslugi.Add(new Usluga
-                    {
-                        Name = usl.Name,
-                        Price = usl.Price,
-                        Description = usl.Description ?? $"Услуга для товара {model.Name}",
-                        ItemId = model.Id
-                    });
-                }
-            }
-
-            if (!string.IsNullOrEmpty(ComplectName) && SelectedItemIds != null && SelectedItemIds.Any())
-            {
-                var complect = new Complect
-                {
-                    Name = ComplectName
-                };
-
-                _db.Complects.Add(complect);
-                await _db.SaveChangesAsync();
-
-                foreach (var itemId in SelectedItemIds)
-                {
-                    _db.ComplectItems.Add(new ComplectItem
-                    {
-                        ComplectId = complect.Id,
-                        ItemId = itemId
-                    });
-                }
-
-                _db.ComplectItems.Add(new ComplectItem
-                {
-                    ComplectId = complect.Id,
-                    ItemId = model.Id
-                });
-            }
-
-            await _db.SaveChangesAsync();
-
-            return RedirectToAction(nameof(ItemDetails), new { id = model.Id });
-        }
-
-
-        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CreateItem(Item item)
@@ -1196,6 +1120,10 @@ namespace BazaR.Controllers
             var ok = _itMan.Create(item);
             TempData[ok ? "Ok" : "Error"] = ok ? "Товар создан." : "Не удалось создать товар.";
             return RedirectToAction(nameof(Index));
+        }
+        public IActionResult Privacy()
+        {
+            return View();
         }
 
         [HttpPost]
@@ -1325,8 +1253,6 @@ namespace BazaR.Controllers
             _db.SaveChanges();
             return Content("OK");
         }
-
-        
     }
 
     public static class SessionExtensions

@@ -2,6 +2,7 @@ using BazaR.Data;
 using BazaR.Filters;
 using BazaR.Interfaces;
 using BazaR.Models;
+using BazaR.ViewModels;
 using BazaR.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -303,6 +304,117 @@ namespace BazaR.Controllers
             return RedirectToAction(nameof(OrderDetails), new { id });
         }
         #endregion
+
+        #region Promotions
+        [HttpGet]
+        public async Task<IActionResult> Promotions()
+        {
+            var promotions = await _appDbContext.Promotions.ToListAsync();
+            return View(promotions);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPromotion(Promotion prom)
+        {
+            _appDbContext.Promotions.Add(prom);
+            await _appDbContext.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePromotion(int id)
+        {
+            var promotion = await _appDbContext.Promotions.FindAsync(id);
+
+            if (promotion != null)
+            {
+                _appDbContext.Promotions.Remove(promotion);
+                await _appDbContext.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Promotions));
+        }
+        #endregion
+
+        #region Mails
+        [HttpGet]
+        public async Task<IActionResult> IndexMail(int id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null)
+                return NotFound();
+
+            var messages = await _appDbContext.Messages
+                .Where(m => m.UserId == id)
+                .OrderByDescending(m => m.DateTime)
+                .ToListAsync();
+
+            var model = new AdminMessageViewModel
+            {
+                UserId = id,
+                UserName = user.Name ?? user.Email ?? "—",
+                Messages = messages
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendMessage(SendMessageViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                var user = await _userManager.FindByIdAsync(vm.UserId.ToString());
+
+                var messages = await _appDbContext.Messages
+                    .Where(m => m.UserId == vm.UserId)
+                    .OrderByDescending(m => m.DateTime)
+                    .ToListAsync();
+
+                var model = new AdminMessageViewModel
+                {
+                    UserId = vm.UserId,
+                    UserName = user?.Name ?? user?.Email ?? "—",
+                    Messages = messages,
+                    NewMessage = vm
+                };
+
+                return View("IndexMail", model);
+            }
+            var sender = await _userManager.GetUserAsync(User);
+            var message = new Message
+            {
+                UserId = vm.UserId,
+                Name = vm.Name.Trim(),
+                Content = vm.Content.Trim(),
+                DateTime = DateTime.UtcNow,
+                IsRead = false,
+                SenderId = sender.Id,
+                SenderName = sender?.Name ?? sender?.Email
+            };
+
+            _appDbContext.Messages.Add(message);
+            await _appDbContext.SaveChangesAsync();
+
+            TempData["Success"] = "Сообщение успешно отправлено.";
+            return RedirectToAction(nameof(IndexMail), new { id = vm.UserId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteMessage(int id, int userId)
+        {
+            var message = await _appDbContext.Messages.FindAsync(id);
+
+            if (message != null && message.UserId == userId)
+            {
+                _appDbContext.Messages.Remove(message);
+                await _appDbContext.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(IndexMail), new { id = userId });
+        }
+#endregion
 
         [HttpGet]
         public async Task<IActionResult> PopularCategories()

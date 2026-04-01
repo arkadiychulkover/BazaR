@@ -6,7 +6,7 @@
     var rawTotal = Model.Where(i => cart.ContainsKey(i.Id)).Sum(i => i.Price * cart[i.Id]);
     var totalQty = cart.Values.Sum();
     var user = ViewBag.User as BazaR.Models.User;
-    var lastName  = user?.LastName  ?? (user?.Name?.Split(' ') is { Length: > 1 } p ? p[1] : "");
+    var lastName = user?.LastName ?? (user?.Name?.Split(' ') is { Length: > 1 } p ? p[1] : "");
     var firstName = user?.FirstName ?? (user?.Name?.Split(' ') is { Length: > 0 } p2 ? p2[0] : "");
     var patronymic = user?.Patronymic ?? "";
 
@@ -74,7 +74,7 @@
     .co-tab:not(.active):hover { background: #e5e5e5; }
     .co-field { margin-bottom: 14px; }
     .co-field label { display: block; font-size: 13px; font-weight: 500; color: #555; margin-bottom: 6px; }
-    .co-field input[type=text], .co-field input[type=tel], .co-field input[type=email] { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+    .co-field input[type=text], .co-field input[type=tel], .co-field input[type=email], .co-field input[type=number] { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
     .co-field input:focus { outline: none; border-color: #7ab800; box-shadow: 0 0 0 2px rgba(122,184,0,.2); }
     .co-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .co-field-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
@@ -285,7 +285,7 @@
                         </div>
 
                         <label class="co-delivery-opt" onclick="showPickupModal('bazar')">
-                            <input type="radio" name="deliveryMethod" value="Самовивіз BAZA-R" class="co-radio" id="delivBazar" checked onclick="event.stopPropagation(); showPickupModal('bazar')"/>
+                            <input type="radio" name="deliveryMethod" value="Самовивіз BAZA-R" class="co-radio" id="delivBazar" checked onclick="event.stopPropagation(); showPickupModal('bazar')" />
                             <div class="co-opt__body">
                                 <div class="co-opt__text">Самовивіз з точок видачі BAZA-R</div>
                                 <div class="co-opt__sub">Забрати завтра з 12:00</div>
@@ -378,11 +378,35 @@
                             <div class="co-promo-msg" id="promoMsg"></div>
                         </div>
                     </div>
-
-                    <!-- 6. Контактні дані отримувача -->
+                    <!-- 6. Бонуси -->
                     <div class="co-card">
                         <div class="co-card__title">
-                            <span class="co-num">6</span> Контактні дані отримувача замовлення
+                            <span class="co-num">6</span> Використати бонуси
+                        </div>
+
+                        <div class="co-field">
+                            <label>Скільки бонусів використати</label>
+                            <input type="number" name="bonusToUse" id="bonusToUseInput" min="0" max="@ViewBag.BonusBalance" value="0" placeholder="Введіть кількість бонусів" />
+
+                            <small style="color:#6B7280; font-size:11px;">10 бонусів = 1₴ знижки</small>
+
+                            <p style="margin-top:6px; font-size:13px; color:#444;">
+                                Ваш баланс: <strong>@ViewBag.BonusBalance</strong> бонусів
+                            </p>
+
+                            <p style="margin-top:6px; font-size:13px; color:#444;">
+                                Використано бонусів: <strong id="bonusUsedText">0</strong>
+                            </p>
+                        </div>
+
+                        <button type="button" class="co-promo-apply" onclick="calculateBonusDiscount()">
+                            Розрахувати знижку
+                        </button>
+                    </div>
+                    <!-- 7. Контактні дані отримувача -->
+                    <div class="co-card">
+                        <div class="co-card__title">
+                            <span class="co-num">7</span> Контактні дані отримувача замовлення
                         </div>
                         <div class="co-field-row">
                             <div class="co-field">
@@ -431,6 +455,10 @@
                                 <span>Знижка за промокодом</span>
                                 <span id="sidebarDiscount">-0₴</span>
                             </div>
+                            <div class="co-total__discount" id="bonusResultBox" style="display:none;">
+                                <span>Знижка бонусами</span>
+                                <span id="bonusDiscountText">-0₴</span>
+                            </div>
                             <div class="co-total__row">
                                 <span>Вартість доставки</span>
                                 <span style="color:#7ab800; font-weight:600;">Безкоштовно</span>
@@ -446,7 +474,7 @@
                             Підтверджуючи замовлення, я приймаю умови:
                             <ul>
                                 <li><i class="bi bi-info-circle"></i> положення про обробку і захист персональних даних</li>
-                                <li><i class="bi bi-info-circle"></i> угоди користувача</li>
+                                <li><i class="bi bi-info-circle"></i> <a asp-controller="Site" asp-action="Privacy">угодою користувача</a></li>
                             </ul>
                         </div>
                     </div>
@@ -523,443 +551,569 @@
 </div>
 
 @section Scripts {
-<script>
-    // ---- Tab switching ----
-    document.querySelectorAll('.co-tab').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            document.querySelectorAll('.co-tab').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
+    <script>
+        // ---- Tab switching ----
+        document.querySelectorAll('.co-tab').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.co-tab').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
         });
-    });
 
-    // ---- Copy contact data ----
-    function copyContactData() {
-        document.getElementById('recipLastName').value   = document.getElementById('lastNameField').value;
-        document.getElementById('recipFirstName').value  = document.getElementById('firstNameField').value;
-        document.getElementById('recipPatronymic').value = document.getElementById('patronymicField').value;
-        document.getElementById('recipPhone').value      = document.getElementById('phoneField').value;
-    }
-
-    // ---- Promo code ----
-    var currentDiscount = 0;
-    var rawTotal = @rawTotal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
-
-    function togglePromoInput() {
-        var wrap = document.getElementById('promoInputWrap');
-        wrap.classList.toggle('visible');
-        var btn = document.getElementById('promoToggleBtn');
-        btn.textContent = wrap.classList.contains('visible') ? '− Закрити' : '+ Додати';
-    }
-
-    function applyPromo() {
-        var code = document.getElementById('promoCodeInput').value.trim();
-        if (!code) return;
-
-        $.ajax({
-            url: '@Url.Action("ValidatePromo", "Site")',
-            type: 'POST',
-            data: {
-                code: code,
-                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
-            },
-            success: function (r) {
-                var msgEl = document.getElementById('promoMsg');
-                if (r.valid) {
-                    currentDiscount = r.discount;
-                    document.getElementById('hiddenPromoCode').value = code;
-                    msgEl.textContent = r.message;
-                    msgEl.className = 'co-promo-msg ok';
-                    updateSidebarTotal();
-                } else {
-                    currentDiscount = 0;
-                    document.getElementById('hiddenPromoCode').value = '';
-                    msgEl.textContent = r.message;
-                    msgEl.className = 'co-promo-msg err';
-                    updateSidebarTotal();
-                }
-            }
-        });
-    }
-
-    function updateSidebarTotal() {
-        var discountRow = document.getElementById('sidebarDiscountRow');
-        var discountEl = document.getElementById('sidebarDiscount');
-        var finalEl = document.getElementById('sidebarFinalTotal');
-
-        if (currentDiscount > 0) {
-            discountRow.style.display = 'flex';
-            discountEl.textContent = '-' + formatNum(currentDiscount) + '₴';
-            finalEl.textContent = formatNum(Math.max(0, rawTotal - currentDiscount)) + '₴';
-        } else {
-            discountRow.style.display = 'none';
-            finalEl.textContent = formatNum(rawTotal) + '₴';
+        // ---- Copy contact data ----
+        function copyContactData() {
+            document.getElementById('recipLastName').value   = document.getElementById('lastNameField').value;
+            document.getElementById('recipFirstName').value  = document.getElementById('firstNameField').value;
+            document.getElementById('recipPatronymic').value = document.getElementById('patronymicField').value;
+            document.getElementById('recipPhone').value      = document.getElementById('phoneField').value;
         }
-    }
 
-    function formatNum(n) {
-        return Math.round(n).toLocaleString('uk-UA');
-    }
+        // ---- Promo code ----
+        var currentDiscount = 0;
+        var rawTotal = @rawTotal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
 
-    // ---- Місто доставки (верхній рядок) + модалка пунктів ----
-    var cityRegionMap = {
-        'Київ': 'Київська обл.',
-        'Харків': 'Харківська обл.',
-        'Одеса': 'Одеська обл.',
-        'Дніпро': 'Дніпропетровська обл.',
-        'Львів': 'Львівська обл.',
-        'Запоріжжя': 'Запорізька обл.',
-        'Кривий Ріг': 'Дніпропетровська обл.',
-        'Миколаїв': 'Миколаївська обл.',
-        'Вінниця': 'Вінницька обл.',
-        'Полтава': 'Полтавська обл.',
-        'Чернігів': 'Чернігівська обл.'
-    };
+        function togglePromoInput() {
+            var wrap = document.getElementById('promoInputWrap');
+            wrap.classList.toggle('visible');
+            var btn = document.getElementById('promoToggleBtn');
+            btn.textContent = wrap.classList.contains('visible') ? '− Закрити' : '+ Додати';
+        }
 
-    var currentDeliveryType = 'bazar';
-    var selectedPostOperator = null;
-    var selectedPointId = null;
-    var selectedPointName = '';
-    var selectedPointAddr = '';
-    var savedBazarPoint = null;
-    var savedPostPoint = null;
+        function applyPromo() {
+            var code = document.getElementById('promoCodeInput').value.trim();
+            if (!code) return;
 
-    function getCheckoutCity() {
-        return (document.getElementById('hiddenDeliveryCity').value || '').trim();
-    }
+            $.ajax({
+                url: '@Url.Action("ValidatePromo", "Site")',
+                type: 'POST',
+                data: {
+                    code: code,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
+                },
+                success: function (r) {
+                    var msgEl = document.getElementById('promoMsg');
+                    if (r.valid) {
+                        currentDiscount = r.discount;
+                        document.getElementById('hiddenPromoCode').value = code;
+                        msgEl.textContent = r.message;
+                        msgEl.className = 'co-promo-msg ok';
+                        updateSidebarTotal();
+                    } else {
+                        currentDiscount = 0;
+                        document.getElementById('hiddenPromoCode').value = '';
+                        msgEl.textContent = r.message;
+                        msgEl.className = 'co-promo-msg err';
+                        updateSidebarTotal();
+                    }
+                }
+            });
+        }
 
-    function pickupEscapeHtml(s) {
-        var d = document.createElement('div');
-        d.textContent = s;
-        return d.innerHTML;
-    }
+        function updateSidebarTotal() {
+            var discountRow = document.getElementById('sidebarDiscountRow');
+            var discountEl = document.getElementById('sidebarDiscount');
+            var finalEl = document.getElementById('sidebarFinalTotal');
 
-    function pickupCityComparator(a, b) {
-        if (a === 'Київ') return -1;
-        if (b === 'Київ') return 1;
-        return a.localeCompare(b, 'uk');
-    }
+            if (currentDiscount > 0) {
+                discountRow.style.display = 'flex';
+                discountEl.textContent = '-' + formatNum(currentDiscount) + '₴';
+                finalEl.textContent = formatNum(Math.max(0, rawTotal - currentDiscount)) + '₴';
+            } else {
+                discountRow.style.display = 'none';
+                finalEl.textContent = formatNum(rawTotal) + '₴';
+            }
+        }
 
-    function pickupHideAllPoints() {
-        document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (el) {
-            el.style.display = 'none';
-        });
-    }
+        function formatNum(n) {
+            return Math.round(n).toLocaleString('uk-UA');
+        }
 
-    function setCheckoutCityUi(city) {
-        document.getElementById('hiddenDeliveryCity').value = city;
-        document.getElementById('checkoutCityName').textContent = city;
-        document.getElementById('checkoutCityRegion').textContent = cityRegionMap[city] || '';
-        var reg = cityRegionMap[city] || '';
-        document.getElementById('addressField').value = 'м. ' + city + (reg ? ', ' + reg : '');
-    }
+        // ---- Місто доставки (верхній рядок) + модалка пунктів ----
+        var cityRegionMap = {
+            'Київ': 'Київська обл.',
+            'Харків': 'Харківська обл.',
+            'Одеса': 'Одеська обл.',
+            'Дніпро': 'Дніпропетровська обл.',
+            'Львів': 'Львівська обл.',
+            'Запоріжжя': 'Запорізька обл.',
+            'Кривий Ріг': 'Дніпропетровська обл.',
+            'Миколаїв': 'Миколаївська обл.',
+            'Вінниця': 'Вінницька обл.',
+            'Полтава': 'Полтавська обл.',
+            'Чернігів': 'Чернігівська обл.'
+        };
 
-    function clearPickupSelectionForMismatch() {
-        document.getElementById('hiddenBazarPickupPointId').value = '';
-        document.getElementById('hiddenPostPickupPointId').value = '';
-        savedBazarPoint = null;
-        savedPostPoint = null;
-        var b = document.getElementById('selectedPointBazar');
-        var p = document.getElementById('selectedPointPost');
-        if (b) { b.textContent = ''; b.style.display = 'none'; }
-        if (p) { p.textContent = ''; p.style.display = 'none'; }
-    }
+        var currentDeliveryType = 'bazar';
+        var selectedPostOperator = null;
+        var selectedPointId = null;
+        var selectedPointName = '';
+        var selectedPointAddr = '';
+        var savedBazarPoint = null;
+        var savedPostPoint = null;
 
-    function onCheckoutCityChanged(city) {
-        var prev = getCheckoutCity();
-        if (prev === city) return;
-        setCheckoutCityUi(city);
-        clearPickupSelectionForMismatch();
-    }
+        function getCheckoutCity() {
+            return (document.getElementById('hiddenDeliveryCity').value || '').trim();
+        }
 
-    function collectAllCities() {
-        var set = {};
-        document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (el) {
-            var c = el.dataset.city;
-            if (c) set[c] = true;
-        });
-        return Object.keys(set).sort(pickupCityComparator);
-    }
+        function pickupEscapeHtml(s) {
+            var d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
 
-    function renderCheckoutCityList() {
-        var cities = collectAllCities();
-        var html = '';
-        cities.forEach(function (city) {
+        function pickupCityComparator(a, b) {
+            if (a === 'Київ') return -1;
+            if (b === 'Київ') return 1;
+            return a.localeCompare(b, 'uk');
+        }
+
+        function pickupHideAllPoints() {
+            document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (el) {
+                el.style.display = 'none';
+            });
+        }
+
+        function setCheckoutCityUi(city) {
+            document.getElementById('hiddenDeliveryCity').value = city;
+            document.getElementById('checkoutCityName').textContent = city;
+            document.getElementById('checkoutCityRegion').textContent = cityRegionMap[city] || '';
             var reg = cityRegionMap[city] || '';
-            html += '<div class="pickup-city-tile" role="button" tabindex="0" data-city="' + pickupEscapeHtml(city) + '" onclick="selectCheckoutCity(this.dataset.city)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectCheckoutCity(this.dataset.city);}">' +
-                '<i class="bi bi-geo-alt-fill"></i>' +
-                '<div class="pickup-city-tile__meta"><div class="pickup-city-tile__name">' + pickupEscapeHtml(city) + '</div><div class="pickup-city-tile__hint">' + pickupEscapeHtml(reg) + '</div></div>' +
-                '<i class="bi bi-chevron-right"></i></div>';
-        });
-        document.getElementById('checkoutCityList').innerHTML = html;
-    }
-
-    function openCheckoutCityPicker() {
-        renderCheckoutCityList();
-        document.getElementById('cityPickerOverlay').classList.add('show');
-    }
-
-    function closeCityPicker(e) {
-        if (!e || e.target === document.getElementById('cityPickerOverlay')) {
-            document.getElementById('cityPickerOverlay').classList.remove('show');
-        }
-    }
-
-    function selectCheckoutCity(city) {
-        onCheckoutCityChanged(city);
-        closeCityPicker();
-    }
-
-    function showPickupPanels(operator, branch) {
-        var op = document.getElementById('pickupOperatorPanel');
-        var br = document.getElementById('pickupBranchPanel');
-        op.classList.toggle('pickup-panel-hidden', !operator);
-        br.classList.toggle('pickup-panel-hidden', !branch);
-    }
-
-    function showBazarBranchStep() {
-        var city = getCheckoutCity();
-        currentDeliveryType = 'bazar';
-        selectedPostOperator = null;
-        document.getElementById('pickupModalTitle').textContent = 'Самовивіз BAZA-R — ' + city;
-        showPickupPanels(false, true);
-        document.getElementById('pickupConfirmBtn').style.display = 'block';
-        document.getElementById('pickupBranchBackLabel').textContent = 'Закрити';
-        document.getElementById('pickupBranchBackBtn').onclick = function () { closePickupModal(); };
-
-        document.getElementById('pickupBranchLead').textContent = 'Оберіть точку видачі у м. ' + city;
-        pickupHideAllPoints();
-        document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (el) {
-            el.classList.remove('selected');
-            var show = el.dataset.kind === 'bazar' && el.dataset.city === city;
-            el.style.display = show ? 'block' : 'none';
-        });
-
-        var n = document.querySelectorAll('#pickupPointsList .pickup-point[data-kind="bazar"][data-city="' + city + '"]').length;
-        if (n === 0) {
-            document.getElementById('pickupBranchLead').textContent = 'У м. ' + city + ' наразі немає точок BAZA-R.';
+            document.getElementById('addressField').value = 'м. ' + city + (reg ? ', ' + reg : '');
         }
 
-        selectedPointId = null;
-        selectedPointName = '';
-        selectedPointAddr = '';
+        function clearPickupSelectionForMismatch() {
+            document.getElementById('hiddenBazarPickupPointId').value = '';
+            document.getElementById('hiddenPostPickupPointId').value = '';
+            savedBazarPoint = null;
+            savedPostPoint = null;
+            var b = document.getElementById('selectedPointBazar');
+            var p = document.getElementById('selectedPointPost');
+            if (b) { b.textContent = ''; b.style.display = 'none'; }
+            if (p) { p.textContent = ''; p.style.display = 'none'; }
+        }
 
-        if (savedBazarPoint && savedBazarPoint.id && savedBazarPoint.city === city) {
+        function onCheckoutCityChanged(city) {
+            var prev = getCheckoutCity();
+            if (prev === city) return;
+            setCheckoutCityUi(city);
+            clearPickupSelectionForMismatch();
+        }
+
+        function collectAllCities() {
+            var set = {};
             document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (el) {
-                if (el.style.display !== 'block') return;
-                if (String(el.dataset.id) === String(savedBazarPoint.id)) {
-                    el.classList.add('selected');
-                    selectedPointId = el.dataset.id;
-                    selectedPointName = el.dataset.name;
-                    selectedPointAddr = el.dataset.addr;
-                }
+                var c = el.dataset.city;
+                if (c) set[c] = true;
             });
-        }
-    }
-
-    function showPostOperatorStep() {
-        var city = getCheckoutCity();
-        currentDeliveryType = 'post';
-        selectedPostOperator = null;
-        document.getElementById('pickupModalTitle').textContent = 'Відділення пошти — ' + city;
-        document.getElementById('pickupOperatorLead').textContent = 'Оберіть оператора — далі відділення у м. ' + city + '.';
-        showPickupPanels(true, false);
-        document.getElementById('pickupConfirmBtn').style.display = 'none';
-        pickupHideAllPoints();
-        document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (p) { p.classList.remove('selected'); });
-        selectedPointId = null;
-        selectedPointName = '';
-        selectedPointAddr = '';
-    }
-
-    function pickupSelectOperator(op) {
-        var city = getCheckoutCity();
-        selectedPostOperator = op;
-        showPickupPanels(false, true);
-        document.getElementById('pickupConfirmBtn').style.display = 'block';
-        document.getElementById('pickupBranchBackLabel').textContent = 'До вибору оператора';
-        document.getElementById('pickupBranchBackBtn').onclick = function () { pickupBranchBack(); };
-
-        var opName = op === 'np' ? 'Нова пошта' : 'Укрпошта';
-        document.getElementById('pickupBranchLead').textContent = opName + ', м. ' + city + ' — оберіть відділення';
-
-        pickupHideAllPoints();
-        document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (el) {
-            el.classList.remove('selected');
-            var show = el.dataset.kind === 'post' && el.dataset.city === city && el.dataset.operator === op;
-            el.style.display = show ? 'block' : 'none';
-        });
-
-        var cnt = document.querySelectorAll('#pickupPointsList .pickup-point[data-kind="post"][data-city="' + city + '"][data-operator="' + op + '"]').length;
-        if (cnt === 0) {
-            document.getElementById('pickupBranchLead').textContent = 'Немає відділень ' + opName + ' у м. ' + city + '.';
+            return Object.keys(set).sort(pickupCityComparator);
         }
 
-        if (savedPostPoint && savedPostPoint.id && savedPostPoint.city === city && savedPostPoint.operator === op) {
+        function renderCheckoutCityList() {
+            var cities = collectAllCities();
+            var html = '';
+            cities.forEach(function (city) {
+                var reg = cityRegionMap[city] || '';
+                html += '<div class="pickup-city-tile" role="button" tabindex="0" data-city="' + pickupEscapeHtml(city) + '" onclick="selectCheckoutCity(this.dataset.city)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectCheckoutCity(this.dataset.city);}">' +
+                    '<i class="bi bi-geo-alt-fill"></i>' +
+                    '<div class="pickup-city-tile__meta"><div class="pickup-city-tile__name">' + pickupEscapeHtml(city) + '</div><div class="pickup-city-tile__hint">' + pickupEscapeHtml(reg) + '</div></div>' +
+                    '<i class="bi bi-chevron-right"></i></div>';
+            });
+            document.getElementById('checkoutCityList').innerHTML = html;
+        }
+
+        function openCheckoutCityPicker() {
+            renderCheckoutCityList();
+            document.getElementById('cityPickerOverlay').classList.add('show');
+        }
+
+        function closeCityPicker(e) {
+            if (!e || e.target === document.getElementById('cityPickerOverlay')) {
+                document.getElementById('cityPickerOverlay').classList.remove('show');
+            }
+        }
+
+        function selectCheckoutCity(city) {
+            onCheckoutCityChanged(city);
+            closeCityPicker();
+        }
+
+        function showPickupPanels(operator, branch) {
+            var op = document.getElementById('pickupOperatorPanel');
+            var br = document.getElementById('pickupBranchPanel');
+            op.classList.toggle('pickup-panel-hidden', !operator);
+            br.classList.toggle('pickup-panel-hidden', !branch);
+        }
+
+        function showBazarBranchStep() {
+            var city = getCheckoutCity();
+            currentDeliveryType = 'bazar';
+            selectedPostOperator = null;
+            document.getElementById('pickupModalTitle').textContent = 'Самовивіз BAZA-R — ' + city;
+            showPickupPanels(false, true);
+            document.getElementById('pickupConfirmBtn').style.display = 'block';
+            document.getElementById('pickupBranchBackLabel').textContent = 'Закрити';
+            document.getElementById('pickupBranchBackBtn').onclick = function () { closePickupModal(); };
+
+            document.getElementById('pickupBranchLead').textContent = 'Оберіть точку видачі у м. ' + city;
+            pickupHideAllPoints();
             document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (el) {
-                if (el.style.display !== 'block') return;
-                if (String(el.dataset.id) === String(savedPostPoint.id)) {
-                    el.classList.add('selected');
-                    selectedPointId = el.dataset.id;
-                    selectedPointName = el.dataset.name;
-                    selectedPointAddr = el.dataset.addr;
-                }
+                el.classList.remove('selected');
+                var show = el.dataset.kind === 'bazar' && el.dataset.city === city;
+                el.style.display = show ? 'block' : 'none';
             });
-        }
-    }
 
-    function pickupBranchBack() {
-        if (currentDeliveryType === 'post' && document.getElementById('pickupBranchPanel') && !document.getElementById('pickupBranchPanel').classList.contains('pickup-panel-hidden')) {
-            showPostOperatorStep();
-        }
-    }
+            var n = document.querySelectorAll('#pickupPointsList .pickup-point[data-kind="bazar"][data-city="' + city + '"]').length;
+            if (n === 0) {
+                document.getElementById('pickupBranchLead').textContent = 'У м. ' + city + ' наразі немає точок BAZA-R.';
+            }
 
-    function tryOpenSavedPostModal() {
-        if (!savedPostPoint || !savedPostPoint.id || !savedPostPoint.operator || savedPostPoint.city !== getCheckoutCity()) return false;
-        pickupSelectOperator(savedPostPoint.operator);
-        return true;
-    }
+            selectedPointId = null;
+            selectedPointName = '';
+            selectedPointAddr = '';
 
-    function showPickupModal(type) {
-        var city = getCheckoutCity();
-        if (!city) {
-            alert('Спочатку оберіть місто доставки (блок зверху).');
-            openCheckoutCityPicker();
-            return;
-        }
-
-        document.getElementById('pickupOverlay').classList.add('show');
-
-        if (type === 'bazar') {
-            showBazarBranchStep();
-            return;
+            if (savedBazarPoint && savedBazarPoint.id && savedBazarPoint.city === city) {
+                document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (el) {
+                    if (el.style.display !== 'block') return;
+                    if (String(el.dataset.id) === String(savedBazarPoint.id)) {
+                        el.classList.add('selected');
+                        selectedPointId = el.dataset.id;
+                        selectedPointName = el.dataset.name;
+                        selectedPointAddr = el.dataset.addr;
+                    }
+                });
+            }
         }
 
-        if (type === 'post') {
-            if (savedPostPoint && savedPostPoint.id && savedPostPoint.city === city && tryOpenSavedPostModal()) {
+        function showPostOperatorStep() {
+            var city = getCheckoutCity();
+            currentDeliveryType = 'post';
+            selectedPostOperator = null;
+            document.getElementById('pickupModalTitle').textContent = 'Відділення пошти — ' + city;
+            document.getElementById('pickupOperatorLead').textContent = 'Оберіть оператора — далі відділення у м. ' + city + '.';
+            showPickupPanels(true, false);
+            document.getElementById('pickupConfirmBtn').style.display = 'none';
+            pickupHideAllPoints();
+            document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (p) { p.classList.remove('selected'); });
+            selectedPointId = null;
+            selectedPointName = '';
+            selectedPointAddr = '';
+        }
+
+        function pickupSelectOperator(op) {
+            var city = getCheckoutCity();
+            selectedPostOperator = op;
+            showPickupPanels(false, true);
+            document.getElementById('pickupConfirmBtn').style.display = 'block';
+            document.getElementById('pickupBranchBackLabel').textContent = 'До вибору оператора';
+            document.getElementById('pickupBranchBackBtn').onclick = function () { pickupBranchBack(); };
+
+            var opName = op === 'np' ? 'Нова пошта' : 'Укрпошта';
+            document.getElementById('pickupBranchLead').textContent = opName + ', м. ' + city + ' — оберіть відділення';
+
+            pickupHideAllPoints();
+            document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (el) {
+                el.classList.remove('selected');
+                var show = el.dataset.kind === 'post' && el.dataset.city === city && el.dataset.operator === op;
+                el.style.display = show ? 'block' : 'none';
+            });
+
+            var cnt = document.querySelectorAll('#pickupPointsList .pickup-point[data-kind="post"][data-city="' + city + '"][data-operator="' + op + '"]').length;
+            if (cnt === 0) {
+                document.getElementById('pickupBranchLead').textContent = 'Немає відділень ' + opName + ' у м. ' + city + '.';
+            }
+
+            if (savedPostPoint && savedPostPoint.id && savedPostPoint.city === city && savedPostPoint.operator === op) {
+                document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (el) {
+                    if (el.style.display !== 'block') return;
+                    if (String(el.dataset.id) === String(savedPostPoint.id)) {
+                        el.classList.add('selected');
+                        selectedPointId = el.dataset.id;
+                        selectedPointName = el.dataset.name;
+                        selectedPointAddr = el.dataset.addr;
+                    }
+                });
+            }
+        }
+
+        function pickupBranchBack() {
+            if (currentDeliveryType === 'post' && document.getElementById('pickupBranchPanel') && !document.getElementById('pickupBranchPanel').classList.contains('pickup-panel-hidden')) {
+                showPostOperatorStep();
+            }
+        }
+
+        function tryOpenSavedPostModal() {
+            if (!savedPostPoint || !savedPostPoint.id || !savedPostPoint.operator || savedPostPoint.city !== getCheckoutCity()) return false;
+            pickupSelectOperator(savedPostPoint.operator);
+            return true;
+        }
+
+        function showPickupModal(type) {
+            var city = getCheckoutCity();
+            if (!city) {
+                alert('Спочатку оберіть місто доставки (блок зверху).');
+                openCheckoutCityPicker();
                 return;
             }
-            showPostOperatorStep();
-        }
-    }
 
-    function closePickupModal(e) {
-        if (!e || e.target === document.getElementById('pickupOverlay')) {
-            document.getElementById('pickupOverlay').classList.remove('show');
-        }
-    }
+            document.getElementById('pickupOverlay').classList.add('show');
 
-    function selectPickupPoint(el) {
-        if (el.style.display === 'none') return;
-        document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (p) {
-            if (p.style.display === 'block') p.classList.remove('selected');
+            if (type === 'bazar') {
+                showBazarBranchStep();
+                return;
+            }
+
+            if (type === 'post') {
+                if (savedPostPoint && savedPostPoint.id && savedPostPoint.city === city && tryOpenSavedPostModal()) {
+                    return;
+                }
+                showPostOperatorStep();
+            }
+        }
+
+        function closePickupModal(e) {
+            if (!e || e.target === document.getElementById('pickupOverlay')) {
+                document.getElementById('pickupOverlay').classList.remove('show');
+            }
+        }
+
+        function selectPickupPoint(el) {
+            if (el.style.display === 'none') return;
+            document.querySelectorAll('#pickupPointsList .pickup-point').forEach(function (p) {
+                if (p.style.display === 'block') p.classList.remove('selected');
+            });
+            el.classList.add('selected');
+            selectedPointId = el.dataset.id;
+            selectedPointName = el.dataset.name;
+            selectedPointAddr = el.dataset.addr;
+        }
+
+        function confirmPickupPoint() {
+            if (!selectedPointId) {
+                alert('Будь ласка, оберіть пункт видачі.');
+                return;
+            }
+
+            var display = selectedPointName + ' — ' + selectedPointAddr;
+            var infoEl, radioEl;
+            var city = getCheckoutCity();
+
+            if (currentDeliveryType === 'bazar') {
+                savedBazarPoint = { id: selectedPointId, name: selectedPointName, addr: selectedPointAddr, city: city };
+                infoEl = document.getElementById('selectedPointBazar');
+                radioEl = document.getElementById('delivBazar');
+            } else {
+                savedPostPoint = {
+                    id: selectedPointId,
+                    name: selectedPointName,
+                    addr: selectedPointAddr,
+                    city: city,
+                    operator: selectedPostOperator || ''
+                };
+                infoEl = document.getElementById('selectedPointPost');
+                radioEl = document.getElementById('delivPost');
+            }
+
+            infoEl.textContent = '📍 ' + display;
+            infoEl.style.display = 'block';
+            radioEl.checked = true;
+
+            document.getElementById('addressField').value = 'м. ' + city + ' — ' + selectedPointAddr + ', ' + selectedPointName;
+
+            if (currentDeliveryType === 'bazar') {
+                document.getElementById('hiddenBazarPickupPointId').value = selectedPointId;
+            } else {
+                document.getElementById('hiddenPostPickupPointId').value = selectedPointId;
+            }
+
+            closePickupModal();
+        }
+
+        function updateCourierAddressVisibility() {
+            var r = document.querySelector('input[name="deliveryMethod"]:checked');
+            var block = document.getElementById('courierAddressBlock');
+            if (!r || !block) return;
+            block.style.display = r.value === "Кур'єр" ? 'block' : 'none';
+        }
+
+        document.querySelectorAll('input[name="deliveryMethod"]').forEach(function (radio) {
+            radio.addEventListener('change', updateCourierAddressVisibility);
         });
-        el.classList.add('selected');
-        selectedPointId = el.dataset.id;
-        selectedPointName = el.dataset.name;
-        selectedPointAddr = el.dataset.addr;
-    }
+        updateCourierAddressVisibility();
 
-    function confirmPickupPoint() {
-        if (!selectedPointId) {
-            alert('Будь ласка, оберіть пункт видачі.');
-            return;
-        }
-
-        var display = selectedPointName + ' — ' + selectedPointAddr;
-        var infoEl, radioEl;
-        var city = getCheckoutCity();
-
-        if (currentDeliveryType === 'bazar') {
-            savedBazarPoint = { id: selectedPointId, name: selectedPointName, addr: selectedPointAddr, city: city };
-            infoEl = document.getElementById('selectedPointBazar');
-            radioEl = document.getElementById('delivBazar');
-        } else {
-            savedPostPoint = {
-                id: selectedPointId,
-                name: selectedPointName,
-                addr: selectedPointAddr,
-                city: city,
-                operator: selectedPostOperator || ''
-            };
-            infoEl = document.getElementById('selectedPointPost');
-            radioEl = document.getElementById('delivPost');
-        }
-
-        infoEl.textContent = '📍 ' + display;
-        infoEl.style.display = 'block';
-        radioEl.checked = true;
-
-        document.getElementById('addressField').value = 'м. ' + city + ' — ' + selectedPointAddr + ', ' + selectedPointName;
-
-        if (currentDeliveryType === 'bazar') {
-            document.getElementById('hiddenBazarPickupPointId').value = selectedPointId;
-        } else {
-            document.getElementById('hiddenPostPickupPointId').value = selectedPointId;
-        }
-
-        closePickupModal();
-    }
-
-    function updateCourierAddressVisibility() {
-        var r = document.querySelector('input[name="deliveryMethod"]:checked');
-        var block = document.getElementById('courierAddressBlock');
-        if (!r || !block) return;
-        block.style.display = r.value === "Кур'єр" ? 'block' : 'none';
-    }
-
-    document.querySelectorAll('input[name="deliveryMethod"]').forEach(function (radio) {
-        radio.addEventListener('change', updateCourierAddressVisibility);
-    });
-    updateCourierAddressVisibility();
-
-    document.getElementById('checkoutForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        var form = e.target;
-        var deliv = form.querySelector('input[name="deliveryMethod"]:checked');
-        if (!deliv) {
-            alert('Оберіть спосіб доставки.');
-            return;
-        }
-        var v = deliv.value;
-
-        if (v === "Кур'єр") {
-            var ca = document.getElementById('courierAddressField').value.trim();
-            if (ca.length < 8) {
-                alert('Вкажіть повну адресу доставки кур\'єром (місто, вулиця, будинок).');
-                document.getElementById('courierAddressField').focus();
+        document.getElementById('checkoutForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var form = e.target;
+            var deliv = form.querySelector('input[name="deliveryMethod"]:checked');
+            if (!deliv) {
+                alert('Оберіть спосіб доставки.');
                 return;
             }
-            document.getElementById('addressField').value = ca;
-        }
-        if (v === "Самовивіз BAZA-R") {
-            if (!document.getElementById('hiddenBazarPickupPointId').value) {
-                alert('Оберіть місто та точку самовивозу BAZA-R.');
-                deliv.closest('.co-delivery-opt') && deliv.closest('.co-delivery-opt').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            var v = deliv.value;
+
+            if (v === "Кур'єр") {
+                var ca = document.getElementById('courierAddressField').value.trim();
+                if (ca.length < 8) {
+                    alert('Вкажіть повну адресу доставки кур\'єром (місто, вулиця, будинок).');
+                    document.getElementById('courierAddressField').focus();
+                    return;
+                }
+                document.getElementById('addressField').value = ca;
+            }
+            if (v === "Самовивіз BAZA-R") {
+                if (!document.getElementById('hiddenBazarPickupPointId').value) {
+                    alert('Оберіть місто та точку самовивозу BAZA-R.');
+                    deliv.closest('.co-delivery-opt') && deliv.closest('.co-delivery-opt').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+            }
+            if (v === "Відділення пошти") {
+                if (!document.getElementById('hiddenPostPickupPointId').value) {
+                    alert('Оберіть місто та відділення пошти.');
+                    deliv.closest('.co-delivery-opt') && deliv.closest('.co-delivery-opt').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+            }
+
+            if (!form.checkValidity()) {
+                form.reportValidity();
                 return;
             }
+
+            HTMLFormElement.prototype.submit.call(form);
+        });
+
+        // Ensure clicking the delivery label with "Кур'єр" doesn't open modal
+        document.querySelectorAll('.co-delivery-opt').forEach(function(lbl) {
+            var radio = lbl.querySelector('input[type=radio]');
+            if (radio && radio.value === "Кур'єр") {
+                lbl.onclick = null;
+            }
+        });
+        // Суми на сторінці — цілі гривні. Не використовувати comma→dot (інакше «2,500₴» → 2.5 → «3₴»).
+        function parsePrice(text) {
+            if (!text) return 0;
+            var s = String(text).replace(/₴/g, "").trim();
+            var digits = s.replace(/[^\d]/g, "");
+            if (!digits) return 0;
+            return parseInt(digits, 10) || 0;
         }
-        if (v === "Відділення пошти") {
-            if (!document.getElementById('hiddenPostPickupPointId').value) {
-                alert('Оберіть місто та відділення пошти.');
-                deliv.closest('.co-delivery-opt') && deliv.closest('.co-delivery-opt').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        function formatPrice(value) {
+            return `${Math.max(0, value).toFixed(0)}₴`;
+        }
+
+        function recalculateCheckoutTotal() {
+            const rawTotalEl = document.getElementById("sidebarRawTotal");
+            const promoDiscountEl = document.getElementById("sidebarDiscount");
+            const promoDiscountRow = document.getElementById("sidebarDiscountRow");
+            const bonusDiscountEl = document.getElementById("bonusDiscountText");
+            const bonusDiscountRow = document.getElementById("bonusResultBox");
+            const finalTotalEl = document.getElementById("sidebarFinalTotal");
+
+            if (!rawTotalEl || !finalTotalEl) {
+                console.error("Не знайдено елементи підсумку замовлення.");
                 return;
+            }
+
+            const rawTotal = parsePrice(rawTotalEl.textContent);
+
+            let promoDiscount = 0;
+            if (promoDiscountRow && promoDiscountEl) {
+                const promoVisible =
+                    promoDiscountRow.style.display !== "none" &&
+                    getComputedStyle(promoDiscountRow).display !== "none";
+
+                if (promoVisible) {
+                    promoDiscount = Math.abs(parsePrice(promoDiscountEl.textContent));
+                }
+            }
+
+            let bonusDiscount = 0;
+            if (bonusDiscountRow && bonusDiscountEl) {
+                const bonusVisible =
+                    bonusDiscountRow.style.display !== "none" &&
+                    getComputedStyle(bonusDiscountRow).display !== "none";
+
+                if (bonusVisible) {
+                    bonusDiscount = Math.abs(parsePrice(bonusDiscountEl.textContent));
+                }
+            }
+
+            const finalTotal = rawTotal - promoDiscount - bonusDiscount;
+            finalTotalEl.textContent = formatPrice(finalTotal);
+        }
+
+        async function calculateBonusDiscount() {
+            const bonusInput = document.getElementById("bonusToUseInput");
+            const bonusResultBox = document.getElementById("bonusResultBox");
+            const bonusDiscountText = document.getElementById("bonusDiscountText");
+            const bonusUsedText = document.getElementById("bonusUsedText");
+
+            if (!bonusInput || !bonusResultBox || !bonusDiscountText) {
+                console.error("Не знайдено елементи бонусного блоку.");
+                return;
+            }
+
+            let bonusToUse = parseInt(bonusInput.value || "0", 10);
+            if (isNaN(bonusToUse) || bonusToUse < 0) {
+                bonusToUse = 0;
+            }
+
+            try {
+                const response = await fetch(`/Site/CalculateBonusDiscount?bonusToUse=${bonusToUse}`, {
+                    method: "GET",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.ok) {
+                    alert(data.message || "Не вдалося розрахувати бонусну знижку.");
+                    return;
+                }
+
+                bonusInput.value = data.bonusUsed;
+
+                if (bonusUsedText) {
+                    bonusUsedText.textContent = data.bonusUsed;
+                }
+
+                if (data.discount > 0) {
+                    bonusDiscountText.textContent = `-${data.discountText}`;
+                    bonusResultBox.style.display = "flex";
+                } else {
+                    bonusDiscountText.textContent = "-0₴";
+                    bonusResultBox.style.display = "none";
+                }
+
+                recalculateCheckoutTotal();
+            } catch (error) {
+                console.error("Помилка при розрахунку бонусів:", error);
+                alert("Помилка при розрахунку бонусів.");
             }
         }
 
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
+        document.addEventListener("DOMContentLoaded", function () {
+            recalculateCheckoutTotal();
 
-        HTMLFormElement.prototype.submit.call(form);
-    });
+            const bonusInput = document.getElementById("bonusToUseInput");
+            if (bonusInput) {
+                bonusInput.addEventListener("input", function () {
+                    let value = parseInt(this.value || "0", 10);
+                    const max = parseInt(this.max || "0", 10);
 
-    // Ensure clicking the delivery label with "Кур'єр" doesn't open modal
-    document.querySelectorAll('.co-delivery-opt').forEach(function(lbl) {
-        var radio = lbl.querySelector('input[type=radio]');
-        if (radio && radio.value === "Кур'єр") {
-            lbl.onclick = null;
-        }
-    });
-</script>
+                    if (isNaN(value) || value < 0) value = 0;
+                    if (!isNaN(max) && value > max) value = max;
+
+                    this.value = value;
+                });
+            }
+        });
+    </script>
 }

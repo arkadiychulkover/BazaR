@@ -96,7 +96,10 @@
         }
     </style>
 </head>
-<body>
+<body data-open-auth="@TempData["OpenAuth"]"
+    data-is-authenticated="@((User.Identity?.IsAuthenticated ?? false).ToString().ToLower())">
+    @await Html.PartialAsync("~/Views/Account/_Login.cshtml")
+    @await Html.PartialAsync("~/Views/Account/_Register.cshtml")
     @* Глобальний токен для AJAX-запитів (кошик, обране тощо) *@
     @Html.AntiForgeryToken()
 
@@ -125,7 +128,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
             <div class="container-fluid">
 
-                <button class="btn btn-dark border-0 me-2 d-flex align-items-center" id="sidebarOpen" type="button" aria-label="Відкрити меню" style="font-size:1.35rem;padding:4px 8px;">
+                <button class="btn btn-dark border-0 me-2 d-flex align-items-center" id="sidebarOpen" data-sidebar-open type="button" aria-label="Відкрити меню" style="font-size:1.35rem;padding:4px 8px;">
                     <i class="bi bi-list"></i>
                 </button>
 
@@ -173,25 +176,25 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person"></i>
-                                @if (ViewBag.User != null)
-                                {
-                                    <span>@ViewBag.User.Name</span>
+                                @{
+                                    var _displayName = ViewBag.User != null
+                                        ? ((string.IsNullOrWhiteSpace((string?)ViewBag.User.FirstName) && string.IsNullOrWhiteSpace((string?)ViewBag.User.LastName))
+                                            ? (string.IsNullOrWhiteSpace((string?)ViewBag.User.Name) ? "Профіль" : (string)ViewBag.User.Name)
+                                            : $"{ViewBag.User.FirstName} {ViewBag.User.LastName}".Trim())
+                                        : "Профіль";
                                 }
-                                else
-                                {
-                                    <span>Профіль</span>
-                                }
+                                <span>@_displayName</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 @if (ViewBag.User != null)
                                 {
                                     <li>
-                                        <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                                        <a class="dropdown-item" asp-controller="Profile" asp-action="Profile">
                                             <i class="bi bi-person-circle me-2"></i> Мій профіль
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" asp-controller="Site" asp-action="Orders">
+                                        <a class="dropdown-item" asp-controller="Profile" asp-action="Orders">
                                             <i class="bi bi-bag-check me-2"></i> Мої замовлення
                                         </a>
                                     </li>
@@ -199,7 +202,7 @@
                                     {
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
-                                            <a class="dropdown-item text-primary" asp-controller="Admin" asp-action="Dashboard">
+                                            <a class="dropdown-item text-primary" asp-controller="Admin" asp-action="Index">
                                                 <i class="bi bi-shield-lock me-2"></i> Адмін панель
                                             </a>
                                         </li>
@@ -217,14 +220,18 @@
                                 else
                                 {
                                     <li>
-                                        <a class="dropdown-item" href="javascript:void(0)" data-open-login="true">
+                                        <button type="button"
+                                        class="dropdown-item"
+                                        data-auth-open="login">
                                             <i class="bi bi-box-arrow-in-right me-2"></i> Увійти
-                                        </a>
+                                        </button>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="javascript:void(0)" data-open-register="true">
+                                        <button type="button"
+                                        class="dropdown-item"
+                                        data-auth-open="register">
                                             <i class="bi bi-person-plus me-2"></i> Реєстрація
-                                        </a>
+                                        </button>
                                     </li>
                                 }
                             </ul>
@@ -243,71 +250,10 @@
     </main>
 
     <!-- FOOTER -->
-    <footer>
-        <div class="container">
-            <div class="row">
+    @await Html.PartialAsync("_Footer")
 
-                <div class="col-md-4">
-                    <h5>BazaR</h5>
-                    <p>Інтернет-магазин електроніки, техніки та аксесуарів.</p>
-                    <div class="mt-3">
-                        <a href="#" class="text-white me-2"><i class="bi bi-facebook fs-5"></i></a>
-                        <a href="#" class="text-white me-2"><i class="bi bi-telegram fs-5"></i></a>
-                        <a href="#" class="text-white me-2"><i class="bi bi-instagram fs-5"></i></a>
-                        <a href="#" class="text-white"><i class="bi bi-youtube fs-5"></i></a>
-                    </div>
-                </div>
-
-                <div class="col-md-2">
-                    <h6>Інформація</h6>
-                    <ul class="list-unstyled">
-                        <li><a asp-controller="Site" asp-action="About">Про нас</a></li>
-                        <li><a asp-controller="Site" asp-action="Delivery">Доставка</a></li>
-                        <li><a asp-controller="Site" asp-action="Payment">Оплата</a></li>
-                        <li><a asp-controller="Site" asp-action="Contacts">Контакти</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-md-2">
-                    <h6>Покупцям</h6>
-                    <ul class="list-unstyled">
-                        <li><a asp-controller="Site" asp-action="HowToOrder">Як замовити</a></li>
-                        <li><a asp-controller="Site" asp-action="Warranty">Гарантія</a></li>
-                        <li><a asp-controller="Site" asp-action="Returns">Повернення</a></li>
-                        <li><a asp-controller="Site" asp-action="FAQ">FAQ</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-md-4">
-                    <h6>Контакти</h6>
-                    <p><i class="bi bi-telephone me-2"></i> 0-800-123-456</p>
-                    <p><i class="bi bi-envelope me-2"></i> support@bazar.ua</p>
-                    <p><i class="bi bi-geo-alt me-2"></i> Київ, вул. Хрещатик, 1</p>
-                    <p><i class="bi bi-clock me-2"></i> Пн-Пт: 9:00 - 20:00</p>
-                </div>
-
-            </div>
-
-            <hr class="mt-4" />
-
-            <div class="row">
-                <div class="col-md-6 text-center text-md-start">
-                    &copy; @DateTime.Now.Year - BazaR. Всі права захищені.
-                </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <a href="#" class="text-white-50 me-3">Політика конфіденційності</a>
-                    <a href="#" class="text-white-50">Умови використання</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Бічне меню (Ivan) -->
+    <!-- Бічне меню -->
     @await Html.PartialAsync("_Sidebar")
-
-    <!-- Модальні вікна (Ivan) -->
-    @await Html.PartialAsync("_Login")
-    @await Html.PartialAsync("_Register")
 
     <!-- Bootstrap JS -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -317,6 +263,8 @@
 
     <!-- Auth modals JS -->
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/lookedcards.js" asp-append-version="true"></script>
+    <script src="~/js/profile.js" asp-append-version="true"></script>
 
     <!-- ===== МОДАЛЬНА КОРЗИНА ===== -->
     <div class="cart-modal-overlay" id="cartOverlay" onclick="closeCartModal()"></div>
@@ -670,8 +618,8 @@
                         var msg = response.added ? 'Додано в обране' : 'Видалено з обраного';
                         if (typeof showNotification === 'function') showNotification(msg, response.added ? 'success' : 'info');
                     } else if (response.requireLogin) {
-                        var $login = $('[data-open-login="true"]').first();
-                        if ($login.length) $login.trigger('click'); else $('#loginModal').modal('show');
+                        var $login = $('[data-auth-open="login"]').first();
+                        if ($login.length) $login.trigger('click'); else window.authModals && window.authModals.openModal('loginModal');
                     }
                 }
             );
@@ -679,36 +627,6 @@
 
     </script>
 
-    <script>
-        (function () {
-            var drawer = document.getElementById('sidebarDrawer');
-            var overlay = document.getElementById('sidebarOverlay');
-            var openBtn = document.getElementById('sidebarOpen');
-            var closeBtn = document.getElementById('sidebarClose');
-
-            function openSidebar() {
-                drawer.classList.add('is-open');
-                overlay.classList.add('is-open');
-                drawer.setAttribute('aria-hidden', 'false');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeSidebar() {
-                drawer.classList.remove('is-open');
-                overlay.classList.remove('is-open');
-                drawer.setAttribute('aria-hidden', 'true');
-                document.body.style.overflow = '';
-            }
-
-            if (openBtn) openBtn.addEventListener('click', openSidebar);
-            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-            if (overlay) overlay.addEventListener('click', closeSidebar);
-
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeSidebar();
-            });
-        })();
-    </script>
 
 </body>
 </html>

@@ -1,12 +1,12 @@
 using BazaR.Data;
 using BazaR.Filters;
+using BazaR.HostedServices;
 using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.Repositories;
 using BazaR.Repository;
 using BazaR.Services;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -59,7 +59,10 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
+builder.Services.AddScoped<IUserMessageService, UserMessageService>();
+builder.Services.AddScoped<IMailingGeneratorService, MailingGeneratorService>();
 
+builder.Services.AddHostedService<MailingBackgroundService>();
 builder.Services
     .AddAuthentication()
     .AddGoogle(options =>
@@ -95,14 +98,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-var provider = new FileExtensionContentTypeProvider();
-provider.Mappings[".svg"] = "image/svg+xml";
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    ContentTypeProvider = provider
-});
+app.UseStaticFiles();
 
 app.UseRouting();
 
