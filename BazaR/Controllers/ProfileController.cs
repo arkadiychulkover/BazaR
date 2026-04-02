@@ -539,32 +539,15 @@ namespace BazaR.Controllers
 
         // ─── Messages ────────────────────────────────────────────────────────────
 
-        public async Task<IActionResult> Messages(int page = 1)
+        public async Task<IActionResult> Messages()
         {
             ViewBag.ActiveMenu = "Messages";
             var (user, profile) = await GetUserAndProfileAsync();
 
-            const int pageSize = 4;
-
-            var baseQuery = _db.Messages
-                .AsNoTracking()
+            var messages = await _db.Messages
+                .Include(m => m.User)
                 .Where(m => m.UserId == user.Id)
-                .OrderByDescending(m => m.DateTime);
-
-            var totalCount = await baseQuery.CountAsync();
-            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-
-            if (totalPages <= 0)
-                totalPages = 1;
-
-            if (page < 1)
-                page = 1;
-            if (page > totalPages)
-                page = totalPages;
-
-            var messages = await baseQuery
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                .OrderByDescending(m => m.DateTime)
                 .Select(m => new MessageVm
                 {
                     Id = m.Id,
@@ -577,20 +560,11 @@ namespace BazaR.Controllers
                 })
                 .ToListAsync();
 
-            var unreadCount = await _db.Messages
-                .AsNoTracking()
-                .Where(m => m.UserId == user.Id && !m.IsRead)
-                .CountAsync();
-
             var vm = new AccountMessagesViewModel
             {
                 Profile = profile,
                 Messages = messages,
-                NewMessagesCount = unreadCount,
-                CurrentPage = page,
-                PageSize = pageSize,
-                TotalCount = totalCount,
-                TotalPages = totalPages
+                NewMessagesCount = messages.Count(m => !m.IsRead)
             };
 
             return View(vm);

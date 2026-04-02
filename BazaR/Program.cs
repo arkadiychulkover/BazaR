@@ -1,6 +1,5 @@
 using BazaR.Data;
 using BazaR.Filters;
-using BazaR.HostedServices;
 using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.Repositories;
@@ -59,10 +58,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
-builder.Services.AddScoped<IUserMessageService, UserMessageService>();
-builder.Services.AddScoped<IMailingGeneratorService, MailingGeneratorService>();
 
-builder.Services.AddHostedService<MailingBackgroundService>();
 builder.Services
     .AddAuthentication()
     .AddGoogle(options =>
