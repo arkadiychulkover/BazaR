@@ -1,5 +1,6 @@
 ﻿// ==================== BazaR.Tests/Controllers/AccountControllerTests.cs ====================
 using BazaR.Controllers;
+using BazaR.Data;
 using BazaR.Models;
 using BazaR.ViewModels;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using System.Security.Claims;
 using Xunit;
@@ -20,6 +22,7 @@ namespace BazaR.Tests.Controllers
     {
         private readonly Mock<UserManager<User>> _mockUserManager;
         private readonly Mock<SignInManager<User>> _mockSignInManager;
+        private readonly AppDbContext _dbContext;
         private readonly AccountController _controller;
         private readonly List<User> _testUsers;
 
@@ -37,12 +40,18 @@ namespace BazaR.Tests.Controllers
                 userPrincipalFactory.Object,
                 null, null, null, null);
 
+            var options = new DbContextOptionsBuilder<AppDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
+            _dbContext = new AppDbContext(options);
+
             _testUsers = GetTestUsers();
             SetupMocks();
 
             _controller = new AccountController(
                 _mockUserManager.Object,
-                _mockSignInManager.Object);
+                _mockSignInManager.Object, 
+                _dbContext);
         }
 
         private void SetupMocks()

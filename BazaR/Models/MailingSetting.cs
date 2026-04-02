@@ -24,5 +24,7 @@ namespace BazaR.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime LastMailingSentAt { get; set;} = DateTime.UtcNow;
     }
 }

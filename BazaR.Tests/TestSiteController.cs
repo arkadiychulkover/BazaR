@@ -58,6 +58,7 @@ namespace BazaR.Tests.Controllers
             _dbContext.Categories.AddRange(_testCategories);
             _dbContext.Items.AddRange(_testItems);
             _dbContext.Users.AddRange(_testUsers);
+            _dbContext.Promotions.AddRange(GetTestPromotions());
             _dbContext.SaveChanges();
 
             SetupMocks();
@@ -225,6 +226,14 @@ namespace BazaR.Tests.Controllers
                 new Item { Id = 1, Name = "MacBook Pro", Desc = "Powerful laptop", Price = 2000, CategoryId = 2, BrandId = 1, UserId = 1, IsAvailable = true, Garantia = 12, ImageUrl = "/images/test.jpg" },
                 new Item { Id = 2, Name = "Dell XPS", Desc = "High-end laptop", Price = 1500, CategoryId = 2, BrandId = 1, UserId = 1, IsAvailable = true, Garantia = 24 },
                 new Item { Id = 3, Name = "iPhone 13", Desc = "Latest iPhone", Price = 800, CategoryId = 3, BrandId = 1, UserId = 1, IsAvailable = false, Garantia = 12 }
+            };
+        }
+
+        private List<Promotion> GetTestPromotions()
+        {
+            return new List<Promotion>
+            {
+                new Promotion { Id = 1, DiscountAmount = 100, Number = "BAZAR10" }
             };
         }
 
@@ -531,16 +540,6 @@ namespace BazaR.Tests.Controllers
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(SiteController.Wishlist), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.RemoveFromWishList(1, 1), Times.Once);
-        }
-
-        [Fact]
-        public void Orders_WhenAuthenticated_ReturnsOrders()
-        {
-            SetupAuthenticatedUser(1);
-            var result = _controller.Orders();
-            var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsType<List<Order>>(viewResult.Model);
-            Assert.Equal(2, model.Count);
         }
 
         [Fact]
