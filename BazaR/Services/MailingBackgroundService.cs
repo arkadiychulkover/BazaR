@@ -45,7 +45,7 @@ namespace BazaR.HostedServices
                         var hours = GetFrequencyHours(settings.PreferredFrequency);
 
                         var shouldSend = settings.LastMailingSentAt == null ||
-                                         settings.LastMailingSentAt.AddHours(hours) <= now;
+                                         settings.LastMailingSentAt.Value.AddHours(hours) <= now;
 
                         if (!shouldSend)
                             continue;
