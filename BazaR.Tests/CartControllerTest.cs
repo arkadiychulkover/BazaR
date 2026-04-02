@@ -1,5 +1,4 @@
-﻿// ==================== BazaR.Tests/Controllers/CartControllerTests.cs ====================
-using BazaR.Controllers;
+﻿using BazaR.Controllers;
 using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Models;
@@ -14,7 +13,6 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using System.Security.Claims;
-using Xunit;
 
 namespace BazaR.Tests.Controllers
 {
@@ -69,9 +67,11 @@ namespace BazaR.Tests.Controllers
                         .Where(ci => ci.UserId == userId)
                         .Select(ci => new CartItem
                         {
+                            Id = ci.Id,
+                            UserId = ci.UserId,
                             ItemId = ci.ItemId,
-                            Item = _testItems.FirstOrDefault(i => i.Id == ci.ItemId),
-                            Quantity = ci.Quantity
+                            Quantity = ci.Quantity,
+                            Item = _testItems.FirstOrDefault(i => i.Id == ci.ItemId)
                         })
                         .ToList());
 
@@ -86,19 +86,15 @@ namespace BazaR.Tests.Controllers
 
             _mockUserDb.Setup(x => x.CreateOrder(It.IsAny<int>(), It.IsAny<Order>()))
                 .Returns(true);
-
-            var currentUser = _testUsers[0];
-            _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
-                .ReturnsAsync(currentUser);
         }
 
         private List<Item> GetTestItems()
         {
             return new List<Item>
             {
-                new Item { Id = 1, Name = "MacBook Pro", Desc = "Powerful laptop", Price = 2000, IsAvailable = true, Garantia = 12, CategoryId = 1, BrandId = 1, UserId = 1 },
-                new Item { Id = 2, Name = "Dell XPS", Desc = "High-end laptop", Price = 1500, IsAvailable = true, Garantia = 24, CategoryId = 1, BrandId = 1, UserId = 1 },
-                new Item { Id = 3, Name = "iPhone 13", Desc = "Latest iPhone", Price = 800, IsAvailable = false, Garantia = 12, CategoryId = 1, BrandId = 1, UserId = 1 }
+                new Item { Id = 1, Name = "MacBook Pro", Desc = "Powerful laptop", Price = 2000, IsAvailable = true, Garantia = 12, CategoryId = 1, BrandId = 1, UserId = 1, ImageUrl = "/test1.jpg" },
+                new Item { Id = 2, Name = "Dell XPS", Desc = "High-end laptop", Price = 1500, IsAvailable = true, Garantia = 24, CategoryId = 1, BrandId = 1, UserId = 1, ImageUrl = "/test2.jpg" },
+                new Item { Id = 3, Name = "iPhone 13", Desc = "Latest iPhone", Price = 800, IsAvailable = false, Garantia = 12, CategoryId = 1, BrandId = 1, UserId = 1, ImageUrl = "/test3.jpg" }
             };
         }
 
@@ -116,8 +112,10 @@ namespace BazaR.Tests.Controllers
         {
             return new List<User>
             {
-                new User { Id = 1, Name = "Test User", Email = "test@example.com", UserName = "test@example.com", IsAdmin = false },
-                new User { Id = 2, Name = "Admin User", Email = "admin@example.com", UserName = "admin@example.com", IsAdmin = true }
+                new User { Id = 1, Name = "Test User", Email = "test@example.com", UserName = "test@example.com",
+                          FirstName = "Test", LastName = "User", PhoneNumber = "1234567890", IsAdmin = false },
+                new User { Id = 2, Name = "Admin User", Email = "admin@example.com", UserName = "admin@example.com",
+                          FirstName = "Admin", LastName = "User", PhoneNumber = "0987654321", IsAdmin = true }
             };
         }
 
@@ -127,7 +125,7 @@ namespace BazaR.Tests.Controllers
 
             var urlHelper = new Mock<IUrlHelper>();
             urlHelper.Setup(x => x.Action(It.IsAny<UrlActionContext>()))
-                .Returns("/Site/Index");
+                .Returns((UrlActionContext context) => $"/{context.Controller ?? "Cart"}/{context.Action}");
 
             var actionDescriptor = new ControllerActionDescriptor
             {
@@ -160,6 +158,9 @@ namespace BazaR.Tests.Controllers
             var claimsPrincipal = new ClaimsPrincipal(identity);
 
             _controller.ControllerContext.HttpContext.User = claimsPrincipal;
+
+            _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .ReturnsAsync(user);
         }
 
         private void SetupUnauthenticatedUser()
@@ -178,8 +179,12 @@ namespace BazaR.Tests.Controllers
             SetupAuthenticatedUser();
             var result = _controller.Index();
             var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Cart", viewResult.ViewName);
             var model = Assert.IsType<List<Item>>(viewResult.Model);
             Assert.Equal(3, model.Count);
+            Assert.NotNull(viewResult.ViewData["CartItems"]);
+            Assert.NotNull(viewResult.ViewData["TotalAmount"]);
+            Assert.NotNull(viewResult.ViewData["TotalQuantity"]);
         }
 
         [Fact]
@@ -190,6 +195,7 @@ namespace BazaR.Tests.Controllers
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
             Assert.Equal("Site", redirectResult.ControllerName);
+            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
         }
 
         [Fact]
@@ -203,12 +209,24 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
+        public void Add_WithInvalidQuantity_UsesDefaultQuantity()
+        {
+            SetupAuthenticatedUser();
+            var result = _controller.Add(1, 0);
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal(nameof(CartController.Index), redirectResult.ActionName);
+            _mockUserDb.Verify(x => x.AddToCart(1, 1), Times.Once);
+        }
+
+        [Fact]
         public void Add_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
             var result = _controller.Add(1);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
+            Assert.Equal("Site", redirectResult.ControllerName);
+            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
         }
 
         [Fact]
@@ -222,6 +240,17 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
+        public void Remove_WhenUnauthenticated_RedirectsToLogin()
+        {
+            SetupUnauthenticatedUser();
+            var result = _controller.Remove(1);
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
+            Assert.Equal("Site", redirectResult.ControllerName);
+            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+        }
+
+        [Fact]
         public void Clear_WhenAuthenticated_ClearsCart()
         {
             SetupAuthenticatedUser();
@@ -232,6 +261,17 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
+        public void Clear_WhenUnauthenticated_RedirectsToLogin()
+        {
+            SetupUnauthenticatedUser();
+            var result = _controller.Clear();
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
+            Assert.Equal("Site", redirectResult.ControllerName);
+            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+        }
+
+        [Fact]
         public void Checkout_WhenAuthenticated_ReturnsView()
         {
             SetupAuthenticatedUser();
@@ -239,10 +279,11 @@ namespace BazaR.Tests.Controllers
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<List<Item>>(viewResult.Model);
             Assert.Equal(3, model.Count);
+            Assert.NotNull(viewResult.ViewData["CartItems"]);
         }
 
         [Fact]
-        public void Checkout_WhenCartEmpty_RedirectsToIndex()
+        public void Checkout_WhenCartEmpty_RedirectsToIndexWithError()
         {
             SetupAuthenticatedUser();
             _mockUserDb.Setup(x => x.GetCartItemsWithQuantity(1))
@@ -251,6 +292,18 @@ namespace BazaR.Tests.Controllers
             var result = _controller.Checkout();
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(CartController.Index), redirectResult.ActionName);
+            Assert.Equal("Корзина пустая.", _controller.TempData["Error"]);
+        }
+
+        [Fact]
+        public void Checkout_WhenUnauthenticated_RedirectsToLogin()
+        {
+            SetupUnauthenticatedUser();
+            var result = _controller.Checkout();
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
+            Assert.Equal("Site", redirectResult.ControllerName);
+            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
         }
 
         [Fact]
@@ -261,10 +314,12 @@ namespace BazaR.Tests.Controllers
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(CartController.Index), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.CreateOrder(1, It.IsAny<Order>()), Times.Once);
+            _mockUserDb.Verify(x => x.ClearCart(1), Times.Once);
+            Assert.Equal("Заказ создан!", _controller.TempData["Ok"]);
         }
 
         [Fact]
-        public void CreateOrder_WhenCartEmpty_RedirectsToIndex()
+        public void CreateOrder_WhenCartEmpty_RedirectsToIndexWithError()
         {
             SetupAuthenticatedUser();
             _mockUserDb.Setup(x => x.GetCartItemsWithQuantity(1))
@@ -273,7 +328,54 @@ namespace BazaR.Tests.Controllers
             var result = _controller.CreateOrder("Address", "Cash", "Courier");
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(CartController.Index), redirectResult.ActionName);
+            Assert.Equal("Корзина пустая.", _controller.TempData["Error"]);
             _mockUserDb.Verify(x => x.CreateOrder(It.IsAny<int>(), It.IsAny<Order>()), Times.Never);
+        }
+
+        [Fact]
+        public void CreateOrder_WhenCreateOrderFails_RedirectsToCheckoutWithError()
+        {
+            SetupAuthenticatedUser();
+            _mockUserDb.Setup(x => x.CreateOrder(It.IsAny<int>(), It.IsAny<Order>()))
+                .Returns(false);
+
+            var result = _controller.CreateOrder("Test Address", "Cash", "Courier");
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal(nameof(CartController.Checkout), redirectResult.ActionName);
+            Assert.Equal("Не удалось создать заказ.", _controller.TempData["Error"]);
+        }
+
+        [Fact]
+        public void CreateOrder_WhenUnauthenticated_RedirectsToLogin()
+        {
+            SetupUnauthenticatedUser();
+            var result = _controller.CreateOrder("Address", "Cash", "Courier");
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
+            Assert.Equal("Site", redirectResult.ControllerName);
+            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+        }
+
+        [Fact]
+        public void CreateOrder_CalculatesTotalAmountCorrectly()
+        {
+            SetupAuthenticatedUser();
+
+            Order createdOrder = null;
+            _mockUserDb.Setup(x => x.CreateOrder(It.IsAny<int>(), It.IsAny<Order>()))
+                .Callback<int, Order>((userId, order) => createdOrder = order)
+                .Returns(true);
+
+            var result = _controller.CreateOrder("Test Address", "Cash", "Courier");
+
+            Assert.NotNull(createdOrder);
+            Assert.Equal(5800, createdOrder.TotalAmount);
+            Assert.Equal(3, createdOrder.OrderItems.Count);
+            Assert.Equal(OrderStatus.New, createdOrder.Status);
+            Assert.Equal(OrderPaymentMethod.PayNow, createdOrder.PaymentMethod);
+            Assert.Equal(OrderDeliveryMethod.SelfPickup, createdOrder.DeliveryMethod);
+            Assert.Equal(OrderPaymentStatus.Pending, createdOrder.PaymentStatus);
+            Assert.Equal("Test Address", createdOrder.Address);
         }
     }
 }

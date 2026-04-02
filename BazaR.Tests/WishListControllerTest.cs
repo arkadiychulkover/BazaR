@@ -1,5 +1,4 @@
-﻿// ==================== BazaR.Tests/Controllers/WishlistControllerTests.cs ====================
-using BazaR.Controllers;
+﻿using BazaR.Controllers;
 using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Models;
@@ -14,7 +13,6 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using System.Security.Claims;
-using Xunit;
 
 namespace BazaR.Tests.Controllers
 {
@@ -80,19 +78,15 @@ namespace BazaR.Tests.Controllers
 
             _mockUserDb.Setup(x => x.RemoveFromWishList(It.IsAny<int>(), It.IsAny<int>()))
                 .Returns(true);
-
-            var currentUser = _testUsers[0];
-            _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
-                .ReturnsAsync(currentUser);
         }
 
         private List<Item> GetTestItems()
         {
             return new List<Item>
             {
-                new Item { Id = 1, Name = "MacBook Pro", Desc = "Powerful laptop", Price = 2000, IsAvailable = true, Garantia = 12, CategoryId = 1, BrandId = 1, UserId = 1 },
-                new Item { Id = 2, Name = "Dell XPS", Desc = "High-end laptop", Price = 1500, IsAvailable = true, Garantia = 24, CategoryId = 1, BrandId = 1, UserId = 1 },
-                new Item { Id = 3, Name = "iPhone 13", Desc = "Latest iPhone", Price = 800, IsAvailable = false, Garantia = 12, CategoryId = 1, BrandId = 1, UserId = 1 }
+                new Item { Id = 1, Name = "MacBook Pro", Desc = "Powerful laptop", Price = 2000, IsAvailable = true, Garantia = 12, CategoryId = 1, BrandId = 1, UserId = 1, ImageUrl = "/test1.jpg" },
+                new Item { Id = 2, Name = "Dell XPS", Desc = "High-end laptop", Price = 1500, IsAvailable = true, Garantia = 24, CategoryId = 1, BrandId = 1, UserId = 1, ImageUrl = "/test2.jpg" },
+                new Item { Id = 3, Name = "iPhone 13", Desc = "Latest iPhone", Price = 800, IsAvailable = false, Garantia = 12, CategoryId = 1, BrandId = 1, UserId = 1, ImageUrl = "/test3.jpg" }
             };
         }
 
@@ -109,8 +103,10 @@ namespace BazaR.Tests.Controllers
         {
             return new List<User>
             {
-                new User { Id = 1, Name = "Test User", Email = "test@example.com", UserName = "test@example.com", IsAdmin = false },
-                new User { Id = 2, Name = "Admin User", Email = "admin@example.com", UserName = "admin@example.com", IsAdmin = true }
+                new User { Id = 1, Name = "Test User", Email = "test@example.com", UserName = "test@example.com",
+                          FirstName = "Test", LastName = "User", PhoneNumber = "1234567890", IsAdmin = false },
+                new User { Id = 2, Name = "Admin User", Email = "admin@example.com", UserName = "admin@example.com",
+                          FirstName = "Admin", LastName = "User", PhoneNumber = "0987654321", IsAdmin = true }
             };
         }
 
@@ -120,7 +116,7 @@ namespace BazaR.Tests.Controllers
 
             var urlHelper = new Mock<IUrlHelper>();
             urlHelper.Setup(x => x.Action(It.IsAny<UrlActionContext>()))
-                .Returns("/Site/Index");
+                .Returns((UrlActionContext context) => $"/{context.Controller ?? "Wishlist"}/{context.Action}");
 
             var actionDescriptor = new ControllerActionDescriptor
             {
@@ -153,6 +149,10 @@ namespace BazaR.Tests.Controllers
             var claimsPrincipal = new ClaimsPrincipal(identity);
 
             _controller.ControllerContext.HttpContext.User = claimsPrincipal;
+
+            // Настраиваем GetUserAsync для возврата пользователя
+            _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .ReturnsAsync(user);
         }
 
         private void SetupUnauthenticatedUser()
@@ -173,6 +173,23 @@ namespace BazaR.Tests.Controllers
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<List<Item>>(viewResult.Model);
             Assert.Equal(2, model.Count);
+            Assert.Contains(model, i => i.Id == 1);
+            Assert.Contains(model, i => i.Id == 2);
+        }
+
+        [Fact]
+        public void Index_WhenAuthenticatedWithEmptyWishlist_ReturnsEmptyList()
+        {
+            SetupAuthenticatedUser();
+
+            // Настраиваем пустой список желаний
+            _mockUserDb.Setup(x => x.GetWishList(1))
+                .Returns(new List<Item>().AsQueryable());
+
+            var result = _controller.Index();
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsType<List<Item>>(viewResult.Model);
+            Assert.Empty(model);
         }
 
         [Fact]
@@ -183,6 +200,7 @@ namespace BazaR.Tests.Controllers
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
             Assert.Equal("Site", redirectResult.ControllerName);
+            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
         }
 
         [Fact]
@@ -196,12 +214,24 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
+        public void Add_WhenAuthenticated_AddsExistingItemAgain()
+        {
+            SetupAuthenticatedUser();
+            var result = _controller.Add(1);
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal(nameof(WishlistController.Index), redirectResult.ActionName);
+            _mockUserDb.Verify(x => x.AddToWishList(1, 1), Times.Once);
+        }
+
+        [Fact]
         public void Add_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
             var result = _controller.Add(1);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
+            Assert.Equal("Site", redirectResult.ControllerName);
+            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
         }
 
         [Fact]
@@ -215,12 +245,83 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
+        public void Remove_WhenAuthenticated_RemovesNonExistentItem()
+        {
+            SetupAuthenticatedUser();
+            var result = _controller.Remove(999);
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal(nameof(WishlistController.Index), redirectResult.ActionName);
+            _mockUserDb.Verify(x => x.RemoveFromWishList(1, 999), Times.Once);
+        }
+
+        [Fact]
         public void Remove_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
             var result = _controller.Remove(1);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
+            Assert.Equal("Site", redirectResult.ControllerName);
+            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+        }
+
+        [Fact]
+        public void Add_WithMultipleItems_AddsEachItem()
+        {
+            SetupAuthenticatedUser();
+
+            _controller.Add(1);
+            _controller.Add(2);
+            _controller.Add(3);
+
+            _mockUserDb.Verify(x => x.AddToWishList(1, 1), Times.Once);
+            _mockUserDb.Verify(x => x.AddToWishList(1, 2), Times.Once);
+            _mockUserDb.Verify(x => x.AddToWishList(1, 3), Times.Once);
+        }
+
+        [Fact]
+        public void Remove_WithMultipleItems_RemovesEachItem()
+        {
+            SetupAuthenticatedUser();
+
+            _controller.Remove(1);
+            _controller.Remove(2);
+
+            _mockUserDb.Verify(x => x.RemoveFromWishList(1, 1), Times.Once);
+            _mockUserDb.Verify(x => x.RemoveFromWishList(1, 2), Times.Once);
+        }
+
+        [Fact]
+        public void Index_AfterAddingItem_ShowsUpdatedWishlist()
+        {
+            SetupAuthenticatedUser();
+
+            // Изначально в вишлисте 2 item'а
+            var resultBefore = _controller.Index();
+            var viewResultBefore = Assert.IsType<ViewResult>(resultBefore);
+            var modelBefore = Assert.IsType<List<Item>>(viewResultBefore.Model);
+            Assert.Equal(2, modelBefore.Count);
+
+            // Добавляем новый item
+            _mockUserDb.Setup(x => x.GetWishList(1))
+                .Returns(() =>
+                {
+                    var wishlistItemIds = _testWishlistItems
+                        .Where(wi => wi.UserId == 1)
+                        .Select(wi => wi.ItemId)
+                        .ToList();
+                    // Добавляем item 3 в вишлист
+                    if (!wishlistItemIds.Contains(3))
+                        wishlistItemIds.Add(3);
+                    return _testItems
+                        .Where(i => wishlistItemIds.Contains(i.Id))
+                        .AsQueryable();
+                });
+
+            var resultAfter = _controller.Index();
+            var viewResultAfter = Assert.IsType<ViewResult>(resultAfter);
+            var modelAfter = Assert.IsType<List<Item>>(viewResultAfter.Model);
+            Assert.Equal(3, modelAfter.Count);
         }
     }
 }
