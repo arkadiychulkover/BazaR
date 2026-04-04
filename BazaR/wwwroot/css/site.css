@@ -4763,3 +4763,67 @@ body {
     .pdp-tabs__left { overflow-x: auto; }
     .pdp-reviews-header { flex-direction: column; align-items: flex-start; }
 }
+/* Контейнер */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+/* Кнопки */
+.pagination__btn {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #0F2744;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(15, 39, 68, 0.08);
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+    /* Hover */
+    .pagination__btn:hover {
+        background: #0F2744;
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(15, 39, 68, 0.15);
+    }
+
+    /* Активная */
+    .pagination__btn.active {
+        background: linear-gradient(135deg, #0F2744, #173B69);
+        color: #ffffff;
+        box-shadow: 0 6px 16px rgba(15, 39, 68, 0.2);
+        cursor: default;
+    }
+
+    /* Отключённые (если будешь добавлять) */
+    .pagination__btn.disabled {
+        opacity: 0.4;
+        pointer-events: none;
+    }
+
+    /* Иконки */
+    .pagination__btn i {
+        font-size: 16px;
+    }
+
+/* Мобилка */
+@media (max-width: 480px) {
+    .pagination__btn {
+        min-width: 34px;
+        height: 34px;
+        font-size: 13px;
+    }
+}

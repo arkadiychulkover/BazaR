@@ -1,14 +1,22 @@
 using BazaR.Interfaces;
 using BazaR.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BazaR.Controllers
 {
+    [Authorize]
     public class WishlistController : Controller
     {
+        #region Private Fields
+
         private readonly IUserDb _usMan;
         private readonly UserManager<User> _userManager;
+
+        #endregion
+
+        #region Constructor
 
         public WishlistController(IUserDb usMan, UserManager<User> userManager)
         {
@@ -16,42 +24,45 @@ namespace BazaR.Controllers
             _userManager = userManager;
         }
 
-        private User? CurrentUser => User.Identity?.IsAuthenticated == true
-            ? _userManager.GetUserAsync(User).Result
-            : null;
-        private bool IsAuthenticated => User.Identity?.IsAuthenticated == true;
+        #endregion
 
-        private IActionResult RequireLogin(string? returnUrl = null)
-        {
-            TempData["Error"] = "Нужно войти в аккаунт.";
-            return RedirectToAction("Index", "Site", new { returnUrl });
-        }
+        #region Public Actions
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            if (!IsAuthenticated) return RequireLogin(Url.Action(nameof(Index)));
-            var userId = CurrentUser!.Id;
-            var items = _usMan.GetWishList(userId).ToList();
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Challenge();
+
+            var items = _usMan.GetWishList(user.Id).ToList();
             return View(items);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Add(int id)
+        public async Task<IActionResult> Add(int id)
         {
-            if (!IsAuthenticated) return RequireLogin();
-            _usMan.AddToWishList(CurrentUser!.Id, id);
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Challenge();
+
+            _usMan.AddToWishList(user.Id, id);
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Remove(int id)
+        public async Task<IActionResult> Remove(int id)
         {
-            if (!IsAuthenticated) return RequireLogin();
-            _usMan.RemoveFromWishList(CurrentUser!.Id, id);
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Challenge();
+
+            _usMan.RemoveFromWishList(user.Id, id);
             return RedirectToAction(nameof(Index));
         }
+
+        #endregion
     }
 }
