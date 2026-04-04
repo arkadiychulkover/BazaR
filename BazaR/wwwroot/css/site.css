@@ -14,11 +14,93 @@ html {
 
 html {
   position: relative;
-  min-height: 100%;
+}
+
+/* Кнопка «Знайти», шапки карток, текст на зеленому */
+:root {
+  --bazaar-search-btn: #a4c639;
+  --bazaar-search-btn-hover: #95b532;
+  --bazaar-on-green: #2d2d2d;
+  /* Заголовки карток категорій / фільтрів */
+  --bazaar-sidebar-heading-top: #3d4d66;
+  --bazaar-sidebar-heading-bottom: #323c50;
+}
+
+/* Смуга-оголошення над шапкою (як зелена стрічка «розпродаж») */
+.site-promo-ribbon {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.4rem 12px;
+  background-color: var(--bazaar-search-btn, #a4c639);
+  color: var(--bazaar-on-green, #1a1a1a);
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  font-family: "Montserrat", system-ui, sans-serif;
+  line-height: 1.25;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.site-promo-ribbon__text {
+  display: inline-block;
+  letter-spacing: 0.28em;
+  transform: scaleX(1.12);
+  transform-origin: center;
+}
+
+.bg-bazaar-accent {
+  background: linear-gradient(180deg, var(--bazaar-sidebar-heading-top) 0%, var(--bazaar-sidebar-heading-bottom) 100%);
+  color: #f0f3f7 !important;
+  border-bottom: none;
+  font-weight: 600;
+}
+
+.bg-bazaar-accent h5,
+.bg-bazaar-accent .bi {
+  color: inherit;
+}
+
+/* Як кнопки в модалках входу (.auth-btn--primary #98be2a) */
+.btn-bazaar-auth {
+  background-color: var(--accent, #98be2a);
+  border-color: var(--accent, #98be2a);
+  color: var(--bazaar-on-green);
+  font-weight: 500;
+}
+
+.btn-bazaar-auth:hover,
+.btn-bazaar-auth:focus-visible {
+  background-color: #89a925;
+  border-color: #89a925;
+  color: var(--bazaar-on-green);
+}
+
+.btn-bazaar-auth:active {
+  background-color: #7d9521;
+  border-color: #7d9521;
+  color: var(--bazaar-on-green);
+}
+
+.btn-outline-bazaar-auth {
+  color: var(--bazaar-on-green);
+  border-color: var(--accent, #98be2a);
+  background: transparent;
+  font-weight: 500;
+}
+
+.btn-outline-bazaar-auth:hover,
+.btn-outline-bazaar-auth:focus-visible {
+  background-color: var(--accent, #98be2a);
+  border-color: var(--accent, #98be2a);
+  color: var(--bazaar-on-green);
 }
 
 body {
-  margin-bottom: 60px;
+  margin-bottom: 0;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -213,9 +295,9 @@ body {
 }
 
 .sidebar-wrapper {
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
 }
 
     .sidebar-wrapper > * {
@@ -4127,7 +4209,21 @@ body {
     gap: 0;
 }
 
-/* Блоки повного списку в розгорнутій панелі */
+/* Блоки повного списку (як у колишній модалці) */
+.pdp-chars-modal {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+}
+.pdp-chars-modal__header {
+    display: none;
+}
+.pdp-chars-modal__body {
+    padding: 0;
+    max-width: none;
+    margin: 0;
+    width: 100%;
+}
 .pdp-chars-modal__section {
     background: #fff;
     border: 1px solid #e8ecf0;

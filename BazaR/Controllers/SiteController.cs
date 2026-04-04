@@ -410,6 +410,7 @@ namespace BazaR.Controllers
             List<int> categorysId = GetSubCategoryIds(category);
             List<Category> categories = new();
             ViewBag.CategotyName = _itMan.GetCategoryById(category).Name;
+            ViewBag.CategoryPageRootId = category;
 
             foreach (int cat in categorysId)
             {

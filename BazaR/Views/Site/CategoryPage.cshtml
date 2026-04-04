@@ -3,33 +3,52 @@
 @{
     ViewData["Title"] = "Категорія";
     string name = ViewBag.CategotyName;
+    int? categoryRootId = ViewBag.CategoryPageRootId is int crid ? crid : null;
 }
 
 <div class="container mt-4">
 
-    <h3 class="mb-3">Категорії</h3>
+    <h3 class="mb-3">
+        @if (categoryRootId == 1)
+        {
+            @:Комп'ютери та ноутбуки
+        }
+        else if (categoryRootId == 2)
+        {
+            @:Смартфони, ТВ та електроніка
+        }
+        else
+        {
+            @:Категорії
+        }
+    </h3>
 
-    <div class="row mb-4">
+    <div class="row mb-4 category-hero-row align-items-lg-stretch">
 
-        <div class="col-lg-8">
+        <div class="col-lg-8 category-hero-col d-flex flex-column">
 
-            <div style="
-                height:220px;
-                border-radius:12px;
-                background:linear-gradient(90deg,#1e2a78,#2c3ed6);
-                color:white;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-size:28px;
-                font-weight:600;
-            ">
-                @name <br /> Знижки до -70%
-            </div>
+            @if (categoryRootId == 1)
+            {
+                <div class="category-hero-banner">
+                    <img src='@Url.Content("~/images/items/BannerComputers.png")' alt="" />
+                </div>
+            }
+            else if (categoryRootId == 2)
+            {
+                <div class="category-hero-banner">
+                    <img src='@Url.Content("~/images/items/PhoneBanner.png")' alt="" />
+                </div>
+            }
+            else
+            {
+                <div class="category-hero-fallback">
+                    @name <br /> Знижки до -70%
+                </div>
+            }
 
         </div>
 
-        <div class="col-lg-4">
+        <div class="col-lg-4 category-hero-sidebar">
 
             <div class="row g-2">
 
@@ -118,3 +137,81 @@
     </div>
 
 </div>
+
+<style>
+    /* На великих екранах ліва колонка тягнеться по висоті правої (сітка 3×2 карток) */
+    @@media (min-width: 992px) {
+        .category-hero-row {
+            align-items: stretch;
+        }
+
+        .category-hero-col {
+            min-height: 1px;
+        }
+
+        .category-hero-banner {
+            flex: 1 1 auto;
+            position: relative;
+            min-height: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            line-height: 0;
+        }
+
+            .category-hero-banner img {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                object-position: center center;
+            }
+
+        .category-hero-fallback {
+            flex: 1 1 auto;
+            min-height: 220px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #1e2a78, #2c3ed6);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 600;
+        }
+    }
+
+    /* Мобільний вигляд: фіксована мінімальна висота банера */
+    @@media (max-width: 991.98px) {
+        .category-hero-banner {
+            border-radius: 12px;
+            overflow: hidden;
+            line-height: 0;
+            margin-bottom: 0.75rem;
+        }
+
+            .category-hero-banner img {
+                display: block;
+                width: 100%;
+                min-height: 200px;
+                max-height: 280px;
+                object-fit: cover;
+                object-position: center center;
+            }
+
+        .category-hero-fallback {
+            min-height: 200px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #1e2a78, #2c3ed6);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+    }
+</style>

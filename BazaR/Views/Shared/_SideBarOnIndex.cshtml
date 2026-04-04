@@ -11,7 +11,7 @@
 
     <!-- Категории (список всех главных категорий) -->
     <div class="card mb-3">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-bazaar-accent">
             <h5 class="mb-0">
                 <i class="bi bi-grid"></i> Категорії
             </h5>
@@ -56,7 +56,7 @@
 
     <!-- Поиск -->
     <div class="card mb-3">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-bazaar-accent">
             <h5 class="mb-0">
                 <i class="bi bi-search"></i> Пошук
             </h5>
@@ -69,7 +69,7 @@
                            class="form-control"
                            placeholder="Назва товару..."
                            value="@ViewBag.Query" />
-                    <button class="btn btn-primary" type="submit">
+                    <button class="btn btn-bazaar-auth" type="submit">
                         <i class="bi bi-search"></i>
                     </button>
                 </div>
@@ -79,7 +79,7 @@
 
     <!-- Справочный центр -->
     <div class="card mb-3">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-bazaar-accent">
             <h5 class="mb-0">
                 <i class="bi bi-question-circle"></i> Довідковий центр
             </h5>
@@ -112,7 +112,7 @@
 
     <!-- Популярные бренды -->
     <div class="card mb-3">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-bazaar-accent">
             <h5 class="mb-0">
                 <i class="bi bi-star"></i> Популярні бренди
             </h5>
@@ -154,7 +154,7 @@
 
     <!-- Скачать приложение -->
     <div class="card mb-3">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-bazaar-accent">
             <h5 class="mb-0">
                 <i class="bi bi-phone"></i> Завантажити додаток
             </h5>
@@ -174,24 +174,24 @@
 
     <!-- Соцсети -->
     <div class="card mb-3">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-bazaar-accent">
             <h5 class="mb-0">
                 <i class="bi bi-share"></i> Ми в соцмережах
             </h5>
         </div>
         <div class="card-body">
-            <div class="d-flex justify-content-around">
-                <a href="#" class="text-decoration-none fs-3 text-primary">
-                    <i class="bi bi-facebook"></i>
+            <div class="d-flex flex-wrap justify-content-around align-items-center gap-3">
+                <a href="#" class="text-decoration-none d-inline-flex align-items-center gap-2 sidebar-social-link">
+                    <span class="fs-3 text-primary"><i class="bi bi-facebook" aria-hidden="true"></i></span>
+                    <span class="sidebar-social-label">FB</span>
                 </a>
-                <a href="#" class="text-decoration-none fs-3 text-info">
-                    <i class="bi bi-telegram"></i>
+                <a href="#" class="text-decoration-none d-inline-flex align-items-center gap-2 sidebar-social-link">
+                    <span class="fs-3 text-info"><i class="bi bi-telegram" aria-hidden="true"></i></span>
+                    <span class="sidebar-social-label">TG</span>
                 </a>
-                <a href="#" class="text-decoration-none fs-3 text-danger">
-                    <i class="bi bi-instagram"></i>
-                </a>
-                <a href="#" class="text-decoration-none fs-3 text-success">
-                    <i class="bi bi-viber"></i>
+                <a href="#" class="text-decoration-none d-inline-flex align-items-center gap-2 sidebar-social-link">
+                    <span class="fs-3 text-danger"><i class="bi bi-instagram" aria-hidden="true"></i></span>
+                    <span class="sidebar-social-label">IG</span>
                 </a>
             </div>
         </div>
@@ -199,7 +199,7 @@
 
     <!-- Информация о магазине -->
     <div class="card mb-3">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-bazaar-accent">
             <h5 class="mb-0">
                 <i class="bi bi-info-circle"></i> Інформація
             </h5>
@@ -225,8 +225,8 @@
     <!-- Приветствие для неавторизованных -->
     @if (ViewBag.User == null)
     {
-        <div class="card mb-3 border-warning">
-            <div class="card-header bg-warning text-white">
+        <div class="card mb-3 sidebar-welcome-card">
+            <div class="card-header sidebar-welcome-card__head">
                 <h5 class="mb-0">
                     <i class="bi bi-person-circle"></i> Вітаємо на BazaR!
                 </h5>
@@ -234,10 +234,10 @@
             <div class="card-body text-center">
                 <p class="mb-3">Увійдіть, щоб отримати доступ до знижок та особистого кабінету</p>
                 <div class="d-grid gap-2">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
+                    <button type="button" class="btn btn-bazaar-auth" data-bs-toggle="modal" data-bs-target="#loginModal">
                         <i class="bi bi-box-arrow-in-right"></i> Увійти
                     </button>
-                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#registerModal">
+                    <button type="button" class="btn btn-outline-bazaar-auth" data-bs-toggle="modal" data-bs-target="#registerModal">
                         <i class="bi bi-person-plus"></i> Реєстрація
                     </button>
                 </div>
@@ -293,6 +293,32 @@
         .list-group-item:last-child {
             border-bottom: none;
         }
+
+    /* Фірмовий зелений — як кнопки входу (.auth-btn--primary, --accent) */
+    .sidebar-welcome-card {
+        border: 1px solid rgba(152, 190, 42, 0.45);
+    }
+
+    .sidebar-welcome-card__head {
+        background: linear-gradient(180deg, #a3c92f 0%, var(--accent, #98be2a) 100%);
+        color: var(--bazaar-on-green, #2d2d2d) !important;
+        font-weight: 600;
+    }
+
+        .sidebar-welcome-card__head .bi {
+            color: inherit;
+        }
+
+    .sidebar-social-label {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--bazaar-on-green, #2d2d2d);
+        letter-spacing: 0.02em;
+    }
+
+    .sidebar-social-link:hover .sidebar-social-label {
+        text-decoration: underline;
+    }
 
     @@media (max-width: 768px) {
         .sidebar-wrapper {
