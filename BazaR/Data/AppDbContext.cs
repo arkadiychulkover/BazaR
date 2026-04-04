@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using BazaR.Models;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace BazaR.Data
 {

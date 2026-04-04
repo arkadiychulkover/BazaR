@@ -150,7 +150,6 @@ namespace BazaR.Tests.Controllers
 
             _controller.ControllerContext.HttpContext.User = claimsPrincipal;
 
-            // Настраиваем GetUserAsync для возврата пользователя
             _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
                 .ReturnsAsync(user);
         }
@@ -166,10 +165,10 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
-        public void Index_WhenAuthenticated_ReturnsViewWithItems()
+        public async Task Index_WhenAuthenticated_ReturnsViewWithItems()
         {
             SetupAuthenticatedUser();
-            var result = _controller.Index();
+            var result = await _controller.Index();
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<List<Item>>(viewResult.Model);
             Assert.Equal(2, model.Count);
@@ -178,101 +177,91 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
-        public void Index_WhenAuthenticatedWithEmptyWishlist_ReturnsEmptyList()
+        public async Task Index_WhenAuthenticatedWithEmptyWishlist_ReturnsEmptyList()
         {
             SetupAuthenticatedUser();
 
-            // Настраиваем пустой список желаний
             _mockUserDb.Setup(x => x.GetWishList(1))
                 .Returns(new List<Item>().AsQueryable());
 
-            var result = _controller.Index();
+            var result = await _controller.Index();
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<List<Item>>(viewResult.Model);
             Assert.Empty(model);
         }
 
         [Fact]
-        public void Index_WhenUnauthenticated_RedirectsToLogin()
+        public async Task Index_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
-            var result = _controller.Index();
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Equal("Site", redirectResult.ControllerName);
-            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+            var result = await _controller.Index();
+            Assert.IsType<ChallengeResult>(result);
         }
 
         [Fact]
-        public void Add_WhenAuthenticated_AddsItemToWishlist()
+        public async Task Add_WhenAuthenticated_AddsItemToWishlist()
         {
             SetupAuthenticatedUser();
-            var result = _controller.Add(3);
+            var result = await _controller.Add(3);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(WishlistController.Index), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.AddToWishList(1, 3), Times.Once);
         }
 
         [Fact]
-        public void Add_WhenAuthenticated_AddsExistingItemAgain()
+        public async Task Add_WhenAuthenticated_AddsExistingItemAgain()
         {
             SetupAuthenticatedUser();
-            var result = _controller.Add(1);
+            var result = await _controller.Add(1);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(WishlistController.Index), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.AddToWishList(1, 1), Times.Once);
         }
 
         [Fact]
-        public void Add_WhenUnauthenticated_RedirectsToLogin()
+        public async Task Add_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
-            var result = _controller.Add(1);
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Equal("Site", redirectResult.ControllerName);
-            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+            var result = await _controller.Add(1);
+            Assert.IsType<ChallengeResult>(result);
         }
 
         [Fact]
-        public void Remove_WhenAuthenticated_RemovesItemFromWishlist()
+        public async Task Remove_WhenAuthenticated_RemovesItemFromWishlist()
         {
             SetupAuthenticatedUser();
-            var result = _controller.Remove(1);
+            var result = await _controller.Remove(1);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(WishlistController.Index), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.RemoveFromWishList(1, 1), Times.Once);
         }
 
         [Fact]
-        public void Remove_WhenAuthenticated_RemovesNonExistentItem()
+        public async Task Remove_WhenAuthenticated_RemovesNonExistentItem()
         {
             SetupAuthenticatedUser();
-            var result = _controller.Remove(999);
+            var result = await _controller.Remove(999);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(WishlistController.Index), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.RemoveFromWishList(1, 999), Times.Once);
         }
 
         [Fact]
-        public void Remove_WhenUnauthenticated_RedirectsToLogin()
+        public async Task Remove_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
-            var result = _controller.Remove(1);
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Equal("Site", redirectResult.ControllerName);
-            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+            var result = await _controller.Remove(1);
+            Assert.IsType<ChallengeResult>(result);
         }
 
         [Fact]
-        public void Add_WithMultipleItems_AddsEachItem()
+        public async Task Add_WithMultipleItems_AddsEachItem()
         {
             SetupAuthenticatedUser();
 
-            _controller.Add(1);
-            _controller.Add(2);
-            _controller.Add(3);
+            await _controller.Add(1);
+            await _controller.Add(2);
+            await _controller.Add(3);
 
             _mockUserDb.Verify(x => x.AddToWishList(1, 1), Times.Once);
             _mockUserDb.Verify(x => x.AddToWishList(1, 2), Times.Once);
@@ -280,29 +269,27 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
-        public void Remove_WithMultipleItems_RemovesEachItem()
+        public async Task Remove_WithMultipleItems_RemovesEachItem()
         {
             SetupAuthenticatedUser();
 
-            _controller.Remove(1);
-            _controller.Remove(2);
+            await _controller.Remove(1);
+            await _controller.Remove(2);
 
             _mockUserDb.Verify(x => x.RemoveFromWishList(1, 1), Times.Once);
             _mockUserDb.Verify(x => x.RemoveFromWishList(1, 2), Times.Once);
         }
 
         [Fact]
-        public void Index_AfterAddingItem_ShowsUpdatedWishlist()
+        public async Task Index_AfterAddingItem_ShowsUpdatedWishlist()
         {
             SetupAuthenticatedUser();
 
-            // Изначально в вишлисте 2 item'а
-            var resultBefore = _controller.Index();
+            var resultBefore = await _controller.Index();
             var viewResultBefore = Assert.IsType<ViewResult>(resultBefore);
             var modelBefore = Assert.IsType<List<Item>>(viewResultBefore.Model);
             Assert.Equal(2, modelBefore.Count);
 
-            // Добавляем новый item
             _mockUserDb.Setup(x => x.GetWishList(1))
                 .Returns(() =>
                 {
@@ -310,7 +297,6 @@ namespace BazaR.Tests.Controllers
                         .Where(wi => wi.UserId == 1)
                         .Select(wi => wi.ItemId)
                         .ToList();
-                    // Добавляем item 3 в вишлист
                     if (!wishlistItemIds.Contains(3))
                         wishlistItemIds.Add(3);
                     return _testItems
@@ -318,7 +304,7 @@ namespace BazaR.Tests.Controllers
                         .AsQueryable();
                 });
 
-            var resultAfter = _controller.Index();
+            var resultAfter = await _controller.Index();
             var viewResultAfter = Assert.IsType<ViewResult>(resultAfter);
             var modelAfter = Assert.IsType<List<Item>>(viewResultAfter.Model);
             Assert.Equal(3, modelAfter.Count);

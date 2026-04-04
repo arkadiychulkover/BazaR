@@ -174,10 +174,10 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
-        public void Index_WhenAuthenticated_ReturnsViewWithItems()
+        public async Task Index_WhenAuthenticated_ReturnsViewWithItems()
         {
             SetupAuthenticatedUser();
-            var result = _controller.Index();
+            var result = await _controller.Index();
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.Equal("Cart", viewResult.ViewName);
             var model = Assert.IsType<List<Item>>(viewResult.Model);
@@ -188,94 +188,82 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
-        public void Index_WhenUnauthenticated_RedirectsToLogin()
+        public async Task Index_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
-            var result = _controller.Index();
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Equal("Site", redirectResult.ControllerName);
-            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+            var result = await _controller.Index();
+            Assert.IsType<ChallengeResult>(result);
         }
 
         [Fact]
-        public void Add_WhenAuthenticated_AddsItemToCart()
+        public async Task Add_WhenAuthenticated_AddsItemToCart()
         {
             SetupAuthenticatedUser();
-            var result = _controller.Add(3, 2);
+            var result = await _controller.Add(3, 2);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(CartController.Index), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.AddToCart(1, 3), Times.Exactly(2));
         }
 
         [Fact]
-        public void Add_WithInvalidQuantity_UsesDefaultQuantity()
+        public async Task Add_WithInvalidQuantity_UsesDefaultQuantity()
         {
             SetupAuthenticatedUser();
-            var result = _controller.Add(1, 0);
+            var result = await _controller.Add(1, 0);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(CartController.Index), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.AddToCart(1, 1), Times.Once);
         }
 
         [Fact]
-        public void Add_WhenUnauthenticated_RedirectsToLogin()
+        public async Task Add_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
-            var result = _controller.Add(1);
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Equal("Site", redirectResult.ControllerName);
-            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+            var result = await _controller.Add(1);
+            Assert.IsType<ChallengeResult>(result);
         }
 
         [Fact]
-        public void Remove_WhenAuthenticated_RemovesItem()
+        public async Task Remove_WhenAuthenticated_RemovesItem()
         {
             SetupAuthenticatedUser();
-            var result = _controller.Remove(1);
+            var result = await _controller.Remove(1);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(CartController.Index), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.RemoveFromCart(1, 1), Times.Once);
         }
 
         [Fact]
-        public void Remove_WhenUnauthenticated_RedirectsToLogin()
+        public async Task Remove_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
-            var result = _controller.Remove(1);
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Equal("Site", redirectResult.ControllerName);
-            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+            var result = await _controller.Remove(1);
+            Assert.IsType<ChallengeResult>(result);
         }
 
         [Fact]
-        public void Clear_WhenAuthenticated_ClearsCart()
+        public async Task Clear_WhenAuthenticated_ClearsCart()
         {
             SetupAuthenticatedUser();
-            var result = _controller.Clear();
+            var result = await _controller.Clear();
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(CartController.Index), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.ClearCart(1), Times.Once);
         }
 
         [Fact]
-        public void Clear_WhenUnauthenticated_RedirectsToLogin()
+        public async Task Clear_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
-            var result = _controller.Clear();
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Equal("Site", redirectResult.ControllerName);
-            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+            var result = await _controller.Clear();
+            Assert.IsType<ChallengeResult>(result);
         }
 
         [Fact]
-        public void Checkout_WhenAuthenticated_ReturnsView()
+        public async Task Checkout_WhenAuthenticated_ReturnsView()
         {
             SetupAuthenticatedUser();
-            var result = _controller.Checkout();
+            var result = await _controller.Checkout();
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<List<Item>>(viewResult.Model);
             Assert.Equal(3, model.Count);
@@ -283,34 +271,31 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
-        public void Checkout_WhenCartEmpty_RedirectsToIndexWithError()
+        public async Task Checkout_WhenCartEmpty_RedirectsToIndexWithError()
         {
             SetupAuthenticatedUser();
             _mockUserDb.Setup(x => x.GetCartItemsWithQuantity(1))
                 .Returns(new List<CartItem>());
 
-            var result = _controller.Checkout();
+            var result = await _controller.Checkout();
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(CartController.Index), redirectResult.ActionName);
             Assert.Equal("Корзина пустая.", _controller.TempData["Error"]);
         }
 
         [Fact]
-        public void Checkout_WhenUnauthenticated_RedirectsToLogin()
+        public async Task Checkout_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
-            var result = _controller.Checkout();
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Equal("Site", redirectResult.ControllerName);
-            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+            var result = await _controller.Checkout();
+            Assert.IsType<ChallengeResult>(result);
         }
 
         [Fact]
-        public void CreateOrder_WhenAuthenticated_CreatesOrder()
+        public async Task CreateOrder_WhenAuthenticated_CreatesOrder()
         {
             SetupAuthenticatedUser();
-            var result = _controller.CreateOrder("Test Address", "Cash", "Courier");
+            var result = await _controller.CreateOrder("Test Address", "Cash", "Courier");
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(CartController.Index), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.CreateOrder(1, It.IsAny<Order>()), Times.Once);
@@ -319,13 +304,13 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
-        public void CreateOrder_WhenCartEmpty_RedirectsToIndexWithError()
+        public async Task CreateOrder_WhenCartEmpty_RedirectsToIndexWithError()
         {
             SetupAuthenticatedUser();
             _mockUserDb.Setup(x => x.GetCartItemsWithQuantity(1))
                 .Returns(new List<CartItem>());
 
-            var result = _controller.CreateOrder("Address", "Cash", "Courier");
+            var result = await _controller.CreateOrder("Address", "Cash", "Courier");
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(CartController.Index), redirectResult.ActionName);
             Assert.Equal("Корзина пустая.", _controller.TempData["Error"]);
@@ -333,31 +318,28 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
-        public void CreateOrder_WhenCreateOrderFails_RedirectsToCheckoutWithError()
+        public async Task CreateOrder_WhenCreateOrderFails_RedirectsToCheckoutWithError()
         {
             SetupAuthenticatedUser();
             _mockUserDb.Setup(x => x.CreateOrder(It.IsAny<int>(), It.IsAny<Order>()))
                 .Returns(false);
 
-            var result = _controller.CreateOrder("Test Address", "Cash", "Courier");
+            var result = await _controller.CreateOrder("Test Address", "Cash", "Courier");
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(CartController.Checkout), redirectResult.ActionName);
             Assert.Equal("Не удалось создать заказ.", _controller.TempData["Error"]);
         }
 
         [Fact]
-        public void CreateOrder_WhenUnauthenticated_RedirectsToLogin()
+        public async Task CreateOrder_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
-            var result = _controller.CreateOrder("Address", "Cash", "Courier");
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-            Assert.Equal("Site", redirectResult.ControllerName);
-            Assert.Equal("Нужно войти в аккаунт.", _controller.TempData["Error"]);
+            var result = await _controller.CreateOrder("Address", "Cash", "Courier");
+            Assert.IsType<ChallengeResult>(result);
         }
 
         [Fact]
-        public void CreateOrder_CalculatesTotalAmountCorrectly()
+        public async Task CreateOrder_CalculatesTotalAmountCorrectly()
         {
             SetupAuthenticatedUser();
 
@@ -366,7 +348,7 @@ namespace BazaR.Tests.Controllers
                 .Callback<int, Order>((userId, order) => createdOrder = order)
                 .Returns(true);
 
-            var result = _controller.CreateOrder("Test Address", "Cash", "Courier");
+            var result = await _controller.CreateOrder("Test Address", "Cash", "Courier");
 
             Assert.NotNull(createdOrder);
             Assert.Equal(5800, createdOrder.TotalAmount);

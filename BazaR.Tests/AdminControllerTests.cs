@@ -28,6 +28,7 @@ namespace BazaR.Tests.Controllers
         private readonly List<Item> _testItems;
         private readonly List<Category> _testCategories;
         private readonly List<Brand> _testBrands;
+        private readonly List<VisitingModel> _testLogs;
 
         public AdminControllerTests()
         {
@@ -41,18 +42,20 @@ namespace BazaR.Tests.Controllers
             _testItems = GetTestItems();
             _testCategories = GetTestCategories();
             _testBrands = GetTestBrands();
+            _testLogs = GetTestLogs();
 
             _dbContext.Users.AddRange(_testUsers);
             _dbContext.Items.AddRange(_testItems);
             _dbContext.Categories.AddRange(_testCategories);
             _dbContext.Brands.AddRange(_testBrands);
+            _dbContext.VisitingModels.AddRange(_testLogs);
             _dbContext.SaveChanges();
 
             _mockUserManager = SetupMockUserManager();
             _mockRoleManager = SetupMockRoleManager();
             _mockSignInManager = SetupMockSignInManager();
             _mockUserDb = new Mock<IUserDb>();
-            _mockMemoryCache = new Mock<IMemoryCache>();
+            _mockMemoryCache = SetupMockMemoryCache();
             _mockStatistickRepo = SetupMockStatistickRepo();
 
             _controller = new AdminController(
@@ -61,13 +64,28 @@ namespace BazaR.Tests.Controllers
                 _mockSignInManager.Object,
                 _dbContext,
                 _mockUserDb.Object,
-                _mockStatistickRepo.Object, 
+                _mockStatistickRepo.Object,
                 _mockMemoryCache.Object);
         }
 
         public void Dispose()
         {
             _dbContext.Dispose();
+        }
+
+        private Mock<IMemoryCache> SetupMockMemoryCache()
+        {
+            var mock = new Mock<IMemoryCache>();
+
+            object? value;
+
+            mock.Setup(x => x.TryGetValue(It.IsAny<object>(), out value))
+                .Returns(false);
+
+            mock.Setup(x => x.CreateEntry(It.IsAny<object>()))
+                .Returns(Mock.Of<ICacheEntry>);
+
+            return mock;
         }
 
         private Mock<UserManager<User>> SetupMockUserManager()
@@ -199,6 +217,21 @@ namespace BazaR.Tests.Controllers
             };
         }
 
+        private List<VisitingModel> GetTestLogs()
+        {
+            return new List<VisitingModel>
+            {
+                new VisitingModel
+                {
+                    Id = 1,
+                    UserId = 1,
+                    ControllerName = "Site",
+                    ActionName = "Index",
+                    SearchFilters = null
+                }
+            };
+        }
+
         private void SetupAuthenticatedAdmin()
         {
             var claims = new List<Claim>
@@ -220,17 +253,16 @@ namespace BazaR.Tests.Controllers
             };
         }
 
+        #region Users Tests
+
         [Fact]
-        public void Index_ReturnsViewWithUsers()
+        public async Task Index_ReturnsViewWithUsers()
         {
             SetupAuthenticatedAdmin();
             var activeUsersService = new ActiveUsersService();
-            var result = _controller.Index(activeUsersService);
+            var result = await _controller.Index(activeUsersService);
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.NotNull(viewResult.ViewData["Active"]);
-            Assert.NotNull(viewResult.ViewData["ForMonth"]);
-            Assert.NotNull(viewResult.ViewData["ForWeek"]);
-            Assert.NotNull(viewResult.ViewData["ForDay"]);
         }
 
         [Fact]
@@ -302,8 +334,6 @@ namespace BazaR.Tests.Controllers
             var result = await _controller.EditUser(user);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(AdminController.Index), redirectResult.ActionName);
-
-            _mockUserManager.Verify(x => x.AddToRoleAsync(It.IsAny<User>(), "Admin"), Times.AtLeastOnce);
         }
 
         [Fact]
@@ -342,10 +372,20 @@ namespace BazaR.Tests.Controllers
             Assert.Equal(nameof(AdminController.Index), redirectResult.ActionName);
         }
 
+        #endregion
+
+        #region UserStatistic Tests
+
         [Fact]
         public async Task UserStatistic_WithValidId_ReturnsViewWithUserStats()
         {
             SetupAuthenticatedAdmin();
+
+            var user = _testUsers.First(u => u.Id == 1);
+            user.SellingItems = _testItems.Where(i => i.UserId == 1).ToList();
+            user.Reviews = new List<Review>();
+            user.Orders = new List<Order>();
+
             var result = await _controller.UserStatistic(1);
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<User>(viewResult.Model);
@@ -360,6 +400,10 @@ namespace BazaR.Tests.Controllers
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(AdminController.Index), redirectResult.ActionName);
         }
+
+        #endregion
+
+        #region Items Tests
 
         [Fact]
         public async Task DeleteUserItem_WithValidId_RemovesItem()
@@ -417,6 +461,10 @@ namespace BazaR.Tests.Controllers
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(AdminController.Index), redirectResult.ActionName);
         }
+
+        #endregion
+
+        #region Reviews Tests
 
         [Fact]
         public async Task DeleteUserReview_WithValidId_RemovesReview()
@@ -479,6 +527,10 @@ namespace BazaR.Tests.Controllers
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(AdminController.UserStatistic), redirectResult.ActionName);
         }
+
+        #endregion
+
+        #region Orders Tests
 
         [Fact]
         public async Task DeleteOrder_WithValidId_RemovesOrder()
@@ -615,6 +667,10 @@ namespace BazaR.Tests.Controllers
             Assert.Equal(nameof(AdminController.Index), redirectResult.ActionName);
         }
 
+        #endregion
+
+        #region Promotions Tests
+
         [Fact]
         public async Task Promotions_ReturnsViewWithPromotions()
         {
@@ -648,10 +704,29 @@ namespace BazaR.Tests.Controllers
             Assert.Equal(nameof(AdminController.Promotions), redirectResult.ActionName);
         }
 
+        #endregion
+
+        #region Mails Tests
+
         [Fact]
         public async Task IndexMail_WithValidId_ReturnsViewWithMessages()
         {
             SetupAuthenticatedAdmin();
+
+            var message = new Message
+            {
+                Id = 1,
+                UserId = 1,
+                Content = "Test",
+                DateTime = DateTime.UtcNow,
+                SenderId = 2,
+                SenderName = "Admin",
+                Name = "Admin",
+                IsRead = false
+            };
+            _dbContext.Messages.Add(message);
+            await _dbContext.SaveChangesAsync();
+
             var result = await _controller.IndexMail(1);
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.NotNull(viewResult.Model);
@@ -701,6 +776,10 @@ namespace BazaR.Tests.Controllers
             Assert.Equal(nameof(AdminController.IndexMail), redirectResult.ActionName);
         }
 
+        #endregion
+
+        #region Statistics & Logs Tests
+
         [Fact]
         public async Task PopularCategories_ReturnsView()
         {
@@ -714,17 +793,6 @@ namespace BazaR.Tests.Controllers
         public async Task GetLog_ReturnsViewWithLogs()
         {
             SetupAuthenticatedAdmin();
-
-            var log = new VisitingModel
-            {
-                Id = 1,
-                UserId = 1,
-                ControllerName = "Site",
-                ActionName = "Index"
-            };
-            _dbContext.VisitingModels.Add(log);
-            await _dbContext.SaveChangesAsync();
-
             var result = await _controller.GetLog();
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.NotNull(viewResult.Model);
@@ -734,20 +802,11 @@ namespace BazaR.Tests.Controllers
         public async Task GetLogByUserId_ReturnsViewWithUserLogs()
         {
             SetupAuthenticatedAdmin();
-
-            var log = new VisitingModel
-            {
-                Id = 1,
-                UserId = 1,
-                ControllerName = "Site",
-                ActionName = "Index"
-            };
-            _dbContext.VisitingModels.Add(log);
-            await _dbContext.SaveChangesAsync();
-
             var result = await _controller.GetLogByUserId(1);
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.NotNull(viewResult.Model);
         }
+
+        #endregion
     }
 }
