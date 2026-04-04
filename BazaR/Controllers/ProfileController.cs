@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BazaR.Controllers
 {
@@ -16,12 +17,14 @@ namespace BazaR.Controllers
         private readonly UserManager<User> _userManager;
         private readonly AppDbContext _db;
         private readonly IUserDb _usMan;
+        private readonly IMemoryCache _cache;
 
-        public ProfileController(UserManager<User> userManager, AppDbContext db, IUserDb usMan)
+        public ProfileController(UserManager<User> userManager, AppDbContext db, IUserDb usMan, IMemoryCache cache)
         {
             _userManager = userManager;
             _db = db;
             _usMan = usMan;
+            _cache = cache;
         }
 
         private async Task<(User user, AccountProfileViewModel vm)> GetUserAndProfileAsync()
@@ -539,58 +542,44 @@ namespace BazaR.Controllers
 
         // ─── Messages ────────────────────────────────────────────────────────────
 
-        public async Task<IActionResult> Messages(int page = 1)
+        public async Task<IActionResult> Messages()
         {
             ViewBag.ActiveMenu = "Messages";
             var (user, profile) = await GetUserAndProfileAsync();
 
-            const int pageSize = 4;
+            //CACHE
+            var cacheKey = $"messages:{user.Id}";
 
-            var baseQuery = _db.Messages
-                .AsNoTracking()
-                .Where(m => m.UserId == user.Id)
-                .OrderByDescending(m => m.DateTime);
+            if (!_cache.TryGetValue(cacheKey, out List<MessageVm> messages))
+            {
+                messages = await _db.Messages
+                    .Include(m => m.User)
+                    .Where(m => m.UserId == user.Id)
+                    .OrderByDescending(m => m.DateTime)
+                    .Select(m => new MessageVm
+                    {
+                        Id = m.Id,
+                        Name = m.Name,
+                        Content = m.Content,
+                        SenderName = m.SenderName,
+                        DateTime = m.DateTime,
+                        IsRead = m.IsRead,
+                        SenderId = m.SenderId
+                    })
+                    .ToListAsync();
 
-            var totalCount = await baseQuery.CountAsync();
-            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-
-            if (totalPages <= 0)
-                totalPages = 1;
-
-            if (page < 1)
-                page = 1;
-            if (page > totalPages)
-                page = totalPages;
-
-            var messages = await baseQuery
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(m => new MessageVm
+                _cache.Set(cacheKey, messages, new MemoryCacheEntryOptions
                 {
-                    Id = m.Id,
-                    Name = m.Name,
-                    Content = m.Content,
-                    SenderName = m.SenderName,
-                    DateTime = m.DateTime,
-                    IsRead = m.IsRead,
-                    SenderId = m.SenderId
-                })
-                .ToListAsync();
-
-            var unreadCount = await _db.Messages
-                .AsNoTracking()
-                .Where(m => m.UserId == user.Id && !m.IsRead)
-                .CountAsync();
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2),
+                    SlidingExpiration = TimeSpan.FromMinutes(1)
+                });
+            }
 
             var vm = new AccountMessagesViewModel
             {
                 Profile = profile,
                 Messages = messages,
-                NewMessagesCount = unreadCount,
-                CurrentPage = page,
-                PageSize = pageSize,
-                TotalCount = totalCount,
-                TotalPages = totalPages
+                NewMessagesCount = messages.Count(m => !m.IsRead)
             };
 
             return View(vm);

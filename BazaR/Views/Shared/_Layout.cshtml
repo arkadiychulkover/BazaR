@@ -25,18 +25,17 @@
 
     @RenderSection("Styles", required: false)
     <style>
-        html, body {
-            height: 100%;
-        }
-
+        /* Без min-height на html/body: інакше при 100% zoom зайвий простір іде в main (flex-grow)
+           і виглядає як великий сірий зазор над/під футером; на 80% ефект менш помітний. */
         body {
             display: flex;
             flex-direction: column;
             background-color: #f5f5f5;
+            margin: 0;
         }
 
         main {
-            flex: 1 0 auto;
+            flex: 0 1 auto;
         }
 
         .navbar-brand {
@@ -44,19 +43,19 @@
             font-size: 22px;
         }
 
-        .sale-banner {
-            height: 320px;
-            background: linear-gradient(135deg, #ff4d4d, #cc0000);
-            color: white;
-            border-radius: 12px;
+        footer.site-footer {
+            flex-shrink: 0;
+            margin-top: 32px;
+            margin-bottom: 0;
         }
 
-        footer {
+        /* Застарілий стиль для інших <footer> без .site-footer */
+        footer:not(.site-footer) {
             flex-shrink: 0;
             background: #212529;
             color: #ccc;
             padding: 30px 0;
-            margin-top: 50px;
+            margin-top: 32px;
         }
 
             footer a {
@@ -71,7 +70,7 @@
         /* Стили для сообщений TempData */
         .alert-container {
             position: fixed;
-            top: 80px;
+            top: 108px;
             right: 20px;
             z-index: 9999;
             max-width: 350px;
@@ -121,6 +120,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }
+    </div>
+
+    <div class="site-promo-ribbon">
+        <span class="site-promo-ribbon__text">ТОТАЛЬНИЙ РОЗПРОДАЖ ДО -50%</span>
     </div>
 
     <!-- HEADER -->

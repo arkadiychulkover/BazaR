@@ -71,7 +71,7 @@ builder.Services
         options.ClientSecret = "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";
         options.SaveTokens = true;
     });
-
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<DbMaker>();
 builder.Services.AddScoped<UserContextFilter>();
 builder.Services.AddScoped<LoggerActionFilter>();

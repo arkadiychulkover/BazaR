@@ -241,22 +241,6 @@ namespace BazaR.Controllers
             // Добавляем роль User по умолчанию
             await _userManager.AddToRoleAsync(user, "User");
 
-            // Создаём настройку для рассылок
-            var mailing = new MailingSetting
-            {
-                UserId = user.Id,
-                NewsAndUpdates = true,
-                SpecialOffers = true,
-                PersonalRecommendations = true,
-                ProductAlerts = false,
-                WeeklyDigest = false,
-                PreferredFrequency = "weekly",
-                LastMailingSentAt = null,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-
             await _signInManager.SignInAsync(user, new AuthenticationProperties
             {
                 IsPersistent = true,
@@ -363,22 +347,6 @@ namespace BazaR.Controllers
 
                 // Добавляем роль User
                 await _userManager.AddToRoleAsync(user, "User");
-
-                // Создаём настройку для рассылок
-                var mailing = new MailingSetting
-                {
-                    UserId = user.Id,
-                    NewsAndUpdates = true,
-                    SpecialOffers = true,
-                    PersonalRecommendations = true,
-                    ProductAlerts = false,
-                    WeeklyDigest = false,
-                    PreferredFrequency = "weekly",
-                    LastMailingSentAt = null,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
             }
 
             var addLoginResult = await _userManager.AddLoginAsync(user, info);

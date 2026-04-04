@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BazaR.Controllers
 {
@@ -20,6 +21,7 @@ namespace BazaR.Controllers
         private readonly AppDbContext _appDbContext;
         private readonly IUserDb _UserRepo;
         private readonly IUserStatistick _StatistickRepo;
+        private readonly IMemoryCache _cache;
         private readonly string adminRoleName = "Admin";
 
         public AdminController(
@@ -27,7 +29,8 @@ namespace BazaR.Controllers
             RoleManager<IdentityRole<int>> roleManager,
             SignInManager<User> signInManager,
             AppDbContext appDbContext,
-            IUserDb userDb, IUserStatistick StatistickRepo)
+            IUserDb userDb, IUserStatistick StatistickRepo,
+            IMemoryCache cache)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -35,6 +38,7 @@ namespace BazaR.Controllers
             _appDbContext = appDbContext;
             _UserRepo = userDb;
             _StatistickRepo = StatistickRepo;
+            _cache = cache;
         }
 
         #region Users
@@ -159,6 +163,9 @@ namespace BazaR.Controllers
                 int userId = it.UserId;
                 _appDbContext.Items.Remove(it);
                 await _appDbContext.SaveChangesAsync();
+                //CACHE
+                _cache.Remove("browse:*");
+
                 return RedirectToAction(nameof(UserStatistic), new { id = userId });
             }
             return RedirectToAction(nameof(Index));
@@ -190,6 +197,9 @@ namespace BazaR.Controllers
                 it.ImageUrl = item.ImageUrl;
 
                 await _appDbContext.SaveChangesAsync();
+                //CACHE
+                _cache.Remove("browse:*");
+
                 return RedirectToAction(nameof(UserStatistic), new { id = it.UserId });
             }
             return RedirectToAction(nameof(Index));
@@ -342,11 +352,22 @@ namespace BazaR.Controllers
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
                 return NotFound();
+            //CACHE
+            var cacheKey = $"messages:{user.Id}";
 
-            var messages = await _appDbContext.Messages
-                .Where(m => m.UserId == id)
-                .OrderByDescending(m => m.DateTime)
-                .ToListAsync();
+            if (!_cache.TryGetValue(cacheKey, out List<Message> messages))
+            {
+                messages = await _appDbContext.Messages
+                    .Where(m => m.UserId == id)
+                    .OrderByDescending(m => m.DateTime)
+                    .ToListAsync();
+
+                _cache.Set(cacheKey, messages, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2),
+                    SlidingExpiration = TimeSpan.FromMinutes(1)
+                });
+            }
 
             var model = new AdminMessageViewModel
             {
@@ -395,7 +416,8 @@ namespace BazaR.Controllers
 
             _appDbContext.Messages.Add(message);
             await _appDbContext.SaveChangesAsync();
-
+            //CACHE
+            _cache.Remove("messages:{user.Id}");
             TempData["Success"] = "Сообщение успешно отправлено.";
             return RedirectToAction(nameof(IndexMail), new { id = vm.UserId });
         }
@@ -411,10 +433,11 @@ namespace BazaR.Controllers
                 _appDbContext.Messages.Remove(message);
                 await _appDbContext.SaveChangesAsync();
             }
-
+            //CACHE
+            _cache.Remove("messages:{user.Id}");
             return RedirectToAction(nameof(IndexMail), new { id = userId });
         }
-#endregion
+        #endregion
 
         [HttpGet]
         public async Task<IActionResult> PopularCategories()

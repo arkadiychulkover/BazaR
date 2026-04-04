@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
 
 namespace BazaR.Controllers
@@ -24,6 +25,7 @@ namespace BazaR.Controllers
         private readonly AppDbContext _db;
         private readonly UserManager<User> _userManager;
         private const int PageSize = 12;
+        private readonly IMemoryCache _cache;
 
         #endregion
 
@@ -34,13 +36,15 @@ namespace BazaR.Controllers
             IItemRepository itMan,
             AppDbContext db,
             UserManager<User> userManager,
-            ILogDb log)
+            ILogDb log,
+            IMemoryCache cache)
         {
             _usMan = usMan;
             _itMan = itMan;
             _db = db;
             _userManager = userManager;
             _log = log;
+            _cache = cache;
         }
 
         #endregion
@@ -338,24 +342,35 @@ namespace BazaR.Controllers
             }
 
             ViewBag.FilterOptions = filterOptions;
+            //CACHE
+            var cacheKey = $"browse:{query}:{string.Join("-", categoryIds ?? new())}:{page}:{sort}:{minPrice}:{maxPrice}:{string.Join("-", brandIds ?? new())}:{Request.QueryString}";
 
-            var items = itemsQuery.ToList();
-
-            items = sort switch
+            if (!_cache.TryGetValue(cacheKey, out List<Item> items))
             {
-                "price_asc" => items.OrderBy(i => i.Price).ToList(),
-                "price_desc" => items.OrderByDescending(i => i.Price).ToList(),
-                "name_asc" => items.OrderBy(i => i.Name).ToList(),
-                "name_desc" => items.OrderByDescending(i => i.Name).ToList(),
-                "rating_desc" => items
-                    .OrderByDescending(i => i.Reviews
-                        .Select(r => r.Rating)
-                        .DefaultIfEmpty(0)
-                        .Average())
-                    .ToList(),
-                "newest" => items.OrderByDescending(i => i.Id).ToList(),
-                _ => items.OrderBy(i => i.Id).ToList()
-            };
+                items = itemsQuery.ToList();
+
+                items = sort switch
+                {
+                    "price_asc" => items.OrderBy(i => i.Price).ToList(),
+                    "price_desc" => items.OrderByDescending(i => i.Price).ToList(),
+                    "name_asc" => items.OrderBy(i => i.Name).ToList(),
+                    "name_desc" => items.OrderByDescending(i => i.Name).ToList(),
+                    "rating_desc" => items
+                        .OrderByDescending(i => i.Reviews
+                            .Select(r => r.Rating)
+                            .DefaultIfEmpty(0)
+                            .Average())
+                        .ToList(),
+                    "newest" => items.OrderByDescending(i => i.Id).ToList(),
+                    _ => items.OrderBy(i => i.Id).ToList()
+                };
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(5))
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(2));
+
+                _cache.Set(cacheKey, items, cacheOptions);
+            }
 
             var total = items.Count;
             var totalPages = (int)Math.Ceiling(total / (double)PageSize);
@@ -1257,6 +1272,123 @@ namespace BazaR.Controllers
         [HttpGet]
         public List<Item> FilterItems(int? categoryId, int? brandId, decimal? minPrice, decimal? maxPrice, bool? isAvailable)
             => _itMan.Filter(categoryId, brandId, minPrice, maxPrice, isAvailable);
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> CreateItemUser()
+        {
+            User us = await _userManager.GetUserAsync(User);
+
+            ViewBag.Categories = _db.Categories.ToList();
+            ViewBag.Brands = _db.Brands.ToList();
+            ViewBag.UserItems = _db.Items.Where(i => i.UserId == us.Id).ToList();
+
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreateItemUser(
+            Item model,
+            List<ItemCharacteristic> Characteristics,
+            List<ItemColor> Colors,
+            List<Usluga> SelectedUslugs,
+            IFormFile imageFile,
+            string ComplectName,
+            List<int> SelectedItemIds
+        )
+        {
+            if (model == null || imageFile == null)
+                return RedirectToAction(nameof(CreateItemUser));
+
+            User us = await _userManager.GetUserAsync(User);
+
+            string filename = $"{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/items", filename);
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            model.Characteristics = null;
+            model.Colors = null;
+            model.Uslugi = null;
+            model.UserId = us.Id;
+            model.ImageUrl = "/images/items/" + filename;
+
+            _db.Items.Add(model);
+            await _db.SaveChangesAsync();
+
+            if (Characteristics != null && Characteristics.Any())
+            {
+                foreach (var charac in Characteristics.Where(c => !string.IsNullOrEmpty(c.Key)))
+                {
+                    _db.ItemCharacteristics.Add(new ItemCharacteristic
+                    {
+                        Key = charac.Key,
+                        Value = charac.Value,
+                        ItemId = model.Id
+                    });
+                }
+            }
+
+            if (Colors != null && Colors.Any())
+            {
+                foreach (var color in Colors.Where(c => !string.IsNullOrEmpty(c.Color)))
+                {
+                    _db.ItemColors.Add(new ItemColor
+                    {
+                        Color = color.Color,
+                        ItemId = model.Id
+                    });
+                }
+            }
+
+            if (SelectedUslugs != null && SelectedUslugs.Any())
+            {
+                foreach (var usl in SelectedUslugs.Where(u => !string.IsNullOrEmpty(u.Name)))
+                {
+                    _db.Uslugi.Add(new Usluga
+                    {
+                        Name = usl.Name,
+                        Price = usl.Price,
+                        Description = usl.Description ?? $"Услуга для товара {model.Name}",
+                        ItemId = model.Id
+                    });
+                }
+            }
+
+            if (!string.IsNullOrEmpty(ComplectName) && SelectedItemIds != null && SelectedItemIds.Any())
+            {
+                var complect = new Complect
+                {
+                    Name = ComplectName
+                };
+
+                _db.Complects.Add(complect);
+                await _db.SaveChangesAsync();
+
+                foreach (var itemId in SelectedItemIds)
+                {
+                    _db.ComplectItems.Add(new ComplectItem
+                    {
+                        ComplectId = complect.Id,
+                        ItemId = itemId
+                    });
+                }
+
+                _db.ComplectItems.Add(new ComplectItem
+                {
+                    ComplectId = complect.Id,
+                    ItemId = model.Id
+                });
+            }
+            //CACHE
+            await _db.SaveChangesAsync();
+            _cache.Remove("browse:*");
+            return RedirectToAction(nameof(ItemDetails), new { id = model.Id });
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
