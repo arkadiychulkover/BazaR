@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using System.Security.Claims;
 
@@ -20,6 +21,7 @@ namespace BazaR.Tests.Controllers
         private readonly Mock<SignInManager<User>> _mockSignInManager;
         private readonly Mock<IUserDb> _mockUserDb;
         private readonly Mock<IUserStatistick> _mockStatistickRepo;
+        private readonly Mock<IMemoryCache> _mockMemoryCache;
         private readonly AppDbContext _dbContext;
         private readonly AdminController _controller;
         private readonly List<User> _testUsers;
@@ -50,6 +52,7 @@ namespace BazaR.Tests.Controllers
             _mockRoleManager = SetupMockRoleManager();
             _mockSignInManager = SetupMockSignInManager();
             _mockUserDb = new Mock<IUserDb>();
+            _mockMemoryCache = new Mock<IMemoryCache>();
             _mockStatistickRepo = SetupMockStatistickRepo();
 
             _controller = new AdminController(
@@ -58,7 +61,8 @@ namespace BazaR.Tests.Controllers
                 _mockSignInManager.Object,
                 _dbContext,
                 _mockUserDb.Object,
-                _mockStatistickRepo.Object);
+                _mockStatistickRepo.Object, 
+                _mockMemoryCache.Object);
         }
 
         public void Dispose()

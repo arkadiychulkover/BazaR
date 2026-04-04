@@ -1164,7 +1164,7 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
-        public void Payment_WhenOrderBelongsToAnotherUser_ReturnsNotFound()
+        public async void Payment_WhenOrderBelongsToAnotherUser_ReturnsNotFound()
         {
             var user1 = new User { Id = 500, Name = "User1", Email = "user1@test.com", UserName = "user1@test.com", IsAdmin = false };
             var user2 = new User { Id = 501, Name = "User2", Email = "user2@test.com", UserName = "user2@test.com", IsAdmin = false };
@@ -1185,7 +1185,7 @@ namespace BazaR.Tests.Controllers
 
             SetupAuthenticatedUser(501);
 
-            var result = _controller.Payment(500);
+            var result = await _controller.Payment(500);
 
             if (result is NotFoundResult)
             {

@@ -68,6 +68,7 @@ builder.Services
         options.SaveTokens = true;
     });
 
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<DbMaker>();
 builder.Services.AddScoped<UserContextFilter>();
 builder.Services.AddScoped<LoggerActionFilter>();
