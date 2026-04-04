@@ -21,4 +21,8 @@
 		<Folder Include="wwwroot\images\items\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Include="BazaR.Tests.csproj" />
+	</ItemGroup>
+
 </Project>

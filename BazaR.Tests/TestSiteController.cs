@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using System.Security.Claims;
 using Xunit;
@@ -24,6 +25,7 @@ namespace BazaR.Tests.Controllers
         private readonly Mock<IUserDb> _mockUserDb;
         private readonly Mock<IItemRepository> _mockItemRepo;
         private readonly Mock<ILogDb> _mockLogDb;
+        private readonly Mock<IMemoryCache> _mockMemoryCache;
         private readonly Mock<UserManager<User>> _mockUserManager;
         private readonly AppDbContext _dbContext;
         private readonly SiteController _controller;
@@ -38,6 +40,7 @@ namespace BazaR.Tests.Controllers
             _mockUserDb = new Mock<IUserDb>();
             _mockItemRepo = new Mock<IItemRepository>();
             _mockLogDb = new Mock<ILogDb>();
+            _mockMemoryCache = new Mock<IMemoryCache>();
 
             var userStoreMock = new Mock<IUserStore<User>>();
             _mockUserManager = new Mock<UserManager<User>>(
@@ -68,7 +71,8 @@ namespace BazaR.Tests.Controllers
                 _mockItemRepo.Object,
                 _dbContext,
                 _mockUserManager.Object,
-                _mockLogDb.Object);
+                _mockLogDb.Object,
+                _mockMemoryCache.Object);
         }
 
         public void Dispose()

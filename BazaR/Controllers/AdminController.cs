@@ -465,6 +465,8 @@ namespace BazaR.Controllers
                 };
 
                 _cache.Remove($"Messages_{vm.UserId}");
+                _cache.Remove($"user_messages:{vm.UserId}:page:1");
+                _cache.Remove($"user_messages:{vm.UserId}:page:1");
 
                 return View("IndexMail", model);
             }
@@ -502,6 +504,8 @@ namespace BazaR.Controllers
                 _appDbContext.Messages.Remove(message);
                 await _appDbContext.SaveChangesAsync();
                 _cache.Remove($"Messages_{userId}");
+                _cache.Remove($"user_messages:{userId}:page:1");
+                _cache.Remove($"user_messages:{userId}:page:1");
             }
 
             return RedirectToAction(nameof(IndexMail), new { id = userId });
