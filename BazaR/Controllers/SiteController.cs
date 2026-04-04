@@ -77,8 +77,17 @@ namespace BazaR.Controllers
 
             var categories = _db.Categories.ToList();
 
+            var sidebarBrandIds = new[] { 1, 2, 3, 7, 8, 12 };
+            ViewBag.SidebarPopularBrands = _db.Brands.AsNoTracking()
+                .Where(b => sidebarBrandIds.Contains(b.Id))
+                .ToList()
+                .OrderBy(b => Array.IndexOf(sidebarBrandIds, b.Id))
+                .ToList();
+
             // Акційні пропозиції (дорогі, доступні)
             var featuredItems = _db.Items
+                .AsNoTracking()
+                .Include(i => i.Category)
                 .Where(i => i.IsAvailable)
                 .OrderByDescending(i => i.Price)
                 .Take(5)
@@ -86,6 +95,8 @@ namespace BazaR.Controllers
 
             // Зараз шукають (по кількості відгуків)
             var trendingItems = _db.Items
+                .AsNoTracking()
+                .Include(i => i.Category)
                 .Where(i => i.IsAvailable)
                 .OrderByDescending(i => i.Reviews.Count)
                 .Take(5)
@@ -93,6 +104,8 @@ namespace BazaR.Controllers
 
             // Рекомендації (нові товари)
             var recommendedItems = _db.Items
+                .AsNoTracking()
+                .Include(i => i.Category)
                 .Where(i => i.IsAvailable)
                 .OrderByDescending(i => i.Id)
                 .Take(5)
@@ -100,6 +113,8 @@ namespace BazaR.Controllers
 
             // Найбільш очікувані (за середнім рейтингом)
             var popularItems = _db.Items
+                .AsNoTracking()
+                .Include(i => i.Category)
                 .Where(i => i.IsAvailable)
                 .OrderByDescending(i => i.Reviews.Any() ? i.Reviews.Average(r => r.Rating) : 0)
                 .Take(5)
@@ -395,6 +410,7 @@ namespace BazaR.Controllers
             List<int> categorysId = GetSubCategoryIds(category);
             List<Category> categories = new();
             ViewBag.CategotyName = _itMan.GetCategoryById(category).Name;
+            ViewBag.CategoryPageRootId = category;
 
             foreach (int cat in categorysId)
             {

@@ -1,4 +1,4 @@
-﻿@model List<BazaR.Models.Category>
+@model List<BazaR.Models.Category>
 
 @{
     var mainCategories = Model?
@@ -29,7 +29,14 @@
 
                         @if (!string.IsNullOrEmpty(category.IconUrl))
                         {
-                            <i class="bi @category.IconUrl"></i>
+                            if (CategoryDisplayHelper.IsWebImagePath(category.IconUrl))
+                            {
+                                <img src="@category.IconUrl" alt="" width="20" height="20" style="object-fit:contain;flex-shrink:0;" />
+                            }
+                            else
+                            {
+                                <i class="bi @category.IconUrl"></i>
+                            }
                         }
                         else
                         {
