@@ -9526,6 +9526,9 @@ namespace BazaR.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("LastMailingSentAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("NewsAndUpdates")
                         .HasColumnType("bit");
 

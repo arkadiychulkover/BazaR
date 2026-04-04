@@ -79,7 +79,7 @@ namespace BazaR.HostedServices
                     _logger.LogError(ex, "Error in MailingBackgroundService");
                 }
 
-                await Task.Delay(TimeSpan.FromHours(5), stoppingToken);
+                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
             }
 
             _logger.LogInformation("MailingBackgroundService stopped.");

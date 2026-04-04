@@ -352,12 +352,13 @@ namespace BazaR.Controllers
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
                 return NotFound();
-            //CACHE
-            var cacheKey = $"messages:{user.Id}";
+
+            var cacheKey = $"admin_messages:{id}";
 
             if (!_cache.TryGetValue(cacheKey, out List<Message> messages))
             {
                 messages = await _appDbContext.Messages
+                    .AsNoTracking()
                     .Where(m => m.UserId == id)
                     .OrderByDescending(m => m.DateTime)
                     .ToListAsync();
@@ -388,6 +389,7 @@ namespace BazaR.Controllers
                 var user = await _userManager.FindByIdAsync(vm.UserId.ToString());
 
                 var messages = await _appDbContext.Messages
+                    .AsNoTracking()
                     .Where(m => m.UserId == vm.UserId)
                     .OrderByDescending(m => m.DateTime)
                     .ToListAsync();
@@ -402,7 +404,9 @@ namespace BazaR.Controllers
 
                 return View("IndexMail", model);
             }
+
             var sender = await _userManager.GetUserAsync(User);
+
             var message = new Message
             {
                 UserId = vm.UserId,
@@ -416,8 +420,10 @@ namespace BazaR.Controllers
 
             _appDbContext.Messages.Add(message);
             await _appDbContext.SaveChangesAsync();
-            //CACHE
-            _cache.Remove("messages:{user.Id}");
+
+            _cache.Remove($"admin_messages:{vm.UserId}");
+            _cache.Remove($"user_messages:{vm.UserId}:page:1");
+
             TempData["Success"] = "Сообщение успешно отправлено.";
             return RedirectToAction(nameof(IndexMail), new { id = vm.UserId });
         }
@@ -433,8 +439,10 @@ namespace BazaR.Controllers
                 _appDbContext.Messages.Remove(message);
                 await _appDbContext.SaveChangesAsync();
             }
-            //CACHE
-            _cache.Remove("messages:{user.Id}");
+
+            _cache.Remove($"admin_messages:{userId}");
+            _cache.Remove($"user_messages:{userId}:page:1");
+
             return RedirectToAction(nameof(IndexMail), new { id = userId });
         }
         #endregion

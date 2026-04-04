@@ -542,20 +542,39 @@ namespace BazaR.Controllers
 
         // ─── Messages ────────────────────────────────────────────────────────────
 
-        public async Task<IActionResult> Messages()
+        public async Task<IActionResult> Messages(int page = 1)
         {
             ViewBag.ActiveMenu = "Messages";
             var (user, profile) = await GetUserAndProfileAsync();
 
-            //CACHE
-            var cacheKey = $"messages:{user.Id}";
+            const int pageSize = 4;
 
-            if (!_cache.TryGetValue(cacheKey, out List<MessageVm> messages))
+            if (page < 1)
+                page = 1;
+
+            var totalCount = await _db.Messages
+                .AsNoTracking()
+                .Where(m => m.UserId == user.Id)
+                .CountAsync();
+
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            if (totalPages <= 0)
+                totalPages = 1;
+
+            if (page > totalPages)
+                page = totalPages;
+
+            var cacheKey = $"user_messages:{user.Id}:page:{page}";
+
+            if (!_cache.TryGetValue(cacheKey, out AccountMessagesViewModel vm))
             {
-                messages = await _db.Messages
-                    .Include(m => m.User)
+                var messages = await _db.Messages
+                    .AsNoTracking()
                     .Where(m => m.UserId == user.Id)
                     .OrderByDescending(m => m.DateTime)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
                     .Select(m => new MessageVm
                     {
                         Id = m.Id,
@@ -568,19 +587,32 @@ namespace BazaR.Controllers
                     })
                     .ToListAsync();
 
-                _cache.Set(cacheKey, messages, new MemoryCacheEntryOptions
+                var unreadCount = await _db.Messages
+                    .AsNoTracking()
+                    .Where(m => m.UserId == user.Id && !m.IsRead)
+                    .CountAsync();
+
+                vm = new AccountMessagesViewModel
+                {
+                    Profile = profile,
+                    Messages = messages,
+                    NewMessagesCount = unreadCount,
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    TotalPages = totalPages
+                };
+
+                _cache.Set(cacheKey, vm, new MemoryCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2),
                     SlidingExpiration = TimeSpan.FromMinutes(1)
                 });
             }
-
-            var vm = new AccountMessagesViewModel
+            else
             {
-                Profile = profile,
-                Messages = messages,
-                NewMessagesCount = messages.Count(m => !m.IsRead)
-            };
+                vm.Profile = profile;
+            }
 
             return View(vm);
         }
