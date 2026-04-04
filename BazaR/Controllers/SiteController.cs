@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
 
 namespace BazaR.Controllers
@@ -24,6 +25,7 @@ namespace BazaR.Controllers
         private readonly AppDbContext _db;
         private readonly UserManager<User> _userManager;
         private const int PageSize = 12;
+        private readonly IMemoryCache _cache;
 
         #endregion
 
@@ -34,13 +36,15 @@ namespace BazaR.Controllers
             IItemRepository itMan,
             AppDbContext db,
             UserManager<User> userManager,
-            ILogDb log)
+            ILogDb log,
+            IMemoryCache cache)
         {
             _usMan = usMan;
             _itMan = itMan;
             _db = db;
             _userManager = userManager;
             _log = log;
+            _cache = cache;
         }
 
         #endregion
@@ -339,23 +343,34 @@ namespace BazaR.Controllers
 
             ViewBag.FilterOptions = filterOptions;
 
-            var items = itemsQuery.ToList();
+            var cacheKey = $"browse:{query}:{string.Join("-", categoryIds ?? new())}:{page}:{sort}:{minPrice}:{maxPrice}:{string.Join("-", brandIds ?? new())}:{Request.QueryString}";
 
-            items = sort switch
+            if (!_cache.TryGetValue(cacheKey, out List<Item> items))
             {
-                "price_asc" => items.OrderBy(i => i.Price).ToList(),
-                "price_desc" => items.OrderByDescending(i => i.Price).ToList(),
-                "name_asc" => items.OrderBy(i => i.Name).ToList(),
-                "name_desc" => items.OrderByDescending(i => i.Name).ToList(),
-                "rating_desc" => items
-                    .OrderByDescending(i => i.Reviews
-                        .Select(r => r.Rating)
-                        .DefaultIfEmpty(0)
-                        .Average())
-                    .ToList(),
-                "newest" => items.OrderByDescending(i => i.Id).ToList(),
-                _ => items.OrderBy(i => i.Id).ToList()
-            };
+                items = itemsQuery.ToList();
+
+                items = sort switch
+                {
+                    "price_asc" => items.OrderBy(i => i.Price).ToList(),
+                    "price_desc" => items.OrderByDescending(i => i.Price).ToList(),
+                    "name_asc" => items.OrderBy(i => i.Name).ToList(),
+                    "name_desc" => items.OrderByDescending(i => i.Name).ToList(),
+                    "rating_desc" => items
+                        .OrderByDescending(i => i.Reviews
+                            .Select(r => r.Rating)
+                            .DefaultIfEmpty(0)
+                            .Average())
+                        .ToList(),
+                    "newest" => items.OrderByDescending(i => i.Id).ToList(),
+                    _ => items.OrderBy(i => i.Id).ToList()
+                };
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(5))
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(2));
+
+                _cache.Set(cacheKey, items, cacheOptions);
+            }
 
             var total = items.Count;
             var totalPages = (int)Math.Ceiling(total / (double)PageSize);
@@ -1124,6 +1139,9 @@ namespace BazaR.Controllers
 
             _usMan.ClearCart(userId);
 
+            _cache.Remove($"UserStatistic_{userId}");
+            _cache.Remove($"Orders_{userId}");
+
             if (pmEnum == OrderPaymentMethod.PayNow)
                 return RedirectToAction(nameof(Payment), new { orderId = order.Id });
 
@@ -1258,6 +1276,125 @@ namespace BazaR.Controllers
         public List<Item> FilterItems(int? categoryId, int? brandId, decimal? minPrice, decimal? maxPrice, bool? isAvailable)
             => _itMan.Filter(categoryId, brandId, minPrice, maxPrice, isAvailable);
 
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> CreateItemUser()
+        {
+            User us = await _userManager.GetUserAsync(User);
+
+            ViewBag.Categories = _db.Categories.ToList();
+            ViewBag.Brands = _db.Brands.ToList();
+            ViewBag.UserItems = _db.Items.Where(i => i.UserId == us.Id).ToList();
+
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreateItemUser(
+            Item model,
+            List<ItemCharacteristic> Characteristics,
+            List<ItemColor> Colors,
+            List<Usluga> SelectedUslugs,
+            IFormFile imageFile,
+            string ComplectName,
+            List<int> SelectedItemIds
+        )
+        {
+            if (model == null || imageFile == null)
+                return RedirectToAction(nameof(CreateItemUser));
+
+            User us = await _userManager.GetUserAsync(User);
+
+            string filename = $"{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/items", filename);
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            model.Characteristics = null;
+            model.Colors = null;
+            model.Uslugi = null;
+            model.UserId = us.Id;
+            model.ImageUrl = "/images/items/" + filename;
+
+            _db.Items.Add(model);
+            await _db.SaveChangesAsync();
+
+            if (Characteristics != null && Characteristics.Any())
+            {
+                foreach (var charac in Characteristics.Where(c => !string.IsNullOrEmpty(c.Key)))
+                {
+                    _db.ItemCharacteristics.Add(new ItemCharacteristic
+                    {
+                        Key = charac.Key,
+                        Value = charac.Value,
+                        ItemId = model.Id
+                    });
+                }
+            }
+
+            if (Colors != null && Colors.Any())
+            {
+                foreach (var color in Colors.Where(c => !string.IsNullOrEmpty(c.Color)))
+                {
+                    _db.ItemColors.Add(new ItemColor
+                    {
+                        Color = color.Color,
+                        ItemId = model.Id
+                    });
+                }
+            }
+
+            if (SelectedUslugs != null && SelectedUslugs.Any())
+            {
+                foreach (var usl in SelectedUslugs.Where(u => !string.IsNullOrEmpty(u.Name)))
+                {
+                    _db.Uslugi.Add(new Usluga
+                    {
+                        Name = usl.Name,
+                        Price = usl.Price,
+                        Description = usl.Description ?? $"Услуга для товара {model.Name}",
+                        ItemId = model.Id
+                    });
+                }
+            }
+
+            if (!string.IsNullOrEmpty(ComplectName) && SelectedItemIds != null && SelectedItemIds.Any())
+            {
+                var complect = new Complect
+                {
+                    Name = ComplectName
+                };
+
+                _db.Complects.Add(complect);
+                await _db.SaveChangesAsync();
+
+                foreach (var itemId in SelectedItemIds)
+                {
+                    _db.ComplectItems.Add(new ComplectItem
+                    {
+                        ComplectId = complect.Id,
+                        ItemId = itemId
+                    });
+                }
+
+                _db.ComplectItems.Add(new ComplectItem
+                {
+                    ComplectId = complect.Id,
+                    ItemId = model.Id
+                });
+            }
+
+            await _db.SaveChangesAsync();
+            _cache.Remove("browse:*");
+            _cache.Remove($"UserStatistic_{us.Id}");
+            _cache.Remove($"Items_{us.Id}");
+            return RedirectToAction(nameof(ItemDetails), new { id = model.Id });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
@@ -1267,7 +1404,7 @@ namespace BazaR.Controllers
 
             var ok = _itMan.Create(item);
             TempData[ok ? "Ok" : "Error"] = ok ? "Товар создан." : "Не удалось создать товар.";
-
+            _cache.Remove("browse:*");
             return RedirectToAction(nameof(Index));
         }
 
@@ -1280,7 +1417,8 @@ namespace BazaR.Controllers
 
             var updated = _itMan.Update(id, item);
             TempData[updated != null ? "Ok" : "Error"] = updated != null ? "Товар обновлён." : "Не удалось обновить товар.";
-
+            _cache.Remove("browse:*");
+            _cache.Remove($"Item_{id}");
             return RedirectToAction(nameof(ItemDetails), new { id });
         }
 
@@ -1289,9 +1427,12 @@ namespace BazaR.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult DeleteItem(int id)
         {
+            var userId = _db.Items.FirstOrDefault(i => i.Id == id)?.UserId;
             var ok = _itMan.Delete(id);
             TempData[ok ? "Ok" : "Error"] = ok ? "Товар удалён." : "Не удалось удалить товар.";
-
+            _cache.Remove("browse:*");
+            _cache.Remove($"UserStatistic_{userId}");
+            _cache.Remove($"Item_{id}");
             return RedirectToAction(nameof(Index));
         }
 
@@ -1309,7 +1450,8 @@ namespace BazaR.Controllers
 
             var ok = _itMan.AddReview(itemId, review);
             TempData[ok ? "Ok" : "Error"] = ok ? "Отзыв добавлен." : "Не удалось добавить отзыв.";
-
+            _cache.Remove($"Item_{itemId}");
+            _cache.Remove($"UserStatistic_{user.Id}");
             return RedirectToAction(nameof(ItemDetails), new { id = itemId });
         }
 
@@ -1318,9 +1460,13 @@ namespace BazaR.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult RemoveReview(int reviewId)
         {
+            var review = _db.Reviews.FirstOrDefault(r => r.Id == reviewId);
+            var itemId = review?.ItemId;
+            var userId = review?.UserId;
             var ok = _itMan.RemoveReview(reviewId);
             TempData[ok ? "Ok" : "Error"] = ok ? "Отзыв удалён." : "Не удалось удалить отзыв.";
-
+            _cache.Remove($"Item_{itemId}");
+            _cache.Remove($"UserStatistic_{userId}");
             return RedirectToAction(nameof(Index));
         }
 
@@ -1331,7 +1477,7 @@ namespace BazaR.Controllers
         {
             var ok = _itMan.AddCharacteristic(itemId, characteristic);
             TempData[ok ? "Ok" : "Error"] = ok ? "Характеристика добавлена." : "Не удалось добавить характеристику.";
-
+            _cache.Remove($"Item_{itemId}");
             return RedirectToAction(nameof(ItemDetails), new { id = itemId });
         }
 
@@ -1340,9 +1486,11 @@ namespace BazaR.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult RemoveCharacteristic(int characteristicId)
         {
+            var charac = _db.ItemCharacteristics.FirstOrDefault(c => c.Id == characteristicId);
+            var itemId = charac?.ItemId;
             var ok = _itMan.RemoveCharacteristic(characteristicId);
             TempData[ok ? "Ok" : "Error"] = ok ? "Характеристика удалена." : "Не удалось удалить характеристику.";
-
+            _cache.Remove($"Item_{itemId}");
             return RedirectToAction(nameof(Index));
         }
 
@@ -1353,7 +1501,7 @@ namespace BazaR.Controllers
         {
             var ok = _itMan.AddUsluga(itemId, usluga);
             TempData[ok ? "Ok" : "Error"] = ok ? "Услуга добавлена." : "Не удалось добавить услугу.";
-
+            _cache.Remove($"Item_{itemId}");
             return RedirectToAction(nameof(ItemDetails), new { id = itemId });
         }
 
@@ -1362,9 +1510,11 @@ namespace BazaR.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult RemoveUsluga(int uslugaId)
         {
+            var usluga = _db.Uslugi.FirstOrDefault(u => u.Id == uslugaId);
+            var itemId = usluga?.ItemId;
             var ok = _itMan.RemoveUsluga(uslugaId);
             TempData[ok ? "Ok" : "Error"] = ok ? "Услуга удалена." : "Не удалось удалить услугу.";
-
+            _cache.Remove($"Item_{itemId}");
             return RedirectToAction(nameof(Index));
         }
 
@@ -1375,7 +1525,7 @@ namespace BazaR.Controllers
         {
             var ok = _itMan.AddDeliveryVariant(itemId, delivery);
             TempData[ok ? "Ok" : "Error"] = ok ? "Доставка добавлена." : "Не удалось добавить доставку.";
-
+            _cache.Remove($"Item_{itemId}");
             return RedirectToAction(nameof(ItemDetails), new { id = itemId });
         }
 
@@ -1384,9 +1534,11 @@ namespace BazaR.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult RemoveDeliveryVariant(int deliveryId)
         {
+            var delivery = _db.Deliveries.FirstOrDefault(d => d.Id == deliveryId);
+            var itemId = delivery?.ItemId;
             var ok = _itMan.RemoveDeliveryVariant(deliveryId);
             TempData[ok ? "Ok" : "Error"] = ok ? "Вариант доставки удалён." : "Не удалось удалить доставку.";
-
+            _cache.Remove($"Item_{itemId}");
             return RedirectToAction(nameof(Index));
         }
 
@@ -1402,6 +1554,7 @@ namespace BazaR.Controllers
             });
 
             _db.SaveChanges();
+            _cache.Remove("browse:*");
             return Content("OK");
         }
 

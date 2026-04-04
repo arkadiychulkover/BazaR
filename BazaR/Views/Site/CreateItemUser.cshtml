@@ -200,7 +200,11 @@
 
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <input type="hidden" name="sellertype" value="@SellerType.otherSeller" asp-for="SellerType" />
+                    <label asp-for="SellerType" class="form-label">Тип продавца</label>
+                    <select asp-for="SellerType" class="form-select" asp-items="Html.GetEnumSelectList<SellerType>()">
+                        <option value="">Выберите тип продавца</option>
+                    </select>
+                    <span asp-validation-for="SellerType" class="text-danger"></span>
                 </div>
 
                 <div class="col-md-6">
