@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="BazaR.Tests/BazaR.Tests.csproj" />
   <Project Path="BazaR/BazaR.csproj" />
 </Solution>

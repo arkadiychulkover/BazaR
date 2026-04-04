@@ -1,12 +1,10 @@
 using BazaR.Data;
 using BazaR.Filters;
-using BazaR.HealthChecks;
 using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.Repositories;
 using BazaR.Repository;
 using BazaR.Services;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -17,11 +15,6 @@ builder.Services.AddControllersWithViews(o =>
 {
     o.Filters.Add<UserContextFilter>();
 });
-
-builder.Services.AddHttpClient();
-builder.Services.AddHealthChecks()
-    .AddCheck<AssetsHealthCheck>("Assets_Satatus")
-    .AddCheck<DatabaseHealthCheck>("DB_Satatus");//Остальные тесты оказались попросту безполезны, зря писал(
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -107,28 +100,6 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapHealthChecks("/health", new HealthCheckOptions
-{
-    Predicate = _ => true,
-    ResponseWriter = async (context, report) =>
-    {
-        var detailed = new
-        {
-            status = report.Status.ToString(),
-            totalDuration = report.TotalDuration.TotalMilliseconds + "ms",
-            checks = report.Entries.Select(e => new
-            {
-                name = e.Key,
-                status = e.Value.Status.ToString(),
-                duration = e.Value.Duration.TotalMilliseconds + "ms",
-                exception = e.Value.Exception?.Message
-            })
-        };
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(detailed);
-    }
-});
 
 app.MapControllerRoute(
     name: "default",
