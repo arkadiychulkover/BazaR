@@ -1,0 +1,86 @@
+@{
+    var c = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var a = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var isHome = string.Equals(c, "Site", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(a, "Index", StringComparison.OrdinalIgnoreCase);
+    var isCatalog = string.Equals(c, "Site", StringComparison.OrdinalIgnoreCase)
+        && (string.Equals(a, "Browse", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(a, "CategoryPage", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(a, "ItemDetails", StringComparison.OrdinalIgnoreCase));
+    var isLists = string.Equals(c, "Wishlist", StringComparison.OrdinalIgnoreCase);
+    var isMoreSheet = string.Equals(c, "Profile", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(c, "Account", StringComparison.OrdinalIgnoreCase);
+    var hideNav = string.Equals(c, "Admin", StringComparison.OrdinalIgnoreCase);
+}
+
+@if (!hideNav)
+{
+<nav class="mobile-bottom-nav" aria-label="Нижня навігація">
+    <a class="mobile-bottom-nav__item@(isHome ? " is-active" : "")"
+       asp-controller="Site"
+       asp-action="Index">
+        <span class="mobile-bottom-nav__icon" aria-hidden="true">
+            @if (isHome)
+            {
+                <img src="@Url.Content("~/SVGAssets/assets/mobile-nav/mn-home-fill.svg")" alt="" width="24" height="24" decoding="async" />
+            }
+            else
+            {
+                <img src="@Url.Content("~/SVGAssets/assets/mobile-nav/mn-home-outline.svg")" alt="" width="24" height="24" decoding="async" />
+            }
+        </span>
+        <span class="mobile-bottom-nav__label">Головна</span>
+    </a>
+
+    <a class="mobile-bottom-nav__item@(isCatalog ? " is-active" : "")"
+       asp-controller="Site"
+       asp-action="Browse">
+        <span class="mobile-bottom-nav__icon" aria-hidden="true">
+            @if (isCatalog)
+            {
+                <img src="@Url.Content("~/SVGAssets/assets/mobile-nav/mn-grid-green.svg")" alt="" width="24" height="24" decoding="async" />
+            }
+            else
+            {
+                <img src="@Url.Content("~/SVGAssets/assets/mobile-nav/mn-grid.svg")" alt="" width="24" height="24" decoding="async" />
+            }
+        </span>
+        <span class="mobile-bottom-nav__label">Каталог</span>
+    </a>
+
+    <a class="mobile-bottom-nav__item@(isLists ? " is-active" : "")"
+       asp-controller="Wishlist"
+       asp-action="Index">
+        <span class="mobile-bottom-nav__icon" aria-hidden="true">
+            @if (isLists)
+            {
+                <img src="@Url.Content("~/SVGAssets/assets/mobile-nav/mn-heart-active.svg")" alt="" width="24" height="24" decoding="async" />
+            }
+            else
+            {
+                <img src="@Url.Content("~/SVGAssets/assets/mobile-nav/mn-heart.svg")" alt="" width="24" height="24" decoding="async" />
+            }
+        </span>
+        <span class="mobile-bottom-nav__label">Списки</span>
+    </a>
+
+    <button type="button"
+            class="mobile-bottom-nav__item mobile-bottom-nav__item--btn@(isMoreSheet ? " is-active" : "")"
+            data-more-sheet-open
+            aria-label="Меню ще"
+            aria-expanded="false"
+            aria-controls="mobileMoreSheet">
+        <span class="mobile-bottom-nav__icon" aria-hidden="true">
+            @if (isMoreSheet)
+            {
+                <img src="@Url.Content("~/SVGAssets/assets/mobile-nav/mn-more-green.svg")" alt="" width="24" height="24" decoding="async" />
+            }
+            else
+            {
+                <img src="@Url.Content("~/SVGAssets/assets/mobile-nav/mn-more.svg")" alt="" width="24" height="24" decoding="async" />
+            }
+        </span>
+        <span class="mobile-bottom-nav__label">Ще</span>
+    </button>
+</nav>
+}

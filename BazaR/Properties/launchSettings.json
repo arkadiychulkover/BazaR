@@ -19,6 +19,17 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "network": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "launchUrl": "http://192.168.88.10:5126",
+      "applicationUrl": "http://0.0.0.0:5126",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "BAZAR_LAN_HTTP": "1"
+      }
     }
   }
 }

@@ -4,6 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- На 64-bit Windows явно x64 зменшує ризик BadImageFormat (0x8007000B) від нативних залежностей (SqlClient тощо) -->
+    <PlatformTarget Condition="$([MSBuild]::IsOSPlatform('Windows'))">x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>

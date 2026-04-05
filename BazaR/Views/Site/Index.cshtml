@@ -13,13 +13,13 @@
 <div class="container-fluid mt-3">
     <div class="row align-items-start">
 
-        <!-- Сайдбар -->
-        <div class="col-lg-3 col-md-4 mb-4">
+        <!-- Сайдбар: на вузькому екрані під банером (order-2 / order-md-1) -->
+        <div class="col-lg-3 col-md-4 mb-4 order-2 order-md-1">
             @await Html.PartialAsync("_SideBarOnIndex", categories)
         </div>
 
-        <!-- Основной контент: баннер + все секции -->
-        <div class="col-lg-9 col-md-8">
+        <!-- Основной контент: баннер + все секции (на мобільному — перший блок) -->
+        <div class="col-lg-9 col-md-8 order-1 order-md-2">
 
             <!-- Баннери: автопрокрутка + свайп (Bootstrap carousel) -->
             <div id="homeHeroCarousel"

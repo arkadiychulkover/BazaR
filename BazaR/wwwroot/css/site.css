@@ -14,6 +14,8 @@ html {
 
 html {
   position: relative;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* Кнопка «Знайти», шапки карток, текст на зеленому */
@@ -43,6 +45,8 @@ html {
   display: flex;
   justify-content: center;
   align-items: center;
+  /* scaleX на тексті нижче виходить за межі рядка й дає горизонтальний скрол сторінки */
+  overflow-x: hidden;
 }
 
 .site-promo-ribbon__text {
@@ -101,6 +105,8 @@ html {
 
 body {
   margin-bottom: 0;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -556,6 +562,8 @@ body {
     z-index: 1000;
     display: none;
     padding-top: 5px;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .search-form.active .megamenu-overlay {
@@ -564,12 +572,14 @@ body {
 
 .megamenu {
     position: absolute;
-    width: 1701px;
+    width: min(1701px, 100vw);
+    max-width: 100%;
     height: 687px;
     background: #F5F5F5;
     border-radius: 15px;
     display: flex;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
 }
 
 .megamenu-left {
@@ -583,7 +593,10 @@ body {
 }
 
 .megamenu-right {
-    width: 1322px;
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    max-width: 1322px;
     height: 627px;
     background: #FFFFFF;
     border: 0.5px solid #DADADA;
@@ -728,102 +741,7 @@ body {
     }
 
 /* ===== Ivan's styles (auth, footer, profile, account, orders) ===== */
-/* ===== Auth modal ===== */
-.auth-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 1100;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-}
-
-    .auth-modal.is-open {
-        display: flex;
-    }
-
-.auth-modal__col--right {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-left: 10px
-}
-
-.auth-modal__backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 0;
-}
-
-.auth-modal__panel {
-    position: relative;
-    z-index: 1;
-    width: min(620px, 100%);
-    background: #f5f5f5;
-    border-radius: 15px;
-    height: auto;
-    min-height: 362px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-    overflow: hidden;
-}
-    .auth-modal__panel.has-error {
-        min-height: 375px;
-    }
-
-.auth-modal__close {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    border: 1px solid rgba(0,0,0,0.08);
-    background: #fff;
-    cursor: pointer;
-    font-size: 22px;
-    line-height: 1;
-}
-
-.auth-modal__content {
-    display: grid;
-    grid-template-columns: 1fr 24px 260px;
-    gap: 0;
-    padding: 28px;
-}
-
-.auth-modal__divider {
-    position: relative;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-    .auth-modal__divider::before {
-        content: "";
-        position: absolute;
-        left: 50%;
-        top: 20px;
-        bottom: 20px;
-        width: 0.5px;
-        transform: translateX(-50%);
-        background: #A6A5A5;
-    }
-.auth-modal__divider--text {
-    background: #f5f5f5;
-    color: #A6A5A5;
-    z-index: 1;
-}
-
-.auth-modal__title {
-    margin: 0 0 18px 0;
-    font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 29px;
-    color: #000;
-}
+/* Auth modal: стилі в loginAndProfile.css (щоб не дублювати й не ламати адаптив) */
 
 /* Alerts */
 .auth-alert {
@@ -1084,41 +1002,6 @@ body {
     font-size: 14px;
     text-align: center;
 }
-.auth-modal__col--left{
-    margin-right: 10px;
-}
-/* Right column (social) */
-.auth-modal__subtitle {
-    margin-top: 48px;
-    margin-bottom: 12px;
-    font-size: 14px;
-    color: #898888;
-    font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-}
-
-.social-btn {
-    width: 100%;
-    height: 48px;
-    border-radius: 30px;
-    border: 0.5px solid rgba(166,165,165,0.5);
-    background: #fff;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    cursor: pointer;
-    font-size: 16px;
-    font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-}
-
-.social-btn--fb {
-    color: #3e77aa;
-    margin-bottom: 20px;
-}
-
-.social-btn--google {
-    color: #3e77aa;
-}
 
 .auth-google-btn-wrap {
     width: 100%;
@@ -1132,25 +1015,6 @@ body {
     max-width: 100% !important;
 }
 
-.social-btn svg {
-    flex: 0 0 auto;
-}
-
-/* Responsive */
-@media (max-width: 860px) {
-    .auth-modal__content {
-        grid-template-columns: 1fr;
-        padding: 20px;
-    }
-
-    .auth-modal__divider {
-        display: none;
-    }
-
-    .auth-modal__subtitle {
-        margin-top: 10px;
-    }
-}
 /* ===== Footer ===== */
 .site-footer {
     font-family: 'Montserrat', sans-serif;
@@ -1222,6 +1086,13 @@ body {
     grid-template-columns: 1.3fr repeat(4, 1fr);
     gap: 24px 42px;
     align-items: start;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.footer-grid > * {
+    min-width: 0;
 }
 
 .footer-left {
@@ -1248,6 +1119,7 @@ body {
 
 .footer-social {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     align-items: center;
 }
@@ -1354,25 +1226,64 @@ body {
     color: #A6A5A5;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-    .footer-grid {
-        grid-template-columns: 1fr 1fr;
+/* Responsive (дублює loginAndProfile з нижчою специфічністю — основні правила там) */
+@media (max-width: 991.98px) {
+    .site-footer__apps {
+        padding: 28px 0;
     }
-}
 
-@media (max-width: 560px) {
     .apps-row {
-        justify-content: flex-start;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        gap: 20px;
     }
 
     .apps-title {
-        font-size: 18px;
-        line-height: 22px;
+        font-size: clamp(15px, 4.2vw, 22px);
+        line-height: 1.25;
+        padding: 0 8px;
+    }
+
+    .apps-badges {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .store-badge svg {
+        max-width: min(180px, 100%);
+        height: auto;
+        max-height: 32px;
+    }
+
+    .site-footer__main {
+        overflow-x: hidden;
     }
 
     .footer-grid {
         grid-template-columns: 1fr;
+        gap: 28px;
+    }
+
+    .footer-bottom-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pay-logos {
+        flex-wrap: wrap;
+    }
+
+    .copy {
+        max-width: 100%;
+        word-wrap: break-word;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 28px 32px;
     }
 }
 /* ===== Product Card - Fully Responsive ===== */
@@ -2189,10 +2100,9 @@ body {
         flex-direction: column;
         gap: 18px;
     }
-}outline-offset: 2px;
-    }
+}
 
-    .social-section {
+.social-section {
         margin-top: 26px;
     }
 
@@ -4858,4 +4768,524 @@ body {
     .pdp-cards-row { grid-template-columns: repeat(2, 1fr); }
     .pdp-tabs__left { overflow-x: auto; }
     .pdp-reviews-header { flex-direction: column; align-items: flex-start; }
+}
+
+/* ——— Мобільна нижня навігація (як у додатку) ——— */
+.mobile-bottom-nav {
+    display: none;
+}
+
+@media (max-width: 991.98px) {
+    body:has(.mobile-bottom-nav) {
+        padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 10px);
+    }
+
+    body.auth-modal-open:has(.mobile-bottom-nav) {
+        padding-bottom: 0;
+    }
+
+    .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1030;
+        justify-content: space-around;
+        align-items: stretch;
+        gap: 4px;
+        padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px));
+        margin: 0;
+        box-sizing: border-box;
+        background: #fff;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 15px 15px 0 0;
+        box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.08);
+        font-family: "Montserrat", system-ui, -apple-system, sans-serif;
+    }
+
+    body.auth-modal-open .mobile-bottom-nav {
+        display: none !important;
+    }
+
+    .mobile-bottom-nav__item {
+        flex: 1 1 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 4px;
+        min-width: 0;
+        padding: 4px 2px;
+        text-decoration: none;
+        color: #8a9bae;
+        font-size: 11px;
+        font-weight: 500;
+        line-height: 1.15;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .mobile-bottom-nav__item--btn {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        color: #8a9bae;
+        appearance: none;
+        -webkit-appearance: none;
+        /* font: inherit тут ламав би типографіку: шортхенд перебиває font-size/font-weight з .mobile-bottom-nav__item */
+    }
+
+    .mobile-bottom-nav__item.is-active {
+        color: #98BE2A;
+    }
+
+    .mobile-bottom-nav__icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+    }
+
+    .mobile-bottom-nav__icon img {
+        display: block;
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+    }
+
+    .mobile-bottom-nav__label {
+        text-align: center;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #8a9bae;
+    }
+
+    .mobile-bottom-nav__item.is-active .mobile-bottom-nav__label {
+        color: #98BE2A;
+    }
+}
+
+/* ——— Мобільне меню «Ще» (повноекранний лист) ——— */
+.mobile-more-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 1045;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.mobile-more-sheet.is-open {
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 1;
+}
+
+.mobile-more-sheet__backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: rgba(0, 0, 0, 0.35);
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-more-sheet__panel {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: 100%;
+    min-height: 0;
+    flex: 1 1 auto;
+    margin-top: 0;
+    background: #eceef1;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
+    font-family: "Montserrat", system-ui, -apple-system, sans-serif;
+}
+
+.mobile-more-sheet__promo {
+    flex-shrink: 0;
+    padding-top: calc(0.4rem + env(safe-area-inset-top, 0px));
+    padding-bottom: 0.4rem;
+}
+
+.mobile-more-sheet__header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    background-color: #212529;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.mobile-more-sheet__header-slot {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 1.35rem;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+}
+
+.mobile-more-sheet__brand {
+    flex: 1 1 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-width: 0;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 22px;
+    line-height: 1.2;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.mobile-more-sheet__brand:hover,
+.mobile-more-sheet__brand:focus-visible {
+    color: #fff;
+}
+
+.mobile-more-sheet__brand .bi-shop {
+    font-size: 1.05em;
+    opacity: 0.95;
+}
+
+.mobile-more-sheet__close {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0.25rem;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-more-sheet__close:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.mobile-more-sheet__close:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+
+.mobile-more-sheet__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px) + 56px);
+}
+
+.mobile-more-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mobile-more-card {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+.mobile-more-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 12px 14px;
+    text-decoration: none;
+    color: #1a1a1a;
+    font-size: 15px;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-more-card .mobile-more-row:last-child {
+    border-bottom: none;
+}
+
+.mobile-more-row:active {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.mobile-more-row--btn {
+    width: 100%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+}
+
+.mobile-more-row__icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid #b8c0cc;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.mobile-more-row__icon--p {
+    font-weight: 800;
+    font-size: 1rem;
+    font-family: "Montserrat", system-ui, sans-serif;
+}
+
+.mobile-more-row__text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.mobile-more-badge {
+    flex-shrink: 0;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #98BE2A;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.mobile-more-row--user .mobile-more-row__icon {
+    border-color: #b8c0cc;
+    font-size: 1.5rem;
+}
+
+@media (min-width: 992px) {
+    .mobile-more-sheet {
+        display: none !important;
+    }
+}
+
+/* Профіль на мобільних: «назад» зліва по краю, логотип магазину по центру */
+.navbar-profile-mobile-bar {
+    display: none;
+    position: relative;
+    flex: 1 1 auto;
+    align-items: center;
+    align-self: stretch;
+    min-width: 0;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.navbar-profile-mobile-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 8px 10px 8px 4px;
+    border: none;
+    background: transparent;
+    font-family: "Montserrat", system-ui, -apple-system, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    color: rgba(255, 255, 255, 0.92);
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    z-index: 2;
+}
+
+/* Фіксована «клітинка» для гліфа — інакше bi-arrow-left візуально вище за текст */
+.navbar-profile-mobile-back__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.navbar-profile-mobile-back__text {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.navbar-profile-mobile-back:hover,
+.navbar-profile-mobile-back:focus-visible {
+    color: #fff !important;
+}
+
+.navbar-profile-mobile-logo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 4px 8px;
+    pointer-events: auto;
+    line-height: 1;
+    font-weight: bold;
+    font-size: 22px;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.navbar-profile-mobile-logo:hover,
+.navbar-profile-mobile-logo:focus-visible {
+    color: #fff !important;
+}
+
+.navbar-profile-mobile-logo .bi-shop {
+    font-size: 1.05em;
+    opacity: 0.95;
+}
+
+/* Мобільна шапка: замість другого «бургера» — кошик → openCartModal */
+.layout-header__mobile-cart {
+    display: none;
+}
+
+@media (max-width: 991.98px) {
+    body:not(.layout-profile-mobile) .navbar > .container-fluid {
+        position: relative;
+        justify-content: flex-start;
+    }
+
+    body:not(.layout-profile-mobile) .navbar .navbar-brand {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0 !important;
+        z-index: 1;
+        max-width: min(200px, calc(100vw - 140px));
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    .layout-header__sidebar-open,
+    .layout-header__mobile-cart {
+        position: relative;
+        z-index: 2;
+    }
+
+    .layout-header__navbar-toggler {
+        display: none !important;
+    }
+
+    .layout-header__mobile-cart {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        min-width: 42px;
+        height: 38px;
+        padding: 0;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0.375rem;
+        flex-shrink: 0;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .layout-header__mobile-cart:focus,
+    .layout-header__mobile-cart:active {
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .layout-header__mobile-cart:focus-visible {
+        outline: 2px solid rgba(255, 255, 255, 0.4);
+        outline-offset: 2px;
+    }
+
+    .layout-header__mobile-cart .layout-header__mobile-cart-badge {
+        font-size: 0.65rem;
+        min-width: 1.15rem;
+        padding: 0.2em 0.4em;
+    }
+}
+
+@media (min-width: 992px) {
+    .layout-header__mobile-cart {
+        display: none !important;
+    }
+}
+
+@media (max-width: 991.98px) {
+    body.layout-profile-mobile .layout-header__sidebar-open {
+        display: none !important;
+    }
+
+    body.layout-profile-mobile .navbar-profile-mobile-bar {
+        display: flex !important;
+    }
+
+    body.layout-profile-mobile .navbar > .container-fluid {
+        align-items: center;
+        min-height: 48px;
+        padding-left: max(4px, env(safe-area-inset-left, 0px));
+        padding-right: max(10px, env(safe-area-inset-right, 0px));
+    }
+
+    body.layout-profile-mobile .navbar .navbar-brand {
+        display: none !important;
+    }
+
+    body.layout-profile-mobile .layout-header__navbar-toggler {
+        display: none !important;
+    }
+
+    body.layout-profile-mobile .profile-page__layout > .account-sidebar {
+        display: none !important;
+    }
+
+    body.layout-profile-mobile .profile-page {
+        overflow-x: hidden;
+    }
 }

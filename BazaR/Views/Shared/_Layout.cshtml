@@ -4,6 +4,8 @@
 @{
     var title = ViewData["Title"] ?? "BazaR";
     var categories = ItemRepository.GetAllCategories();
+    var layoutController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var isProfileLayoutSection = string.Equals(layoutController, "Profile", StringComparison.OrdinalIgnoreCase);
 }
 
 <!DOCTYPE html>
@@ -95,8 +97,9 @@
         }
     </style>
 </head>
-<body data-open-auth="@TempData["OpenAuth"]"
-    data-is-authenticated="@((User.Identity?.IsAuthenticated ?? false).ToString().ToLower())">
+<body class="@(isProfileLayoutSection ? "layout-profile-mobile" : null)"
+      data-open-auth="@TempData["OpenAuth"]"
+      data-is-authenticated="@((User.Identity?.IsAuthenticated ?? false).ToString().ToLower())">
     @await Html.PartialAsync("~/Views/Account/_Login.cshtml")
     @await Html.PartialAsync("~/Views/Account/_Register.cshtml")
     @* Глобальний токен для AJAX-запитів (кошик, обране тощо) *@
@@ -131,16 +134,43 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
             <div class="container-fluid">
 
-                <button class="btn btn-dark border-0 me-2 d-flex align-items-center" id="sidebarOpen" data-sidebar-open type="button" aria-label="Відкрити меню" style="font-size:1.35rem;padding:4px 8px;">
+                <button class="btn btn-dark border-0 me-2 d-flex align-items-center layout-header__sidebar-open" id="sidebarOpen" data-sidebar-open type="button" aria-label="Відкрити меню" style="font-size:1.35rem;padding:4px 8px;">
                     <i class="bi bi-list"></i>
                 </button>
+
+                <div class="navbar-profile-mobile-bar">
+                    <a class="navbar-profile-mobile-back text-decoration-none"
+                       href="@Url.Action("Index", "Site")"
+                       data-profile-back
+                       aria-label="Повернутися назад">
+                        <i class="bi bi-arrow-left navbar-profile-mobile-back__icon" aria-hidden="true"></i>
+                        <span class="navbar-profile-mobile-back__text">назад</span>
+                    </a>
+                    <a class="navbar-profile-mobile-logo text-decoration-none"
+                       asp-controller="Site"
+                       asp-action="Index"
+                       aria-label="BazaR — на головну">
+                        <i class="bi bi-shop" aria-hidden="true"></i> BazaR
+                    </a>
+                </div>
 
                 <a class="navbar-brand" asp-controller="Site" asp-action="Index">
                     <i class="bi bi-shop"></i> BazaR
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <button class="navbar-toggler layout-header__navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-label="Відкрити меню">
                     <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <button type="button"
+                        class="btn btn-dark border-0 layout-header__mobile-cart position-relative ms-auto"
+                        onclick="openCartModal(); return false;"
+                        aria-label="Кошик">
+                    <i class="bi bi-cart3" style="font-size:1.25rem;" aria-hidden="true"></i>
+                    <span class="cart-header-badge layout-header__mobile-cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          style="@(((int)(ViewBag.CartCount ?? 0)) == 0 ? "display:none" : "")">
+                        @(ViewBag.CartCount ?? 0)
+                    </span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="mainNavbar">
@@ -162,7 +192,7 @@
                         <li class="nav-item">
                             <a class="nav-link position-relative" href="#" onclick="openCartModal(); return false;">
                                 <i class="bi bi-cart"></i> Кошик
-                                <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                <span id="cartBadge" class="cart-header-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                                       style="@(((int)(ViewBag.CartCount ?? 0)) == 0 ? "display:none" : "")">
                                     @(ViewBag.CartCount ?? 0)
                                 </span>
@@ -258,6 +288,9 @@
     <!-- Бічне меню -->
     @await Html.PartialAsync("_Sidebar")
 
+    @await Html.PartialAsync("_MobileBottomNav")
+    @await Html.PartialAsync("_MobileMoreSheet")
+
     <!-- Bootstrap JS -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -286,15 +319,17 @@
         </div>
 
         <div class="cart-modal__footer" id="cartModalFooter" style="display:none;">
-            <a href="@Url.Action("Browse", "Site")" class="btn cart-modal__btn-continue">
-                Продовжити покупки
-            </a>
-            <div class="cart-modal__footer-right">
-                <span class="cart-modal__total-label">Разом:</span>
-                <span class="cart-modal__total-amount" id="cartTotalAmount">0 ₴</span>
-                <a href="@Url.Action("Checkout", "Site")" class="btn cart-modal__btn-order">
+            <div class="cart-modal__footer-actions">
+                <a href="@Url.Action("Browse", "Site")" class="cart-modal__btn-continue">
+                    Продовжити покупки
+                </a>
+                <a href="@Url.Action("Checkout", "Site")" class="cart-modal__btn-order">
                     Оформити замовлення
                 </a>
+            </div>
+            <div class="cart-modal__footer-total">
+                <span class="cart-modal__total-label">Разом:</span>
+                <span class="cart-modal__total-amount" id="cartTotalAmount">0 ₴</span>
             </div>
         </div>
     </div>
@@ -421,36 +456,118 @@
         }
         .cart-item__remove:hover { color: #dc3545; transform: scale(1.15); }
 
-        /* === Футер === */
+        /* === Футер: кнопки в один ряд, сума «Разом» під ними === */
         .cart-modal__footer {
-            padding: 18px 28px; border-top: 1px solid #f0f0f0;
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 12px; flex-wrap: wrap; background: #fafafa;
+            box-sizing: border-box;
+            padding: 14px 20px;
+            border-top: 1px solid #f0f0f0;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            min-height: 0;
+        }
+        .cart-modal__footer-actions {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
         }
         .cart-modal__btn-continue {
-            border: 1.5px solid #d0d0d0; background: #fff; color: #333;
-            border-radius: 12px; padding: 11px 22px; font-size: 14px;
-            font-weight: 600; white-space: nowrap; text-decoration: none;
+            flex: 1 1 auto;
+            min-width: min(140px, 100%);
+            box-sizing: border-box;
+            border: 1.5px solid #d0d0d0;
+            background: #fff;
+            color: #333;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.2;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s;
         }
         .cart-modal__btn-continue:hover { border-color: #7ab800; color: #5a9a00; }
-        .cart-modal__footer-right { display: flex; align-items: center; gap: 16px; }
-        .cart-modal__total-label { font-size: 14px; color: #999; white-space: nowrap; }
+        .cart-modal__footer-total {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            justify-content: flex-end;
+            gap: 8px;
+            padding-top: 2px;
+            border-top: 1px solid #ececec;
+        }
+        .cart-modal__total-label {
+            font-size: 13px;
+            color: #999;
+            white-space: nowrap;
+        }
         .cart-modal__total-amount {
-            font-size: 24px; font-weight: 800; color: #1a1a1a;
-            white-space: nowrap; letter-spacing: -0.02em;
+            font-size: clamp(18px, 4.5vw, 24px);
+            font-weight: 800;
+            color: #1a1a1a;
+            white-space: nowrap;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
         }
         .cart-modal__btn-order {
-            background: #7ab800; color: #fff; border: none;
-            border-radius: 12px; padding: 11px 24px; font-size: 14px;
-            font-weight: 700; white-space: nowrap; text-decoration: none;
-            transition: background 0.2s, transform 0.15s;
+            flex: 1 1 auto;
+            min-width: min(160px, 100%);
+            box-sizing: border-box;
+            max-width: 100%;
+            background: #7ab800;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.2;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            transition: background 0.2s, box-shadow 0.2s;
             box-shadow: 0 4px 12px rgba(122,184,0,0.25);
         }
         .cart-modal__btn-order:hover {
-            background: #5a9a00; color: #fff;
-            transform: translateY(-1px);
+            background: #5a9a00;
+            color: #fff;
             box-shadow: 0 6px 16px rgba(122,184,0,0.35);
+        }
+        @@media (max-width: 520px) {
+            .cart-modal__footer {
+                padding: 12px 12px;
+                gap: 10px;
+            }
+            .cart-modal__footer-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .cart-modal__btn-continue {
+                padding: 10px 12px;
+                font-size: 13px;
+                min-width: 0;
+            }
+            .cart-modal__btn-order {
+                padding: 10px 12px;
+                font-size: 12px;
+                min-width: 0;
+            }
+            .cart-modal__footer-total {
+                justify-content: center;
+                padding-top: 4px;
+            }
         }
     </style>
 
@@ -561,11 +678,11 @@
         }
 
         function updateCartBadge(count) {
-            var badge = $('#cartBadge');
-            if (badge.length) {
-                badge.text(count);
-                badge.toggle(count > 0);
-            }
+            $('.cart-header-badge').each(function () {
+                var $b = $(this);
+                $b.text(count);
+                $b.toggle(count > 0);
+            });
         }
 
         function cartRemove(itemId) {
@@ -622,7 +739,7 @@
                         if (typeof showNotification === 'function') showNotification(msg, response.added ? 'success' : 'info');
                     } else if (response.requireLogin) {
                         var $login = $('[data-auth-open="login"]').first();
-                        if ($login.length) $login.trigger('click'); else window.authModals && window.authModals.openModal('loginModal');
+                        if ($login.length) $login.trigger('click'); else window.authModals && window.authModals.openModal('login');
                     }
                 }
             );

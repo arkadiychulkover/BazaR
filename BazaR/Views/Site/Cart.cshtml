@@ -213,8 +213,11 @@
                         if (typeof updateCartBadge === 'function') {
                             updateCartBadge(r.cartCount);
                         } else {
-                            var badge = $('#cartBadge');
-                            if (badge.length) { badge.text(r.cartCount); badge.toggle(r.cartCount > 0); }
+                            $('.cart-header-badge').each(function () {
+                                var $b = $(this);
+                                $b.text(r.cartCount);
+                                $b.toggle(r.cartCount > 0);
+                            });
                         }
                     }
                 }

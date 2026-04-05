@@ -93,7 +93,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Профіль launch "network": доступ з телефону по HTTP без редіректу на HTTPS (сертифікат dev на телефоні не довірений)
+if (Environment.GetEnvironmentVariable("BAZAR_LAN_HTTP") != "1")
+    app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
