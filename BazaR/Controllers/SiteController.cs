@@ -168,13 +168,17 @@ namespace BazaR.Controllers
 
         [HttpGet]
         public async Task<IActionResult> Browse(
-            string? query,
-            List<int>? categoryIds,
-            int page = 1,
-            string sort = "default",
-            decimal? minPrice = null,
-            decimal? maxPrice = null,
-            List<int>? brandIds = null)
+    string? query,
+    List<int>? categoryIds,
+    int page = 1,
+    string sort = "default",
+    decimal? minPrice = null,
+    decimal? maxPrice = null,
+    List<int>? brandIds = null,
+    bool? readyToSend = null,
+    List<int>? sellerTypes = null,
+    bool? noPercentCredit = null,
+    List<int>? countries = null)
         {
             await SetLayoutDataAsync();
 
@@ -265,6 +269,18 @@ namespace BazaR.Controllers
             if (brandIds != null && brandIds.Any())
                 itemsQuery = itemsQuery.Where(i => brandIds.Contains(i.BrandId));
 
+            if (readyToSend == true)
+                itemsQuery = itemsQuery.Where(i => i.IsReadyToSend);
+
+            if (sellerTypes != null && sellerTypes.Any())
+                itemsQuery = itemsQuery.Where(i => sellerTypes.Contains((int)i.SellerType));
+
+            if (noPercentCredit == true)
+                itemsQuery = itemsQuery.Where(i => i.IsNoPercentCredit);
+
+            if (countries != null && countries.Any())
+                itemsQuery = itemsQuery.Where(i => countries.Contains((int)i.Country));
+
             var selectedFilters = new Dictionary<string, List<string>>();
 
             foreach (var key in Request.Query.Keys.Where(k => k.StartsWith("filter_")))
@@ -282,6 +298,11 @@ namespace BazaR.Controllers
             }
 
             ViewBag.SelectedFilters = selectedFilters;
+
+            ViewBag.ReadyToSend = readyToSend;
+            ViewBag.SellerTypes = sellerTypes ?? new List<int>();
+            ViewBag.NoPercentCredit = noPercentCredit;
+            ViewBag.Countries = countries ?? new List<int>();
 
             var filterOptions = new Dictionary<string, List<string>>();
 
@@ -343,7 +364,7 @@ namespace BazaR.Controllers
 
             ViewBag.FilterOptions = filterOptions;
 
-            var cacheKey = $"browse:{query}:{string.Join("-", categoryIds ?? new())}:{page}:{sort}:{minPrice}:{maxPrice}:{string.Join("-", brandIds ?? new())}:{Request.QueryString}";
+            var cacheKey = $"browse:{query}:{string.Join("-", categoryIds ?? new())}:{page}:{sort}:{minPrice}:{maxPrice}:{string.Join("-", brandIds ?? new())}:{readyToSend}:{string.Join("-", sellerTypes ?? new())}:{noPercentCredit}:{string.Join("-", countries ?? new())}:{Request.QueryString}";
 
             if (!_cache.TryGetValue(cacheKey, out List<Item> items))
             {
@@ -362,6 +383,10 @@ namespace BazaR.Controllers
                             .Average())
                         .ToList(),
                     "newest" => items.OrderByDescending(i => i.Id).ToList(),
+                    "ready_to_send" => items.OrderByDescending(i => i.IsReadyToSend).ThenBy(i => i.Id).ToList(),
+                    "seller_type" => items.OrderBy(i => i.SellerType).ThenBy(i => i.Name).ToList(),
+                    "no_percent_credit" => items.OrderByDescending(i => i.IsNoPercentCredit).ThenBy(i => i.Id).ToList(),
+                    "country" => items.OrderBy(i => i.Country.ToString()).ThenBy(i => i.Name).ToList(),
                     _ => items.OrderBy(i => i.Id).ToList()
                 };
 
