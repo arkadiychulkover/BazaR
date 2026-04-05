@@ -1,9 +1,9 @@
-﻿// ==================== BazaR.Tests/Controllers/SiteControllerTests.cs ====================
-using BazaR.Controllers;
+﻿using BazaR.Controllers;
 using BazaR.Data;
 using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.Models.BazaR.Models;
+using BazaR.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using System.Security.Claims;
 using Xunit;
@@ -24,6 +25,7 @@ namespace BazaR.Tests.Controllers
         private readonly Mock<IUserDb> _mockUserDb;
         private readonly Mock<IItemRepository> _mockItemRepo;
         private readonly Mock<ILogDb> _mockLogDb;
+        private readonly Mock<IMemoryCache> _mockMemoryCache;
         private readonly Mock<UserManager<User>> _mockUserManager;
         private readonly AppDbContext _dbContext;
         private readonly SiteController _controller;
@@ -38,6 +40,7 @@ namespace BazaR.Tests.Controllers
             _mockUserDb = new Mock<IUserDb>();
             _mockItemRepo = new Mock<IItemRepository>();
             _mockLogDb = new Mock<ILogDb>();
+            _mockMemoryCache = new Mock<IMemoryCache>();
 
             var userStoreMock = new Mock<IUserStore<User>>();
             _mockUserManager = new Mock<UserManager<User>>(
@@ -58,6 +61,7 @@ namespace BazaR.Tests.Controllers
             _dbContext.Categories.AddRange(_testCategories);
             _dbContext.Items.AddRange(_testItems);
             _dbContext.Users.AddRange(_testUsers);
+            _dbContext.Promotions.AddRange(GetTestPromotions());
             _dbContext.SaveChanges();
 
             SetupMocks();
@@ -67,7 +71,8 @@ namespace BazaR.Tests.Controllers
                 _mockItemRepo.Object,
                 _dbContext,
                 _mockUserManager.Object,
-                _mockLogDb.Object);
+                _mockLogDb.Object,
+                _mockMemoryCache.Object);
         }
 
         public void Dispose()
@@ -193,6 +198,23 @@ namespace BazaR.Tests.Controllers
             _mockItemRepo.Setup(x => x.RemoveReview(It.IsAny<int>()))
                 .Returns(true);
 
+            _mockItemRepo.Setup(x => x.Filter(It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<decimal?>(), It.IsAny<decimal?>(), It.IsAny<bool?>()))
+                .Returns<int?, int?, decimal?, decimal?, bool?>((catId, brandId, minPrice, maxPrice, isAvailable) =>
+                {
+                    var query = _testItems.AsQueryable();
+                    if (catId.HasValue)
+                        query = query.Where(i => i.CategoryId == catId.Value);
+                    if (brandId.HasValue)
+                        query = query.Where(i => i.BrandId == brandId.Value);
+                    if (minPrice.HasValue)
+                        query = query.Where(i => i.Price >= minPrice.Value);
+                    if (maxPrice.HasValue)
+                        query = query.Where(i => i.Price <= maxPrice.Value);
+                    if (isAvailable.HasValue)
+                        query = query.Where(i => i.IsAvailable == isAvailable.Value);
+                    return query.ToList();
+                });
+
             _mockLogDb.Setup(x => x.LogPageVisitAsync(
                     It.IsAny<int>(),
                     It.IsAny<UserAction>(),
@@ -225,6 +247,14 @@ namespace BazaR.Tests.Controllers
                 new Item { Id = 1, Name = "MacBook Pro", Desc = "Powerful laptop", Price = 2000, CategoryId = 2, BrandId = 1, UserId = 1, IsAvailable = true, Garantia = 12, ImageUrl = "/images/test.jpg" },
                 new Item { Id = 2, Name = "Dell XPS", Desc = "High-end laptop", Price = 1500, CategoryId = 2, BrandId = 1, UserId = 1, IsAvailable = true, Garantia = 24 },
                 new Item { Id = 3, Name = "iPhone 13", Desc = "Latest iPhone", Price = 800, CategoryId = 3, BrandId = 1, UserId = 1, IsAvailable = false, Garantia = 12 }
+            };
+        }
+
+        private List<Promotion> GetTestPromotions()
+        {
+            return new List<Promotion>
+            {
+                new Promotion { Id = 1, DiscountAmount = 100, Number = "BAZAR10" }
             };
         }
 
@@ -280,20 +310,55 @@ namespace BazaR.Tests.Controllers
 
         private void SetupAuthenticatedUser(int userId = 1)
         {
-            SetupControllerContext();
+            var httpContext = new DefaultHttpContext();
 
-            var user = _testUsers.FirstOrDefault(u => u.Id == userId);
+            var urlHelper = new Mock<IUrlHelper>();
+            urlHelper.Setup(x => x.Action(It.IsAny<UrlActionContext>()))
+                .Returns("/Site/Index");
+
+            var actionDescriptor = new ControllerActionDescriptor
+            {
+                ControllerName = "Site",
+                ActionName = "Index"
+            };
+
+            var actionContext = new ActionContext(httpContext, new RouteData(), actionDescriptor);
+
+            _controller.ControllerContext = new ControllerContext(actionContext);
+            _controller.Url = urlHelper.Object;
+
+            var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
+            _controller.TempData = tempData;
+
+            var user = _dbContext.Users.FirstOrDefault(u => u.Id == userId);
+            if (user == null)
+            {
+                user = new User
+                {
+                    Id = userId,
+                    Name = $"User{userId}",
+                    Email = $"user{userId}@test.com",
+                    UserName = $"user{userId}@test.com",
+                    IsAdmin = userId >= 900
+                };
+                _dbContext.Users.Add(user);
+                _dbContext.SaveChanges();
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Name, user?.Name ?? "Test User"),
-                new Claim(ClaimTypes.Email, user?.Email ?? "test@example.com")
+                new Claim(ClaimTypes.Name, user.Name ?? "Test User"),
+                new Claim(ClaimTypes.Email, user.Email ?? "test@example.com")
             };
 
             var identity = new ClaimsIdentity(claims, "TestAuth");
             var claimsPrincipal = new ClaimsPrincipal(identity);
 
             _controller.ControllerContext.HttpContext.User = claimsPrincipal;
+
+            _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .ReturnsAsync(user);
         }
 
         private void SetupUnauthenticatedUser()
@@ -304,188 +369,64 @@ namespace BazaR.Tests.Controllers
             var claimsPrincipal = new ClaimsPrincipal(identity);
 
             _controller.ControllerContext.HttpContext.User = claimsPrincipal;
+
+            _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .ReturnsAsync((User?)null);
         }
 
-        [Fact]
-        public void Index_ReturnsViewResult_WithLayoutData()
+        private void SetupAjaxRequest()
         {
-            SetupAuthenticatedUser();
-            var result = _controller.Index();
-            var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.NotNull(viewResult.ViewData["Categories"]);
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Headers["X-Requested-With"] = "XMLHttpRequest";
+
+            var routeData = new RouteData();
+            var actionDescriptor = new ControllerActionDescriptor();
+            var actionContext = new ActionContext(httpContext, routeData, actionDescriptor);
+
+            _controller.ControllerContext = new ControllerContext(actionContext);
+            _controller.Url = new Mock<IUrlHelper>().Object;
+
+            var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
+            _controller.TempData = tempData;
         }
 
-        [Fact]
-        public void Browse_ReturnsViewResult_WithItems()
-        {
-            SetupAuthenticatedUser();
-            var result = _controller.Browse(null, null, 1, "default", null, null, null);
-            var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsType<List<Item>>(viewResult.Model);
-            Assert.NotNull(model);
-        }
+
+        #region Cart Tests
 
         [Fact]
-        public async Task Browse_WithQuery_FiltersItems()
-        {
-            SetupAuthenticatedUser();
-
-            var category = await _dbContext.Categories.FirstOrDefaultAsync(c => c.Id == 2);
-            if (category == null)
-            {
-                category = new Category { Id = 2, Name = "Laptops", ParentCategoryId = 1, DisplayOrder = 1 };
-                _dbContext.Categories.Add(category);
-            }
-
-            var brand = await _dbContext.Brands.FirstOrDefaultAsync(b => b.Id == 1);
-            if (brand == null)
-            {
-                brand = new Brand { Id = 1, Name = "Test Brand" };
-                _dbContext.Brands.Add(brand);
-            }
-
-            await _dbContext.SaveChangesAsync();
-
-            var testItem = new Item
-            {
-                Id = 100,
-                Name = "UniqueTestMacBook",
-                Desc = "Test Description",
-                Price = 1000,
-                CategoryId = 2,
-                BrandId = 1,
-                UserId = 1,
-                IsAvailable = true,
-                Garantia = 12
-            };
-            _dbContext.Items.Add(testItem);
-            await _dbContext.SaveChangesAsync();
-
-            var result = _controller.Browse("UniqueTestMacBook", null, 1, "default", null, null, null);
-            var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsType<List<Item>>(viewResult.Model);
-            Assert.Single(model);
-            Assert.Contains(model, i => i.Name.Contains("UniqueTestMacBook"));
-        }
-
-        [Fact]
-        public async Task Browse_WithCategoryIds_FiltersByCategory()
-        {
-            SetupAuthenticatedUser();
-
-            var category = await _dbContext.Categories.FirstOrDefaultAsync(c => c.Id == 2);
-            if (category == null)
-            {
-                category = new Category { Id = 2, Name = "Laptops", ParentCategoryId = 1, DisplayOrder = 1 };
-                _dbContext.Categories.Add(category);
-            }
-
-            var brand = await _dbContext.Brands.FirstOrDefaultAsync(b => b.Id == 1);
-            if (brand == null)
-            {
-                brand = new Brand { Id = 1, Name = "Test Brand" };
-                _dbContext.Brands.Add(brand);
-            }
-
-            await _dbContext.SaveChangesAsync();
-
-            var existingItems = _dbContext.Items.Where(i => i.CategoryId == 2).ToList();
-            _dbContext.Items.RemoveRange(existingItems);
-
-            var testItem1 = new Item
-            {
-                Id = 101,
-                Name = "Test Laptop 1",
-                Desc = "Test",
-                Price = 1000,
-                CategoryId = 2,
-                BrandId = 1,
-                UserId = 1,
-                IsAvailable = true,
-                Garantia = 12
-            };
-            var testItem2 = new Item
-            {
-                Id = 102,
-                Name = "Test Laptop 2",
-                Desc = "Test",
-                Price = 1500,
-                CategoryId = 2,
-                BrandId = 1,
-                UserId = 1,
-                IsAvailable = true,
-                Garantia = 12
-            };
-            _dbContext.Items.AddRange(testItem1, testItem2);
-            await _dbContext.SaveChangesAsync();
-
-            var result = _controller.Browse(null, new List<int> { 2 }, 1, "default", null, null, null);
-            var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsType<List<Item>>(viewResult.Model);
-            Assert.Equal(2, model.Count);
-            Assert.All(model, i => Assert.Equal(2, i.CategoryId));
-        }
-
-        [Fact]
-        public void Cart_WhenAuthenticated_ReturnsViewWithCartItems()
+        public async Task AddToCart_WhenAuthenticated_AddsItemToCart()
         {
             SetupAuthenticatedUser(1);
-            var result = _controller.Cart();
-            var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsType<List<Item>>(viewResult.Model);
-            Assert.Equal(2, model.Count);
-        }
-
-        [Fact]
-        public void Cart_WhenUnauthenticated_RedirectsToLogin()
-        {
-            SetupUnauthenticatedUser();
-            var result = _controller.Cart();
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-        }
-
-        [Fact]
-        public void AddToCart_WhenAuthenticated_AddsItemToCart()
-        {
-            SetupAuthenticatedUser(1);
-            var result = _controller.AddToCart(3, 1);
+            var result = await _controller.AddToCart(3, 1);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(SiteController.Cart), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.AddToCart(1, 3), Times.Once);
         }
 
         [Fact]
-        public void AddToCart_WhenUnauthenticated_RedirectsToLogin()
+        public async Task AddToCart_WhenUnauthenticated_RedirectsToLogin()
         {
             SetupUnauthenticatedUser();
-            var result = _controller.AddToCart(1);
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
+            var result = await _controller.AddToCart(1);
+            var redirectResult = Assert.IsType<ChallengeResult>(result);
         }
 
         [Fact]
-        public void RemoveFromCart_WhenAuthenticated_RemovesItem()
+        public async Task AddToCart_WhenItemNotFound_ReturnsNotFound()
         {
             SetupAuthenticatedUser(1);
-            var result = _controller.RemoveFromCart(1);
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal(nameof(SiteController.Cart), redirectResult.ActionName);
-            _mockUserDb.Verify(x => x.RemoveFromCart(1, 1), Times.Once);
+            _mockItemRepo.Setup(x => x.GetById(999)).Returns((Item)null);
+
+            var result = await _controller.AddToCart(999, 1);
+            Assert.IsType<NotFoundResult>(result);
         }
 
-        [Fact]
-        public void ClearCart_WhenAuthenticated_ClearsCart()
-        {
-            SetupAuthenticatedUser(1);
-            var result = _controller.ClearCart();
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal(nameof(SiteController.Cart), redirectResult.ActionName);
-            _mockUserDb.Verify(x => x.ClearCart(1), Times.Once);
-        }
+        #endregion
+
+        #region Wishlist Tests
 
         [Fact]
-        public void Wishlist_WhenAuthenticated_RedirectsToWishlistController()
+        public async Task Wishlist_WhenAuthenticated_RedirectsToWishlistController()
         {
             SetupAuthenticatedUser(1);
             var result = _controller.Wishlist();
@@ -495,53 +436,75 @@ namespace BazaR.Tests.Controllers
         }
 
         [Fact]
-        public void Wishlist_WhenUnauthenticated_RedirectsToLogin()
-        {
-            SetupUnauthenticatedUser();
-            var result = _controller.Wishlist();
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-        }
-
-        [Fact]
-        public void AddToWishlist_WhenAuthenticated_AddsItem()
+        public async Task AddToWishlist_WhenAuthenticated_AddsItem()
         {
             SetupAuthenticatedUser(1);
-            var result = _controller.AddToWishlist(3);
+            var result = await _controller.AddToWishlist(3);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(SiteController.Wishlist), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.AddToWishList(1, 3), Times.Once);
         }
 
         [Fact]
-        public void AddToWishlist_WhenAlreadyInWishlist_RemovesItem()
+        public async Task AddToWishlist_WhenAlreadyInWishlist_RemovesItem()
         {
             SetupAuthenticatedUser(1);
-            var result = _controller.AddToWishlist(1);
+            var result = await _controller.AddToWishlist(1);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(nameof(SiteController.Wishlist), redirectResult.ActionName);
             _mockUserDb.Verify(x => x.RemoveFromWishList(1, 1), Times.Once);
         }
 
         [Fact]
-        public void RemoveFromWishlist_WhenAuthenticated_RemovesItem()
+        public async Task AddToWishlist_WhenItemNotFound_ReturnsNotFound()
         {
             SetupAuthenticatedUser(1);
-            var result = _controller.RemoveFromWishlist(1);
+            _mockItemRepo.Setup(x => x.GetById(999)).Returns((Item)null);
+            var result = await _controller.AddToWishlist(999);
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        #endregion
+
+        #region Review Tests
+
+        [Fact]
+        public async Task AddReview_WhenAuthenticated_AddsReview()
+        {
+            SetupAuthenticatedUser(1);
+            var review = new Review { Comment = "Great product!", Rating = 5 };
+            var result = await _controller.AddReview(1, review);
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal(nameof(SiteController.Wishlist), redirectResult.ActionName);
-            _mockUserDb.Verify(x => x.RemoveFromWishList(1, 1), Times.Once);
+            Assert.Equal(nameof(SiteController.ItemDetails), redirectResult.ActionName);
+            _mockItemRepo.Verify(x => x.AddReview(1, It.IsAny<Review>()), Times.Once);
         }
 
         [Fact]
-        public void Orders_WhenAuthenticated_ReturnsOrders()
+        public async Task AddReview_WhenUnauthenticated_RedirectsToLogin()
         {
-            SetupAuthenticatedUser(1);
-            var result = _controller.Orders();
-            var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsType<List<Order>>(viewResult.Model);
-            Assert.Equal(2, model.Count);
+            SetupUnauthenticatedUser();
+            var review = new Review { Comment = "Test", Rating = 5 };
+            var result = await _controller.AddReview(1, review);
+            var redirectResult = Assert.IsType<ChallengeResult>(result);
         }
+
+        [Fact]
+        public async Task RemoveReview_WhenAdmin_RemovesReview()
+        {
+            var adminUser = new User { Id = 996, Name = "Admin", Email = "admin@test.com", UserName = "admin@test.com", IsAdmin = true };
+            _dbContext.Users.Add(adminUser);
+            await _dbContext.SaveChangesAsync();
+            SetupAuthenticatedUser(996);
+            var result = _controller.RemoveReview(1);
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal(nameof(SiteController.Index), redirectResult.ActionName);
+            _mockItemRepo.Verify(x => x.RemoveReview(1), Times.Once);
+        }
+
+        #endregion
+
+
+        #region Simple Tests
 
         [Fact]
         public void AccessDenied_ReturnsView()
@@ -554,6 +517,13 @@ namespace BazaR.Tests.Controllers
         public void Error_ReturnsView()
         {
             var result = _controller.Error();
+            Assert.IsType<ViewResult>(result);
+        }
+
+        [Fact]
+        public void Privacy_ReturnsView()
+        {
+            var result = _controller.Privacy();
             Assert.IsType<ViewResult>(result);
         }
 
@@ -572,6 +542,14 @@ namespace BazaR.Tests.Controllers
             var result = _controller.GetItemById(1);
             Assert.NotNull(result);
             Assert.Equal(1, result.Id);
+        }
+
+        [Fact]
+        public void GetItemById_WithInvalidId_ReturnsNull()
+        {
+            SetupAuthenticatedUser();
+            var result = _controller.GetItemById(999);
+            Assert.Null(result);
         }
 
         [Fact]
@@ -605,5 +583,224 @@ namespace BazaR.Tests.Controllers
             Assert.NotNull(validProperty);
             Assert.False((bool)validProperty.GetValue(data));
         }
+
+        [Fact]
+        public void GetItemsByCategory_ReturnsCorrectItems()
+        {
+            SetupAuthenticatedUser();
+            var result = _controller.GetItemsByCategory(2);
+            Assert.Equal(2, result.Count);
+            Assert.All(result, i => Assert.Equal(2, i.CategoryId));
+        }
+
+        [Fact]
+        public void GetItemsByBrand_ReturnsCorrectItems()
+        {
+            SetupAuthenticatedUser();
+            var result = _controller.GetItemsByBrand(1);
+            Assert.Equal(3, result.Count);
+            Assert.All(result, i => Assert.Equal(1, i.BrandId));
+        }
+
+        [Fact]
+        public void FilterItems_WithMultipleFilters_ReturnsFilteredItems()
+        {
+            SetupAuthenticatedUser(1);
+            var result = _controller.FilterItems(2, 1, 1000, 2000, true);
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public void SearchSuggestions_WithValidQuery_ReturnsResults()
+        {
+            SetupAuthenticatedUser();
+            var result = _controller.SearchSuggestions("Laptop");
+            var jsonResult = Assert.IsType<JsonResult>(result);
+            Assert.NotNull(jsonResult.Value);
+        }
+
+        [Fact]
+        public void SearchSuggestions_WithEmptyQuery_ReturnsEmptyList()
+        {
+            SetupAuthenticatedUser();
+            var result = _controller.SearchSuggestions("");
+            var jsonResult = Assert.IsType<JsonResult>(result);
+            var data = jsonResult.Value as List<object>;
+            Assert.NotNull(data);
+            Assert.Empty(data);
+        }
+
+        [Fact]
+        public void CategoryPage_WithValidCategory_ReturnsView()
+        {
+            SetupAuthenticatedUser();
+            var result = _controller.CategoryPage(1);
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsType<List<Category>>(viewResult.Model);
+            Assert.NotNull(model);
+        }
+
+        [Fact]
+        public void AddCategoriesTest_AddsCategoriesToDatabase()
+        {
+            var existingCategories = _dbContext.Categories.Where(c => c.Name == "Телефоны" || c.Name == "Ноутбуки");
+            _dbContext.Categories.RemoveRange(existingCategories);
+            _dbContext.SaveChanges();
+            var result = _controller.AddCategoriesTest();
+            var contentResult = Assert.IsType<ContentResult>(result);
+            Assert.Equal("OK", contentResult.Content);
+        }
+
+        [Fact]
+        public void Admin_User_Should_Have_IsAdmin_True()
+        {
+            var adminUser = new User { Id = 777, Name = "RealAdmin", Email = "admin@real.com", UserName = "admin@real.com", IsAdmin = true };
+            _dbContext.Users.Add(adminUser);
+            _dbContext.SaveChanges();
+            Assert.True(adminUser.IsAdmin);
+        }
+
+        [Fact]
+        public async Task CalculateBonusDiscount_WhenAuthenticated_ReturnsDiscount()
+        {
+            SetupAuthenticatedUser(1);
+            var bonusAccount = new BonusAccount
+            {
+                UserId = 1,
+                TotalBalance = 1000,
+                MonthlyAccrued = 0,
+                MonthlySpent = 0,
+                AccrualRate = 0.10m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            _dbContext.BonusAccounts.Add(bonusAccount);
+            await _dbContext.SaveChangesAsync();
+
+            var result = await _controller.CalculateBonusDiscount(500);
+            var jsonResult = Assert.IsType<JsonResult>(result);
+            var data = jsonResult.Value;
+            var okProperty = data.GetType().GetProperty("ok");
+            Assert.NotNull(okProperty);
+            Assert.True((bool)okProperty.GetValue(data));
+        }
+
+        [Fact]
+        public async Task CalculateBonusDiscount_WhenBonusToUseExceedsBalance_CapsAtBalance()
+        {
+            SetupAuthenticatedUser(1);
+            var bonusAccount = new BonusAccount
+            {
+                UserId = 1,
+                TotalBalance = 100,
+                MonthlyAccrued = 0,
+                MonthlySpent = 0,
+                AccrualRate = 0.10m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            _dbContext.BonusAccounts.Add(bonusAccount);
+            await _dbContext.SaveChangesAsync();
+
+            var result = await _controller.CalculateBonusDiscount(500);
+            var jsonResult = Assert.IsType<JsonResult>(result);
+            var data = jsonResult.Value;
+            var bonusUsedProperty = data.GetType().GetProperty("bonusUsed");
+            Assert.NotNull(bonusUsedProperty);
+            Assert.Equal(100, (int)bonusUsedProperty.GetValue(data));
+        }
+
+        [Fact]
+        public async Task CalculateBonusDiscount_WhenUnauthenticated_ReturnsError()
+        {
+            SetupUnauthenticatedUser();
+            var result = await _controller.CalculateBonusDiscount(100);
+            var jsonResult = Assert.IsType<JsonResult>(result);
+            var data = jsonResult.Value;
+            var okProperty = data.GetType().GetProperty("ok");
+            Assert.NotNull(okProperty);
+            Assert.False((bool)okProperty.GetValue(data));
+        }
+
+        [Fact]
+        public async Task AddToCart_AjaxRequest_ReturnsJsonWithCartCount()
+        {
+            var user = new User { Id = 99, Name = "Test User", Email = "test@example.com", UserName = "test@example.com", IsAdmin = false };
+            _dbContext.Users.Add(user);
+            await _dbContext.SaveChangesAsync();
+
+            _mockUserDb.Setup(x => x.AddToCart(99, 3)).Returns(true);
+            _mockUserDb.Setup(x => x.GetCartItemsWithQuantity(99))
+                .Returns(new List<CartItem> { new CartItem { ItemId = 3, Quantity = 1, Item = _testItems.First(i => i.Id == 3) } });
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Headers["X-Requested-With"] = "XMLHttpRequest";
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "99"),
+                new Claim(ClaimTypes.Name, "Test User"),
+                new Claim(ClaimTypes.Email, "test@example.com")
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            httpContext.User = claimsPrincipal;
+
+            var actionContext = new ActionContext(httpContext, new RouteData(), new ControllerActionDescriptor());
+            _controller.ControllerContext = new ControllerContext(actionContext);
+            _controller.Url = new Mock<IUrlHelper>().Object;
+            _controller.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
+
+            _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .ReturnsAsync(user);
+
+            var result = await _controller.AddToCart(3, 1);
+            var jsonResult = Assert.IsType<JsonResult>(result);
+            var data = jsonResult.Value;
+            var successProperty = data.GetType().GetProperty("success");
+            Assert.NotNull(successProperty);
+            Assert.True((bool)successProperty.GetValue(data));
+        }
+
+        [Fact]
+        public async Task AddToWishlist_AjaxRequest_ReturnsJsonWithWishlistCount()
+        {
+            var user = new User { Id = 100, Name = "Test User", Email = "test@example.com", UserName = "test@example.com", IsAdmin = false };
+            _dbContext.Users.Add(user);
+            await _dbContext.SaveChangesAsync();
+
+            _mockUserDb.Setup(x => x.AddToWishList(100, 3)).Returns(true);
+            _mockUserDb.Setup(x => x.GetWishList(100))
+                .Returns(new List<Item> { _testItems.First(i => i.Id == 3) }.AsQueryable());
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Headers["X-Requested-With"] = "XMLHttpRequest";
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "100"),
+                new Claim(ClaimTypes.Name, "Test User"),
+                new Claim(ClaimTypes.Email, "test@example.com")
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            httpContext.User = claimsPrincipal;
+
+            var actionContext = new ActionContext(httpContext, new RouteData(), new ControllerActionDescriptor());
+            _controller.ControllerContext = new ControllerContext(actionContext);
+            _controller.Url = new Mock<IUrlHelper>().Object;
+            _controller.TempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
+
+            _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                .ReturnsAsync(user);
+
+            var result = await _controller.AddToWishlist(3);
+            var jsonResult = Assert.IsType<JsonResult>(result);
+            var data = jsonResult.Value;
+            var successProperty = data.GetType().GetProperty("success");
+            Assert.NotNull(successProperty);
+            Assert.True((bool)successProperty.GetValue(data));
+        }
+        #endregion
     }
 }

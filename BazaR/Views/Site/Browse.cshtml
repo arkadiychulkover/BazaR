@@ -16,6 +16,10 @@
     var currentCategory = ViewBag.CurrentCategory as Category;
     var categoryPath = ViewBag.CategoryPath as List<Category> ?? new List<Category>();
     var selectedFilters = ViewBag.SelectedFilters as Dictionary<string, List<string>> ?? new Dictionary<string, List<string>>();
+    var readyToSend = ViewBag.ReadyToSend as bool?;
+    var sellerTypes = ViewBag.SellerTypes as List<int> ?? new List<int>();
+    var noPercentCredit = ViewBag.NoPercentCredit as bool?;
+    var countries = ViewBag.Countries as List<int> ?? new List<int>();
 }
 
 <div class="container mt-4">
@@ -121,6 +125,18 @@
                                 <option value="newest" selected="@(currentSort == "newest")">
                                     Спочатку нові
                                 </option>
+                                <option value="ready_to_send" selected="@(currentSort == "ready_to_send")">
+                                    Готові до відправлення
+                                </option>
+                                <option value="seller_type" selected="@(currentSort == "seller_type")">
+                                    Тип продавця (спочатку магазини)
+                                </option>
+                                <option value="no_percent_credit" selected="@(currentSort == "no_percent_credit")">
+                                    Безвідсотковий кредит
+                                </option>
+                                <option value="country" selected="@(currentSort == "country")">
+                                    Країна виробник (А-Я)
+                                </option>
                             </select>
                         </div>
 
@@ -128,6 +144,8 @@
                         <input type="hidden" name="page" value="1" />
                         <input type="hidden" name="minPrice" value="@minPrice" />
                         <input type="hidden" name="maxPrice" value="@maxPrice" />
+                        <input type="hidden" name="readyToSend" value="@(readyToSend?.ToString()?.ToLower())" />
+                        <input type="hidden" name="noPercentCredit" value="@(noPercentCredit?.ToString()?.ToLower())" />
 
                         @foreach (var catId in selectedCategoryIds)
                         {
@@ -137,6 +155,16 @@
                         @foreach (var brandId in selectedBrandIds)
                         {
                             <input type="hidden" name="brandIds" value="@brandId" />
+                        }
+
+                        @foreach (var sellerType in sellerTypes)
+                        {
+                            <input type="hidden" name="sellerTypes" value="@sellerType" />
+                        }
+
+                        @foreach (var country in countries)
+                        {
+                            <input type="hidden" name="countries" value="@country" />
                         }
 
                         @foreach (var filter in selectedFilters)
@@ -176,7 +204,11 @@
                                        brandIds = selectedBrandIds,
                                        sort = currentSort,
                                        minPrice,
-                                       maxPrice
+                                       maxPrice,
+                                       readyToSend,
+                                       sellerTypes,
+                                       noPercentCredit,
+                                       countries
                                    })@GetFilterQueryString(selectedFilters)">
                                     <i class="bi bi-chevron-left"></i>
                                 </a>
@@ -193,7 +225,11 @@
                                            brandIds = selectedBrandIds,
                                            sort = currentSort,
                                            minPrice,
-                                           maxPrice
+                                           maxPrice,
+                                           readyToSend,
+                                           sellerTypes,
+                                           noPercentCredit,
+                                           countries
                                        })@GetFilterQueryString(selectedFilters)">
                                         @i
                                     </a>
@@ -209,7 +245,11 @@
                                        brandIds = selectedBrandIds,
                                        sort = currentSort,
                                        minPrice,
-                                       maxPrice
+                                       maxPrice,
+                                       readyToSend,
+                                       sellerTypes,
+                                       noPercentCredit,
+                                       countries
                                    })@GetFilterQueryString(selectedFilters)">
                                     <i class="bi bi-chevron-right"></i>
                                 </a>
@@ -230,6 +270,21 @@
         </div>
     </div>
 </div>
+
+<style>
+    .catalog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    @@media (max-width: 768px) {
+        .catalog-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+    }
+</style>
 
 @functions {
     public string GetFilterQueryString(Dictionary<string, List<string>> filters)

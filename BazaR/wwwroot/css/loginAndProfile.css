@@ -61,15 +61,21 @@ html {
     .auth-modal {
         position: fixed;
         inset: 0;
-        z-index: 1000;
+        z-index: 1060;
         display: none;
         align-items: center;
         justify-content: center;
         padding: 24px;
     }
+        /* Bootstrap modal() може залишити display:block — не показувати без is-open */
+        .auth-modal:not(.is-open) {
+            display: none !important;
+        }
 
         .auth-modal.is-open {
             display: flex;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
     .externalLogin-form {
@@ -78,54 +84,148 @@ html {
 
     .externalLogin-form-profile {
         display: flex;
+        flex-wrap: wrap;
+        gap: 12px 16px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        align-items: stretch;
     }
 
     body.auth-modal-open {
         overflow: hidden;
+        overflow-x: hidden;
+        width: 100%;
     }
 
     .auth-modal__backdrop {
         position: absolute;
         inset: 0;
         background: rgba(0, 0, 0, 0.3);
+        z-index: 0;
     }
 
     .auth-modal__panel {
         position: relative;
+        z-index: 1;
         width: min(620px, 100%);
+        max-width: 100%;
+        box-sizing: border-box;
         background: #f5f5f5;
         border-radius: 15px;
         min-height: 362px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
-        .auth-modal__panel.has-error {
-            min-height: 375px;
+    .auth-modal__brand {
+        flex-shrink: 0;
+        border-radius: 15px 15px 0 0;
+    }
+    /* Як верхня navbar: темний фон, іконка магазину + BazaR по центру */
+    .auth-modal__brand--navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 12px;
+        background-color: #212529;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .auth-modal__brand-slot {
+        flex: 0 0 44px;
+        width: 44px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+
+    .auth-modal__brand-slot--ghost {
+        pointer-events: none;
+        user-select: none;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 1.35rem;
+        line-height: 1;
+    }
+
+    .auth-modal__brand-slot--close {
+        margin: 0;
+        padding: 0;
+        border: none;
+        border-radius: 0.25rem;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 1.25rem;
+        line-height: 1;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+
+        .auth-modal__brand-slot--close:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
         }
 
-    .auth-modal__close {
-        position: absolute;
-        top: 14px;
-        right: 14px;
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        background: #fff;
-        cursor: pointer;
+        .auth-modal__brand-slot--close:focus-visible {
+            outline: 2px solid rgba(255, 255, 255, 0.5);
+            outline-offset: 2px;
+        }
+
+    .auth-modal__navbar-brand {
+        flex: 1 1 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        min-width: 0;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
         font-size: 22px;
-        line-height: 1;
+        line-height: 1.2;
+        color: rgba(255, 255, 255, 0.95);
+        text-decoration: none;
+    }
+
+        .auth-modal__navbar-brand:hover,
+        .auth-modal__navbar-brand:focus-visible {
+            color: #fff;
+        }
+
+        .auth-modal__navbar-brand i {
+            font-size: 1.05em;
+            opacity: 0.95;
+        }
+
+    .auth-modal__social--mobile {
+        display: none;
+    }
+
+    .auth-modal__subtitle--external {
+        text-align: center;
+    }
+
+    .auth-modal__panel.has-error {
+        min-height: 375px;
     }
 
     .auth-modal__content {
         display: grid;
         grid-template-columns: 1fr 24px 200px;
         padding: 28px;
+        flex: 1 1 auto;
+        min-height: 0;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .auth-modal__col--left {
         margin-right: 10px;
+        min-width: 0;
     }
 
     .auth-modal__col--right {
@@ -438,6 +538,21 @@ html {
             filter: brightness(0.98);
             color: #2d2d2d;
         }
+    /* Як на макеті: лайм + білий текст у модалках входу/реєстрації */
+    .auth-modal .auth-btn--primary {
+        background: var(--accent, #a4c639);
+        border-color: transparent;
+        color: #fff;
+        font-weight: 600;
+        width: 100%;
+        border-radius: 14px;
+    }
+
+        .auth-modal .auth-btn--primary:hover,
+        .auth-modal .auth-btn--primary:focus-visible {
+            filter: brightness(1.04);
+            color: #fff;
+        }
 
     .auth-btn--link {
         height: auto;
@@ -491,6 +606,156 @@ html {
 
     .social-btn svg {
         flex: 0 0 auto;
+    }
+    /* До lg: одна колонка (768px у DevTools і планшети — інакше сітка 1fr|24|200 з’їдає місце) */
+    @media (max-width: 991.98px) {
+        .auth-modal {
+            padding: 16px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-modal__panel {
+            width: 100%;
+            max-width: min(100%, 440px);
+            margin: auto;
+            flex-shrink: 0;
+            border-radius: 16px;
+            max-height: min(92vh, 92dvh);
+            min-height: unset;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .auth-modal__brand {
+            border-radius: 16px 16px 0 0;
+        }
+
+        .auth-modal__brand--navbar {
+            padding: 10px 10px;
+        }
+
+        .auth-modal__content {
+            display: flex;
+            flex-direction: column;
+            grid-template-columns: unset;
+            padding: 20px 16px 28px;
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .auth-modal__col--left {
+            margin-right: 0;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        .auth-modal__title {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.35rem;
+            margin-bottom: 20px;
+        }
+
+        .auth-modal__divider {
+            display: none !important;
+        }
+
+        .auth-modal__social--desktop {
+            display: none !important;
+        }
+
+        .auth-modal__social--mobile {
+            display: block !important;
+            width: 100%;
+        }
+
+        .auth-modal__subtitle {
+            margin-top: 4px;
+            margin-bottom: 10px;
+        }
+
+        .auth-modal__col--right {
+            margin-left: 0;
+            padding-bottom: 0;
+        }
+
+        .auth-input {
+            min-height: 44px;
+            height: auto;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .auth-hint {
+            max-width: none;
+            text-align: left;
+            margin-left: 4px;
+            font-size: 11px;
+            line-height: 1.35;
+        }
+
+        .auth-terms {
+            margin-left: 4px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .field-validation {
+            margin-left: 8px;
+        }
+
+        .social-btn--fb {
+            margin-bottom: 12px;
+        }
+
+        .auth-modal__register-flow {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            gap: 12px;
+        }
+        /* Без display:contents на <form> — інакше вміст реєстрації може не малюватися (Safari/WebKit) */
+
+        .auth-modal__login-flow {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            gap: 12px;
+        }
+
+            .auth-modal__login-flow .auth-modal__social--mobile {
+                margin-top: 4px;
+            }
+
+        .auth-modal .externalLogin-form {
+            min-width: 0;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .auth-modal .social-btn {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .auth-modal .auth-btn--link {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .auth-modal .auth-form {
+            max-width: 100%;
+            min-width: 0;
+        }
     }
     /* =====================================================
    FOOTER
@@ -549,7 +814,14 @@ html {
         grid-template-columns: 1.3fr repeat(4, 1fr);
         gap: 24px 42px;
         align-items: start;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
+
+        .footer-grid > * {
+            min-width: 0;
+        }
 
     .footer-left {
         display: flex;
@@ -575,6 +847,7 @@ html {
 
     .footer-social {
         display: flex;
+        flex-wrap: wrap;
         gap: 12px;
         align-items: center;
     }
@@ -677,6 +950,76 @@ html {
         font-size: 12px;
         line-height: 15px;
         color: #A6A5A5;
+    }
+
+    @media (max-width: 991.98px) {
+        .site-footer__apps {
+            padding: 28px 0;
+        }
+
+        .apps-row {
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            gap: 20px;
+        }
+
+        .apps-title {
+            font-size: clamp(15px, 4.2vw, 22px);
+            line-height: 1.25;
+            padding: 0 8px;
+            letter-spacing: 0.02em;
+        }
+
+        .apps-badges {
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 100%;
+        }
+
+        .store-badge {
+            max-width: min(100%, 220px);
+            padding: 0 10px;
+        }
+
+            .store-badge svg {
+                width: auto;
+                max-width: 100%;
+                height: 32px;
+                display: block;
+            }
+
+        .site-footer__main {
+            padding: 22px 0 16px;
+            overflow-x: hidden;
+        }
+
+        .footer-grid {
+            grid-template-columns: 1fr;
+            gap: 28px;
+            column-gap: 0;
+        }
+
+        .footer-bottom-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .pay-logos {
+            flex-wrap: wrap;
+        }
+
+        .copy {
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+    }
+
+    @media (min-width: 992px) and (max-width: 1199.98px) {
+        .footer-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 28px 32px;
+        }
     }
     /* =====================================================
    PRODUCT CARD
@@ -1150,11 +1493,15 @@ html {
         max-width: 1880px;
         margin: 0 auto;
         padding: 24px 24px 60px;
+        box-sizing: border-box;
+        width: 100%;
     }
 
     .profile-page__content {
         flex: 1;
         min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .profile-page__title {
@@ -1169,7 +1516,9 @@ html {
         display: flex;
         flex-direction: column;
         gap: 10px;
-        width: 110%;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .profile-block {
@@ -1177,6 +1526,8 @@ html {
         border: 0.5px solid #A6A5A5;
         border-radius: 15px;
         overflow: hidden;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .profile-block__head {
@@ -1263,6 +1614,73 @@ html {
         gap: 10px 80px;
     }
 
+    @media (max-width: 991.98px) {
+        .profile-page__layout {
+            padding-left: 16px;
+            padding-right: 16px;
+            max-width: 100%;
+        }
+
+        .profile-page__content {
+            overflow-x: hidden;
+        }
+
+        .profile-block__head {
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+
+        .profile-block__body {
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+
+        .profile-info-grid {
+            gap: 20px;
+        }
+
+        .profile-info-grid--3,
+        .profile-info-grid--2 {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .profile-info-grid .profile-info-item,
+        .profile-info-grid .profile-login-item {
+            min-width: 0;
+        }
+
+        .profile-info-item__value,
+        .profile-login-item__value {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .profile-social__list {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .externalLogin-form-profile {
+            flex-direction: column;
+            flex-wrap: nowrap;
+            gap: 12px;
+        }
+
+            .externalLogin-form-profile .social-connect-card {
+                width: 100%;
+                max-width: 100%;
+                flex: none;
+            }
+
+        .social-connect-card__content {
+            min-width: 0;
+            flex: 1;
+            align-items: flex-start;
+        }
+    }
+
     .profile-info-item__label,
     .profile-login-item__label {
         margin-bottom: 10px;
@@ -1329,6 +1747,9 @@ html {
 
     .social-connect-card {
         width: 238px;
+        max-width: 100%;
+        min-width: 0;
+        flex: 1 1 200px;
         min-height: 74px;
         padding: 16px 18px;
         display: flex;
@@ -1338,10 +1759,11 @@ html {
         border: 0.5px solid #A6A5A5;
         border-radius: 10px;
         text-decoration: none;
+        box-sizing: border-box;
     }
 
     .social-connect-card__left {
-        margin-right: 20px;
+        margin-right: 0;
     }
 
     .social-connect-card__icon {
@@ -1579,6 +2001,7 @@ html {
         .save-btn:hover {
             background: #86a925;
         }
+
     .wallet-page {
         max-width: 1100px;
         margin: 40px auto;
@@ -1637,17 +2060,17 @@ html {
         padding: 20px;
     }
 
-    .wallet-box h3 {
-        font-size: 16px;
-        color: #0F2744;
-        margin-bottom: 10px;
-    }
+        .wallet-box h3 {
+            font-size: 16px;
+            color: #0F2744;
+            margin-bottom: 10px;
+        }
 
-    .wallet-box p {
-        margin: 0;
-        color: #6B7280;
-        font-size: 14px;
-    }
+        .wallet-box p {
+            margin: 0;
+            color: #6B7280;
+            font-size: 14px;
+        }
 
     .wallet-actions {
         display: flex;
@@ -1667,9 +2090,9 @@ html {
         transition: .2s;
     }
 
-    .btn-main:hover {
-        opacity: .92;
-    }
+        .btn-main:hover {
+            opacity: .92;
+        }
 
     .btn-outline {
         background: #fff;
@@ -1682,9 +2105,9 @@ html {
         transition: .2s;
     }
 
-    .btn-outline:hover {
-        background: #F9FAFB;
-    }
+        .btn-outline:hover {
+            background: #F9FAFB;
+        }
 
     .wallet-modal {
         position: fixed;
@@ -1697,9 +2120,9 @@ html {
         padding: 20px;
     }
 
-    .wallet-modal.show {
-        display: flex;
-    }
+        .wallet-modal.show {
+            display: flex;
+        }
 
     .wallet-modal__dialog {
         width: 100%;
@@ -1762,10 +2185,10 @@ html {
         box-sizing: border-box;
     }
 
-    .wallet-field input:focus,
-    .wallet-field select:focus {
-        border-color: #98BE2A;
-    }
+        .wallet-field input:focus,
+        .wallet-field select:focus {
+            border-color: #98BE2A;
+        }
 
     .wallet-row-2 {
         display: grid;
@@ -1788,10 +2211,10 @@ html {
         margin-bottom: 10px;
     }
 
-    .wallet-pay-summary strong {
-        font-size: 24px;
-        color: #0F2744;
-    }
+        .wallet-pay-summary strong {
+            font-size: 24px;
+            color: #0F2744;
+        }
 
     .wallet-pay-note {
         font-size: 13px;
@@ -1814,15 +2237,15 @@ html {
         font-weight: 600;
     }
 
-    .wallet-step.active {
-        background: #0F2744;
-        color: #fff;
-    }
+        .wallet-step.active {
+            background: #0F2744;
+            color: #fff;
+        }
 
-    .wallet-step.done {
-        background: #98BE2A;
-        color: #fff;
-    }
+        .wallet-step.done {
+            background: #98BE2A;
+            color: #fff;
+        }
 
     .wallet-status {
         display: none;
@@ -1832,21 +2255,21 @@ html {
         margin-top: 16px;
     }
 
-    .wallet-status.show {
-        display: block;
-    }
+        .wallet-status.show {
+            display: block;
+        }
 
-    .wallet-status.success {
-        background: #ECFDF3;
-        color: #166534;
-        border: 1px solid #BBF7D0;
-    }
+        .wallet-status.success {
+            background: #ECFDF3;
+            color: #166534;
+            border: 1px solid #BBF7D0;
+        }
 
-    .wallet-status.error {
-        background: #FEF2F2;
-        color: #991B1B;
-        border: 1px solid #FECACA;
-    }
+        .wallet-status.error {
+            background: #FEF2F2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+        }
 
     .wallet-processing {
         display: none;
@@ -1854,9 +2277,9 @@ html {
         padding: 18px 0 8px;
     }
 
-    .wallet-processing.show {
-        display: block;
-    }
+        .wallet-processing.show {
+            display: block;
+        }
 
     .wallet-spinner {
         width: 44px;
@@ -1869,7 +2292,9 @@ html {
     }
 
     @@keyframes walletSpin {
-        to { transform: rotate(360deg); }
+        to {
+            transform: rotate(360deg);
+        }
     }
 
     .wallet-history {
@@ -1911,9 +2336,9 @@ html {
         border-bottom: 1px solid #F3F4F6;
     }
 
-    .wallet-history__item:last-child {
-        border-bottom: none;
-    }
+        .wallet-history__item:last-child {
+            border-bottom: none;
+        }
 
     .wallet-history__left {
         min-width: 0;
@@ -1935,13 +2360,13 @@ html {
         white-space: nowrap;
     }
 
-    .wallet-history__amount.in {
-        color: #16A34A;
-    }
+        .wallet-history__amount.in {
+            color: #16A34A;
+        }
 
-    .wallet-history__amount.out {
-        color: #DC2626;
-    }
+        .wallet-history__amount.out {
+            color: #DC2626;
+        }
 
     .wallet-empty {
         padding: 30px 22px;
@@ -3278,6 +3703,7 @@ html {
         border: 0.5px solid var(--sidebar-border);
         border-radius: var(--sidebar-radius);
         padding: 18px 20px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
     }
 
     .sidebar-nav-item {
@@ -4112,4 +4538,254 @@ html {
             color: #fff;
             border-color: #c62828;
         }
-    
+    /* —— Бічне меню: категорії → довідка (окрема картка) → welcome → додатки → соц. → групи —— */
+    .sidebar-card--catalog {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .sidebar-cat-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .sidebar-cat-item {
+        margin: 0;
+    }
+
+    .sidebar-cat-link {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 13px 18px;
+        text-decoration: none;
+        color: #1a1a1a;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.25;
+        border-bottom: 1px solid #eee;
+        transition: background 0.15s ease;
+    }
+
+    .sidebar-cat-item:last-child .sidebar-cat-link {
+        border-bottom: none;
+    }
+
+    .sidebar-cat-link:hover {
+        background: #f8f9fa;
+        color: #1a1a1a;
+    }
+
+    .sidebar-cat-icon {
+        width: 26px;
+        min-width: 26px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+    }
+
+        .sidebar-cat-icon .bi {
+            font-size: 1.15rem;
+            line-height: 1;
+        }
+
+        .sidebar-cat-icon img {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+        }
+
+    .sidebar-cat-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .sidebar-card--help-row {
+        padding: 0;
+        overflow: hidden;
+        border-color: #e5e5e5;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar-help-center-link {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 13px 18px;
+        text-decoration: none;
+        color: #1a1a1a;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+        .sidebar-help-center-link:hover {
+            background: #f8f9fa;
+            color: #1a1a1a;
+        }
+
+            .sidebar-help-center-link:hover .sidebar-help-center-link__icon .bi {
+                color: #333;
+            }
+
+    .sidebar-help-center-link__icon {
+        width: 26px;
+        min-width: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: #333;
+    }
+
+        .sidebar-help-center-link__icon .bi {
+            color: #333;
+        }
+
+    .sidebar-card--welcome {
+        text-align: center;
+    }
+
+    .sidebar-welcome-title {
+        margin: 0 0 8px;
+        font-size: 17px;
+        font-weight: 700;
+        color: #1a1a1a;
+    }
+
+    .sidebar-welcome-text {
+        margin: 0 0 16px;
+        font-size: 13px;
+        line-height: 1.45;
+        color: #666;
+    }
+
+    .sidebar-welcome-btn {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 12px;
+        background: #c8e632;
+        color: #1a1a1a;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+        .sidebar-welcome-btn:hover {
+            background: #b8d628;
+            color: #1a1a1a;
+        }
+
+        .sidebar-welcome-btn:active {
+            transform: scale(0.99);
+        }
+
+    .sidebar-card--app-panel {
+        padding: 14px 16px 16px;
+    }
+
+        .sidebar-card--app-panel .download-app {
+            width: 100%;
+            max-width: 100%;
+            min-height: 0;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .sidebar-card--app-panel .download-app__title {
+            text-align: center;
+            margin-left: 0;
+        }
+
+    .sidebar-card--social-wrap {
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+        .sidebar-card--social-wrap .social-card {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+        .sidebar-card--social-wrap .social-card__title {
+            text-align: center;
+            margin-left: 0;
+        }
+
+    .sidebar-card--link-groups {
+        padding: 16px 18px 18px;
+    }
+
+    .sidebar-link-group {
+        margin-top: 18px;
+    }
+
+        .sidebar-link-group:first-child {
+            margin-top: 0;
+        }
+
+    .sidebar-link-group__title {
+        margin: 0 0 10px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #1a1a1a;
+    }
+
+    .sidebar-link-group__list {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+        .sidebar-link-group__list a {
+            font-size: 13px;
+            line-height: 1.35;
+            color: #4a4a4a;
+            text-decoration: none;
+            font-weight: 400;
+        }
+
+            .sidebar-link-group__list a:hover {
+                color: #5a9a00;
+                text-decoration: underline;
+            }
+
+    .sidebar-pay-logos {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 12px 20px;
+        padding-top: 4px;
+        border-top: 1px solid #ececec;
+        margin-top: 4px;
+    }
+
+    .sidebar-pay-logos--in-card {
+        margin-top: 18px;
+        padding-top: 14px;
+    }
+
+    .sidebar-pay-fake {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: #888;
+        text-transform: uppercase;
+    }

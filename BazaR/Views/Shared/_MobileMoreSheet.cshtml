@@ -1,0 +1,20 @@
+﻿<div id="mobileMoreSheet" class="mobile-more-sheet" aria-hidden="true">
+    <div class="mobile-more-sheet__backdrop" data-more-sheet-close tabindex="-1"></div>
+    <div class="mobile-more-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="mobileMoreSheetTitle">
+        <div class="site-promo-ribbon mobile-more-sheet__promo" role="status">
+            <span class="site-promo-ribbon__text">ТОТАЛЬНИЙ РОЗПРОДАЖ ДО -50%</span>
+        </div>
+        <header class="mobile-more-sheet__header">
+            <span class="mobile-more-sheet__header-slot" aria-hidden="true"><i class="bi bi-list"></i></span>
+            <a id="mobileMoreSheetTitle" class="mobile-more-sheet__brand" asp-controller="Site" asp-action="Index">
+                <i class="bi bi-shop" aria-hidden="true"></i> BazaR
+            </a>
+            <button type="button" class="mobile-more-sheet__close" data-more-sheet-close aria-label="Закрити">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+        <div class="mobile-more-sheet__body">
+            @await Component.InvokeAsync("MobileMoreMenu")
+        </div>
+    </div>
+</div>

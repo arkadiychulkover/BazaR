@@ -42,7 +42,7 @@ namespace BazaR.Controllers
 
             var vm = new AccountProfileViewModel
             {
-                
+
                 FirstName = user?.FirstName,
                 LastName = user?.LastName,
                 MiddleName = user?.MiddleName,

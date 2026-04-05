@@ -85,7 +85,7 @@
                         class="tovar-card__cart-btn @(isInCart ? "tovar-card__cart-btn--in-cart" : "")"
                         data-item-id="@Model.Id"
                         onclick="addToCart(this, @Model.Id)"
-                        @(isInCart ? "disabled" : "")
+                    @(isInCart ? "disabled" : "")
                         title="Додати в кошик">
                     <i class="bi @(isInCart ? "bi-check-lg" : "bi-cart3")"></i>
                 </button>
@@ -114,12 +114,20 @@
                     if (typeof updateCartBadge === 'function') {
                         updateCartBadge(response.cartCount);
                     } else {
-                        var badge = $('#cartBadge');
-                        if (badge.length) { badge.text(response.cartCount); badge.show(); }
+                        $('.cart-header-badge').each(function () {
+                            var $b = $(this);
+                            $b.text(response.cartCount);
+                            $b.toggle(response.cartCount > 0);
+                        });
                     }
                     showNotification('Товар додано до кошика', 'success');
                 } else if (response.requireLogin) {
-                    $('#loginModal').modal('show');
+                    if (window.authModals && typeof window.authModals.openModal === 'function') {
+                        window.authModals.openModal('login');
+                    } else {
+                        var goCart = document.querySelector('[data-auth-open="login"]');
+                        if (goCart) goCart.click();
+                    }
                     button.innerHTML = originalHtml;
                     button.disabled = false;
                 } else {
@@ -184,7 +192,12 @@
                     var msg = response.added ? 'Додано в обране' : 'Видалено з обраного';
                     showNotification(msg, response.added ? 'success' : 'info');
                 } else if (response.requireLogin) {
-                    $('#loginModal').modal('show');
+                    if (window.authModals && typeof window.authModals.openModal === 'function') {
+                        window.authModals.openModal('login');
+                    } else {
+                        var go = document.querySelector('[data-auth-open="login"]');
+                        if (go) go.click();
+                    }
                 } else {
                     showNotification(response.message || 'Помилка', 'danger');
                 }

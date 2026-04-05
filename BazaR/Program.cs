@@ -1,6 +1,5 @@
 using BazaR.Data;
 using BazaR.Filters;
-using BazaR.HostedServices;
 using BazaR.Interfaces;
 using BazaR.Models;
 using BazaR.Repositories;
@@ -10,15 +9,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
+Console.WriteLine("LOG");
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddControllersWithViews(o =>
 {
     o.Filters.Add<UserContextFilter>();
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
 
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
@@ -59,10 +58,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
-builder.Services.AddScoped<IUserMessageService, UserMessageService>();
-builder.Services.AddScoped<IMailingGeneratorService, MailingGeneratorService>();
 
-builder.Services.AddHostedService<MailingBackgroundService>();
 builder.Services
     .AddAuthentication()
     .AddGoogle(options =>
@@ -71,6 +67,7 @@ builder.Services
         options.ClientSecret = "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";
         options.SaveTokens = true;
     });
+
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<DbMaker>();
 builder.Services.AddScoped<UserContextFilter>();
@@ -87,9 +84,14 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    Console.WriteLine("Scope");
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await context.Database.MigrateAsync();
+
     var dbMaker = scope.ServiceProvider.GetRequiredService<DbMaker>();
     await dbMaker.MakeAsync();
 }
+Console.WriteLine("AfterScope");
 
 if (!app.Environment.IsDevelopment())
 {

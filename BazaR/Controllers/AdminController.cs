@@ -29,7 +29,8 @@ namespace BazaR.Controllers
             RoleManager<IdentityRole<int>> roleManager,
             SignInManager<User> signInManager,
             AppDbContext appDbContext,
-            IUserDb userDb, IUserStatistick StatistickRepo,
+            IUserDb userDb,
+            IUserStatistick StatistickRepo,
             IMemoryCache cache)
         {
             _userManager = userManager;
@@ -44,13 +45,25 @@ namespace BazaR.Controllers
         #region Users
 
         [HttpGet]
-        public IActionResult Index([FromServices] ActiveUsersService service)
+        public async Task<IActionResult> Index([FromServices] ActiveUsersService service)
         {
-            IQueryable<User> users = _appDbContext.Users;
-            ViewBag.Active = service.GetOnlineUsersCount();
+            if (!_cache.TryGetValue("Users", out List<User> users))
+            {
+                users = await _appDbContext.Users.ToListAsync();
+                _cache.Set("Users", users, TimeSpan.FromMinutes(5));
+            }
+
+            if (!_cache.TryGetValue("OnlineUsersCount", out int onlineUsersCount))
+            {
+                onlineUsersCount = service.GetOnlineUsersCount();
+                _cache.Set("OnlineUsersCount", onlineUsersCount, TimeSpan.FromMinutes(1));
+            }
+
+            ViewBag.Active = onlineUsersCount;
             ViewBag.ForMonth = _StatistickRepo.GetUsersCountForMonthAsync();
             ViewBag.ForWeek = _StatistickRepo.GetUsersCountForWeekAsync();
             ViewBag.ForDay = _StatistickRepo.GetUsersCountForDayAsync();
+
             return View(users);
         }
 
@@ -62,6 +75,7 @@ namespace BazaR.Controllers
             if (us != null)
             {
                 await _userManager.DeleteAsync(us);
+                _cache.Remove("Users");
             }
             return RedirectToAction(nameof(Index));
         }
@@ -86,7 +100,6 @@ namespace BazaR.Controllers
             us.PhoneNumber = user.PhoneNumber;
             us.IsAdmin = user.IsAdmin;
 
-            // Управление ролью Admin
             if (user.IsAdmin)
             {
                 if (!await _userManager.IsInRoleAsync(us, adminRoleName))
@@ -99,6 +112,7 @@ namespace BazaR.Controllers
             }
 
             await _userManager.UpdateAsync(us);
+            _cache.Remove("Users");
 
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser != null && currentUser.Id == us.Id)
@@ -118,6 +132,7 @@ namespace BazaR.Controllers
             user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(1);
 
             await _userManager.UpdateAsync(user);
+            _cache.Remove("Users");
 
             return RedirectToAction(nameof(Index));
         }
@@ -132,27 +147,38 @@ namespace BazaR.Controllers
             user.LockoutEnd = null;
 
             await _userManager.UpdateAsync(user);
+            _cache.Remove("Users");
 
             return RedirectToAction(nameof(Index));
         }
 
         #endregion
 
+        #region UserStatistic
+
         [HttpGet]
         public async Task<IActionResult> UserStatistic(int id)
         {
-            User us = await _appDbContext.Users
-                .Include(u => u.SellingItems).ThenInclude(i => i.Category)
-                .Include(u => u.SellingItems).ThenInclude(i => i.Brand)
-                .Include(u => u.Reviews).ThenInclude(r => r.Item)
-                .Include(u => u.Orders)
-                .FirstOrDefaultAsync(u => u.Id == id);
+            if (!_cache.TryGetValue($"UserStatistic_{id}", out User us))
+            {
+                us = await _appDbContext.Users
+                    .Include(u => u.SellingItems).ThenInclude(i => i.Category)
+                    .Include(u => u.SellingItems).ThenInclude(i => i.Brand)
+                    .Include(u => u.Reviews).ThenInclude(r => r.Item)
+                    .Include(u => u.Orders)
+                    .FirstOrDefaultAsync(u => u.Id == id);
+
+                _cache.Set($"UserStatistic_{id}", us, TimeSpan.FromMinutes(5));
+            }
 
             if (us == null) return RedirectToAction(nameof(Index));
             return View(us);
         }
 
+        #endregion
+
         #region Items
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUserItem(int id)
@@ -163,8 +189,9 @@ namespace BazaR.Controllers
                 int userId = it.UserId;
                 _appDbContext.Items.Remove(it);
                 await _appDbContext.SaveChangesAsync();
-                //CACHE
+                _cache.Remove($"UserStatistic_{userId}");
                 _cache.Remove("browse:*");
+                _cache.Remove($"Item_{id}");
 
                 return RedirectToAction(nameof(UserStatistic), new { id = userId });
             }
@@ -178,7 +205,11 @@ namespace BazaR.Controllers
                 .Include(i => i.Category)
                 .Include(i => i.Brand)
                 .FirstOrDefaultAsync(i => i.Id == id);
+
             if (it == null) return RedirectToAction(nameof(Index));
+
+            _cache.Remove($"UserStatistic_{it.UserId}");
+            _cache.Remove("browse:*");
             return View(it);
         }
 
@@ -197,16 +228,19 @@ namespace BazaR.Controllers
                 it.ImageUrl = item.ImageUrl;
 
                 await _appDbContext.SaveChangesAsync();
-                //CACHE
+                _cache.Remove($"UserStatistic_{it.UserId}");
                 _cache.Remove("browse:*");
+                _cache.Remove($"Item_{item.Id}");
 
                 return RedirectToAction(nameof(UserStatistic), new { id = it.UserId });
             }
             return RedirectToAction(nameof(Index));
         }
+
         #endregion
 
         #region Reviews
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUserReview(int id)
@@ -217,6 +251,9 @@ namespace BazaR.Controllers
                 int userId = rev.UserId;
                 _appDbContext.Reviews.Remove(rev);
                 await _appDbContext.SaveChangesAsync();
+                _cache.Remove($"UserStatistic_{userId}");
+                _cache.Remove($"Review_{id}");
+
                 return RedirectToAction(nameof(UserStatistic), new { id = userId });
             }
             return RedirectToAction(nameof(Index));
@@ -227,6 +264,7 @@ namespace BazaR.Controllers
         {
             Review rev = await _appDbContext.Reviews.FirstOrDefaultAsync(r => r.Id == id);
             if (rev == null) return RedirectToAction(nameof(Index));
+            _cache.Remove($"UserStatistic_{rev.UserId}");
             return View(rev);
         }
 
@@ -240,13 +278,18 @@ namespace BazaR.Controllers
                 rev.Comment = review.Comment;
                 rev.Rating = review.Rating;
                 await _appDbContext.SaveChangesAsync();
+                _cache.Remove($"UserStatistic_{rev.UserId}");
+                _cache.Remove($"Review_{review.Id}");
+
                 return RedirectToAction(nameof(UserStatistic), new { id = rev.UserId });
             }
             return RedirectToAction(nameof(Index));
         }
+
         #endregion
 
         #region Orders
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteOrder(int id)
@@ -254,10 +297,13 @@ namespace BazaR.Controllers
             Order or = await _appDbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
             if (or != null)
             {
-                int userid = or.UserId;
+                int userId = or.UserId;
                 _appDbContext.Orders.Remove(or);
                 await _appDbContext.SaveChangesAsync();
-                return RedirectToAction(nameof(UserStatistic), new { id = userid });
+                _cache.Remove($"UserStatistic_{userId}");
+                _cache.Remove($"Order_{id}");
+
+                return RedirectToAction(nameof(UserStatistic), new { id = userId });
             }
             return RedirectToAction(nameof(Index));
         }
@@ -265,11 +311,16 @@ namespace BazaR.Controllers
         [HttpGet]
         public async Task<IActionResult> OrderDetails(int id)
         {
-            Order order = await _appDbContext.Orders
-                .Include(o => o.OrderItems).ThenInclude(oi => oi.Item)
-                .Include(o => o.City)
-                .Include(o => o.User)
-                .FirstOrDefaultAsync(o => o.Id == id);
+            if (!_cache.TryGetValue($"Order_{id}", out Order order))
+            {
+                order = await _appDbContext.Orders
+                    .Include(o => o.OrderItems).ThenInclude(oi => oi.Item)
+                    .Include(o => o.City)
+                    .Include(o => o.User)
+                    .FirstOrDefaultAsync(o => o.Id == id);
+
+                _cache.Set($"Order_{id}", order, TimeSpan.FromMinutes(5));
+            }
 
             if (order == null) return RedirectToAction(nameof(Index));
 
@@ -310,26 +361,39 @@ namespace BazaR.Controllers
             order.Ttn = ttn?.Trim();
 
             await _appDbContext.SaveChangesAsync();
+
+            _cache.Remove($"Order_{id}");
+            _cache.Remove($"UserStatistic_{order.UserId}");
+
             TempData["Ok"] = $"Замовлення №{order.Number} оновлено.";
             return RedirectToAction(nameof(OrderDetails), new { id });
         }
+
         #endregion
 
         #region Promotions
+
         [HttpGet]
         public async Task<IActionResult> Promotions()
         {
-            var promotions = await _appDbContext.Promotions.ToListAsync();
+            if (!_cache.TryGetValue("Promotions", out List<Promotion> promotions))
+            {
+                promotions = await _appDbContext.Promotions.ToListAsync();
+                _cache.Set("Promotions", promotions, TimeSpan.FromMinutes(5));
+            }
             return View(promotions);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddPromotion(Promotion prom)
         {
             _appDbContext.Promotions.Add(prom);
             await _appDbContext.SaveChangesAsync();
+            _cache.Remove("Promotions");
             return RedirectToAction(nameof(Index));
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeletePromotion(int id)
@@ -340,20 +404,22 @@ namespace BazaR.Controllers
             {
                 _appDbContext.Promotions.Remove(promotion);
                 await _appDbContext.SaveChangesAsync();
+                _cache.Remove("Promotions");
             }
             return RedirectToAction(nameof(Promotions));
         }
+
         #endregion
 
         #region Mails
+
         [HttpGet]
         public async Task<IActionResult> IndexMail(int id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
-            if (user == null)
-                return NotFound();
+            if (user == null) return NotFound();
 
-            var cacheKey = $"admin_messages:{id}";
+            var cacheKey = $"Messages_{id}";
 
             if (!_cache.TryGetValue(cacheKey, out List<Message> messages))
             {
@@ -363,11 +429,7 @@ namespace BazaR.Controllers
                     .OrderByDescending(m => m.DateTime)
                     .ToListAsync();
 
-                _cache.Set(cacheKey, messages, new MemoryCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2),
-                    SlidingExpiration = TimeSpan.FromMinutes(1)
-                });
+                _cache.Set(cacheKey, messages, TimeSpan.FromMinutes(5));
             }
 
             var model = new AdminMessageViewModel
@@ -402,6 +464,8 @@ namespace BazaR.Controllers
                     NewMessage = vm
                 };
 
+                _cache.Remove($"Messages_{vm.UserId}");
+
                 return View("IndexMail", model);
             }
 
@@ -421,7 +485,7 @@ namespace BazaR.Controllers
             _appDbContext.Messages.Add(message);
             await _appDbContext.SaveChangesAsync();
 
-            _cache.Remove($"admin_messages:{vm.UserId}");
+            _cache.Remove($"Messages_{vm.UserId}");
             _cache.Remove($"user_messages:{vm.UserId}:page:1");
 
             TempData["Success"] = "Сообщение успешно отправлено.";
@@ -438,29 +502,41 @@ namespace BazaR.Controllers
             {
                 _appDbContext.Messages.Remove(message);
                 await _appDbContext.SaveChangesAsync();
+                _cache.Remove($"Messages_{userId}");
+                _cache.Remove($"user_messages:{userId}:page:1");
             }
-
-            _cache.Remove($"admin_messages:{userId}");
-            _cache.Remove($"user_messages:{userId}:page:1");
 
             return RedirectToAction(nameof(IndexMail), new { id = userId });
         }
+
         #endregion
+
+        #region Statistics & Logs
 
         [HttpGet]
         public async Task<IActionResult> PopularCategories()
         {
-            var popularDict = await _StatistickRepo.GetPopularCategoryAsync();
-            return View(popularDict);
+            if (!_cache.TryGetValue("PopularCategories", out Dictionary<Category, int> data))
+            {
+                data = await _StatistickRepo.GetPopularCategoryAsync();
+                _cache.Set("PopularCategories", data, TimeSpan.FromMinutes(5));
+            }
+
+            return View(data);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetLog()
         {
-            List<VisitingModel> log = _appDbContext.VisitingModels.ToList();
-            foreach (VisitingModel model in log) 
+            if (!_cache.TryGetValue("Logs", out List<VisitingModel> log))
             {
-                if(model.SearchFilters != null)
+                log = await _appDbContext.VisitingModels.ToListAsync();
+                _cache.Set("Logs", log, TimeSpan.FromMinutes(5));
+            }
+
+            foreach (VisitingModel model in log)
+            {
+                if (model.SearchFilters != null)
                     Console.WriteLine(model.SearchFilters.Id);
                 Console.WriteLine("\n\nLOGS\n\n");
             }
@@ -468,20 +544,29 @@ namespace BazaR.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetLogByUserId(int id) 
+        public async Task<IActionResult> GetLogByUserId(int id)
         {
-            List<VisitingModel> log = _appDbContext.VisitingModels.Where<VisitingModel>(v => v.UserId == id).ToList();
+            if (!_cache.TryGetValue($"Logs_{id}", out List<VisitingModel> log))
+            {
+                log = await _appDbContext.VisitingModels.Where(v => v.UserId == id).ToListAsync();
+                _cache.Set($"Logs_{id}", log, TimeSpan.FromMinutes(5));
+            }
             return View(log);
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeleteLogs() 
+        public async Task<IActionResult> DeleteLogs()
         {
             _appDbContext.VisitingModels.RemoveRange(_appDbContext.VisitingModels);
             await _appDbContext.SaveChangesAsync();
 
             await _appDbContext.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('VisitingModels', RESEED, 0)");
+
+            _cache.Remove("Logs");
+
             return RedirectToAction("GetLog");
         }
+
+        #endregion
     }
 }

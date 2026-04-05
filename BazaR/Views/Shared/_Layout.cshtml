@@ -4,6 +4,8 @@
 @{
     var title = ViewData["Title"] ?? "BazaR";
     var categories = ItemRepository.GetAllCategories();
+    var layoutController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var isProfileLayoutSection = string.Equals(layoutController, "Profile", StringComparison.OrdinalIgnoreCase);
 }
 
 <!DOCTYPE html>
@@ -95,8 +97,9 @@
         }
     </style>
 </head>
-<body data-open-auth="@TempData["OpenAuth"]"
-    data-is-authenticated="@((User.Identity?.IsAuthenticated ?? false).ToString().ToLower())">
+<body class="@(isProfileLayoutSection ? "layout-profile-mobile" : null)"
+      data-open-auth="@TempData["OpenAuth"]"
+      data-is-authenticated="@((User.Identity?.IsAuthenticated ?? false).ToString().ToLower())">
     @await Html.PartialAsync("~/Views/Account/_Login.cshtml")
     @await Html.PartialAsync("~/Views/Account/_Register.cshtml")
     @* Глобальний токен для AJAX-запитів (кошик, обране тощо) *@
@@ -131,16 +134,66 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
             <div class="container-fluid">
 
-                <button class="btn btn-dark border-0 me-2 d-flex align-items-center" id="sidebarOpen" data-sidebar-open type="button" aria-label="Відкрити меню" style="font-size:1.35rem;padding:4px 8px;">
+                <button class="btn btn-dark border-0 me-2 d-flex align-items-center layout-header__sidebar-open" id="sidebarOpen" data-sidebar-open type="button" aria-label="Відкрити меню" style="font-size:1.35rem;padding:4px 8px;">
                     <i class="bi bi-list"></i>
                 </button>
 
-                <a class="navbar-brand" asp-controller="Site" asp-action="Index">
-                    <i class="bi bi-shop"></i> BazaR
+                <div class="navbar-profile-mobile-bar">
+                    <a class="navbar-profile-mobile-back text-decoration-none"
+                       href="@Url.Action("Index", "Site")"
+                       data-profile-back
+                       aria-label="Повернутися назад">
+                        <i class="bi bi-arrow-left navbar-profile-mobile-back__icon" aria-hidden="true"></i>
+                        <span class="navbar-profile-mobile-back__text">назад</span>
+                    </a>
+                    <a class="navbar-profile-mobile-logo text-decoration-none"
+                       asp-controller="Site"
+                       asp-action="Index"
+                       aria-label="BazaR — на головну">
+                        <i class="bi bi-shop" aria-hidden="true"></i> BazaR
+                    </a>
+                </div>
+
+                <a class="navbar-brand" asp-controller="Site" asp-action="Index" style="margin-left: 50px">
+                    <svg width="117" height="47" viewBox="0 0 117 47" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M25.3716 28.5159C25.3636 29.0483 25.276 29.5768 25.1116 30.085C24.927 30.68 24.6185 31.2324 24.2049 31.7081C23.7913 32.1839 23.2815 32.5731 22.7066 32.8519C21.9817 33.1911 21.1827 33.3562 20.3775 33.3331H4.71247C4.43041 33.3347 4.15074 33.2832 3.88913 33.1814C3.65127 33.0833 3.43448 32.9432 3.24997 32.7682C3.06262 32.5867 2.91361 32.3717 2.81122 32.1353C2.70507 31.8811 2.6517 31.6092 2.65413 31.3351V13.3792C2.64965 12.846 2.86385 12.3326 3.24997 11.9513C3.43037 11.7637 3.64764 11.6125 3.88913 11.5068C4.15074 11.4049 4.43041 11.3534 4.71247 11.3551H18.5195C19.0716 11.3645 19.6192 11.4526 20.1445 11.6166C20.7347 11.7946 21.2857 12.0766 21.7695 12.4482C22.2899 12.8573 22.7161 13.3668 23.0208 13.9441C23.3835 14.6482 23.5603 15.428 23.5354 16.2141V16.962C23.5242 17.7334 23.4002 18.4994 23.167 19.2372C22.9175 20.0664 22.5197 20.847 21.9916 21.5438C22.4637 21.8269 22.9 22.1622 23.2916 22.5428C23.7135 22.9439 24.0778 23.3978 24.375 23.8923C24.694 24.4388 24.9397 25.0223 25.1062 25.6287C25.2909 26.324 25.3801 27.0397 25.3716 27.7575V28.5159ZM21.2495 27.7523C21.2567 27.2737 21.1703 26.7982 20.995 26.3505C20.8334 25.9582 20.59 25.6021 20.28 25.3045C19.973 25.0061 19.6037 24.7743 19.1966 24.6245C18.7288 24.4574 18.2329 24.3758 17.7341 24.3839H8.41205L11.505 20.3722H15.8383C16.3493 20.3777 16.8568 20.289 17.3333 20.1107C17.7403 19.9609 18.1096 19.7291 18.4166 19.4308C18.7251 19.1329 18.9667 18.7768 19.1262 18.3847C19.2953 17.9357 19.3779 17.4606 19.37 16.9829V16.2141C19.37 15.6387 19.0829 15.3563 18.5141 15.3563H6.75997V29.358H20.3775H20.6429C20.745 29.3533 20.8441 29.3226 20.93 29.2691C21.0278 29.2036 21.1047 29.113 21.1521 29.0075C21.2274 28.8432 21.2608 28.6639 21.2495 28.4845V27.7523Z" fill="#98BE2B"/>
+                        <path d="M54.2749 18.3062C54.441 18.66 54.4865 19.0556 54.4049 19.436C54.332 19.8123 54.1432 20.1586 53.8633 20.4298L44.487 29.4469H54.237V33.3644H39.2004H39.157C38.8439 33.2724 38.554 33.1183 38.3059 32.9121C38.0579 32.7059 37.857 32.452 37.7162 32.1667C37.5625 31.8044 37.5237 31.4061 37.6048 31.0225C37.6858 30.6389 37.8829 30.2871 38.1712 30.0118L47.5041 20.9946H37.7541V17.0771H52.417C52.8128 17.0739 53.2008 17.183 53.5329 17.3909C53.8764 17.6103 54.1368 17.9316 54.2749 18.3062Z" fill="#98BE2B"/>
+                        <path d="M88.8333 26.3558H78V22.3755H88.8333V26.3558Z" fill="#98BE2B"/>
+                        <path d="M114.422 18.7717C114.434 19.5968 114.315 20.4187 114.07 21.2091C113.858 21.8833 113.54 22.522 113.127 23.1025C112.746 23.6355 112.282 24.1083 111.751 24.5042C111.25 24.8834 110.705 25.2046 110.126 25.4614C109.579 25.7001 109.004 25.8757 108.415 25.9844C107.88 26.0931 107.336 26.1492 106.79 26.1518L115.407 33.3383H109.021L100.425 26.1518H97.4566L100.55 22.3545H105.966C106.75 22.3293 107.52 22.1514 108.23 21.8315C108.631 21.6681 108.998 21.436 109.314 21.1463C109.63 20.8527 109.876 20.4956 110.034 20.1003C110.21 19.6564 110.296 19.1842 110.289 18.709V16.1984C110.298 16.0201 110.268 15.842 110.202 15.6754C110.153 15.5706 110.077 15.4803 109.98 15.4139C109.894 15.3596 109.795 15.3255 109.693 15.3145H109.417H95.8045V33.3592H91.677V13.3949C91.6754 13.1272 91.7307 12.8619 91.8395 12.6156C91.9392 12.376 92.0864 12.1574 92.2729 11.9723C92.4582 11.7846 92.6838 11.6383 92.9337 11.5434C93.1942 11.4373 93.4744 11.3839 93.757 11.3865H109.417C110.223 11.3618 111.022 11.5289 111.746 11.8729C112.348 12.1605 112.878 12.571 113.3 13.0759C113.686 13.5418 113.976 14.0743 114.156 14.645C114.322 15.1531 114.411 15.6815 114.422 16.2141V18.7717Z" fill="#98BE2B"/>
+                        <path d="M24.0933 19.9538C23.2752 19.7857 22.5353 19.3666 21.984 18.7592C21.4327 18.1517 21.0996 17.3884 21.0343 16.5832C20.969 15.778 21.1751 14.974 21.6218 14.2911C22.0685 13.6082 22.7318 13.0831 23.5129 12.794C24.294 12.505 25.1509 12.4675 25.9558 12.6872C26.7607 12.9069 27.4705 13.372 27.9793 14.0132C28.488 14.6543 28.7685 15.437 28.7788 16.2447C28.7892 17.0523 28.5288 17.8415 28.0366 18.4946" stroke="white" stroke-width="0.75" stroke-miterlimit="10" stroke-linecap="round"/>
+                        <path d="M24.4022 18.4318L24.1801 18.3743C23.7578 18.2315 23.3887 17.9714 23.1191 17.6266C22.8494 17.2818 22.6914 16.8678 22.6647 16.4366C22.638 16.0053 22.7439 15.5761 22.9691 15.2028C23.1944 14.8295 23.5288 14.5288 23.9305 14.3385C24.3321 14.1482 24.7831 14.0767 25.2267 14.1332C25.6703 14.1896 26.0867 14.3714 26.4236 14.6556C26.7605 14.9399 27.0029 15.314 27.1203 15.7308C27.2377 16.1477 27.2249 16.5888 27.0834 16.9987C27.0213 17.1717 26.9376 17.3368 26.8343 17.4903" stroke="white" stroke-width="0.25" stroke-miterlimit="10"/>
+                        <path d="M31.3516 27.7209L34.6016 30.6813L37.3099 29.6352L26.6283 20.8325L24.8841 34.5465L25.9187 34.1333L26.9533 33.7306L28.4429 33.1343L28.2479 34.6668L24.1366 36.3092C24.0392 36.3519 23.9317 36.3687 23.8253 36.3579C23.719 36.3471 23.6175 36.3091 23.5313 36.2478C23.4452 36.1865 23.3776 36.1041 23.3355 36.0092C23.2933 35.9142 23.2782 35.8102 23.2916 35.7077L25.3933 19.2111C25.4053 19.1077 25.4463 19.0094 25.512 18.9269C25.5778 18.8444 25.6656 18.7809 25.766 18.7432C25.8665 18.7055 25.9757 18.695 26.0819 18.713C26.188 18.7309 26.2871 18.7766 26.3683 18.845L39.2112 29.4156C39.2881 29.4804 39.3467 29.563 39.3814 29.6557C39.4161 29.7485 39.4258 29.8482 39.4096 29.9455C39.3933 30.0429 39.3517 30.1346 39.2885 30.2121C39.2254 30.2896 39.1428 30.3502 39.0487 30.3884L34.2875 32.2818L30.9129 29.2116L29.732 29.698L29.9433 28.3015L31.3516 27.7209Z" fill="white"/>
+                        <path d="M61.2083 29.4522V33.3592H57.1079V25.3202C57.0962 24.1814 57.3152 23.0514 57.7524 21.9937C58.1545 21.0176 58.7602 20.1319 59.5317 19.3913C60.3033 18.6508 61.2242 18.0714 62.2374 17.6891C63.3193 17.2733 64.4748 17.0655 65.6391 17.0771H73.6666C73.8749 17.0749 74.0814 17.114 74.2733 17.1922C74.6491 17.3458 74.9483 17.6347 75.1075 17.9977C75.1884 18.183 75.229 18.3824 75.2266 18.5835V33.3592H71.0774V29.3162H62.5029L65.1787 26.3296H71.0558L71.0016 20.9685H66.8524C66.7549 20.9685 66.3108 20.9685 66.0183 21.0051C65.6513 21.0397 65.2885 21.1081 64.9349 21.2091C64.496 21.3302 64.0712 21.4949 63.6674 21.7008C63.2072 21.9367 62.7929 22.2482 62.4433 22.6213C62.0449 23.0501 61.7327 23.5467 61.5224 24.0858C61.2629 24.7686 61.1397 25.4927 61.1595 26.2198L61.2083 29.4522Z" fill="#98BE2B"/>
+                    </svg>
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <li class="nav-item" style="list-style: none; margin-left: 50px">
+                    <a class="nav-link catalog-btn" asp-controller="Site" asp-action="Browse">
+                        <span class="catalog-icon">
+                            <svg width="34" height="36" viewBox="0 0 34 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8 21.4121C8 20.3075 8.89543 19.4121 10 19.4121H13.4375C14.5421 19.4121 15.4375 20.3075 15.4375 21.4121V24.8239C15.4375 25.9284 14.5421 26.8239 13.4375 26.8239H10C8.89543 26.8239 8 25.9284 8 24.8239V21.4121Z" fill="black"/>
+                                <path d="M18.4375 21.4121C18.4375 20.3075 19.3329 19.4121 20.4375 19.4121H23.875C24.9796 19.4121 25.875 20.3075 25.875 21.4121V24.8239C25.875 25.9284 24.9796 26.8239 23.875 26.8239H20.4375C19.3329 26.8239 18.4375 25.9284 18.4375 24.8239V21.4121Z" fill="black"/>
+                                <path d="M8 11C8 9.89543 8.89543 9 10 9H13.4375C14.5421 9 15.4375 9.89543 15.4375 11V14.4118C15.4375 15.5163 14.5421 16.4118 13.4375 16.4118H10C8.89543 16.4118 8 15.5163 8 14.4118V11Z" fill="black"/>
+                                <path d="M20.7323 8.86929C21.5133 8.08824 22.7796 8.08824 23.5607 8.86929L25.9914 11.3C26.7724 12.081 26.7724 13.3473 25.9914 14.1284L23.5789 16.5409C22.7978 17.3219 21.5315 17.3219 20.7505 16.5409L18.3198 14.1102C17.5387 13.3292 17.5387 12.0628 18.3198 11.2818L20.7323 8.86929Z" fill="black"/>
+                            </svg>
+                        </span>
+                        <span class="catalog-text">Каталог</span>
+                    </a>
+                </li>
+
+                <button class="navbar-toggler layout-header__navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-label="Відкрити меню">
                     <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <button type="button"
+                        class="btn btn-dark border-0 layout-header__mobile-cart position-relative ms-auto"
+                        onclick="openCartModal(); return false;"
+                        aria-label="Кошик">
+                    <i class="bi bi-cart3" style="font-size:1.25rem;" aria-hidden="true"></i>
+                    <span class="cart-header-badge layout-header__mobile-cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          style="@(((int)(ViewBag.CartCount ?? 0)) == 0 ? "display:none" : "")">
+                        @(ViewBag.CartCount ?? 0)
+                    </span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="mainNavbar">
@@ -149,97 +202,176 @@
                     <div class="mx-auto w-50">
                         @await Html.PartialAsync("_SearchBar", categories)
                     </div>
-
+                    <li class="nav-item" style="list-style: none;">
+                        <a class="nav-link premium-btn-header"  asp-controller="Profile" asp-action="Premium">
+                            <span class="premium-top-header">Спробуйте</span>
+                            <span class="premium-badge-header">PREMIUM</span>
+                        </a>
+                    </li>
                     <!-- Right menu -->
                     <ul class="navbar-nav ms-auto">
-
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Site" asp-action="Browse">
-                                <i class="bi bi-grid"></i> Каталог
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" href="#" onclick="openCartModal(); return false;">
-                                <i class="bi bi-cart"></i> Кошик
-                                <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                      style="@(((int)(ViewBag.CartCount ?? 0)) == 0 ? "display:none" : "")">
-                                    @(ViewBag.CartCount ?? 0)
-                                </span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" asp-controller="Wishlist" asp-action="Index">
-                                <i class="bi bi-heart"></i> Обране
-                                <span id="wishlistCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="@((ViewBag.WishlistCount ?? 0) > 0 ? "" : "display: none;")">@(ViewBag.WishlistCount ?? 0)</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person"></i>
-                                @{
-                                    var _displayName = ViewBag.User != null
-                                        ? ((string.IsNullOrWhiteSpace((string?)ViewBag.User.FirstName) && string.IsNullOrWhiteSpace((string?)ViewBag.User.LastName))
-                                            ? (string.IsNullOrWhiteSpace((string?)ViewBag.User.Name) ? "Профіль" : (string)ViewBag.User.Name)
-                                            : $"{ViewBag.User.FirstName} {ViewBag.User.LastName}".Trim())
-                                        : "Профіль";
-                                }
-                                <span>@_displayName</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                @if (ViewBag.User != null)
-                                {
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Profile" asp-action="Profile">
-                                            <i class="bi bi-person-circle me-2"></i> Мій профіль
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Profile" asp-action="Orders">
-                                            <i class="bi bi-bag-check me-2"></i> Мої замовлення
-                                        </a>
-                                    </li>
-                                    @if (ViewBag.User.IsAdmin)
+                                <a class="nav-link position-relative" asp-controller="Wishlist" asp-action="Index">
+                                    <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="0.410714" y="0.410714" width="22.1786" height="22.1786" rx="2.875" stroke="white" stroke-width="0.821429"/>
+                                        <path d="M8.21484 6.57227H18.8934" stroke="white" stroke-width="1.64286" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M8.21484 11.5H18.8934" stroke="white" stroke-width="1.64286" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M8.21484 16.4277H18.8934" stroke="white" stroke-width="1.64286" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M4.10742 6.57227H4.11635" stroke="white" stroke-width="1.64286" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M4.10742 11.5H4.11635" stroke="white" stroke-width="1.64286" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M4.10742 16.4277H4.11635" stroke="white" stroke-width="1.64286" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span id="wishlistCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="@((ViewBag.WishlistCount ?? 0) > 0 ? "" : "display: none;")">@(ViewBag.WishlistCount ?? 0)</span>
+                                </a>
+                            </li>
+                        @if (ViewBag.User != null)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M25 12.4875C25 5.59375 19.4 0 12.5 0C5.6 0 0 5.59375 0 12.4875C0 16.2844 1.725 19.7062 4.425 22.0031C4.45 22.0281 4.475 22.0281 4.475 22.0531C4.7 22.2281 4.925 22.4031 5.175 22.5781C5.3 22.6531 5.4 22.7516 5.525 22.8516C7.59073 24.2521 10.0292 25.0006 12.525 25C15.0208 25.0006 17.4593 24.2521 19.525 22.8516C19.65 22.7766 19.75 22.6781 19.875 22.6016C20.1 22.4281 20.35 22.2531 20.575 22.0781C20.6 22.0531 20.625 22.0531 20.625 22.0281C23.275 19.7047 25 16.2844 25 12.4875ZM12.5 23.4266C10.15 23.4266 8 22.6766 6.225 21.4281C6.25 21.2281 6.3 21.0297 6.35 20.8297C6.49897 20.2877 6.71745 19.7672 7 19.2812C7.275 18.8062 7.6 18.3813 8 18.0063C8.375 17.6313 8.825 17.2828 9.275 17.0078C9.75 16.7328 10.25 16.5328 10.8 16.3828C11.3543 16.2334 11.9259 16.1583 12.5 16.1594C14.2041 16.1473 15.8457 16.801 17.075 17.9813C17.65 18.5563 18.1 19.2313 18.425 20.0047C18.6 20.4547 18.725 20.9297 18.8 21.4281C16.955 22.7252 14.7554 23.423 12.5 23.4266ZM8.675 11.8641C8.45472 11.3597 8.34395 10.8144 8.35 10.2641C8.35 9.71562 8.45 9.16562 8.675 8.66562C8.9 8.16562 9.2 7.71719 9.575 7.34219C9.95 6.96719 10.4 6.66875 10.9 6.44375C11.4 6.21875 11.95 6.11875 12.5 6.11875C13.075 6.11875 13.6 6.21875 14.1 6.44375C14.6 6.66875 15.05 6.96875 15.425 7.34219C15.8 7.71719 16.1 8.16719 16.325 8.66562C16.55 9.16562 16.65 9.71562 16.65 10.2641C16.65 10.8391 16.55 11.3641 16.325 11.8625C16.1079 12.3551 15.8029 12.8041 15.425 13.1875C15.0415 13.5648 14.5925 13.8693 14.1 14.0859C13.0669 14.5105 11.9081 14.5105 10.875 14.0859C10.3825 13.8693 9.93355 13.5648 9.55 13.1875C9.17159 12.8097 8.8739 12.3589 8.675 11.8625V11.8641ZM20.275 20.1547C20.275 20.1047 20.25 20.0797 20.25 20.0297C20.0041 19.2475 19.6417 18.5069 19.175 17.8328C18.7078 17.1537 18.1337 16.5548 17.475 16.0594C16.9719 15.6809 16.4266 15.3621 15.85 15.1094C16.1123 14.9363 16.3554 14.7357 16.575 14.5109C16.9477 14.143 17.275 13.7317 17.55 13.2859C18.1037 12.3763 18.3896 11.3289 18.375 10.2641C18.3827 9.4758 18.2296 8.69425 17.925 7.96719C17.6243 7.26662 17.1914 6.63056 16.65 6.09375C16.1094 5.56255 15.4732 5.13842 14.775 4.84375C14.0467 4.53968 13.2642 4.3871 12.475 4.39531C11.6857 4.38759 10.9032 4.5407 10.175 4.84531C9.47071 5.13936 8.83298 5.57248 8.3 6.11875C7.76882 6.65873 7.34468 7.2944 7.05 7.99219C6.74539 8.71925 6.59227 9.5008 6.6 10.2891C6.6 10.8391 6.675 11.3641 6.825 11.8625C6.975 12.3875 7.175 12.8625 7.45 13.3109C7.7 13.7609 8.05 14.1609 8.425 14.5359C8.65 14.7609 8.9 14.9594 9.175 15.1344C8.59662 15.3938 8.05112 15.7211 7.55 16.1094C6.9 16.6094 6.325 17.2078 5.85 17.8578C5.37853 18.5291 5.01575 19.2705 4.775 20.0547C4.75 20.1047 4.75 20.1547 4.75 20.1797C2.775 18.1812 1.55 15.4844 1.55 12.4875C1.55 6.46875 6.475 1.54844 12.5 1.54844C18.525 1.54844 23.45 6.46875 23.45 12.4875C23.4467 15.3624 22.3052 18.1191 20.275 20.1547Z" fill="white"/>
+                                    </svg>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    @if (ViewBag.User != null)
                                     {
-                                        <li><hr class="dropdown-divider"></li>
                                         <li>
-                                            <a class="dropdown-item text-primary" asp-controller="Admin" asp-action="Index">
-                                                <i class="bi bi-shield-lock me-2"></i> Адмін панель
+                                            <a class="dropdown-item" asp-controller="Profile" asp-action="Profile">
+                                                <i class="bi bi-person-circle me-2"></i> Мій профіль
                                             </a>
                                         </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Profile" asp-action="Orders">
+                                                <i class="bi bi-bag-check me-2"></i> Мої замовлення
+                                            </a>
+                                        </li>
+                                        @if (ViewBag.User.IsAdmin)
+                                        {
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-primary" asp-controller="Admin" asp-action="Index">
+                                                    <i class="bi bi-shield-lock me-2"></i> Адмін панель
+                                                </a>
+                                            </li>
+                                        }
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="bi bi-box-arrow-right me-2"></i> Вийти
+                                                </button>
+                                            </form>
+                                        </li>
                                     }
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form asp-controller="Account" asp-action="Logout" method="post">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="dropdown-item text-danger">
-                                                <i class="bi bi-box-arrow-right me-2"></i> Вийти
+                                    else
+                                    {
+                                        <li>
+                                            <button type="button"
+                                            class="dropdown-item"
+                                            data-auth-open="login">
+                                                <i class="bi bi-box-arrow-in-right me-2"></i> Увійти
                                             </button>
-                                        </form>
-                                    </li>
-                                }
-                                else
-                                {
-                                    <li>
-                                        <button type="button"
-                                        class="dropdown-item"
-                                        data-auth-open="login">
-                                            <i class="bi bi-box-arrow-in-right me-2"></i> Увійти
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button type="button"
-                                        class="dropdown-item"
-                                        data-auth-open="register">
-                                            <i class="bi bi-person-plus me-2"></i> Реєстрація
-                                        </button>
-                                    </li>
-                                }
-                            </ul>
-                        </li>
+                                        </li>
+                                        <li>
+                                            <button type="button"
+                                            class="dropdown-item"
+                                            data-auth-open="register">
+                                                <i class="bi bi-person-plus me-2"></i> Реєстрація
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link position-relative" href="#" onclick="openCartModal(); return false;">
+                                    <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9.99805 24C10.93 24 11.6855 23.2445 11.6855 22.3125C11.6855 21.3805 10.93 20.625 9.99805 20.625C9.06607 20.625 8.31055 21.3805 8.31055 22.3125C8.31055 23.2445 9.06607 24 9.99805 24Z" fill="white"/>
+                                        <path d="M20.25 24C21.182 24 21.9375 23.2445 21.9375 22.3125C21.9375 21.3805 21.182 20.625 20.25 20.625C19.318 20.625 18.5625 21.3805 18.5625 22.3125C18.5625 23.2445 19.318 24 20.25 24Z" fill="white"/>
+                                        <path d="M24.8099 4.02737C24.7401 3.94133 24.6521 3.87183 24.5522 3.82385C24.4524 3.77587 24.3432 3.7506 24.2324 3.74987H8.61737L9.10487 5.24987H23.2499L21.2474 14.2499H9.99737L6.56987 3.39737C6.5328 3.28221 6.46842 3.17773 6.38222 3.09285C6.29603 3.00796 6.19058 2.94518 6.07487 2.90987L2.99987 1.96487C2.90532 1.93581 2.80597 1.92567 2.7075 1.93501C2.60902 1.94435 2.51335 1.97299 2.42595 2.0193C2.24943 2.11284 2.1173 2.27266 2.05862 2.46362C1.99994 2.65457 2.01952 2.86102 2.11305 3.03754C2.20659 3.21406 2.36641 3.34619 2.55737 3.40487L5.24987 4.22987L8.69237 15.1049L7.46237 16.1099L7.36487 16.2074C7.06062 16.558 6.88817 17.0037 6.87722 17.4678C6.86627 17.9319 7.0175 18.3853 7.30487 18.7499C7.50929 18.9985 7.76905 19.1958 8.06337 19.326C8.3577 19.4562 8.67841 19.5158 8.99987 19.4999H21.5174C21.7163 19.4999 21.907 19.4209 22.0477 19.2802C22.1884 19.1395 22.2674 18.9488 22.2674 18.7499C22.2674 18.551 22.1884 18.3602 22.0477 18.2195C21.907 18.0789 21.7163 17.9999 21.5174 17.9999H8.87987C8.7935 17.9969 8.70936 17.9717 8.63556 17.9268C8.56177 17.8818 8.50081 17.8186 8.45859 17.7432C8.41637 17.6678 8.3943 17.5828 8.39453 17.4964C8.39475 17.4099 8.41726 17.325 8.45987 17.2499L10.2674 15.7499H21.8474C22.0207 15.7541 22.1902 15.6981 22.327 15.5915C22.4637 15.4848 22.5593 15.3341 22.5974 15.1649L24.9749 4.66487C24.9977 4.55306 24.9947 4.43751 24.9661 4.32704C24.9375 4.21657 24.8841 4.11407 24.8099 4.02737Z" fill="white"/>
+                                    </svg>
 
+                                    <span id="cartBadge" class="cart-header-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                          style="@(((int)(ViewBag.CartCount ?? 0)) == 0 ? "display:none" : "")">
+                                        @(ViewBag.CartCount ?? 0)
+                                    </span>
+                                </a>
+                            </li>
+                        }
+                        else{
+                            
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M25 12.4875C25 5.59375 19.4 0 12.5 0C5.6 0 0 5.59375 0 12.4875C0 16.2844 1.725 19.7062 4.425 22.0031C4.45 22.0281 4.475 22.0281 4.475 22.0531C4.7 22.2281 4.925 22.4031 5.175 22.5781C5.3 22.6531 5.4 22.7516 5.525 22.8516C7.59073 24.2521 10.0292 25.0006 12.525 25C15.0208 25.0006 17.4593 24.2521 19.525 22.8516C19.65 22.7766 19.75 22.6781 19.875 22.6016C20.1 22.4281 20.35 22.2531 20.575 22.0781C20.6 22.0531 20.625 22.0531 20.625 22.0281C23.275 19.7047 25 16.2844 25 12.4875ZM12.5 23.4266C10.15 23.4266 8 22.6766 6.225 21.4281C6.25 21.2281 6.3 21.0297 6.35 20.8297C6.49897 20.2877 6.71745 19.7672 7 19.2812C7.275 18.8062 7.6 18.3813 8 18.0063C8.375 17.6313 8.825 17.2828 9.275 17.0078C9.75 16.7328 10.25 16.5328 10.8 16.3828C11.3543 16.2334 11.9259 16.1583 12.5 16.1594C14.2041 16.1473 15.8457 16.801 17.075 17.9813C17.65 18.5563 18.1 19.2313 18.425 20.0047C18.6 20.4547 18.725 20.9297 18.8 21.4281C16.955 22.7252 14.7554 23.423 12.5 23.4266ZM8.675 11.8641C8.45472 11.3597 8.34395 10.8144 8.35 10.2641C8.35 9.71562 8.45 9.16562 8.675 8.66562C8.9 8.16562 9.2 7.71719 9.575 7.34219C9.95 6.96719 10.4 6.66875 10.9 6.44375C11.4 6.21875 11.95 6.11875 12.5 6.11875C13.075 6.11875 13.6 6.21875 14.1 6.44375C14.6 6.66875 15.05 6.96875 15.425 7.34219C15.8 7.71719 16.1 8.16719 16.325 8.66562C16.55 9.16562 16.65 9.71562 16.65 10.2641C16.65 10.8391 16.55 11.3641 16.325 11.8625C16.1079 12.3551 15.8029 12.8041 15.425 13.1875C15.0415 13.5648 14.5925 13.8693 14.1 14.0859C13.0669 14.5105 11.9081 14.5105 10.875 14.0859C10.3825 13.8693 9.93355 13.5648 9.55 13.1875C9.17159 12.8097 8.8739 12.3589 8.675 11.8625V11.8641ZM20.275 20.1547C20.275 20.1047 20.25 20.0797 20.25 20.0297C20.0041 19.2475 19.6417 18.5069 19.175 17.8328C18.7078 17.1537 18.1337 16.5548 17.475 16.0594C16.9719 15.6809 16.4266 15.3621 15.85 15.1094C16.1123 14.9363 16.3554 14.7357 16.575 14.5109C16.9477 14.143 17.275 13.7317 17.55 13.2859C18.1037 12.3763 18.3896 11.3289 18.375 10.2641C18.3827 9.4758 18.2296 8.69425 17.925 7.96719C17.6243 7.26662 17.1914 6.63056 16.65 6.09375C16.1094 5.56255 15.4732 5.13842 14.775 4.84375C14.0467 4.53968 13.2642 4.3871 12.475 4.39531C11.6857 4.38759 10.9032 4.5407 10.175 4.84531C9.47071 5.13936 8.83298 5.57248 8.3 6.11875C7.76882 6.65873 7.34468 7.2944 7.05 7.99219C6.74539 8.71925 6.59227 9.5008 6.6 10.2891C6.6 10.8391 6.675 11.3641 6.825 11.8625C6.975 12.3875 7.175 12.8625 7.45 13.3109C7.7 13.7609 8.05 14.1609 8.425 14.5359C8.65 14.7609 8.9 14.9594 9.175 15.1344C8.59662 15.3938 8.05112 15.7211 7.55 16.1094C6.9 16.6094 6.325 17.2078 5.85 17.8578C5.37853 18.5291 5.01575 19.2705 4.775 20.0547C4.75 20.1047 4.75 20.1547 4.75 20.1797C2.775 18.1812 1.55 15.4844 1.55 12.4875C1.55 6.46875 6.475 1.54844 12.5 1.54844C18.525 1.54844 23.45 6.46875 23.45 12.4875C23.4467 15.3624 22.3052 18.1191 20.275 20.1547Z" fill="white"/>
+                                    </svg>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    @if (ViewBag.User != null)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Profile" asp-action="Profile">
+                                                <i class="bi bi-person-circle me-2"></i> Мій профіль
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Profile" asp-action="Orders">
+                                                <i class="bi bi-bag-check me-2"></i> Мої замовлення
+                                            </a>
+                                        </li>
+                                        @if (ViewBag.User.IsAdmin)
+                                        {
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-primary" asp-controller="Admin" asp-action="Index">
+                                                    <i class="bi bi-shield-lock me-2"></i> Адмін панель
+                                                </a>
+                                            </li>
+                                        }
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="bi bi-box-arrow-right me-2"></i> Вийти
+                                                </button>
+                                            </form>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li>
+                                            <button type="button"
+                                            class="dropdown-item"
+                                            data-auth-open="login">
+                                                <i class="bi bi-box-arrow-in-right me-2"></i> Увійти
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button"
+                                            class="dropdown-item"
+                                            data-auth-open="register">
+                                                <i class="bi bi-person-plus me-2"></i> Реєстрація
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link position-relative" href="#" onclick="openCartModal(); return false;">
+                                    <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9.99805 24C10.93 24 11.6855 23.2445 11.6855 22.3125C11.6855 21.3805 10.93 20.625 9.99805 20.625C9.06607 20.625 8.31055 21.3805 8.31055 22.3125C8.31055 23.2445 9.06607 24 9.99805 24Z" fill="white"/>
+                                        <path d="M20.25 24C21.182 24 21.9375 23.2445 21.9375 22.3125C21.9375 21.3805 21.182 20.625 20.25 20.625C19.318 20.625 18.5625 21.3805 18.5625 22.3125C18.5625 23.2445 19.318 24 20.25 24Z" fill="white"/>
+                                        <path d="M24.8099 4.02737C24.7401 3.94133 24.6521 3.87183 24.5522 3.82385C24.4524 3.77587 24.3432 3.7506 24.2324 3.74987H8.61737L9.10487 5.24987H23.2499L21.2474 14.2499H9.99737L6.56987 3.39737C6.5328 3.28221 6.46842 3.17773 6.38222 3.09285C6.29603 3.00796 6.19058 2.94518 6.07487 2.90987L2.99987 1.96487C2.90532 1.93581 2.80597 1.92567 2.7075 1.93501C2.60902 1.94435 2.51335 1.97299 2.42595 2.0193C2.24943 2.11284 2.1173 2.27266 2.05862 2.46362C1.99994 2.65457 2.01952 2.86102 2.11305 3.03754C2.20659 3.21406 2.36641 3.34619 2.55737 3.40487L5.24987 4.22987L8.69237 15.1049L7.46237 16.1099L7.36487 16.2074C7.06062 16.558 6.88817 17.0037 6.87722 17.4678C6.86627 17.9319 7.0175 18.3853 7.30487 18.7499C7.50929 18.9985 7.76905 19.1958 8.06337 19.326C8.3577 19.4562 8.67841 19.5158 8.99987 19.4999H21.5174C21.7163 19.4999 21.907 19.4209 22.0477 19.2802C22.1884 19.1395 22.2674 18.9488 22.2674 18.7499C22.2674 18.551 22.1884 18.3602 22.0477 18.2195C21.907 18.0789 21.7163 17.9999 21.5174 17.9999H8.87987C8.7935 17.9969 8.70936 17.9717 8.63556 17.9268C8.56177 17.8818 8.50081 17.8186 8.45859 17.7432C8.41637 17.6678 8.3943 17.5828 8.39453 17.4964C8.39475 17.4099 8.41726 17.325 8.45987 17.2499L10.2674 15.7499H21.8474C22.0207 15.7541 22.1902 15.6981 22.327 15.5915C22.4637 15.4848 22.5593 15.3341 22.5974 15.1649L24.9749 4.66487C24.9977 4.55306 24.9947 4.43751 24.9661 4.32704C24.9375 4.21657 24.8841 4.11407 24.8099 4.02737Z" fill="white"/>
+                                    </svg>
+
+                                    <span id="cartBadge" class="cart-header-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                          style="@(((int)(ViewBag.CartCount ?? 0)) == 0 ? "display:none" : "")">
+                                        @(ViewBag.CartCount ?? 0)
+                                    </span>
+                                </a>
+                            </li>
+                        }
                     </ul>
 
                 </div>
@@ -257,6 +389,9 @@
 
     <!-- Бічне меню -->
     @await Html.PartialAsync("_Sidebar")
+
+    @await Html.PartialAsync("_MobileBottomNav")
+    @await Html.PartialAsync("_MobileMoreSheet")
 
     <!-- Bootstrap JS -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -286,15 +421,17 @@
         </div>
 
         <div class="cart-modal__footer" id="cartModalFooter" style="display:none;">
-            <a href="@Url.Action("Browse", "Site")" class="btn cart-modal__btn-continue">
-                Продовжити покупки
-            </a>
-            <div class="cart-modal__footer-right">
-                <span class="cart-modal__total-label">Разом:</span>
-                <span class="cart-modal__total-amount" id="cartTotalAmount">0 ₴</span>
-                <a href="@Url.Action("Checkout", "Site")" class="btn cart-modal__btn-order">
+            <div class="cart-modal__footer-actions">
+                <a href="@Url.Action("Browse", "Site")" class="cart-modal__btn-continue">
+                    Продовжити покупки
+                </a>
+                <a href="@Url.Action("Checkout", "Site")" class="cart-modal__btn-order">
                     Оформити замовлення
                 </a>
+            </div>
+            <div class="cart-modal__footer-total">
+                <span class="cart-modal__total-label">Разом:</span>
+                <span class="cart-modal__total-amount" id="cartTotalAmount">0 ₴</span>
             </div>
         </div>
     </div>
@@ -421,36 +558,118 @@
         }
         .cart-item__remove:hover { color: #dc3545; transform: scale(1.15); }
 
-        /* === Футер === */
+        /* === Футер: кнопки в один ряд, сума «Разом» під ними === */
         .cart-modal__footer {
-            padding: 18px 28px; border-top: 1px solid #f0f0f0;
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 12px; flex-wrap: wrap; background: #fafafa;
+            box-sizing: border-box;
+            padding: 14px 20px;
+            border-top: 1px solid #f0f0f0;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            min-height: 0;
+        }
+        .cart-modal__footer-actions {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
         }
         .cart-modal__btn-continue {
-            border: 1.5px solid #d0d0d0; background: #fff; color: #333;
-            border-radius: 12px; padding: 11px 22px; font-size: 14px;
-            font-weight: 600; white-space: nowrap; text-decoration: none;
+            flex: 1 1 auto;
+            min-width: min(140px, 100%);
+            box-sizing: border-box;
+            border: 1.5px solid #d0d0d0;
+            background: #fff;
+            color: #333;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.2;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s;
         }
         .cart-modal__btn-continue:hover { border-color: #7ab800; color: #5a9a00; }
-        .cart-modal__footer-right { display: flex; align-items: center; gap: 16px; }
-        .cart-modal__total-label { font-size: 14px; color: #999; white-space: nowrap; }
+        .cart-modal__footer-total {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            justify-content: flex-end;
+            gap: 8px;
+            padding-top: 2px;
+            border-top: 1px solid #ececec;
+        }
+        .cart-modal__total-label {
+            font-size: 13px;
+            color: #999;
+            white-space: nowrap;
+        }
         .cart-modal__total-amount {
-            font-size: 24px; font-weight: 800; color: #1a1a1a;
-            white-space: nowrap; letter-spacing: -0.02em;
+            font-size: clamp(18px, 4.5vw, 24px);
+            font-weight: 800;
+            color: #1a1a1a;
+            white-space: nowrap;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
         }
         .cart-modal__btn-order {
-            background: #7ab800; color: #fff; border: none;
-            border-radius: 12px; padding: 11px 24px; font-size: 14px;
-            font-weight: 700; white-space: nowrap; text-decoration: none;
-            transition: background 0.2s, transform 0.15s;
+            flex: 1 1 auto;
+            min-width: min(160px, 100%);
+            box-sizing: border-box;
+            max-width: 100%;
+            background: #7ab800;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.2;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            transition: background 0.2s, box-shadow 0.2s;
             box-shadow: 0 4px 12px rgba(122,184,0,0.25);
         }
         .cart-modal__btn-order:hover {
-            background: #5a9a00; color: #fff;
-            transform: translateY(-1px);
+            background: #5a9a00;
+            color: #fff;
             box-shadow: 0 6px 16px rgba(122,184,0,0.35);
+        }
+        @@media (max-width: 520px) {
+            .cart-modal__footer {
+                padding: 12px 12px;
+                gap: 10px;
+            }
+            .cart-modal__footer-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .cart-modal__btn-continue {
+                padding: 10px 12px;
+                font-size: 13px;
+                min-width: 0;
+            }
+            .cart-modal__btn-order {
+                padding: 10px 12px;
+                font-size: 12px;
+                min-width: 0;
+            }
+            .cart-modal__footer-total {
+                justify-content: center;
+                padding-top: 4px;
+            }
         }
     </style>
 
@@ -561,11 +780,11 @@
         }
 
         function updateCartBadge(count) {
-            var badge = $('#cartBadge');
-            if (badge.length) {
-                badge.text(count);
-                badge.toggle(count > 0);
-            }
+            $('.cart-header-badge').each(function () {
+                var $b = $(this);
+                $b.text(count);
+                $b.toggle(count > 0);
+            });
         }
 
         function cartRemove(itemId) {
@@ -622,7 +841,7 @@
                         if (typeof showNotification === 'function') showNotification(msg, response.added ? 'success' : 'info');
                     } else if (response.requireLogin) {
                         var $login = $('[data-auth-open="login"]').first();
-                        if ($login.length) $login.trigger('click'); else window.authModals && window.authModals.openModal('loginModal');
+                        if ($login.length) $login.trigger('click'); else window.authModals && window.authModals.openModal('login');
                     }
                 }
             );
