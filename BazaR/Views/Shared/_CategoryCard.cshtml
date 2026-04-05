@@ -1,0 +1,45 @@
+﻿@model BazaR.Models.Category
+
+<a asp-controller="Site"
+       asp-action="Browse"
+       asp-route-categoryIds="@Model.Id"
+       style="text-decoration:none;color:inherit;">
+
+    <div style="
+        border-radius:14px;
+        border:1px solid #e5e5e5;
+        height:150px;
+        padding:20px;
+        display:flex;
+        flex-direction:column;
+        justify-content:space-between;
+        transition:0.2s;
+        background-size:cover;
+        background-position:center;
+        background-repeat:no-repeat;
+        position:relative;
+        overflow:hidden;
+        @(string.IsNullOrEmpty(Model.ImgUrl) ? "background:white;" : $"background-image:url('{Model.ImgUrl}');")
+        "
+         onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.15)'"
+         onmouseout="this.style.boxShadow='none'">
+
+        <div style="
+        position:absolute;
+        inset:0;
+        background:rgba(0,0,0,0.35);
+        "></div>
+       
+
+        <div style="
+            position:relative;
+            font-size:16px;
+            font-weight:600;
+            color:white;
+            ">
+            @Model.Name
+        </div>
+
+    </div>
+
+</a>

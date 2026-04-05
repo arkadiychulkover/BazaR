@@ -1,0 +1,145 @@
+﻿@model BazaR.Models.CategoryFilter
+
+<div class="filter-glass">
+
+    <div class="filter-glass-header">
+        @Model.DisplayName
+    </div>
+
+    <div class="filter-glass-body">
+
+        @switch (Model.ValueType)
+        {
+            case FilterValueType.String:
+
+                <label class="filter-item">
+                    <input type="checkbox" name="@Model.Key" value="value1" />
+                    <span>Value 1</span>
+                </label>
+
+                <label class="filter-item">
+                    <input type="checkbox" name="@Model.Key" value="value2" />
+                    <span>Value 2</span>
+                </label>
+
+                <label class="filter-item">
+                    <input type="checkbox" name="@Model.Key" value="value3" />
+                    <span>Value 3</span>
+                </label>
+
+                break;
+
+
+            case FilterValueType.Number:
+
+                <input type="number"
+                       name="@Model.Key"
+                       class="filter-input"
+                       placeholder="Enter number" />
+
+                break;
+
+
+            case FilterValueType.Boolean:
+
+                <label class="filter-item">
+                    <input type="checkbox" name="@Model.Key" value="true" />
+                    <span>@Model.DisplayName</span>
+                </label>
+
+                break;
+
+
+            case FilterValueType.Range:
+
+                <div class="filter-range">
+                    <input type="number"
+                           name="@(Model.Key + "_min")"
+                           placeholder="Min"
+                           class="filter-input" />
+
+                    <input type="number"
+                           name="@(Model.Key + "_max")"
+                           placeholder="Max"
+                           class="filter-input" />
+                </div>
+
+                break;
+        }
+
+    </div>
+
+</div>
+
+<style>
+    /* 🔥 GLASS CARD */
+    .filter-glass {
+        border-radius: 14px;
+        padding: 10px;
+        margin-bottom: 12px;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(40, 167, 69, 0.25); /* зелёная тонкая */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    /* HEADER */
+    .filter-glass-header {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #32CD32;
+    }
+
+    /* BODY */
+    .filter-glass-body {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    /* ITEMS */
+    .filter-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        /* hover мягкий */
+        .filter-item:hover {
+            background: rgba(40, 167, 69, 0.08);
+        }
+
+        /* checked */
+        .filter-item input:checked + span {
+            color: #198754;
+            font-weight: 500;
+        }
+
+        /* чекбокс */
+        .filter-item input {
+            accent-color: #198754;
+        }
+
+    /* INPUT */
+    .filter-input {
+        width: 100%;
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: 1px solid rgba(0,0,0,0.1);
+        background: rgba(255,255,255,0.7);
+        backdrop-filter: blur(4px);
+        font-size: 0.85rem;
+    }
+
+    /* RANGE */
+    .filter-range {
+        display: flex;
+        gap: 6px;
+    }
+</style>

@@ -1,0 +1,352 @@
+@model List<BazaR.Models.Category>
+
+@{
+    var mainCategories = SidebarCatalogHelper.GetSidebarRootCategories(Model ?? Enumerable.Empty<BazaR.Models.Category>());
+}
+
+<div class="sidebar-wrapper">
+
+    <!-- Каталог с мега-меню -->
+    @* @await Html.PartialAsync("_CatalogMenu", Model) *@
+
+    <!-- Категории (список всех главных категорий) -->
+    <div class="card mb-3">
+        <div class="card-header bg-bazaar-accent">
+            <h5 class="mb-0">
+                <i class="bi bi-grid"></i> Категорії
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <ul class="list-group list-group-flush">
+                @foreach (var category in mainCategories)
+                {
+                    <li class="list-group-item">
+                        <a href="@SidebarCatalogHelper.GetSidebarCategoryHref(Url, category)"
+                               class="text-decoration-none text-dark d-flex align-items-center">
+                            @if (!string.IsNullOrEmpty(category.IconUrl))
+                            {
+                                if (CategoryDisplayHelper.IsWebImagePath(category.IconUrl))
+                                {
+                                    <img src="@category.IconUrl" alt="" class="me-2 flex-shrink-0" width="28" height="28" style="object-fit:contain;" />
+                                }
+                                else
+                                {
+                                    <i class="bi @category.IconUrl me-2 text-primary"></i>
+                                }
+                            }
+                            else
+                            {
+                                <i class="bi bi-tag me-2 text-primary"></i>
+                            }
+                            <span>@SidebarCatalogHelper.GetSidebarRootDisplayName(category)</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <!-- Довідковий центр: один пункт під категоріями -->
+    <div class="card mb-3 overflow-hidden">
+        <div class="card-body p-0">
+            <a asp-controller="Site"
+                   asp-action="Privacy"
+                   class="d-flex align-items-center gap-3 px-3 py-3 text-decoration-none text-dark sidebar-index-help-link">
+                <i class="bi bi-question-circle sidebar-index-help-icon flex-shrink-0" aria-hidden="true"></i>
+                <span class="fw-medium">Довідковий центр</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Привітання / вхід одразу під категоріями -->
+    @if (ViewBag.User == null)
+    {
+        <div class="card mb-3 sidebar-welcome-card">
+            <div class="card-header sidebar-welcome-card__head">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-circle"></i> Вітаємо на BazaR!
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <p class="mb-3">Увійдіть, щоб отримати доступ до знижок та особистого кабінету</p>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-bazaar-auth" data-auth-open="login">
+                        <i class="bi bi-box-arrow-in-right"></i> Увійти
+                    </button>
+                    <button type="button" class="btn btn-outline-bazaar-auth" data-auth-open="register">
+                        <i class="bi bi-person-plus"></i> Реєстрація
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Поиск -->
+    <div class="card mb-3">
+        <div class="card-header bg-bazaar-accent">
+            <h5 class="mb-0">
+                <i class="bi bi-search"></i> Пошук
+            </h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="Browse" asp-controller="Site" method="get">
+                <div class="input-group">
+                    <input type="text"
+                           name="query"
+                           class="form-control"
+                           placeholder="Назва товару..."
+                           value="@ViewBag.Query" />
+                    <button class="btn btn-bazaar-auth" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Популярные бренды -->
+    <div class="card mb-3">
+        <div class="card-header bg-bazaar-accent">
+            <h5 class="mb-0">
+                <i class="bi bi-star"></i> Популярні бренди
+            </h5>
+        </div>
+        <div class="card-body">
+            @{
+                var sidebarBrands = ViewBag.SidebarPopularBrands as List<BazaR.Models.Brand>;
+            }
+            @if (sidebarBrands != null && sidebarBrands.Any())
+            {
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    @foreach (var b in sidebarBrands)
+                    {
+                        <a href="@Url.Action("Browse", "Site", new { brandId = b.Id })"
+                               class="sidebar-brand-pill d-inline-flex align-items-center gap-1 text-decoration-none btn btn-outline-secondary btn-sm py-1 px-2"
+                               title="@b.Name">
+                            @if (!string.IsNullOrWhiteSpace(b.Logo) && (b.Logo.StartsWith('/') || b.Logo.StartsWith("http", StringComparison.OrdinalIgnoreCase)))
+                            {
+                                <img src="@b.Logo" alt="" width="22" height="22" style="object-fit:contain;" />
+                            }
+                            <span>@b.Name</span>
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="@Url.Action("Browse", "Site", new { brandId = 1 })" class="btn btn-outline-secondary btn-sm">Samsung</a>
+                    <a href="@Url.Action("Browse", "Site", new { brandId = 2 })" class="btn btn-outline-secondary btn-sm">Apple</a>
+                    <a href="@Url.Action("Browse", "Site", new { brandId = 3 })" class="btn btn-outline-secondary btn-sm">Xiaomi</a>
+                    <a href="@Url.Action("Browse", "Site", new { brandId = 7 })" class="btn btn-outline-secondary btn-sm">Adidas</a>
+                    <a href="@Url.Action("Browse", "Site", new { brandId = 8 })" class="btn btn-outline-secondary btn-sm">Nike</a>
+                    <a href="@Url.Action("Browse", "Site", new { brandId = 12 })" class="btn btn-outline-secondary btn-sm">Asus</a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Скачать приложение -->
+    <div class="card mb-3">
+        <div class="card-header bg-bazaar-accent">
+            <h5 class="mb-0">
+                <i class="bi bi-phone"></i> Завантажити додаток
+            </h5>
+        </div>
+        <div class="card-body text-center">
+            <p class="small text-muted mb-3">Швидше, зручніше, з бонусами</p>
+            <div class="d-grid gap-2">
+                <a href="#" class="btn btn-outline-dark">
+                    <i class="bi bi-google-play me-2"></i> Google Play
+                </a>
+                <a href="#" class="btn btn-outline-dark">
+                    <i class="bi bi-apple me-2"></i> App Store
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Соцмережі — ті самі 6 мереж, що в site-footer__main (.footer-social) -->
+    <div class="card mb-3">
+        <div class="card-header bg-bazaar-accent">
+            <h5 class="mb-0">
+                <i class="bi bi-share"></i> Ми в соцмережах
+            </h5>
+        </div>
+        <div class="card-body sidebar-index-social-body">
+            @await Html.PartialAsync("_SocialMedia")
+        </div>
+    </div>
+
+    <!-- Информация о магазине -->
+    <div class="card mb-3">
+        <div class="card-header bg-bazaar-accent">
+            <h5 class="mb-0">
+                <i class="bi bi-info-circle"></i> Інформація
+            </h5>
+        </div>
+        <div class="card-body">
+            <ul class="list-unstyled mb-0">
+                <li class="mb-2">
+                    <i class="bi bi-geo-alt me-2 text-primary"></i> Київ, вул. Хрещатик, 1
+                </li>
+                <li class="mb-2">
+                    <i class="bi bi-telephone me-2 text-primary"></i> 0-800-123-456
+                </li>
+                <li class="mb-2">
+                    <i class="bi bi-envelope me-2 text-primary"></i> info@bazar.ua
+                </li>
+                <li>
+                    <i class="bi bi-clock me-2 text-primary"></i> Пн-Пт: 9:00 - 20:00
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .sidebar-wrapper {
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+    }
+
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+    .card-header {
+        border-bottom: none;
+        font-weight: 500;
+    }
+
+    .list-group-item {
+        transition: background-color 0.2s;
+        border-left: none;
+        border-right: none;
+    }
+
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .list-group-item a:hover {
+            color: #0d6efd !important;
+        }
+
+        .list-group-item:first-child {
+            border-top: none;
+        }
+
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+    /* Фірмовий зелений — як кнопки входу (.auth-btn--primary, --accent) */
+    .sidebar-welcome-card {
+        border: 1px solid rgba(152, 190, 42, 0.45);
+    }
+
+    .sidebar-welcome-card__head {
+        background: linear-gradient(180deg, #a3c92f 0%, var(--accent, #98be2a) 100%);
+        color: var(--bazaar-on-green, #2d2d2d) !important;
+        font-weight: 600;
+    }
+
+        .sidebar-welcome-card__head .bi {
+            color: inherit;
+        }
+
+    .sidebar-index-social-body {
+        padding: 1.1rem 1rem 1.25rem;
+        background: linear-gradient(180deg, #fafbfc 0%, #f1f3f6 100%);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+        .sidebar-index-social-body .social-card__title {
+            display: none;
+        }
+
+        .sidebar-index-social-body .social-card {
+            width: 100%;
+            max-width: 100%;
+            min-height: 0;
+            margin: 0;
+            padding: 0;
+            border: none;
+            box-shadow: none;
+            background: transparent;
+            display: block;
+        }
+
+        .sidebar-index-social-body .social-card__icons {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem 0.95rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .sidebar-index-social-body .social-card__icon {
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            min-height: 50px;
+            display: grid;
+            place-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .sidebar-index-social-body .social-card__icon svg {
+                width: 42px;
+                height: 42px;
+                display: block;
+                filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.07));
+            }
+
+            .sidebar-index-social-body .social-card__icon:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+            }
+
+            .sidebar-index-social-body .social-card__icon:active {
+                transform: translateY(0) scale(0.97);
+            }
+
+    .sidebar-index-help-link {
+        transition: background-color 0.2s ease;
+    }
+
+        .sidebar-index-help-link:hover {
+            background-color: #f8f9fa;
+            color: #1a1a1a;
+        }
+
+            .sidebar-index-help-link:hover .sidebar-index-help-icon {
+                color: #333;
+            }
+
+    .sidebar-index-help-icon {
+        font-size: 1.25rem;
+        line-height: 1;
+        color: #333;
+    }
+
+    @@media (max-width: 768px) {
+        .sidebar-wrapper {
+            position: static;
+        }
+    }
+</style>

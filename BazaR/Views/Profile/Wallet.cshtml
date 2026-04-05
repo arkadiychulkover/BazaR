@@ -1,0 +1,892 @@
+@model BazaR.ViewModels.WalletViewModel
+@{
+    ViewData["Title"] = "Мій гаманець";
+}
+
+<style>
+    .wallet-page {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 15px;
+    }
+
+    .wallet-card {
+        background: #FFFFFF;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 10px 30px rgba(15, 39, 68, 0.08);
+    }
+
+    .wallet-title {
+        font-size: 30px;
+        font-weight: 700;
+        color: #0F2744;
+        margin-bottom: 8px;
+    }
+
+    .wallet-subtitle {
+        color: #6B7280;
+        margin-bottom: 30px;
+    }
+
+    .wallet-balance {
+        background: linear-gradient(135deg, #0F2744, #173B69);
+        color: #fff;
+        border-radius: 20px;
+        padding: 28px;
+        margin-bottom: 25px;
+    }
+
+    .wallet-balance__label {
+        font-size: 14px;
+        opacity: 0.8;
+        margin-bottom: 10px;
+    }
+
+    .wallet-balance__sum {
+        font-size: 42px;
+        font-weight: 700;
+    }
+
+    .wallet-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+        margin-bottom: 25px;
+    }
+
+    .wallet-box {
+        background: #fff;
+        border: 1px solid #E5E7EB;
+        border-radius: 16px;
+        padding: 20px;
+    }
+
+    .wallet-box h3 {
+        font-size: 16px;
+        color: #0F2744;
+        margin-bottom: 10px;
+    }
+
+    .wallet-box p {
+        margin: 0;
+        color: #6B7280;
+        font-size: 14px;
+    }
+
+    .wallet-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+    }
+
+    .btn-main {
+        background: #98BE2A;
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        padding: 13px 24px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .btn-main:hover {
+        opacity: .92;
+    }
+
+    .btn-outline {
+        background: #fff;
+        color: #0F2744;
+        border: 1px solid #0F2744;
+        border-radius: 14px;
+        padding: 13px 24px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .btn-outline:hover {
+        background: #F9FAFB;
+    }
+
+    .wallet-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 39, 68, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 20px;
+    }
+
+    .wallet-modal.show {
+        display: flex;
+    }
+
+    .wallet-modal__dialog {
+        width: 100%;
+        max-width: 560px;
+        background: #fff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(15, 39, 68, 0.18);
+    }
+
+    .wallet-modal__header {
+        padding: 22px 24px;
+        border-bottom: 1px solid #E5E7EB;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .wallet-modal__title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0F2744;
+    }
+
+    .wallet-modal__close {
+        background: transparent;
+        border: none;
+        font-size: 26px;
+        line-height: 1;
+        cursor: pointer;
+        color: #6B7280;
+    }
+
+    .wallet-modal__body {
+        padding: 24px;
+    }
+
+    .wallet-form-grid {
+        display: grid;
+        gap: 16px;
+    }
+
+    .wallet-field label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #0F2744;
+    }
+
+    .wallet-field input,
+    .wallet-field select {
+        width: 100%;
+        height: 48px;
+        border: 1px solid #D1D5DB;
+        border-radius: 14px;
+        padding: 0 14px;
+        font-size: 15px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .wallet-field input:focus,
+    .wallet-field select:focus {
+        border-color: #98BE2A;
+    }
+
+    .wallet-row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .wallet-pay-box {
+        border: 1px solid #E5E7EB;
+        border-radius: 16px;
+        padding: 18px;
+        background: #F9FAFB;
+    }
+
+    .wallet-pay-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 10px;
+    }
+
+    .wallet-pay-summary strong {
+        font-size: 24px;
+        color: #0F2744;
+    }
+
+    .wallet-pay-note {
+        font-size: 13px;
+        color: #6B7280;
+    }
+
+    .wallet-steps {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .wallet-step {
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #F3F4F6;
+        color: #6B7280;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .wallet-step.active {
+        background: #0F2744;
+        color: #fff;
+    }
+
+    .wallet-step.done {
+        background: #98BE2A;
+        color: #fff;
+    }
+
+    .wallet-status {
+        display: none;
+        border-radius: 16px;
+        padding: 18px;
+        font-size: 14px;
+        margin-top: 16px;
+    }
+
+    .wallet-status.show {
+        display: block;
+    }
+
+    .wallet-status.success {
+        background: #ECFDF3;
+        color: #166534;
+        border: 1px solid #BBF7D0;
+    }
+
+    .wallet-status.error {
+        background: #FEF2F2;
+        color: #991B1B;
+        border: 1px solid #FECACA;
+    }
+
+    .wallet-processing {
+        display: none;
+        text-align: center;
+        padding: 18px 0 8px;
+    }
+
+    .wallet-processing.show {
+        display: block;
+    }
+
+    .wallet-spinner {
+        width: 44px;
+        height: 44px;
+        border: 4px solid #E5E7EB;
+        border-top-color: #98BE2A;
+        border-radius: 50%;
+        margin: 0 auto 12px;
+        animation: walletSpin .8s linear infinite;
+    }
+
+    @@keyframes walletSpin {
+        to { transform: rotate(360deg); }
+    }
+
+    .wallet-history {
+        margin-top: 28px;
+        border: 1px solid #E5E7EB;
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .wallet-history__head {
+        padding: 18px 22px;
+        border-bottom: 1px solid #E5E7EB;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #fff;
+    }
+
+    .wallet-history__title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0F2744;
+    }
+
+    .wallet-history__count {
+        color: #6B7280;
+        font-size: 14px;
+    }
+
+    .wallet-history__list {
+        background: #fff;
+    }
+
+    .wallet-history__item {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 18px 22px;
+        border-bottom: 1px solid #F3F4F6;
+    }
+
+    .wallet-history__item:last-child {
+        border-bottom: none;
+    }
+
+    .wallet-history__left {
+        min-width: 0;
+    }
+
+    .wallet-history__name {
+        font-weight: 600;
+        color: #0F2744;
+        margin-bottom: 6px;
+    }
+
+    .wallet-history__date {
+        font-size: 13px;
+        color: #6B7280;
+    }
+
+    .wallet-history__amount {
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .wallet-history__amount.in {
+        color: #16A34A;
+    }
+
+    .wallet-history__amount.out {
+        color: #DC2626;
+    }
+
+    .wallet-empty {
+        padding: 30px 22px;
+        color: #6B7280;
+        text-align: center;
+        background: #fff;
+    }
+
+    @@media (max-width: 768px) {
+        .wallet-card {
+            padding: 22px;
+        }
+
+        .wallet-title {
+            font-size: 24px;
+        }
+
+        .wallet-balance__sum {
+            font-size: 34px;
+        }
+
+        .wallet-row-2 {
+            grid-template-columns: 1fr;
+        }
+
+        .wallet-history__item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="profile-page">
+    <div class="profile-page__layout">
+        @await Html.PartialAsync("_ProfileSidebar", Model.Profile)
+
+        <section class="profile-page__content">
+            <div class="wallet-page">
+                <div class="wallet-card">
+                    <h1 class="wallet-title">Мій гаманець</h1>
+                    <p class="wallet-subtitle">Керуйте балансом, поповнюйте рахунок та переглядайте історію операцій.</p>
+
+                    <div class="wallet-balance">
+                        <div class="wallet-balance__label">Поточний баланс</div>
+                        <div class="wallet-balance__sum" id="walletBalance">@Model.Balance.ToString("F2") ₴</div>
+                    </div>
+
+                    <div class="wallet-grid">
+                        <div class="wallet-box">
+                            <h3>Статус</h3>
+                            <p>@Model.Status</p>
+                        </div>
+
+                        <div class="wallet-box">
+                            <h3>Витрачено цього місяця</h3>
+                            <p id="walletSpent">@Model.MonthlySpent.ToString("F2") ₴</p>
+                        </div>
+
+                        <div class="wallet-box">
+                            <h3>Операцій</h3>
+                            <p id="walletOperationsCount">@Model.Transactions.Count</p>
+                        </div>
+
+                        <div class="wallet-box">
+                            <h3>Останнє поповнення</h3>
+                            <p id="walletLastTopup">
+                                @(Model.LastReplenishmentDate.HasValue
+                                    ? $"{Model.LastReplenishmentAmount?.ToString("F2")} ₴ · {Model.LastReplenishmentDate.Value:dd.MM.yyyy HH:mm}"
+                                    : "Ще не було")
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="wallet-actions">
+                        <button type="button" class="btn-main" id="openPaymentModal">Поповнити рахунок</button>
+                    </div>
+
+                    <div class="wallet-history" id="walletHistory">
+                        <div class="wallet-history__head">
+                            <div class="wallet-history__title">Історія операцій</div>
+                            <div class="wallet-history__count" id="historyCount">@Model.Transactions.Count операцій</div>
+                        </div>
+
+                        <div class="wallet-history__list" id="historyList">
+                            @if (Model.Transactions != null && Model.Transactions.Any())
+                            {
+                                foreach (var tx in Model.Transactions.OrderByDescending(x => x.CreatedAt))
+                                {
+                                    var isIn = tx.Type == "replenishment";
+                                    <div class="wallet-history__item">
+                                        <div class="wallet-history__left">
+                                            <div class="wallet-history__name">@tx.Description</div>
+                                            <div class="wallet-history__date">@tx.CreatedAt.ToString("dd.MM.yyyy HH:mm")</div>
+                                        </div>
+                                        <div class="wallet-history__amount @(isIn ? "in" : "out")">
+                                            @(isIn ? "+" : "-")@tx.Amount.ToString("F2") ₴
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="wallet-empty" id="walletEmptyHistory">Операцій поки немає</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="wallet-modal" id="paymentModal">
+    <div class="wallet-modal__dialog">
+        <div class="wallet-modal__header">
+            <div class="wallet-modal__title">Поповнення рахунку</div>
+            <button type="button" class="wallet-modal__close" id="closePaymentModal">&times;</button>
+        </div>
+
+        <div class="wallet-modal__body">
+            <div class="wallet-steps">
+                <div class="wallet-step active" id="step1">1. Дані</div>
+                <div class="wallet-step" id="step2">2. Обробка</div>
+                <div class="wallet-step" id="step3">3. Результат</div>
+            </div>
+
+            <div id="paymentFormBlock">
+                <div class="wallet-form-grid">
+                    <div class="wallet-field">
+                        <label for="paymentAmount">Сума поповнення</label>
+                        <input type="number" id="paymentAmount" min="1" step="1" placeholder="Введіть суму" />
+                    </div>
+
+                    <div class="wallet-pay-box">
+                        <div class="wallet-pay-summary">
+                            <span>До сплати</span>
+                            <strong id="summaryAmount">0.00 ₴</strong>
+                        </div>
+                    </div>
+
+                    <div class="wallet-field">
+                        <label for="cardNumber">Номер картки</label>
+                        <input type="text" id="cardNumber" maxlength="19" placeholder="0000 0000 0000 0000" />
+                    </div>
+
+                    <div class="wallet-row-2">
+                        <div class="wallet-field">
+                            <label for="cardExpiry">Термін дії</label>
+                            <input type="text" id="cardExpiry" maxlength="5" placeholder="MM/YY" />
+                        </div>
+                        <div class="wallet-field">
+                            <label for="cardCvv">CVV</label>
+                            <input type="password" id="cardCvv" maxlength="3" placeholder="***" />
+                        </div>
+                    </div>
+
+                    <div class="wallet-field">
+                        <label for="cardHolder">Ім'я власника картки</label>
+                        <input type="text" id="cardHolder" placeholder="IVAN IVANENKO" />
+                    </div>
+
+                    <div class="wallet-actions" style="margin-bottom:0;">
+                        <button type="button" class="btn-main" id="startPaymentBtn">Оплатити</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wallet-processing" id="paymentProcessing">
+                <div class="wallet-spinner"></div>
+                <div style="font-weight:600; color:#0F2744; margin-bottom:6px;">Обробка платежу...</div>
+                <div style="font-size:14px; color:#6B7280;">Зачекайте доки закінчиться, перевірка та підтвердження операції.</div>
+            </div>
+
+            <div class="wallet-status" id="paymentStatus"></div>
+        </div>
+    </div>
+</div>
+
+<form id="walletAntiForgeryForm" style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
+
+<script>
+    (function () {
+        const modal = document.getElementById('paymentModal');
+        const openBtn = document.getElementById('openPaymentModal');
+        const closeBtn = document.getElementById('closePaymentModal');
+
+        const paymentAmount = document.getElementById('paymentAmount');
+        const cardNumber = document.getElementById('cardNumber');
+        const cardExpiry = document.getElementById('cardExpiry');
+        const cardCvv = document.getElementById('cardCvv');
+        const cardHolder = document.getElementById('cardHolder');
+
+        const summaryAmount = document.getElementById('summaryAmount');
+        const startPaymentBtn = document.getElementById('startPaymentBtn');
+
+        const paymentFormBlock = document.getElementById('paymentFormBlock');
+        const paymentProcessing = document.getElementById('paymentProcessing');
+        const paymentStatus = document.getElementById('paymentStatus');
+
+        const walletBalance = document.getElementById('walletBalance');
+        const walletOperationsCount = document.getElementById('walletOperationsCount');
+        const historyCount = document.getElementById('historyCount');
+        const historyList = document.getElementById('historyList');
+        const walletLastTopup = document.getElementById('walletLastTopup');
+
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+
+        let currentBalance = parseFloat('@Model.Balance'.toString().replace(',', '.')) || 0;
+        let operationsCount = parseInt('@Model.Transactions.Count') || 0;
+        let isSubmitting = false;
+
+        // ================= EVENTS =================
+
+        if (openBtn) {
+            openBtn.addEventListener('click', openModal);
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
+        }
+
+        if (modal) {
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('show')) {
+                closeModal();
+            }
+        });
+
+        if (paymentAmount) {
+            paymentAmount.addEventListener('input', function () {
+                const amount = parseFloat(this.value);
+                updateSummary(amount);
+            });
+        }
+
+        if (cardNumber) {
+            cardNumber.addEventListener('input', function () {
+                let value = this.value.replace(/\D/g, '').substring(0, 16);
+                this.value = value.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+            });
+        }
+
+        if (cardExpiry) {
+            cardExpiry.addEventListener('input', function () {
+                let value = this.value.replace(/\D/g, '').substring(0, 4);
+                if (value.length > 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2);
+                }
+                this.value = value;
+            });
+        }
+
+        if (cardCvv) {
+            cardCvv.addEventListener('input', function () {
+                this.value = this.value.replace(/\D/g, '').substring(0, 3);
+            });
+        }
+
+        if (startPaymentBtn) {
+            startPaymentBtn.addEventListener('click', submitPayment);
+        }
+
+        // ================= MAIN =================
+
+        async function submitPayment() {
+            if (isSubmitting) return;
+
+            clearStatus();
+
+            const amount = parseFloat(paymentAmount.value);
+            const validationError = validateForm(amount);
+
+            if (validationError) {
+                showStatus(validationError, 'error');
+                return;
+            }
+
+            isSubmitting = true;
+            startPaymentBtn.disabled = true;
+
+            setStepState(2);
+
+            paymentFormBlock.style.display = 'none';
+            paymentProcessing.classList.add('show');
+
+            try {
+                const resp = await fetch('/Profile/TopUpWallet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ amount: amount })
+                });
+
+                const rawText = await resp.text();
+                let data = null;
+
+                try {
+                    data = rawText ? JSON.parse(rawText) : null;
+                } catch {
+                    data = null;
+                }
+
+                paymentProcessing.classList.remove('show');
+
+                if (!resp.ok) {
+                    paymentFormBlock.style.display = '';
+                    setStepState(1);
+                    showStatus(
+                        data?.error || data?.message || 'Не вдалося виконати поповнення.',
+                        'error'
+                    );
+                    return;
+                }
+
+                currentBalance = parseFloat(data?.newBalance ?? (currentBalance + amount));
+                walletBalance.textContent = formatMoney(currentBalance);
+
+                operationsCount += 1;
+                if (walletOperationsCount) {
+                    walletOperationsCount.textContent = operationsCount;
+                }
+                if (historyCount) {
+                    historyCount.textContent = operationsCount + ' операцій';
+                }
+
+                updateLastTopup(amount);
+                prependHistoryItem({
+                    description: data?.description || 'Поповнення рахунку',
+                    amount: amount,
+                    createdAt: data?.createdAt || new Date().toISOString(),
+                    type: 'replenishment'
+                });
+
+                setStepState(3);
+                showStatus('Платіж успішно проведено.', 'success');
+
+                setTimeout(() => {
+                    closeModal();
+                }, 1400);
+
+            } catch (error) {
+                paymentProcessing.classList.remove('show');
+                paymentFormBlock.style.display = '';
+                setStepState(1);
+                showStatus('Помилка мережі або сервера. Спробуйте ще раз.', 'error');
+            } finally {
+                isSubmitting = false;
+                startPaymentBtn.disabled = false;
+            }
+        }
+
+        // ================= UI HELPERS =================
+
+        function openModal() {
+            resetModalState();
+            modal.classList.add('show');
+            if (paymentAmount) paymentAmount.focus();
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+            resetModalState();
+            clearForm();
+        }
+
+        function resetModalState() {
+            paymentFormBlock.style.display = '';
+            paymentProcessing.classList.remove('show');
+            clearStatus();
+            setStepState(1);
+        }
+
+        function clearForm() {
+            paymentAmount.value = '';
+            cardNumber.value = '';
+            cardExpiry.value = '';
+            cardCvv.value = '';
+            cardHolder.value = '';
+            updateSummary(0);
+        }
+
+        function updateSummary(amount) {
+            if (!summaryAmount) return;
+            summaryAmount.textContent = formatMoney(amount && amount > 0 ? amount : 0);
+        }
+
+        function setStepState(stepNumber) {
+            [step1, step2, step3].forEach(step => {
+                if (!step) return;
+                step.classList.remove('active', 'done');
+            });
+
+            if (stepNumber === 1) {
+                step1.classList.add('active');
+            }
+            else if (stepNumber === 2) {
+                step1.classList.add('done');
+                step2.classList.add('active');
+            }
+            else if (stepNumber === 3) {
+                step1.classList.add('done');
+                step2.classList.add('done');
+                step3.classList.add('active');
+            }
+        }
+
+        function showStatus(text, type) {
+            paymentStatus.textContent = text;
+            paymentStatus.classList.remove('success', 'error', 'show');
+            paymentStatus.classList.add(type, 'show');
+        }
+
+        function clearStatus() {
+            paymentStatus.textContent = '';
+            paymentStatus.classList.remove('success', 'error', 'show');
+        }
+
+        function validateForm(amount) {
+            if (!amount || amount <= 0) {
+                return 'Вкажіть коректну суму поповнення.';
+            }
+
+            if (amount < 1) {
+                return 'Мінімальна сума поповнення — 1 ₴.';
+            }
+
+            const cleanedCard = cardNumber.value.replace(/\s/g, '');
+            if (cleanedCard.length !== 16) {
+                return 'Вкажіть коректний номер картки.';
+            }
+
+            if (!/^\d{2}\/\d{2}$/.test(cardExpiry.value)) {
+                return 'Вкажіть термін дії картки у форматі MM/YY.';
+            }
+
+            if (!/^\d{3}$/.test(cardCvv.value)) {
+                return 'Вкажіть коректний CVV.';
+            }
+
+            if (!cardHolder.value.trim()) {
+                return "Вкажіть ім'я власника картки.";
+            }
+
+            return null;
+        }
+
+        function prependHistoryItem(tx) {
+            const emptyBlock = document.getElementById('walletEmptyHistory');
+            if (emptyBlock) {
+                emptyBlock.remove();
+            }
+
+            const isIn = tx.type === 'replenishment';
+            const item = document.createElement('div');
+            item.className = 'wallet-history__item';
+
+            item.innerHTML = `
+                <div class="wallet-history__left">
+                    <div class="wallet-history__name">${escapeHtml(tx.description || 'Операція')}</div>
+                    <div class="wallet-history__date">${formatDate(tx.createdAt)}</div>
+                </div>
+                <div class="wallet-history__amount ${isIn ? 'in' : 'out'}">
+                    ${isIn ? '+' : '-'}${formatMoneyValue(tx.amount)} ₴
+                </div>
+            `;
+
+            historyList.prepend(item);
+        }
+
+        function updateLastTopup(amount) {
+            if (!walletLastTopup) return;
+            walletLastTopup.textContent = `${formatMoneyValue(amount)} ₴ · ${formatDate(new Date())}`;
+        }
+
+        function formatMoney(value) {
+            return `${formatMoneyValue(value)} ₴`;
+        }
+
+        function formatMoneyValue(value) {
+            const num = parseFloat(value || 0);
+            return num.toFixed(2);
+        }
+
+        function formatDate(dateValue) {
+            const date = new Date(dateValue);
+
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${day}.${month}.${year} ${hours}:${minutes}`;
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        updateSummary(0);
+    })();
+</script>

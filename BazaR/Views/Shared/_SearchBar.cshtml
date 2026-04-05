@@ -1,0 +1,492 @@
+@using System.Text.Json
+@model List<BazaR.Models.Category>
+
+@{
+    var mainCategories = Model?.Where(c => c.ParentCategoryId == null)
+        .OrderBy(c => c.DisplayOrder)
+        .ToList() ?? new List<BazaR.Models.Category>();
+}
+
+<form asp-action="Browse" asp-controller="Site" method="get" class="search-form">
+
+    <div class="search-container">
+        <div class="search-field">
+            <span class="search-field__icon search-field__icon--start" aria-hidden="true">
+                <img class="search-field__glyph" src='@Url.Content("~/SVGAssets/assets/zoom.svg")' alt="" />
+            </span>
+            <input type="text"
+                   name="query"
+                   value="@ViewBag.Query"
+                   class="search-input"
+                   placeholder="Я шукаю..."
+                   id="searchInput"
+                   autocomplete="off" />
+            <button type="button" class="search-field__mic" aria-label="Голосовий пошук">
+                <img class="search-field__glyph" src='@Url.Content("~/SVGAssets/assets/microphone.svg")' alt="" />
+            </button>
+        </div>
+        <button type="submit" class="search-button">
+            Знайти
+        </button>
+    </div>
+
+    <!-- Меню с категориями по вводу -->
+    <div class="search-suggestions" id="searchSuggestions"></div>
+
+    <div class="mega-overlay" id="megaOverlay">
+        <div class="mega">
+
+            <div class="mega-left">
+                @foreach (var category in mainCategories.Take(20))
+                {
+                    <a href="@Url.Action("CategoryPage", "Site", new { category = category.Id })"
+                       class="mega-category @(category == mainCategories.FirstOrDefault() ? "active" : "")"
+                       data-id="@category.Id">
+                        @if (!string.IsNullOrEmpty(category.IconUrl))
+                        {
+                            if (CategoryDisplayHelper.IsWebImagePath(category.IconUrl))
+                            {
+                                <img src="@category.IconUrl" alt="" width="20" height="20" style="object-fit:contain;flex-shrink:0;" />
+                            }
+                            else
+                            {
+                                <i class="bi @category.IconUrl"></i>
+                            }
+                        }
+                        else
+                        {
+                            <i class="bi bi-grid"></i>
+                        }
+                        <span>@category.Name</span>
+                    </a>
+                }
+            </div>
+
+            <div class="mega-right">
+                @foreach (var mainCategory in mainCategories)
+                {
+                    var subCategories = Model?
+                    .Where(x => x.ParentCategoryId == mainCategory.Id)
+                    .OrderBy(x => x.DisplayOrder)
+                    .ToList();
+
+                    <div class="mega-block"
+                         data-id="@mainCategory.Id"
+                         style="display:@(mainCategory == mainCategories.FirstOrDefault() ? "grid" : "none")">
+                        @foreach (var sub in subCategories ?? new List<BazaR.Models.Category>())
+                        {
+                            var subSub = Model?
+                            .Where(x => x.ParentCategoryId == sub.Id)
+                            .OrderBy(x => x.DisplayOrder)
+                            .ToList();
+
+                            <div class="mega-col">
+                                <h3>
+                                    <a href="@Url.Action("Browse", "Site", new { categoryIds = new List<int> { sub.Id } })">
+                                        @sub.Name
+                                    </a>
+                                </h3>
+
+                                @if (subSub != null)
+                                {
+                                    foreach (var s in subSub)
+                                    {
+                                        <a class="mega-link"
+                                           href="@Url.Action("Browse", "Site", new { categoryIds = new List<int> { s.Id } })">
+                                            @s.Name
+                                        </a>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+
+</form>
+
+<style>
+    .search-form {
+        position: relative;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .search-container {
+        display: flex;
+        align-items: stretch;
+        width: 100%;
+        border-radius: 999px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+        box-sizing: border-box;
+    }
+
+    .search-field {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: #fff;
+        border-radius: 999px 0 0 999px;
+        padding: 0 8px 0 10px;
+        border: none;
+        box-sizing: border-box;
+        min-height: 46px;
+        transition: box-shadow 0.2s;
+    }
+
+    .search-field:focus-within {
+        box-shadow: inset 0 0 0 2px rgba(164, 198, 57, 0.45);
+    }
+
+    /* Однаковий розмір і колір; вирівнювання по центру рядка */
+    .search-field__glyph {
+        width: 20px;
+        height: 20px;
+        display: block;
+        object-fit: contain;
+        object-position: center;
+        flex-shrink: 0;
+        opacity: 0.52;
+        margin: 0;
+        vertical-align: middle;
+    }
+
+    .search-field__icon--start {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 36px;
+        align-self: stretch;
+        line-height: 0;
+    }
+
+    .search-field__mic {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        min-width: 36px;
+        align-self: stretch;
+        padding: 0;
+        margin: 0;
+        border: none;
+        background: transparent;
+        border-radius: 0;
+        cursor: pointer;
+        line-height: 0;
+        transition: background 0.15s;
+    }
+
+        .search-field__mic:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        .search-field__mic:hover .search-field__glyph {
+            opacity: 0.72;
+        }
+
+    .search-input {
+        flex: 1;
+        min-width: 0;
+        padding: 0 4px;
+        margin: 0;
+        border: none;
+        background: transparent;
+        font-size: 15px;
+        line-height: 1.3;
+        height: 46px;
+        color: #222;
+        box-sizing: border-box;
+    }
+
+        .search-input::placeholder {
+            color: #9aa0a6;
+        }
+
+        .search-input:focus {
+            outline: none;
+        }
+
+    .search-button {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        align-self: stretch;
+        min-height: 46px;
+        background: var(--bazaar-search-btn, #a4c639);
+        border: none;
+        padding: 0 24px;
+        color: var(--bazaar-on-green, #2d2d2d);
+        font-weight: 700;
+        font-size: 15px;
+        line-height: 1.2;
+        border-radius: 0 999px 999px 0;
+        cursor: pointer;
+        box-sizing: border-box;
+        transition: background 0.15s, filter 0.15s;
+    }
+
+        .search-button:hover {
+            background: var(--bazaar-search-btn-hover, #95b532);
+            filter: brightness(1.02);
+            color: var(--bazaar-on-green, #2d2d2d);
+        }
+
+    .search-suggestions {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        width: 100%;
+        max-width: 1200px;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        z-index: 1000;
+        display: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+        .search-suggestions a {
+            display: block;
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #333;
+            transition: 0.2s;
+        }
+
+            .search-suggestions a:hover {
+                background: #f5f5f5;
+                color: #7bd500;
+            }
+
+    .mega-overlay {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 1200px;
+        top: calc(100% + 8px);
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        opacity: 0;
+        visibility: hidden;
+        transition: 0.25s;
+        z-index: 999;
+    }
+
+    .search-form.active .mega-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .mega {
+        display: flex;
+        width: 100%;
+        min-height: 420px;
+    }
+
+    .mega-left {
+        width: 260px;
+        min-width: 260px;
+        height: 420px;
+        background: #f5f5f5;
+        border-right: 1px solid #e5e5e5;
+        padding: 10px 0;
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+
+    .mega-category {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px;
+        color: #333;
+        text-decoration: none;
+        font-size: 14px;
+        transition: 0.2s;
+        white-space: nowrap;
+    }
+
+        .mega-category i {
+            font-size: 18px;
+            color: #888;
+            flex-shrink: 0;
+        }
+
+        .mega-category img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .mega-category span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mega-category:hover {
+            background: white;
+            color: #7bd500;
+            cursor: pointer;
+        }
+
+        .mega-category.active {
+            background: white;
+            font-weight: 600;
+            color: #7bd500;
+        }
+
+    .mega-right {
+        flex: 1;
+        padding: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+        box-sizing: border-box;
+    }
+
+    .mega-block {
+        display: none;
+        width: 100%;
+        gap: 30px;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-auto-rows: min-content;
+    }
+
+    .mega-col {
+        min-width: 160px;
+    }
+
+        .mega-col h3 {
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+            .mega-col h3 a {
+                color: #222;
+                text-decoration: none;
+            }
+
+                .mega-col h3 a:hover {
+                    color: #7bd500;
+                }
+
+    .mega-link {
+        display: block;
+        font-size: 13px;
+        color: #666;
+        text-decoration: none;
+        padding: 3px 0;
+        transition: 0.15s;
+    }
+
+        .mega-link:hover {
+            color: #7bd500;
+            padding-left: 6px;
+        }
+</style>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const form = document.querySelector(".search-form");
+    const input = document.getElementById("searchInput");
+    const megaOverlay = document.getElementById("megaOverlay");
+    const suggestions = document.getElementById("searchSuggestions");
+
+    // Категории + бренды для подсказок
+    const allCategories = @Html.Raw(JsonSerializer.Serialize(
+        Model.Select(c => new { 
+            id = c.Id, 
+            name = c.Name, 
+            brands = c.CategoryBrands.Select(b => b.Brand.Name).ToList() 
+        })
+    ));
+
+    const cats = document.querySelectorAll(".mega-category");
+    const blocks = document.querySelectorAll(".mega-block");
+
+    function openCat(id) {
+        cats.forEach(c => c.classList.toggle("active", c.dataset.id === id));
+        blocks.forEach(b => b.style.display = (b.dataset.id === id) ? "grid" : "none");
+    }
+
+    cats.forEach(c => {
+        c.addEventListener("mouseenter", () => {
+            if (!input.value) openCat(c.dataset.id);
+        });
+    });
+
+    if (blocks.length > 0) blocks[0].style.display = "grid";
+
+    // --- Поиск категорий + брендов ---
+        input.addEventListener("input", () => {
+        const val = input.value.trim().toLowerCase();
+        suggestions.innerHTML = "";
+
+        if (val.length === 0) {
+            suggestions.style.display = "none";
+            megaOverlay.style.display = "block";
+            return;
+        }
+
+        megaOverlay.style.display = "none";
+
+        allCategories.forEach(c => {
+            let matched = false;
+
+            // Проверка категории
+            if (c.name.toLowerCase().includes(val)) {
+                const aCat = document.createElement("a");
+                aCat.href = "@Url.Action("Browse", "Site")?categoryIds=" + c.id;
+                aCat.textContent = c.name;
+                suggestions.appendChild(aCat);
+                matched = true;
+            }
+
+            // Проверка брендов
+            c.brands.forEach(b => {
+                if (b.toLowerCase().includes(val)) {
+                    const aBrand = document.createElement("a");
+                    aBrand.href = "@Url.Action("Browse", "Site")?categoryIds=" + c.id;
+                    aBrand.textContent = c.name + " – " + b;
+                    suggestions.appendChild(aBrand);
+                    matched = true;
+                }
+            });
+        });
+
+        suggestions.style.display = suggestions.children.length > 0 ? "block" : "none";
+    });
+
+    input.addEventListener("focus", () => {
+        form.classList.add("active");
+        if (!input.value) megaOverlay.style.display = "block";
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!form.contains(e.target)) {
+            form.classList.remove("active");
+            suggestions.style.display = "none";
+            megaOverlay.style.display = "block";
+        }
+    });
+
+});
+</script>

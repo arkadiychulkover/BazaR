@@ -1,0 +1,50 @@
+﻿using System.Collections.Generic;
+
+namespace BazaR.Models
+{
+    public class Item
+    {
+        public int Id { get; set; }
+
+        public int Price { get; set; }
+        public int Garantia { get; set; }
+
+        public bool IsAvailable { get; set; }
+        public bool IsReadyToSend { get; set; }
+        public bool IsNoPercentCredit { get; set; }
+
+        public string Name { get; set; }
+        public string Desc { get; set; }
+        public string? ImageUrl { get; set; }
+
+        public SellerType SellerType { get; set; }
+        public ProductionCountry Country { get; set; }
+
+        public int BrandId { get; set; }
+        public Brand Brand { get; set; }
+
+        public List<CategoryFilter> filters { get; set; }
+
+        public List<ItemColor> Colors { get; set; }
+
+        public List<Review> Reviews { get; set; } = new();
+
+        public List<ComplectItem> ComplectItems { get; set; } = new();
+
+        public List<ItemCharacteristic> Characteristics { get; set; } = new();
+
+        public int CategoryId { get; set; }
+        public Category Category { get; set; }
+
+        public List<Usluga> Uslugi { get; set; } = new();
+
+        public List<Delivery> DeliveryVariants { get; set; } = new();
+
+        public int UserId { get; set; }
+        public User User { get; set; }
+
+        public List<CartItem> CartItems { get; set; } = new();
+        public List<WishlistItem> WishlistItems { get; set; } = new();
+        public List<OrderItem> OrderItems { get; set; } = new();
+    }
+}

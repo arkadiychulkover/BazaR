@@ -1,0 +1,67 @@
+﻿@model BazaR.Models.ViewModels.FilterCheckboxGroupViewModel
+
+<div class="filter-group mb-3">
+    <div class="filter-header mb-2">
+        <span class="fw-bold">@Model.DisplayName</span>
+    </div>
+
+    <div class="filter-body">
+        <div class="checkbox-list" style="max-height: 200px; overflow-y: auto;">
+            @foreach (var value in Model.Values)
+            {
+                var isChecked = Model.SelectedValues.Contains(value);
+                var inputId = $"filter_{Model.Key}_{value.Replace(" ", "_")}";
+
+                <div class="form-check mb-2">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="filter_@Model.Key"
+                           value="@value"
+                           id="@inputId"
+                           @(isChecked ? "checked" : "")
+                           onchange="this.form.submit()">
+                    <label class="form-check-label" for="@inputId">
+                        @value
+                    </label>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .checkbox-list {
+        scrollbar-width: thin;
+        scrollbar-color: #ccc #f1f1f1;
+        padding-right: 5px;
+    }
+
+        .checkbox-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .checkbox-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .checkbox-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+            .checkbox-list::-webkit-scrollbar-thumb:hover {
+                background: #999;
+            }
+
+    .filter-group {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+
+        .filter-group:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+</style>
