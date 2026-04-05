@@ -1,7 +1,7 @@
 @model List<BazaR.Models.Category>
 
 @{
-    var mainCategories = Model?.Where(c => c.ParentCategoryId == null).OrderBy(c => c.DisplayOrder).ToList() ?? new List<BazaR.Models.Category>();
+    var mainCategories = SidebarCatalogHelper.GetSidebarRootCategories(Model ?? Enumerable.Empty<BazaR.Models.Category>());
 }
 
 <div class="sidebar-wrapper">
@@ -18,10 +18,10 @@
         </div>
         <div class="card-body p-0">
             <ul class="list-group list-group-flush">
-                @foreach (var category in mainCategories.Take(10))
+                @foreach (var category in mainCategories)
                 {
                     <li class="list-group-item">
-                        <a href="@Url.Action("CategoryPage", "Site", new { category = category.Id })"
+                        <a href="@SidebarCatalogHelper.GetSidebarCategoryHref(Url, category)"
                            class="text-decoration-none text-dark d-flex align-items-center">
                             @if (!string.IsNullOrEmpty(category.IconUrl))
                             {
@@ -38,21 +38,48 @@
                             {
                                 <i class="bi bi-tag me-2 text-primary"></i>
                             }
-                            <span>@category.Name</span>
-                        </a>
-                    </li>
-                }
-                @if (mainCategories.Count > 10)
-                {
-                    <li class="list-group-item text-center">
-                        <a href="@Url.Action("Browse", "Site")" class="text-primary text-decoration-none">
-                            Всі категорії <i class="bi bi-arrow-right"></i>
+                            <span>@SidebarCatalogHelper.GetSidebarRootDisplayName(category)</span>
                         </a>
                     </li>
                 }
             </ul>
         </div>
     </div>
+
+    <!-- Довідковий центр: один пункт під категоріями -->
+    <div class="card mb-3 overflow-hidden">
+        <div class="card-body p-0">
+            <a asp-controller="Site"
+               asp-action="Privacy"
+               class="d-flex align-items-center gap-3 px-3 py-3 text-decoration-none text-dark sidebar-index-help-link">
+                <i class="bi bi-question-circle sidebar-index-help-icon flex-shrink-0" aria-hidden="true"></i>
+                <span class="fw-medium">Довідковий центр</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Привітання / вхід одразу під категоріями -->
+    @if (ViewBag.User == null)
+    {
+        <div class="card mb-3 sidebar-welcome-card">
+            <div class="card-header sidebar-welcome-card__head">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-circle"></i> Вітаємо на BazaR!
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <p class="mb-3">Увійдіть, щоб отримати доступ до знижок та особистого кабінету</p>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-bazaar-auth" data-auth-open="login">
+                        <i class="bi bi-box-arrow-in-right"></i> Увійти
+                    </button>
+                    <button type="button" class="btn btn-outline-bazaar-auth" data-auth-open="register">
+                        <i class="bi bi-person-plus"></i> Реєстрація
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
 
     <!-- Поиск -->
     <div class="card mb-3">
@@ -74,39 +101,6 @@
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- Справочный центр -->
-    <div class="card mb-3">
-        <div class="card-header bg-bazaar-accent">
-            <h5 class="mb-0">
-                <i class="bi bi-question-circle"></i> Довідковий центр
-            </h5>
-        </div>
-        <div class="card-body">
-            <ul class="list-unstyled mb-0">
-                <li class="mb-2">
-                    <a href="#" class="text-decoration-none text-dark">
-                        <i class="bi bi-question-circle me-2 text-primary"></i> Як зробити замовлення
-                    </a>
-                </li>
-                <li class="mb-2">
-                    <a href="#" class="text-decoration-none text-dark">
-                        <i class="bi bi-truck me-2 text-primary"></i> Доставка та оплата
-                    </a>
-                </li>
-                <li class="mb-2">
-                    <a href="#" class="text-decoration-none text-dark">
-                        <i class="bi bi-arrow-return-left me-2 text-primary"></i> Повернення товару
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="text-decoration-none text-dark">
-                        <i class="bi bi-shield-check me-2 text-primary"></i> Гарантія
-                    </a>
-                </li>
-            </ul>
         </div>
     </div>
 
@@ -172,28 +166,15 @@
         </div>
     </div>
 
-    <!-- Соцсети -->
+    <!-- Соцмережі — ті самі 6 мереж, що в site-footer__main (.footer-social) -->
     <div class="card mb-3">
         <div class="card-header bg-bazaar-accent">
             <h5 class="mb-0">
                 <i class="bi bi-share"></i> Ми в соцмережах
             </h5>
         </div>
-        <div class="card-body">
-            <div class="d-flex flex-wrap justify-content-around align-items-center gap-3">
-                <a href="#" class="text-decoration-none d-inline-flex align-items-center gap-2 sidebar-social-link">
-                    <span class="fs-3 text-primary"><i class="bi bi-facebook" aria-hidden="true"></i></span>
-                    <span class="sidebar-social-label">FB</span>
-                </a>
-                <a href="#" class="text-decoration-none d-inline-flex align-items-center gap-2 sidebar-social-link">
-                    <span class="fs-3 text-info"><i class="bi bi-telegram" aria-hidden="true"></i></span>
-                    <span class="sidebar-social-label">TG</span>
-                </a>
-                <a href="#" class="text-decoration-none d-inline-flex align-items-center gap-2 sidebar-social-link">
-                    <span class="fs-3 text-danger"><i class="bi bi-instagram" aria-hidden="true"></i></span>
-                    <span class="sidebar-social-label">IG</span>
-                </a>
-            </div>
+        <div class="card-body sidebar-index-social-body">
+            @await Html.PartialAsync("_SocialMedia")
         </div>
     </div>
 
@@ -221,29 +202,6 @@
             </ul>
         </div>
     </div>
-
-    <!-- Приветствие для неавторизованных -->
-    @if (ViewBag.User == null)
-    {
-        <div class="card mb-3 sidebar-welcome-card">
-            <div class="card-header sidebar-welcome-card__head">
-                <h5 class="mb-0">
-                    <i class="bi bi-person-circle"></i> Вітаємо на BazaR!
-                </h5>
-            </div>
-            <div class="card-body text-center">
-                <p class="mb-3">Увійдіть, щоб отримати доступ до знижок та особистого кабінету</p>
-                <div class="d-grid gap-2">
-                    <button type="button" class="btn btn-bazaar-auth" data-auth-open="login">
-                        <i class="bi bi-box-arrow-in-right"></i> Увійти
-                    </button>
-                    <button type="button" class="btn btn-outline-bazaar-auth" data-auth-open="register">
-                        <i class="bi bi-person-plus"></i> Реєстрація
-                    </button>
-                </div>
-            </div>
-        </div>
-    }
 
 </div>
 
@@ -309,15 +267,81 @@
             color: inherit;
         }
 
-    .sidebar-social-label {
-        font-size: 0.8125rem;
-        font-weight: 600;
-        color: var(--bazaar-on-green, #2d2d2d);
-        letter-spacing: 0.02em;
+    .sidebar-index-social-body {
+        padding: 1.1rem 1rem 1.25rem;
+        background: linear-gradient(180deg, #fafbfc 0%, #f1f3f6 100%);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
     }
 
-    .sidebar-social-link:hover .sidebar-social-label {
-        text-decoration: underline;
+    .sidebar-index-social-body .social-card__title {
+        display: none;
+    }
+
+    .sidebar-index-social-body .social-card {
+        width: 100%;
+        max-width: 100%;
+        min-height: 0;
+        margin: 0;
+        padding: 0;
+        border: none;
+        box-shadow: none;
+        background: transparent;
+        display: block;
+    }
+
+    .sidebar-index-social-body .social-card__icons {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.65rem 0.95rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .sidebar-index-social-body .social-card__icon {
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        min-height: 50px;
+        display: grid;
+        place-items: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .sidebar-index-social-body .social-card__icon svg {
+        width: 42px;
+        height: 42px;
+        display: block;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.07));
+    }
+
+    .sidebar-index-social-body .social-card__icon:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+    }
+
+    .sidebar-index-social-body .social-card__icon:active {
+        transform: translateY(0) scale(0.97);
+    }
+
+    .sidebar-index-help-link {
+        transition: background-color 0.2s ease;
+    }
+
+        .sidebar-index-help-link:hover {
+            background-color: #f8f9fa;
+            color: #1a1a1a;
+        }
+
+            .sidebar-index-help-link:hover .sidebar-index-help-icon {
+                color: #333;
+            }
+
+    .sidebar-index-help-icon {
+        font-size: 1.25rem;
+        line-height: 1;
+        color: #333;
     }
 
     @@media (max-width: 768px) {
