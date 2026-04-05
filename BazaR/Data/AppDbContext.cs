@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using BazaR.Models;
-using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace BazaR.Data
 {
@@ -11,6 +10,8 @@ namespace BazaR.Data
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
+            //Database.EnsureDeleted();
+            //Database.EnsureCreated();
         }
 
         public DbSet<Category> Categories { get; set; }
@@ -449,7 +450,7 @@ namespace BazaR.Data
                 new Category { Id = 14, Name = "Канцтовари та книги", IconUrl = "/AssetsIconImg/TopLevelCategory/icon-stationery-books.svg", ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-stationery-books.svg", ParentCategoryId = null, DisplayOrder = 14 },
                 new Category { Id = 15, Name = "Алкогольні напої та продукти", IconUrl = "/AssetsIconImg/TopLevelCategory/icon-alcohol-food.svg", ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-alcohol-food.svg", ParentCategoryId = null, DisplayOrder = 15 },
                 new Category { Id = 16, Name = "Товари для бізнесу та послуги", IconUrl = "/AssetsIconImg/TopLevelCategory/icon-business-services.svg", ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-business-services.svg", ParentCategoryId = null, DisplayOrder = 16 },
-                new Category { Id = 17, Name = "Туризм та відпочинок", IconUrl = "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg", ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg", ParentCategoryId = null, DisplayOrder = 17 },
+                new Category { Id = 17, Name = "Тури та відпочинок", IconUrl = "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg", ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg", ParentCategoryId = null, DisplayOrder = 17 },
                 new Category { Id = 18, Name = "Акції", IconUrl = "/AssetsIconImg/TopLevelCategory/icon-promotions.svg", ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-promotions.svg", ParentCategoryId = null, DisplayOrder = 18 },
                 new Category { Id = 19, Name = "Тотальний розпродаж", IconUrl = "/AssetsIconImg/TopLevelCategory/icon-total-sale.svg", ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-total-sale.svg", ParentCategoryId = null, DisplayOrder = 19 }
             );

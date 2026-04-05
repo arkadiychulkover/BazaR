@@ -30,7 +30,7 @@
                                     <p class="card-text">
                                         <strong>Цена:</strong> @item.Price грн<br>
                                         <strong>Количество:</strong> @quantity<br>
-                                        <strong>Сумма:</strong> @(item.Price * quantity) грн
+                                        <strong>Сумма:</strong> @(item.Price* quantity) грн
                                     </p>
                                     <form asp-action="Remove" asp-controller="Cart" method="post" style="display: inline;">
                                         @Html.AntiForgeryToken()

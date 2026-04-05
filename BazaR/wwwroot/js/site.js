@@ -15,12 +15,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         modal.classList.remove('is-open');
         modal.setAttribute('aria-hidden', 'true');
-        body.classList.remove('auth-modal-open');
     }
 
     function closeAllModals() {
         closeModal(loginModal);
         closeModal(registerModal);
+        body.classList.remove('auth-modal-open');
     }
 
     function openModal(name) {
@@ -30,12 +30,25 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!modal) return;
 
         document.dispatchEvent(new CustomEvent('sidebar:close'));
+        document.dispatchEvent(new CustomEvent('mobile-more:close'));
 
         closeAllModals();
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         body.classList.add('auth-modal-open');
     }
+
+    document.querySelectorAll('[data-auth-close]').forEach(function (el) {
+        el.addEventListener('click', function () {
+            closeAllModals();
+        });
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        if (!body.classList.contains('auth-modal-open')) return;
+        closeAllModals();
+    });
 
     document.querySelectorAll('[data-auth-open]').forEach(function (button) {
         button.addEventListener('click', function (e) {
@@ -47,10 +60,46 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.querySelectorAll('[data-auth-switch]').forEach(function (button) {
-        button.addEventListener('click', function () {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             openModal(button.dataset.authSwitch);
         });
     });
+
+    function normalizeAuthName(name) {
+        var n = (name || '').toString();
+        if (n === 'loginModal') return 'login';
+        if (n === 'registerModal') return 'register';
+        return n;
+    }
+
+    window.authModals = {
+        openModal: function (name) {
+            openModal(normalizeAuthName(name));
+        },
+        closeAllModals: closeAllModals
+    };
+
+    /* Bootstrap modal + кастомний auth-modal конфліктували: прибираємо залишки .show / backdrop */
+    function cleanupBootstrapModalArtifacts() {
+        [loginModal, registerModal].forEach(function (el) {
+            if (!el) return;
+            el.classList.remove('show', 'fade');
+            if (el.getAttribute('style')) {
+                el.style.removeProperty('display');
+                el.style.removeProperty('padding-right');
+            }
+        });
+        document.querySelectorAll('.modal-backdrop').forEach(function (b) {
+            b.remove();
+        });
+        body.classList.remove('modal-open');
+        body.style.removeProperty('overflow');
+        body.style.removeProperty('padding-right');
+    }
+
+    cleanupBootstrapModalArtifacts();
 
     document.querySelectorAll('.auth-pass-toggle, .auth-pass-toggle-noterror, .auth-pass-toggle-noterror-login, .auth-pass-toggle-login').forEach(function (button) {
 
@@ -109,6 +158,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!drawer) return;
 
     function openSidebar() {
+        document.dispatchEvent(new CustomEvent('mobile-more:close'));
+
         drawer.classList.add('is-open');
         drawer.setAttribute('aria-hidden', 'false');
 
@@ -149,3 +200,82 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 })();
+
+// ══════════════════════════════════════════
+//   MOBILE «ЩЕ» SHEET  —  BazaR
+// ══════════════════════════════════════════
+
+(function () {
+    'use strict';
+
+    const sheet = document.getElementById('mobileMoreSheet');
+    if (!sheet) return;
+
+    const openBtns = document.querySelectorAll('[data-more-sheet-open]');
+
+    function setOpenBtnsExpanded(expanded) {
+        openBtns.forEach(function (btn) {
+            btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        });
+    }
+
+    function openMoreSheet() {
+        sheet.classList.add('is-open');
+        sheet.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('mobile-more-open');
+        document.body.style.overflow = 'hidden';
+        setOpenBtnsExpanded(true);
+
+        const panel = sheet.querySelector('.mobile-more-sheet__panel');
+        const focusTarget = panel ? panel.querySelector('a, button, [tabindex]:not([tabindex="-1"])') : null;
+        if (focusTarget) focusTarget.focus();
+    }
+
+    function closeMoreSheet() {
+        sheet.classList.remove('is-open');
+        sheet.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('mobile-more-open');
+        if (!document.body.classList.contains('auth-modal-open')) {
+            document.body.style.overflow = '';
+        }
+        setOpenBtnsExpanded(false);
+    }
+
+    document.addEventListener('mobile-more:close', closeMoreSheet);
+
+    openBtns.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (sheet.classList.contains('is-open')) {
+                closeMoreSheet();
+            } else {
+                openMoreSheet();
+            }
+        });
+    });
+
+    sheet.querySelectorAll('[data-more-sheet-close]').forEach(function (el) {
+        el.addEventListener('click', function () {
+            closeMoreSheet();
+        });
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        if (!sheet.classList.contains('is-open')) return;
+        closeMoreSheet();
+        e.preventDefault();
+    });
+})();
+
+document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-profile-back]');
+    if (!el) return;
+    e.preventDefault();
+    var fallback = el.getAttribute('href') || '/';
+    if (window.history.length > 1) {
+        window.history.back();
+    } else {
+        window.location.href = fallback;
+    }
+});

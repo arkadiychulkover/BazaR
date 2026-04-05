@@ -1,9 +1,9 @@
 ﻿@model BazaR.Models.Category
 
 <a asp-controller="Site"
-   asp-action="Browse"
-   asp-route-categoryIds="@Model.Id"
-   style="text-decoration:none;color:inherit;">
+       asp-action="Browse"
+       asp-route-categoryIds="@Model.Id"
+       style="text-decoration:none;color:inherit;">
 
     <div style="
         border-radius:14px;
@@ -20,14 +20,14 @@
         position:relative;
         overflow:hidden;
         @(string.IsNullOrEmpty(Model.ImgUrl) ? "background:white;" : $"background-image:url('{Model.ImgUrl}');")
-    "
+        "
          onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.15)'"
          onmouseout="this.style.boxShadow='none'">
 
         <div style="
-            position:absolute;
-            inset:0;
-            background:rgba(0,0,0,0.35);
+        position:absolute;
+        inset:0;
+        background:rgba(0,0,0,0.35);
         "></div>
        
 
@@ -36,7 +36,7 @@
             font-size:16px;
             font-weight:600;
             color:white;
-        ">
+            ">
             @Model.Name
         </div>
 

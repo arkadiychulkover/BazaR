@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BazaR.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260404173156_init")]
-    partial class init
+    [Migration("20260405111447_final")]
+    partial class final
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -431,7 +431,7 @@ namespace BazaR.Migrations
                             DisplayOrder = 17,
                             IconUrl = "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg",
                             ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg",
-                            Name = "Туризм та відпочинок"
+                            Name = "Тури та відпочинок"
                         },
                         new
                         {

@@ -428,7 +428,7 @@ namespace BazaR.Migrations
                             DisplayOrder = 17,
                             IconUrl = "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg",
                             ImgUrl = "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg",
-                            Name = "Туризм та відпочинок"
+                            Name = "Тури та відпочинок"
                         },
                         new
                         {

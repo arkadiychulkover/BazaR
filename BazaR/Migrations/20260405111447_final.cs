@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BazaR.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class final : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -996,7 +996,7 @@ namespace BazaR.Migrations
                     { 14, 14, "/AssetsIconImg/TopLevelCategory/icon-stationery-books.svg", "/AssetsIconImg/TopLevelCategory/icon-stationery-books.svg", "Канцтовари та книги", null },
                     { 15, 15, "/AssetsIconImg/TopLevelCategory/icon-alcohol-food.svg", "/AssetsIconImg/TopLevelCategory/icon-alcohol-food.svg", "Алкогольні напої та продукти", null },
                     { 16, 16, "/AssetsIconImg/TopLevelCategory/icon-business-services.svg", "/AssetsIconImg/TopLevelCategory/icon-business-services.svg", "Товари для бізнесу та послуги", null },
-                    { 17, 17, "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg", "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg", "Туризм та відпочинок", null },
+                    { 17, 17, "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg", "/AssetsIconImg/TopLevelCategory/icon-tourism-outdoor.svg", "Тури та відпочинок", null },
                     { 18, 18, "/AssetsIconImg/TopLevelCategory/icon-promotions.svg", "/AssetsIconImg/TopLevelCategory/icon-promotions.svg", "Акції", null },
                     { 19, 19, "/AssetsIconImg/TopLevelCategory/icon-total-sale.svg", "/AssetsIconImg/TopLevelCategory/icon-total-sale.svg", "Тотальний розпродаж", null }
                 });

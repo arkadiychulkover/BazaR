@@ -13,13 +13,13 @@
 <div class="container-fluid mt-3">
     <div class="row align-items-start">
 
-        <!-- Сайдбар -->
-        <div class="col-lg-3 col-md-4 mb-4">
+        <!-- Сайдбар: на вузькому екрані під банером (order-2 / order-md-1) -->
+        <div class="col-lg-3 col-md-4 mb-4 order-2 order-md-1">
             @await Html.PartialAsync("_SideBarOnIndex", categories)
         </div>
 
-        <!-- Основной контент: баннер + все секции -->
-        <div class="col-lg-9 col-md-8">
+        <!-- Основной контент: баннер + все секции (на мобільному — перший блок) -->
+        <div class="col-lg-9 col-md-8 order-1 order-md-2">
 
             <!-- Баннери: автопрокрутка + свайп (Bootstrap carousel) -->
             <div id="homeHeroCarousel"
@@ -33,23 +33,31 @@
                     <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="1" aria-label="Слайд 2"></button>
                     <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="2" aria-label="Слайд 3"></button>
                     <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="3" aria-label="Слайд 4"></button>
-                    <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="4" aria-label="Слайд 5"></button>
                 </div>
                 <div class="carousel-inner">
                     <div class="carousel-item active">
-                        <img src="@Url.Content("~/images/items/BannerComputers.png")" class="d-block w-100 home-hero-carousel__img" alt="" />
+                        <img src="~/images/items/BannerComputers.png"
+                             asp-append-version="true"
+                             class="d-block w-100 home-hero-carousel__img"
+                             alt="" />
                     </div>
                     <div class="carousel-item">
-                        <img src="@Url.Content("~/images/items/BannerKitchen.png")" class="d-block w-100 home-hero-carousel__img" alt="" />
+                        <img src="~/images/items/BannerKitchen.png"
+                             asp-append-version="true"
+                             class="d-block w-100 home-hero-carousel__img"
+                             alt="" />
                     </div>
                     <div class="carousel-item">
-                        <img src="@Url.Content("~/images/items/BannerSale.png")" class="d-block w-100 home-hero-carousel__img" alt="" />
+                        <img src="~/images/items/BannerSale.png"
+                             asp-append-version="true"
+                             class="d-block w-100 home-hero-carousel__img"
+                             alt="" />
                     </div>
                     <div class="carousel-item">
-                        <img src="@Url.Content("~/images/items/PhoneBanner.png")" class="d-block w-100 home-hero-carousel__img" alt="" />
-                    </div>
-                    <div class="carousel-item">
-                        <img src="@Url.Content("~/images/items/banner-green.png")" class="d-block w-100 home-hero-carousel__img" alt="" />
+                        <img src="~/images/items/PhoneBanner.png"
+                             asp-append-version="true"
+                             class="d-block w-100 home-hero-carousel__img"
+                             alt="" />
                     </div>
                 </div>
                 <button class="carousel-control-prev home-hero-carousel__ctrl" type="button" data-bs-target="#homeHeroCarousel" data-bs-slide="prev">
